@@ -7,21 +7,21 @@ import Link from "next/link";
 const galleryImages = [
   { 
     id: 1, 
-    url: "/_next/image?url=%2FUsers%2Fbhaveshsathwara%2F.gemini%2Fantigravity%2Fbrain%2Ff1d73360-eb6c-4af2-b654-b886652608bf%2Fsabha_networking_mixer_1775039898287.png&w=1080&q=75",
+    url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1080&auto=format&fit=crop",
     title: "Networking Magic",
     category: "Mixer",
     quote: "Connections that turn into corporations."
   },
   { 
     id: 2, 
-    url: "/_next/image?url=%2FUsers%2Fbhaveshsathwara%2F.gemini%2Fantigravity%2Fbrain%2Ff1d73360-eb6c-4af2-b654-b886652608bf%2Fsabha_business_workshop_1775039921602.png&w=1080&q=75",
+    url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1080&auto=format&fit=crop",
     title: "Strategic Growth",
     category: "Workshop",
     quote: "Learning the pulse of the digital era."
   },
   { 
     id: 3, 
-    url: "/_next/image?url=%2FUsers%2Fbhaveshsathwara%2F.gemini%2Fantigravity%2Fbrain%2Ff1d73360-eb6c-4af2-b654-b886652608bf%2Fsabha_community_growth_1775039940221.png&w=1080&q=75",
+    url: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1080&auto=format&fit=crop",
     title: "Unity in Vision",
     category: "Community",
     quote: "Where peers become partners."
@@ -51,102 +51,117 @@ const galleryImages = [
 
 export default function GalleryPage() {
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="relative isolate min-h-screen pt-20 overflow-hidden bg-background">
+      {/* Background Blobs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
+        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] animate-pulse" />
+      </div>
+
       {/* Immersive Header */}
-      <div className="bg-white py-24 relative overflow-hidden border-b">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-50" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3" />
+      <section className="relative py-24 lg:py-32 overflow-hidden border-b border-white/5">
         <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10 text-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-7xl italic">
-              Sabha <span className="text-primary italic">Lens.</span>
+             <div className="inline-block px-4 py-2 rounded-full glass border-white/5 mb-8">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
+                Visual Chronicles of Success
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-8xl font-black mb-8 leading-none tracking-tighter uppercase">
+              Sabha <span className="text-gradient">Lens.</span>
             </h1>
-            <p className="mt-6 text-xl text-foreground/50 max-w-2xl mx-auto font-medium italic leading-relaxed">
-              Moments that define our community. Explore the mixers, masterminds, and milestones of Sabha's elite professional network.
+            <p className="mt-8 text-xl md:text-2xl text-white/50 max-w-2xl mx-auto font-bold leading-relaxed">
+              Moments that define our community. Explore the mixers, masterminds, and milestones of Sabha's elite network.
             </p>
           </motion.div>
         </div>
-      </div>
+      </section>
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8 py-20">
         {/* Gallery Stats Bento */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-20">
-          <div className="md:col-span-2 bg-white rounded-[2.5rem] p-10 border shadow-xl shadow-foreground/5 flex flex-col justify-between overflow-hidden relative">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-24">
+          <div className="md:col-span-2 glass p-12 rounded-[3.5rem] border-white/5 flex flex-col justify-between overflow-hidden relative group">
+             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] group-hover:bg-primary/20 transition-colors" />
              <div className="relative z-10">
-               <Camera className="w-10 h-10 text-primary mb-6" />
-               <h2 className="text-3xl font-black mb-2 italic">Visual Legacy</h2>
-               <p className="text-foreground/50 leading-relaxed italic font-medium">"Every photo tells a story of a business deal made, a partnership formed, or a breakthrough achieved."</p>
+               <Camera className="w-12 h-12 text-primary mb-8" />
+               <h2 className="text-4xl font-black mb-4 uppercase tracking-tighter text-white">Visual Legacy</h2>
+               <p className="text-white/40 text-lg leading-relaxed font-bold">"Every photo tells a story of a business deal made, a partnership formed, or a breakthrough achieved."</p>
              </div>
-             <div className="pt-8 flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-primary relative z-10">
-                <span className="bg-primary/10 px-4 py-2 rounded-full border border-primary/20">5000+ Captures</span>
-                <span className="bg-primary/10 px-4 py-2 rounded-full border border-primary/20">120+ Events</span>
+             <div className="pt-12 flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-primary relative z-10">
+                <span className="glass px-6 py-2.5 rounded-full border-white/5">5000+ Captures</span>
+                <span className="glass px-6 py-2.5 rounded-full border-white/5">120+ Events</span>
              </div>
           </div>
-          <div className="bg-primary rounded-[2.5rem] p-8 border flex flex-col justify-center items-center text-center shadow-xl shadow-primary/20 overflow-hidden relative group">
-             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity blur-2xl" />
-             <Users className="w-8 h-8 mb-4 text-white relative z-10" />
-             <h3 className="text-4xl font-black text-white relative z-10 italic">500+</h3>
-             <p className="text-[10px] font-black uppercase tracking-widest text-white/60 relative z-10">Elite Members</p>
+
+          <div className="glass p-12 rounded-[3.5rem] border-white/5 flex flex-col justify-center items-center text-center group">
+             <div className="w-16 h-16 rounded-3xl bg-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+               <Users className="w-8 h-8 text-primary" />
+             </div>
+             <h3 className="text-5xl font-black text-white mb-2 uppercase tracking-tight">500+</h3>
+             <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Elite Members</p>
           </div>
-          <div className="bg-white rounded-[2.5rem] p-8 border flex flex-col justify-center items-center text-center transition-all hover:bg-foreground hover:text-white shadow-xl shadow-foreground/5 group overflow-hidden relative">
-             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
-             <Target className="w-8 h-8 mb-4 text-primary relative z-10" />
-             <h3 className="text-4xl font-black relative z-10 italic">12+</h3>
-             <p className="text-[10px] font-black uppercase tracking-widest text-foreground/40 group-hover:text-white/40 relative z-10">Cities Covered</p>
+
+          <div className="glass p-12 rounded-[3.5rem] border-white/5 flex flex-col justify-center items-center text-center group hover:bg-white/[0.02] transition-colors">
+             <div className="w-16 h-16 rounded-3xl bg-accent/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+               <Target className="w-8 h-8 text-accent" />
+             </div>
+             <h3 className="text-5xl font-black text-white mb-2 uppercase tracking-tight">12+</h3>
+             <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Cities Covered</p>
           </div>
         </div>
 
         {/* Masonry-style Grid */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 mb-40">
           {galleryImages.map((image) => (
             <motion.div
               key={image.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="relative group rounded-[2rem] overflow-hidden border bg-white break-inside-avoid shadow-xl shadow-foreground/5 hover:shadow-2xl transition-all"
+              whileHover={{ y: -10 }}
+              className="relative group rounded-[3rem] overflow-hidden glass border-white/5 break-inside-avoid"
             >
               <img 
                 src={image.url} 
-                className="w-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                className="w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" 
                 alt={image.title}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8">
-                <div className="bg-primary/20 backdrop-blur-md border border-white/20 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mb-4 italic">
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
+                <div className="glass border-white/20 text-white/80 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest w-fit mb-6">
                   {image.category}
                 </div>
-                <h3 className="text-2xl font-black text-white italic mb-2">"{image.title}"</h3>
-                <p className="text-white/60 text-sm font-medium italic">"{image.quote}"</p>
+                <h3 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter">"{image.title}"</h3>
+                <p className="text-white/40 text-sm font-bold uppercase tracking-widest">"{image.quote}"</p>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Final Gallery CTA */}
-        <div className="mt-40 text-center">
-          <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full border shadow-xl shadow-foreground/5 mb-12">
-            <Heart className="w-5 h-5 text-primary fill-current" />
-            <span className="text-[10px] font-black text-foreground/40 tracking-[0.2em] uppercase">Be part of the next frame</span>
-          </div>
-          <h2 className="text-4xl md:text-7xl font-black mb-12 italic tracking-tight uppercase">Your Business. <br/><span className="text-gradient">Our Spotlight.</span></h2>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link 
-              href="/register" 
-              className="px-12 py-5 rounded-[2rem] bg-primary text-white font-black text-lg shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all hover:scale-105 active:scale-95"
-            >
-              Join the Community
-            </Link>
-            <Link 
-              href="/events" 
-              className="px-12 py-5 rounded-[2rem] border-2 border-foreground text-foreground font-black text-lg hover:bg-foreground hover:text-white transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              Upcoming Events
-              <ArrowUpRight className="w-5 h-5" />
-            </Link>
+        <div className="relative py-24 glass rounded-[4rem] border-white/5 overflow-hidden text-center">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px]" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-[80px]" />
+
+          <div className="relative z-10 px-6">
+            <div className="inline-flex items-center gap-4 glass px-8 py-4 rounded-full border-white/5 mb-12">
+              <Heart className="w-6 h-6 text-primary animate-pulse" />
+              <span className="text-[10px] font-black text-white/40 tracking-[0.3em] uppercase">Be part of the next frame</span>
+            </div>
+            <h2 className="text-4xl md:text-8xl font-black mb-16 uppercase tracking-tighter leading-none">
+              Your Business. <br/><span className="text-gradient">Our Spotlight.</span>
+            </h2>
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
+              <Link href="/register" className="btn-premium px-12 py-6 text-lg">
+                Join the Community
+              </Link>
+              <Link href="/events" className="glass border-white/10 text-white px-12 py-6 rounded-3xl font-black text-lg hover:border-primary transition-all flex items-center justify-center gap-3">
+                Events Radar
+                <ArrowUpRight size={20} />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

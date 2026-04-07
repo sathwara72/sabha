@@ -14,15 +14,10 @@ return new class extends Migration
         Schema::create('businesses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug')->unique();
-            $table->string('category')->index();
-            $table->string('location');
-            $table->decimal('rating', 3, 2)->default(0);
-            $table->integer('reviews_count')->default(0);
-            $table->boolean('is_verified')->default(false);
-            $table->string('image_url')->nullable();
+            $table->string('category');
             $table->text('description')->nullable();
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->string('logo')->nullable();
+            $table->string('website')->nullable();
             $table->timestamps();
         });
     }
