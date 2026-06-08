@@ -1,134 +1,217 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Target, ShieldCheck, Heart, ArrowRight } from "lucide-react";
+import {
+  Users,
+  Target,
+  ShieldCheck,
+  Heart,
+  Award,
+  ArrowRight,
+  Zap,
+  TrendingUp,
+  Briefcase,
+  MapPin,
+  Calendar
+} from "lucide-react";
 import Link from "next/link";
+import PageHeader from "@/components/shared/PageHeader";
+import { fetchStatistics } from "@/lib/api";
 
 const values = [
-  { name: "Trust First", description: "Every business and user in Sabha is verified for authenticity and professional integrity.", icon: ShieldCheck },
-  { name: "Collaborative Growth", description: "We believe we grow faster when we grow together. Collaboration is our core engine.", icon: Users },
-  { name: "Global Standard", description: "Bringing world-class community management and professional tools to local businesses.", icon: Target },
-  { name: "Heart of Community", description: "Beyond business, we are a family that supports every member's professional journey.", icon: Heart },
+  {
+    name: "Trust First",
+    description: "Every business and member in SABHA undergoes rigorous verification to maintain professional integrity and authenticity.",
+    icon: ShieldCheck,
+    color: "text-blue-600",
+    bg: "bg-blue-50"
+  },
+  {
+    name: "Collaborative Growth",
+    description: "We align community strength with business strategy. Collaboration is our primary driver for scaling operations.",
+    icon: Users,
+    color: "text-emerald-600",
+    bg: "bg-emerald-50"
+  },
+  {
+    name: "Harmony & Connection",
+    description: "Fostering respect, mutual alignment, and community synergy to build relationships that extend beyond business.",
+    icon: Heart,
+    color: "text-rose-600",
+    bg: "bg-rose-50"
+  },
+  {
+    name: "Advancement",
+    description: "Equipping young entrepreneurs and established enterprises with modern tools, workshops, and strategic mentorship.",
+    icon: TrendingUp,
+    color: "text-amber-600",
+    bg: "bg-amber-50"
+  },
+];
+
+const team = [
+  {
+    name: "Ravi Sharma",
+    role: "President & Trustee",
+    org: "Founder, Vertex Solutions",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
+  },
+  {
+    name: "Pooja Verma",
+    role: "Vice President",
+    org: "Chief Architect & CEO, Prime Builders",
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop"
+  },
+  {
+    name: "Amit Shah",
+    role: "Treasurer & Growth Lead",
+    org: "Director of Operations, Global Logistics",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
+  },
+  {
+    name: "Sara Khan",
+    role: "General Secretary",
+    org: "Senior Partner, Summit Consulting",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=150&auto=format&fit=crop"
+  }
+];
+
+const milestones = [
+  {
+    year: "2024",
+    title: "Foundation & Vision",
+    description: "SABHA was conceptualized by community visionaries to create a unified ecosystem that fosters trust, business referrals, and professional advancement."
+  },
+  {
+    year: "2025",
+    title: "Directory & Chapters Launch",
+    description: "Introduced our digital business directory platform and registered 200+ local enterprises. Launched regional chapters across Mumbai, Pune, and Delhi."
+  },
+  {
+    year: "2026",
+    title: "Harmony Mixers & Scale",
+    description: "Grown to 500+ active verified businesses. Hosted 50+ corporate networking meets, generating millions in business referrals and mutual trade."
+  }
 ];
 
 export default function AboutPage() {
-  return (
-    <div className="relative isolate min-h-screen pt-20 overflow-hidden bg-background">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[10%] right-[-10%] w-[600px] h-[600px] bg-accent/10 rounded-full blur-[150px] animate-pulse" />
-      </div>
+  const [stats, setStats] = useState({
+    members: "500+",
+    businessExchanged: "₹10Cr+",
+    monthlyMixers: "50+"
+  });
 
-      {/* Hero Section */}
-      <section className="relative py-24 lg:py-32 overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10 text-center">
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const statData = await fetchStatistics();
+        const foundMembers = statData.find((s: any) => s.label.toLowerCase().includes("member") || s.label.toLowerCase().includes("professional"));
+        const foundBusiness = statData.find((s: any) => s.label.toLowerCase().includes("exchange") || s.label.toLowerCase().includes("success"));
+        const foundMixers = statData.find((s: any) => s.label.toLowerCase().includes("mixer") || s.label.toLowerCase().includes("event"));
+
+        setStats({
+          members: foundMembers ? foundMembers.value : "500+",
+          businessExchanged: foundBusiness ? foundBusiness.value : "₹10Cr+",
+          monthlyMixers: foundMixers ? foundMixers.value : "50+"
+        });
+      } catch (e) {
+        console.error("Failed to load statistics for about page:", e);
+      }
+    }
+    loadStats();
+  }, []);
+
+  return (
+    <div className="bg-background">
+      {/* Hero */}
+      <PageHeader
+        kicker="Sathwara Association of Business, Harmony & Advancement"
+        title="About SABHA"
+        subtitle="SABHA unites entrepreneurs, service providers, and professionals. We believe in building trust, driving growth, and advancing our community together."
+      />
+
+      {/* Mission & Impact */}
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.97 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border shadow-lg"
           >
-            <div className="inline-block px-4 py-2 rounded-full glass border-white/5 mb-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-                Our Genesis & Philosophy
-              </span>
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1000"
+              alt="SABHA Community Mixer"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-103"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-slate-900/80 via-slate-900/35 to-transparent p-10 text-center">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-white backdrop-blur-md">
+                <Users className="h-6 w-6" />
+              </div>
+              <p className="text-base font-bold leading-relaxed text-white">
+                Monthly Mixers • Technical Panels • Business Referrals
+              </p>
             </div>
-            <h1 className="text-5xl md:text-8xl font-black mb-8 leading-none tracking-tighter uppercase">
-              Connecting the <br />
-              <span className="text-gradient">Visionaries.</span>
-            </h1>
-            <p className="max-w-3xl mx-auto text-xl md:text-2xl text-white/50 font-bold leading-relaxed mb-12">
-              SABHA was born out of a realization: networking should be visceral. It should be about building trust and lasting professional alliances.
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="space-y-6"
+          >
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">Our Mission & Vision</span>
+            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              Empowering Community-Led Global Businesses
+            </h2>
+            <p className="text-sm leading-relaxed text-muted font-medium">
+              SABHA provides the digital tools, strategic networks, and interactive platforms necessary to help Sathwara entrepreneurs showcase their capabilities, exchange vetted business leads, and achieve mutual growth.
             </p>
+
+            <div className="grid grid-cols-3 gap-6 pt-4 border-t border-border/80">
+              <div className="space-y-1">
+                <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.members}</p>
+                <p className="text-[11px] font-bold text-muted uppercase">Verified Members</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.businessExchanged}</p>
+                <p className="text-[11px] font-bold text-muted uppercase">Business Exchanged</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.monthlyMixers}</p>
+                <p className="text-[11px] font-bold text-muted uppercase">Monthly Mixers</p>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Our Story / Mission */}
-      <section className="py-24 relative">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div 
-               initial={{ opacity: 0, scale: 0.95 }}
-               whileInView={{ opacity: 1, scale: 1 }}
-               viewport={{ once: true }}
-               className="relative aspect-square rounded-[4rem] overflow-hidden glass-card border-none group"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1000" 
-                alt="Community" 
-                className="w-full h-full object-cover grayscale opacity-30 group-hover:scale-105 group-hover:opacity-50 transition-all duration-700"
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-16 text-center">
-                <div className="w-24 h-24 rounded-3xl bg-primary/20 flex items-center justify-center mb-8 border border-primary/20 backdrop-blur-xl">
-                   <Users className="w-10 h-10 text-primary" />
-                </div>
-                <p className="text-white/60 text-xl font-bold tracking-tight leading-relaxed uppercase">
-                  Community Mixers. Strategic Workshops. Peer-to-Peer Growth.
-                </p>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="space-y-12"
-            >
-              <div>
-                <div className="flex items-center gap-4 mb-6">
-                   <div className="w-2 h-10 bg-primary rounded-full" />
-                   <h2 className="text-4xl font-black tracking-tight uppercase">Mission & Vision</h2>
-                </div>
-                <p className="text-3xl text-white/70 font-bold leading-relaxed">
-                  To become the <span className="text-gradient font-black">digital heartbeat</span> of professional communities globally.
-                </p>
-              </div>
-
-              <div className="space-y-8">
-                <p className="text-xl text-white/40 leading-relaxed font-bold">
-                  We provide a high-performance platform that simplifies discovery, facilitates showcasing, and fosters a premium ecosystem of trust.
-                </p>
-                <div className="grid grid-cols-2 gap-12 pt-8">
-                  <div className="space-y-2">
-                    <p className="text-5xl font-black text-white mb-1 tracking-tighter">500+</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Verified Entities</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-5xl font-black text-white mb-1 tracking-tighter">12k+</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">Connections Built</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
       {/* Values Grid */}
-      <section className="py-24 lg:py-40 relative">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="mx-auto max-w-3xl text-center mb-24">
-             <div className="inline-block bg-primary/10 text-primary px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-6">
-               Core Paradigms
-             </div>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white uppercase underline underline-offset-[12px] decoration-white/5">What We Stand For</h2>
+      <section className="border-y border-border bg-surface">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+          <div className="mb-14 text-center max-w-2xl mx-auto">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">Core Principles</span>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              What We Stand For
+            </h2>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v, i) => (
-              <motion.div 
+              <motion.div
                 key={v.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-card p-10 rounded-[2.5rem] border-none group hover:bg-white/5"
+                transition={{ delay: i * 0.05 }}
+                className="glass-card hover-card p-7 flex flex-col items-start"
               >
-                <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
-                  <v.icon className="w-8 h-8 text-primary" />
+                <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl ${v.bg} ${v.color}`}>
+                  <v.icon className="h-5.5 w-5.5" />
                 </div>
-                <h3 className="text-xl font-black mb-4 uppercase tracking-tight group-hover:text-primary transition-colors">{v.name}</h3>
-                <p className="text-lg text-white/40 leading-relaxed font-bold">
+                <h3 className="text-base font-bold text-foreground">{v.name}</h3>
+                <p className="mt-2.5 text-xs leading-relaxed text-muted flex-1">
                   {v.description}
                 </p>
               </motion.div>
@@ -137,16 +220,97 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 lg:py-40">
-        <div className="container mx-auto px-6">
-          <div className="glass shadow-2xl rounded-[4rem] p-16 md:p-24 text-center relative overflow-hidden group">
-            <div className="absolute top-[-20%] left-[-20%] w-[400px] h-[400px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-            <h2 className="text-4xl md:text-7xl font-black text-white mb-8 tracking-tighter uppercase relative z-10">Ready to Join the<br /><span className="text-gradient">Professional Elite?</span></h2>
-            <Link href="/register" className="btn-premium inline-flex relative z-10 px-12 py-5 text-xl">
-              Get Started Now <ArrowRight size={24} />
-            </Link>
-          </div>
+      {/* Evolution Timeline */}
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24 border-b border-border">
+        <div className="mb-14 text-center max-w-2xl mx-auto">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">Our Timeline</span>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            SABHA's Journey & Evolution
+          </h2>
+        </div>
+
+        <div className="relative border-l border-primary/25 ml-4 md:ml-32 space-y-12">
+          {milestones.map((m, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1 }}
+              className="relative pl-8 md:pl-10"
+            >
+              {/* Year badge left-aligned on desktop */}
+              <div className="hidden md:flex absolute right-full mr-10 top-0.5 text-right flex-col">
+                <span className="text-2xl font-extrabold text-primary">{m.year}</span>
+                <span className="text-[10px] font-bold text-muted uppercase">Milestone</span>
+              </div>
+
+              {/* Dot indicator */}
+              <div className="absolute -left-1.5 top-2.5 h-3.5 w-3.5 rounded-full border-2 border-primary bg-white z-10" />
+
+              <div>
+                <span className="inline-block md:hidden text-lg font-extrabold text-primary mb-1">{m.year}</span>
+                <h3 className="text-base font-bold text-foreground">{m.title}</h3>
+                <p className="mt-2 text-xs leading-relaxed text-muted font-medium max-w-3xl">{m.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Leadership Board */}
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+        <div className="mb-14 text-center max-w-2xl mx-auto">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">Trustees & Leadership</span>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Meet Our Core Committee
+          </h2>
+          <p className="mt-4 text-xs text-muted font-medium">
+            The visionary leaders steering SABHA towards community empowerment, business alignment, and global opportunities.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {team.map((t, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.05 }}
+              className="glass-card hover-card p-5 text-center flex flex-col items-center border border-border"
+            >
+              <img
+                src={t.avatar}
+                alt={t.name}
+                className="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
+              />
+              <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full mb-2 border border-emerald-100">
+                Verified Trustee
+              </span>
+              <h3 className="text-sm font-extrabold text-foreground">{t.name}</h3>
+              <p className="text-[11px] font-bold text-primary mt-0.5">{t.role}</p>
+              <p className="text-[10px] text-muted font-semibold mt-1 truncate max-w-full">{t.org}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="rounded-2xl border border-border bg-primary px-8 py-14 text-center text-white lg:px-16 shadow-lg">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Grow Your Business & Network Today
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-white/80 leading-relaxed">
+            Join 500+ community owners, list your services, receive qualified referrals, and advance your startup.
+          </p>
+          <Link
+            href="/register"
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-md transition-all hover:opacity-90 active:scale-[0.98]"
+          >
+            Join SABHA Community <ArrowRight size={16} />
+          </Link>
         </div>
       </section>
     </div>

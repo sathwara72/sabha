@@ -1,37 +1,109 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Calendar, MapPin, Search, Tag, ArrowRight, Info, Filter, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Calendar, MapPin, Search, Tag, ArrowRight, Info, Filter, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-
-const mockEvents = [
-  { id: 1, title: "Modern Business Networking Mixer", date: "Oct 12, 2026", time: "6:30 PM", type: "physical", status: "upcoming", category: "Networking", description: "Connect with over 50 local entrepreneurs and service providers in a structured networking environment.", attendees: "120+", price: "₹2,499", image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800&auto=format&fit=crop" },
-  { id: 2, title: "Next.js & Laravel: Scaling to Millions", date: "Oct 15, 2026", time: "2:00 PM", type: "virtual", status: "upcoming", category: "Workshop", description: "Deep dive into full-stack architecture with industry experts. Learn how to scale your community platform.", attendees: "500+", price: "Free", image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&auto=format&fit=crop" },
-  { id: 3, title: "Marketing Strategy for Startups", date: "Oct 01, 2026", time: "10:30 AM", type: "hybrid", status: "current", category: "Seminar", description: "A high-impact seminar on digital marketing trends and organic growth strategies for new businesses.", attendees: "80+", price: "₹1,499", image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop" },
-  { id: 4, title: "Founders Roundtable: Q3 Review", date: "Sep 20, 2026", time: "5:00 PM", type: "physical", status: "past", category: "Networking", description: "An exclusive invite-only session for business owners to discuss market trends and quarterly results.", attendees: "30", price: "Invite Only", image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=800&auto=format&fit=crop" },
-  { id: 5, title: "Introduction to Community Building", date: "Aug 15, 2026", time: "11:00 AM", type: "virtual", status: "past", category: "Workshop", description: "Learning the basics of fostering engaged digital and physical communities in 2026.", attendees: "250+", price: "Free", image: "https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?q=80&w=800&auto=format&fit=crop" },
-  { id: 6, title: "AI in Global Supply Chains", date: "Nov 05, 2026", time: "4:00 PM", type: "virtual", status: "upcoming", category: "Seminar", description: "Exploring how artificial intelligence is transforming logistics and procurement for large-scale operations.", attendees: "300+", price: "₹999", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" },
-  { id: 7, title: "Design Thinking for Leaders", date: "Nov 12, 2026", time: "9:00 AM", type: "physical", status: "upcoming", category: "Workshop", description: "A hands-on workshop on applying creative problem-solving frameworks to business management.", attendees: "45", price: "₹4,999", image: "https://images.unsplash.com/photo-1513128034602-7814ccaddd4e?q=80&w=800&auto=format&fit=crop" },
-  { id: 8, title: "Quarterly Tech Summit 2026", date: "Dec 01, 2026", time: "10:00 AM", type: "hybrid", status: "upcoming", category: "Summit", description: "The premier gathering of developers and tech founders to discuss the landscape of the Indian IT sector.", attendees: "1000+", price: "₹5,499", image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=800&auto=format&fit=crop" },
-  { id: 9, title: "Social Impact Venture Day", date: "Oct 28, 2026", time: "11:30 AM", type: "physical", status: "upcoming", category: "Networking", description: "Connecting impact investors with sustainable business founders for a better tomorrow.", attendees: "150+", price: "₹2,999", image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop" },
-  { id: 10, title: "Cybersecurity for Small Biz", date: "Oct 25, 2026", time: "3:00 PM", type: "virtual", status: "upcoming", category: "Workshop", description: "Practical steps to secure your business digital assets against emerging threats in the 2026 landscape.", attendees: "180", price: "Free", image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop" },
-];
+import { cn } from "@/lib/utils";
+import { fetchEvents, getUserBusiness } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 export default function EventsPage() {
-  const [filter, setFilter] = useState("upcoming");
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
+  const { isAuthenticated } = useAuth();
+  const [isVerifiedMember, setIsVerifiedMember] = useState(false);
+
+  useEffect(() => {
+    async function checkVerification() {
+      if (isAuthenticated) {
+        try {
+          const biz = await getUserBusiness();
+          if (biz && biz.status === "approved") {
+            setIsVerifiedMember(true);
+          }
+        } catch (e) {
+          console.error("Failed to check business verification status:", e);
+        }
+      } else {
+        setIsVerifiedMember(false);
+      }
+    }
+    checkVerification();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        setLoading(true);
+        const data = await fetchEvents();
+        const liveEvents = (data || []).map((e: any) => {
+          const eventDate = new Date(e.date);
+          const now = new Date();
+          let status = "upcoming";
+          
+          // Clear time component for accurate comparison
+          const dateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+          const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+          if (dateOnly.getTime() === todayOnly.getTime()) {
+            status = "current";
+          } else if (dateOnly < todayOnly) {
+            status = "past";
+          }
+
+          return {
+            id: e.id,
+            title: e.title,
+            description: e.description,
+            date: eventDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            time: eventDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+            location: e.location,
+            type: e.type,
+            status,
+            category: e.type,
+            attendees: "50+",
+            price_normal: e.price_normal || (e.type === "Workshop" ? "Free" : "₹1,499"),
+            price_verified: e.price_verified || (e.type === "Workshop" ? "Free" : "₹1,499"),
+            image: e.image || "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=800&auto=format&fit=crop"
+          };
+        });
+
+        // Sort: current first, then upcoming (ascending by date), then past (descending by date)
+        const statusOrder: Record<string, number> = { current: 0, upcoming: 1, past: 2 };
+        liveEvents.sort((a: any, b: any) => {
+          if (statusOrder[a.status] !== statusOrder[b.status]) {
+            return statusOrder[a.status] - statusOrder[b.status];
+          }
+          const aDate = new Date(a.date).getTime();
+          const bDate = new Date(b.date).getTime();
+          // upcoming: ascending (sooner first), past: descending (most recent first)
+          return a.status === "past" ? bDate - aDate : aDate - bDate;
+        });
+
+        setEvents(liveEvents);
+      } catch (err) {
+        console.error("Failed to fetch events:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadEvents();
+  }, []);
+
   const filteredEvents = useMemo(() => {
-    return mockEvents.filter(event => {
+    return events.filter(event => {
       const matchesFilter = filter === "all" || event.status === filter;
-      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             event.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     });
-  }, [filter, searchQuery]);
+  }, [events, filter, searchQuery]);
 
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const paginatedEvents = filteredEvents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -47,173 +119,216 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="relative isolate min-h-screen pt-20 overflow-hidden bg-background">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[10%] right-[-10%] w-[600px] h-[600px] bg-accent/10 rounded-full blur-[150px] animate-pulse" />
-      </div>
-
-      {/* Hero Header */}
-      <section className="relative py-24 lg:py-32 overflow-hidden border-b border-white/5">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }}
-          >
-             <div className="inline-block px-4 py-2 rounded-full glass border-white/5 mb-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-                Curated Professional Gatherings
-              </span>
+    <div className="bg-background font-outfit">
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+        {/* Compact title row */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2.5">
+              <span className="h-4 w-1.5 rounded-full bg-accent" />
+              <span className="text-sm font-semibold text-accent">Community events</span>
             </div>
-            <h1 className="text-5xl md:text-8xl font-black mb-8 leading-none tracking-tighter uppercase">
-              Events <span className="text-gradient">Radar.</span>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Events
             </h1>
-            <p className="max-w-2xl text-xl md:text-2xl text-white/50 font-bold leading-relaxed mb-12">
-              From mastermind sessions to networking mixers. Curated experiences designed for professional breakthroughs.
+            <p className="mt-1 text-sm text-muted">
+              Networking mixers, workshops, and summits to help you connect and grow.
             </p>
-          </motion.div>
+          </div>
+          <p className="text-sm font-medium text-muted">
+            {filteredEvents.length} {filteredEvents.length === 1 ? "event" : "events"}
+          </p>
         </div>
-      </section>
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12 relative z-10">
         {/* Search & Filter Bar */}
-        <div className="flex flex-col gap-12 mb-20">
-          <div className="relative max-w-3xl">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative"
-            >
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-              <input
-                type="text"
-                placeholder="PRO SEARCH: e.g. 'Networking' or 'Workshop'"
-                className="w-full glass border-white/10 rounded-[2rem] py-6 pl-16 pr-8 focus:border-primary outline-none text-white font-black text-sm tracking-widest uppercase transition-all"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </motion.div>
+        <div className="mb-10 mt-6 flex flex-col gap-4">
+          <div className="relative max-w-2xl">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search events by name or category"
+              className="w-full rounded-xl border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+            />
           </div>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-12">
-            <div className="flex items-center gap-4">
-              <Filter className="w-5 h-5 text-primary" />
-              <h2 className="font-black text-xs uppercase tracking-widest text-white/40">Status:</h2>
-              <div className="flex flex-wrap gap-3">
-                {["upcoming", "current", "past"].map((f) => (
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-muted">
+                <Filter className="h-4 w-4 text-primary" />
+                Status
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "all", label: "All Events" },
+                  { key: "current", label: "🟢 Booking Available" },
+                  { key: "upcoming", label: "🟡 Booking Open Soon" },
+                  { key: "past", label: "⚫ Past Events" },
+                ].map(({ key, label }) => (
                   <button
-                    key={f}
-                    onClick={() => handleFilterChange(f)}
+                    key={key}
+                    onClick={() => handleFilterChange(key)}
                     className={cn(
-                      "px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
-                      filter === f 
-                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                        : "glass border-white/5 text-white/40 hover:text-white"
+                      "rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer",
+                      filter === key
+                        ? "bg-primary text-white shadow-sm"
+                        : "border border-border bg-white text-muted hover:bg-surface hover:text-foreground"
                     )}
                   >
-                    {f}
+                    {label}
                   </button>
                 ))}
               </div>
             </div>
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass px-8 py-4 rounded-3xl border-white/5 flex items-center gap-4 ml-auto"
-            >
-              <Info className="w-4 h-4 text-primary" />
-              <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">
-                Members get 40% priority discount.
-              </p>
-            </motion.div>
+            <div className="flex items-center gap-2 rounded-xl bg-primary-soft px-4 py-2.5 text-sm font-medium text-primary md:ml-auto">
+              <Info className="h-4 w-4" />
+              Verified members (with registered businesses) get lower ticket pricing.
+            </div>
           </div>
         </div>
 
         {/* Results Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          <AnimatePresence mode="popLayout">
-            {paginatedEvents.map((event, idx) => (
-              <motion.div
-                key={event.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ y: -10 }}
-                className="glass-card flex flex-col h-full rounded-[3rem] overflow-hidden border-none relative group"
-              >
-                <div className="h-56 w-full relative overflow-hidden">
-                  <img 
-                    src={event.image} 
-                    alt={event.title}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-                  <div className="absolute top-6 left-6">
-                    <div className="glass text-white/80 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-white/10">
-                      {event.category}
+        {loading ? (
+          <div className="py-20 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+            <p className="mt-3 text-sm text-muted">Loading events...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence mode="popLayout">
+              {paginatedEvents.map((event) => (
+                <motion.div
+                   key={event.id}
+                   layout
+                   initial={{ opacity: 0, scale: 0.97 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   exit={{ opacity: 0, scale: 0.97 }}
+                   className="glass-card group flex h-full flex-col overflow-hidden p-0 hover:shadow-md transition-shadow"
+                >
+                  <div className="relative h-52 w-full overflow-hidden">
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <div className="absolute left-4 top-4">
+                      <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
+                        {event.category}
+                      </span>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-10 flex flex-col flex-1">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest">
-                      <Tag size={12} /> {event.type}
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium capitalize text-primary">
+                        <Tag size={12} /> {event.type}
+                      </span>
+                      {event.status === "upcoming" && (
+                        <span className="rounded-full bg-amber-50 border border-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                          Upcoming - Booking open soon
+                        </span>
+                      )}
+                      {event.status === "current" && (
+                        <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                          Current - Booking Available
+                        </span>
+                      )}
+                      {event.status === "past" && (
+                        <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          Past - Booking Closed
+                        </span>
+                      )}
                     </div>
-                    {event.status === "upcoming" && (
-                      <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-4 text-white/30 font-black text-[10px] uppercase tracking-widest">
-                      <Calendar size={14} /> {event.date}
-                    </div>
-                    <h3 className="text-2xl font-black text-white mb-4 uppercase tracking-tight group-hover:text-primary transition-colors">
-                      {event.title}
-                    </h3>
-                    <p className="text-lg text-white/40 font-bold line-clamp-2 mb-8 leading-relaxed">
-                      {event.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-8 border-t border-white/5 mt-auto">
-                    <div className="flex items-center justify-between mb-8">
-                       <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-widest">
-                        <MapPin size={12} className="text-primary" /> Location Vetted
+ 
+                    <div className="flex-1">
+                      <div className="mb-2 flex items-center gap-1.5 text-sm text-muted">
+                        <Calendar size={14} className="text-primary" /> {event.date}
                       </div>
-                      <span className="text-white font-black text-xl">{event.price}</span>
+                      <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+                        {event.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">
+                        {event.description}
+                      </p>
                     </div>
-                    <Link 
-                      href={`/events/${event.id}`}
-                      className="btn-premium w-full py-5 text-sm uppercase tracking-widest"
-                    >
-                      Book Ticket
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+ 
+                    <div className="mt-6 border-t border-border pt-5">
+                      <div className="mb-4 flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+                          <MapPin size={14} className="text-primary" /> {event.attendees} going
+                        </span>
+                        <div className="text-right">
+                          {isVerifiedMember ? (
+                            <div>
+                              <span className="text-lg font-bold text-foreground">{event.price_verified}</span>
+                              <span className="text-[10px] font-semibold text-emerald-600 flex items-center justify-end gap-0.5 mt-0.5">
+                                <ShieldCheck size={11} /> Verified price
+                              </span>
+                            </div>
+                          ) : (
+                            <div>
+                              <span className="text-lg font-bold text-foreground">{event.price_normal}</span>
+                              {event.price_verified && event.price_verified !== event.price_normal && (
+                                <span className="block text-[10px] text-muted-foreground font-semibold mt-0.5">
+                                  {event.price_verified} for Verified Members
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {event.status === "current" && (
+                        <Link
+                          href={`/events/${event.id}`}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+                        >
+                          Book ticket <ArrowRight size={16} />
+                        </Link>
+                      )}
 
-        {filteredEvents.length === 0 && (
-          <div className="text-center py-40 glass rounded-[4rem] border-white/5">
-            <h3 className="text-2xl font-black text-white/20 uppercase tracking-widest mb-4">No Signals Detected</h3>
-            <p className="text-white/10 font-bold text-lg max-w-xs mx-auto">Check back shortly. New sessions are being vetted.</p>
+                      {event.status === "upcoming" && (
+                        <Link
+                          href={`/events/${event.id}`}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50/50 px-5 py-3 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-50 active:scale-[0.98]"
+                        >
+                          Booking open soon <ArrowRight size={16} />
+                        </Link>
+                      )}
+
+                      {event.status === "past" && (
+                        <div className="w-full text-center py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-semibold text-sm">
+                          Booking Closed
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {filteredEvents.length === 0 && !loading && (
+          <div className="rounded-2xl border border-dashed border-border py-24 text-center">
+            <h3 className="text-xl font-semibold text-foreground">No events found</h3>
+            <p className="mx-auto mt-2 max-w-xs text-sm text-muted">
+              Check back shortly. New sessions are being added regularly.
+            </p>
           </div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-24 flex items-center justify-center gap-4">
+          <div className="mt-16 flex items-center justify-center gap-3">
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              className="w-14 h-14 rounded-2xl glass border-white/10 flex items-center justify-center text-white hover:border-primary transition-all"
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} />
             </button>
             <div className="flex gap-2">
               {[...Array(totalPages)].map((_, i) => (
@@ -221,10 +336,10 @@ export default function EventsPage() {
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
                   className={cn(
-                    "w-14 h-14 rounded-2xl text-sm font-black transition-all",
-                    currentPage === i + 1 
-                      ? "bg-primary text-white" 
-                      : "glass border-white/5 text-white/30 hover:text-white"
+                    "h-11 w-11 rounded-xl text-sm font-semibold transition-all cursor-pointer",
+                    currentPage === i + 1
+                      ? "bg-primary text-white shadow-sm"
+                      : "border border-border bg-white text-muted hover:bg-surface hover:text-foreground"
                   )}
                 >
                   {i + 1}
@@ -233,9 +348,9 @@ export default function EventsPage() {
             </div>
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              className="w-14 h-14 rounded-2xl glass border-white/10 flex items-center justify-center text-white hover:border-primary transition-all"
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} />
             </button>
           </div>
         )}
@@ -243,5 +358,3 @@ export default function EventsPage() {
     </div>
   );
 }
-
-const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");

@@ -1,37 +1,70 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, Filter, MapPin, Briefcase, ChevronRight, Star, ShieldCheck, Zap, ChevronLeft } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Filter, MapPin, ShieldCheck, Star, ChevronLeft, ChevronRight, Lock, Plus, X, Briefcase, Info } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-
-const mockBusinesses = [
-  { id: 1, name: "Vertex Solutions", category: "Software Development", location: "Mumbai", rating: 4.8, reviews: 24, verified: true, image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=200&h=200&auto=format&fit=crop" },
-  { id: 2, name: "Global Logistics", category: "Supply Chain", location: "Delhi", rating: 4.5, reviews: 18, verified: true, image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=200&h=200&auto=format&fit=crop" },
-  { id: 3, name: "Nexus Marketing", category: "Digital Marketing", location: "Bangalore", rating: 4.2, reviews: 12, verified: false, image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=200&h=200&auto=format&fit=crop" },
-  { id: 4, name: "Prime Builders", category: "Construction", location: "Pune", rating: 4.9, reviews: 31, verified: true, image: "https://images.unsplash.com/photo-1503387762-592dea58ef21?q=80&w=200&h=200&auto=format&fit=crop" },
-  { id: 5, name: "Zenith Finance", category: "Financial Services", location: "Mumbai", rating: 4.6, reviews: 15, verified: false, image: "https://images.unsplash.com/photo-1454165833762-02ad50e8958?q=80&w=200&h=200&auto=format&fit=crop" },
-  { id: 6, name: "Eco Energy", category: "Renewables", location: "Hyderabad", rating: 4.7, reviews: 20, verified: true, image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=200&h=200&auto=format&fit=crop" },
-  { id: 7, name: "Summit Consulting", category: "Business Strategy", location: "Mumbai", rating: 4.4, reviews: 10, verified: true, image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=200&h=200&auto=format&fit=crop" },
-  { id: 8, name: "Alpha Tech Lab", category: "Software Development", location: "Chennai", rating: 4.9, reviews: 45, verified: true, image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=200&h=200&auto=format&fit=crop" },
-];
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
+import { fetchBusinesses, submitBusiness } from "@/lib/api";
 
 export default function BusinessDirectory() {
+  const { isAuthenticated, isReady, openLogin } = useAuth();
+  const [businesses, setBusinesses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const itemsPerPage = 6;
 
-  const categories = ["All", "Software Development", "Supply Chain", "Digital Marketing", "Construction", "Financial Services", "Renewables"];
+  // Form states for business submission
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [formSuccess, setFormSuccess] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "Software Development",
+    description: "",
+    website: "",
+  });
+
+  const categories = [
+    "All",
+    "Software Development",
+    "Supply Chain",
+    "Digital Marketing",
+    "Construction",
+    "Financial Services",
+    "Renewables",
+    "Creative Agency",
+    "Venture Capital"
+  ];
+
+  useEffect(() => {
+    loadBusinessesData();
+  }, []);
+
+  async function loadBusinessesData() {
+    try {
+      setLoading(true);
+      const data = await fetchBusinesses();
+      setBusinesses(data || []);
+    } catch (err) {
+      console.error("Failed to load businesses:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const filteredBusinesses = useMemo(() => {
-    return mockBusinesses.filter(b => {
-      const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    return businesses.filter(b => {
+      const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             b.category.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === "All" || b.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [businesses, searchQuery, selectedCategory]);
 
   const totalPages = Math.ceil(filteredBusinesses.length / itemsPerPage);
   const paginatedBusinesses = filteredBusinesses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -46,164 +79,225 @@ export default function BusinessDirectory() {
     setCurrentPage(1);
   };
 
-  return (
-    <div className="relative isolate min-h-screen pt-20 overflow-hidden bg-background">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
-        <div className="absolute top-[-5%] right-[-5%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] animate-pulse" />
-      </div>
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError("");
+    setFormSuccess("");
+    setSubmitting(true);
 
-      {/* Hero Header */}
-      <section className="relative py-24 lg:py-32 overflow-hidden border-b border-white/5">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }}
-          >
-             <div className="inline-block px-4 py-2 rounded-full glass border-white/5 mb-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-                Vetted Professional Ecosystem
-              </span>
+    try {
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("category", formData.category);
+      data.append("description", formData.description || "");
+      data.append("website", formData.website || "");
+
+      await submitBusiness(data);
+      setFormSuccess("Your business has been submitted successfully and is pending administrator review!");
+      setFormData({
+        name: "",
+        category: "Software Development",
+        description: "",
+        website: "",
+      });
+      // Reload business list (though newly added will be pending so it won't show yet)
+      loadBusinessesData();
+      setTimeout(() => {
+        setIsSubmitOpen(false);
+        setFormSuccess("");
+      }, 3500);
+    } catch (err: any) {
+      setFormError(err.message || "Failed to submit business. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Gate the directory behind login
+  if (isReady && !isAuthenticated) {
+    return (
+      <div className="bg-background font-outfit">
+        <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-6 py-20 text-center">
+          <div className="glass-card w-full p-10">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+              <Lock className="h-6 w-6" />
             </div>
-            <h1 className="text-5xl md:text-8xl font-black mb-8 leading-none tracking-tighter uppercase">
-              Elite <span className="text-gradient">Directory.</span>
-            </h1>
-            <p className="max-w-2xl text-xl md:text-2xl text-white/50 font-bold leading-relaxed mb-12">
-              Connect with vetted industry leaders. Find your next strategic partner in the Sabha ecosystem.
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Members only</h1>
+            <p className="mx-auto mt-2 max-w-xs text-sm text-muted">
+              Log in to browse the business directory and connect with members.
             </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12 relative z-10">
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col gap-12 mb-20">
-          <div className="relative max-w-3xl">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative"
+            <button
+              onClick={openLogin}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
             >
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-              <input
-                type="text"
-                placeholder="PRO DIRECTORY SEARCH: e.g. 'Software' or 'Mumbai'"
-                className="w-full glass border-white/10 rounded-[2rem] py-6 pl-16 pr-8 focus:border-primary outline-none text-white font-black text-sm tracking-widest uppercase transition-all"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </motion.div>
+              Log in to continue
+            </button>
+            <p className="mt-4 text-sm text-muted">
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="font-semibold text-primary hover:opacity-80">
+                Create one
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background font-outfit">
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+        {/* Compact title row */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border pb-6">
+          <div>
+            <div className="mb-2 flex items-center gap-2.5">
+              <span className="h-4 w-1.5 rounded-full bg-accent" />
+              <span className="text-sm font-semibold text-accent">Directory</span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Business directory
+            </h1>
+            <p className="mt-1 text-sm text-muted">
+              Browse and connect with members across the network.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsSubmitOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4.5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
+            >
+              <Plus size={16} /> Register business
+            </button>
+            <p className="text-sm font-medium text-muted">
+              {filteredBusinesses.length} {filteredBusinesses.length === 1 ? "business" : "businesses"}
+            </p>
+          </div>
+        </div>
+
+        {/* Search & Filter Bar */}
+        <div className="mb-10 mt-8 flex flex-col gap-4">
+          <div className="relative max-w-2xl">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search businesses by name or category"
+              className="w-full rounded-xl border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+            />
           </div>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-            <div className="flex items-center gap-4">
-              <Filter className="w-5 h-5 text-primary" />
-              <h2 className="font-black text-xs uppercase tracking-widest text-white/40">Filters:</h2>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => handleCategoryChange(cat)}
-                    className={cn(
-                      "px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border",
-                      selectedCategory === cat 
-                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                        : "glass border-white/5 text-white/40 hover:text-white"
-                    )}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted">
+              <Filter className="h-4 w-4 text-primary" />
+              Filter by category
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => handleCategoryChange(cat)}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-xs font-medium transition-colors cursor-pointer",
+                    selectedCategory === cat
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-white text-muted hover:bg-surface hover:text-foreground"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Results Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          <AnimatePresence mode="popLayout">
-            {paginatedBusinesses.map((business, idx) => (
-              <motion.div
-                key={business.id}
-                layout
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -10 }}
-                className="glass-card flex flex-col h-full rounded-[3rem] p-10 relative group"
-              >
-                <div className="flex items-start justify-between mb-10">
-                  <div className="h-24 w-24 rounded-3xl glass border-white/10 p-2 overflow-hidden group-hover:border-primary/50 transition-colors">
-                    <img 
-                      src={business.image} 
-                      alt={business.name}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 rounded-2xl"
-                    />
-                  </div>
-                  <div className="flex flex-col items-end gap-3">
-                    {business.verified && (
-                      <div className="glass text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border-primary/20 shadow-lg shadow-primary/10">
-                        <ShieldCheck size={12} />
-                        Verified
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 text-amber-500 font-black text-xs bg-amber-500/5 px-4 py-1.5 rounded-full border border-amber-500/10">
-                      <Star size={12} className="fill-current" />
-                      {business.rating}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex-1">
-                  <h3 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter group-hover:text-primary transition-colors">
-                    {business.name}
-                  </h3>
-                  <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-widest mb-8">
-                    <MapPin size={12} className="text-primary" />
-                    {business.location} • {business.category}
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-6 mb-10 pt-8 border-t border-white/5">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] mb-1">Reviews</span>
-                      <span className="font-bold text-white text-sm">{business.reviews} Members</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] mb-1">Status</span>
-                      <span className="text-xs font-black text-green-500 flex items-center gap-1.5 tracking-widest uppercase">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        Active
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <Link 
-                  href={`/businesses/${business.id}`}
-                  className="btn-premium w-full py-5 text-sm uppercase tracking-widest"
+        {loading ? (
+          <div className="py-20 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+            <p className="mt-3 text-sm text-muted">Loading business listings...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence mode="popLayout">
+              {paginatedBusinesses.map((business) => (
+                <motion.div
+                  key={business.id}
+                  layout
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 16 }}
+                  className="glass-card group flex h-full flex-col p-6 hover:shadow-md transition-shadow"
                 >
-                  View Profile
-                </Link>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+                  <div className="mb-5 flex items-start justify-between">
+                    <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-primary-soft flex items-center justify-center text-primary text-xl font-bold">
+                      {business.logo ? (
+                        <img
+                          src={business.logo}
+                          alt={business.name}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        business.name?.[0] ?? "?"
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      {business.is_verified && (
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary border border-primary/10">
+                          <ShieldCheck size={12} />
+                          Verified
+                        </div>
+                      )}
+                      <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
+                        <Star size={14} className="fill-current" />
+                        {business.rating || "5.0"}
+                      </div>
+                    </div>
+                  </div>
 
-        {filteredBusinesses.length === 0 && (
-          <div className="text-center py-40 glass rounded-[4rem] border-white/5">
-            <h3 className="text-2xl font-black text-white/20 uppercase tracking-widest mb-4">No Entities Found</h3>
-            <p className="text-white/10 font-bold text-lg max-w-xs mx-auto">Try broadening your industry focus.</p>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-foreground transition-colors group-hover:text-primary">
+                      {business.name}
+                    </h3>
+                    <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
+                      <MapPin size={13} className="text-primary" />
+                      {business.location || "Mumbai"} • {business.category}
+                    </p>
+                    <p className="mt-3.5 text-xs leading-relaxed text-muted line-clamp-3">
+                      {business.description || "No description provided yet."}
+                    </p>
+                  </div>
+
+                  <Link
+                    href={`/businesses/${business.id}`}
+                    className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+                  >
+                    View profile
+                  </Link>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {filteredBusinesses.length === 0 && !loading && (
+          <div className="rounded-xl border border-dashed border-border py-20 text-center">
+            <h3 className="text-lg font-semibold text-foreground">No businesses found</h3>
+            <p className="mx-auto mt-2 max-w-xs text-sm text-muted">
+              Try a different search term or category.
+            </p>
           </div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-24 flex items-center justify-center gap-4">
+          <div className="mt-12 flex items-center justify-center gap-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              className="w-14 h-14 rounded-2xl glass border-white/10 flex items-center justify-center text-white hover:border-primary transition-all"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
+              aria-label="Previous page"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={18} />
             </button>
             <div className="flex gap-2">
               {[...Array(totalPages)].map((_, i) => (
@@ -211,10 +305,10 @@ export default function BusinessDirectory() {
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
                   className={cn(
-                    "w-14 h-14 rounded-2xl text-sm font-black transition-all",
-                    currentPage === i + 1 
-                      ? "bg-primary text-white" 
-                      : "glass border-white/5 text-white/30 hover:text-white"
+                    "h-10 w-10 rounded-xl text-sm font-semibold transition-colors cursor-pointer",
+                    currentPage === i + 1
+                      ? "bg-primary text-white"
+                      : "border border-border bg-white text-muted hover:bg-surface hover:text-foreground"
                   )}
                 >
                   {i + 1}
@@ -223,15 +317,129 @@ export default function BusinessDirectory() {
             </div>
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              className="w-14 h-14 rounded-2xl glass border-white/10 flex items-center justify-center text-white hover:border-primary transition-all"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
+              aria-label="Next page"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={18} />
             </button>
           </div>
         )}
       </div>
+
+      {/* Submit Business Modal */}
+      <AnimatePresence>
+        {isSubmitOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+              onClick={() => setIsSubmitOpen(false)}
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-lg rounded-2xl border border-border bg-white p-8 shadow-xl z-10"
+            >
+              <button
+                onClick={() => setIsSubmitOpen(false)}
+                className="absolute right-4 top-4 rounded-lg p-1.5 text-muted transition-colors hover:bg-surface hover:text-foreground"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="mb-6 text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <Briefcase className="h-6 w-6" />
+                </div>
+                <h2 className="text-xl font-bold text-foreground">Register your business</h2>
+                <p className="mt-1 text-sm text-muted">
+                  Submit your business details for listings in the directory
+                </p>
+              </div>
+
+              {formError && (
+                <div className="mb-4 rounded-xl bg-red-50 border border-red-100 p-3.5 text-center text-xs font-semibold text-red-600">
+                  {formError}
+                </div>
+              )}
+
+              {formSuccess && (
+                <div className="mb-4 rounded-xl bg-emerald-50 border border-emerald-100 p-3.5 text-center text-xs font-semibold text-emerald-600 flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+                  <span>{formSuccess}</span>
+                </div>
+              )}
+
+              <form className="space-y-4" onSubmit={handleFormSubmit}>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted">Business name</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="E.g. Nexus Technology"
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted">Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none focus:border-primary transition-colors"
+                  >
+                    {categories.filter(c => c !== "All").map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted">Website URL</label>
+                  <input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    placeholder="https://example.com"
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted">Description</label>
+                  <textarea
+                    rows={4}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="What does your company do?"
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none focus:border-primary transition-colors resize-none"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+                  >
+                    {submitting ? "Submitting..." : "Submit Registration"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-
-const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");

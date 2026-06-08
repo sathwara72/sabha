@@ -1,189 +1,1002 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { 
-  ArrowLeft, MapPin, Globe, Mail, Phone, Clock, 
-  ShieldCheck, Star, Briefcase, Zap, 
-  Share2, MessageCircle, ArrowUpRight 
+import {
+  ArrowLeft, MapPin, Globe, Mail, Clock,
+  ShieldCheck, Star, Briefcase, Zap,
+  MessageCircle, ArrowUpRight, Download,
+  Phone, User, MessageSquare, Award, CheckCircle2, Share2,
 } from "lucide-react";
+import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from "@/components/SocialIcons";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { fetchBusinesses, fetchReviews, submitReview } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { getCoverImage } from "@/lib/categoryCover";
 
-const mockBusinesses = [
-  { id: 1, name: "Vertex Solutions", category: "Software Development", location: "Mumbai", rating: 4.8, reviews: 24, verified: true, about: "Vertex Solutions is a leading software development firm specializing in cloud architecture and enterprise-scale digital transformations. We've helped over 50 startups scale to international markets.", services: ["Cloud Migration", "Custom ERP", "AI Integration", "Mobile Apps"], hours: "9:00 AM - 6:00 PM", website: "https://vertex.solutions" },
-  { id: 2, name: "Global Logistics", category: "Supply Chain", location: "Delhi", rating: 4.5, reviews: 18, verified: true, about: "Global Logistics provides end-to-end supply chain solutions with a focus on real-time tracking and automated warehousing. Our network spans across 12 countries.", services: ["Last-mile Delivery", "Warehousing", "Customs Clearance", "Freight Forwarding"], hours: "8:00 AM - 7:00 PM", website: "https://globallogistics.com" },
-  { id: 4, name: "Prime Builders", category: "Construction", location: "Pune", rating: 4.9, reviews: 31, verified: true, about: "Prime Builders is an award-winning construction and architectural firm focused on sustainable, green-certified commercial developments.", services: ["Sustainable Architecture", "Project Management", "Commercial EPC", "Interior Design"], hours: "10:00 AM - 6:00 PM", website: "https://primebuilders.in" },
+interface ServiceItem {
+  title: string;
+  desc: string;
+}
+
+interface Review {
+  reviewer: string;
+  role: string;
+  content: string;
+  rating: number;
+}
+
+interface Member {
+  name: string;
+  role: string;
+  avatar: string;
+}
+
+interface BusinessDetail {
+  id: number;
+  name: string;
+  category: string;
+  location: string;
+  rating: number;
+  reviews: number;
+  verified: boolean;
+  tagline: string;
+  about: string;
+  founded: string;
+  teamSize: string;
+  industry: string;
+  projects: string;
+  services: ServiceItem[];
+  hours: string;
+  website: string;
+  phone: string;
+  email: string;
+  linkedin: string;
+  bannerImage: string;
+  reviewsList: Review[];
+  member: Member;
+  logo?: string;
+  instagram?: string;
+  youtube?: string;
+  twitter?: string;
+  whatsapp?: string;
+}
+
+const detailedBusinesses: BusinessDetail[] = [
+  {
+    id: 1,
+    name: "Vertex Solutions",
+    category: "Software Development",
+    location: "Mumbai",
+    rating: 4.8,
+    reviews: 24,
+    verified: true,
+    tagline: "Enterprise Cloud Architecture & Digital Transformations",
+    about: "Vertex Solutions is a premier technology partner specializing in cloud engineering, system integrations, and bespoke SaaS platforms. We help startups and enterprises scale their infrastructure for high throughput, security, and global availability. Our certified team leverages the best engineering practices to accelerate product development cycles.",
+    founded: "2018",
+    teamSize: "45+ engineers",
+    industry: "Information Technology",
+    projects: "120+ projects",
+    services: [
+      { title: "Cloud Migration", desc: "Seamless migration of database clusters and application workloads to AWS and GCP with zero downtime." },
+      { title: "Custom ERP Solutions", desc: "Centralized resource management systems built using Laravel and React for optimized business operations." },
+      { title: "AI Stack Integration", desc: "Automating workflows and customer service pipelines using OpenAI LLMs and advanced vector databases." },
+      { title: "SaaS Product Design", desc: "Multi-tenant dashboard platforms with strict tenant isolation and secure Stripe payment processing." }
+    ],
+    hours: "9:00 AM - 6:00 PM (Mon - Fri)",
+    website: "https://vertex.solutions",
+    phone: "+91 22 5550 1928",
+    email: "hello@vertex.solutions",
+    linkedin: "/company/vertex-solutions",
+    bannerImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Ravi Sharma", role: "Founder, TechWave", content: "Vertex Solutions helped us migrate our legacy database to AWS RDS. The transition was seamless, and our query latencies decreased by 40%. Highly recommended!", rating: 5 },
+      { reviewer: "Pooja Verma", role: "CEO, DesignFlow", content: "Working with the Vertex team on our internal ERP was a great experience. They delivered on time and communicated effectively throughout.", rating: 4 }
+    ],
+    member: {
+      name: "Ravi Sharma",
+      role: "Founder & CEO, Vertex Solutions",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
+    }
+  },
+  {
+    id: 2,
+    name: "Global Logistics",
+    category: "Supply Chain",
+    location: "Delhi",
+    rating: 4.5,
+    reviews: 18,
+    verified: true,
+    tagline: "Real-Time Tracking & Automated Global Distribution Hubs",
+    about: "Global Logistics provides end-to-end logistics, cargo routing, and supply chain management services. Utilizing automated warehousing and AI-driven route optimization, we ensure your products reach global markets faster, safer, and with complete visibility at every stage of transit.",
+    founded: "2015",
+    teamSize: "180+ staff",
+    industry: "Logistics & Transport",
+    projects: "15,000+ tons shipped",
+    services: [
+      { title: "Cargo Forwarding", desc: "Multi-modal air, sea, and land cargo transport with complete customs clearance handling." },
+      { title: "Smart Warehousing", desc: "IoT-enabled warehouse facilities offering temperature controls and automated stock tracking." },
+      { title: "Last-Mile B2B Delivery", desc: "Express delivery services for corporate supply chains with real-time fleet coordinates." },
+      { title: "Supply Chain Audits", desc: "Analytical evaluations to streamline raw material procurement and minimize overheads." }
+    ],
+    hours: "8:00 AM - 7:00 PM (Mon - Sat)",
+    website: "https://globallogistics.com",
+    phone: "+91 11 4488 9200",
+    email: "ops@globallogistics.com",
+    linkedin: "/company/global-logistics-group",
+    bannerImage: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Amit Shah", role: "Director, BuildCo", content: "Reliable, secure, and always on time. Their custom tracking portal makes monitoring material shipments incredibly straightforward.", rating: 5 },
+      { reviewer: "Karan Mehta", role: "Founder, Zenith", content: "Excellent warehouse security and helpful customer support when dealing with tricky import customs clearances.", rating: 4 }
+    ],
+    member: {
+      name: "Amit Shah",
+      role: "Director of Operations",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
+    }
+  },
+  {
+    id: 3,
+    name: "Nexus Marketing",
+    category: "Digital Marketing",
+    location: "Bangalore",
+    rating: 4.2,
+    reviews: 12,
+    verified: false,
+    tagline: "Data-Driven Performance Marketing & Growth Strategies",
+    about: "Nexus Marketing is a results-oriented digital agency focusing on search engine visibility, paid acquisition, and content-led growth. We turn traffic into revenue through systematic conversion rate optimization and creative brand campaigns.",
+    founded: "2020",
+    teamSize: "22 specialists",
+    industry: "Marketing & Advertising",
+    projects: "80+ brands scaled",
+    services: [
+      { title: "SEO Campaigning", desc: "Deep content audits and off-page backlinking to rank your primary services on Google Page 1." },
+      { title: "Paid Acquisition", desc: "High-ROI Google, Meta, and LinkedIn ad management to reduce acquisition costs." },
+      { title: "Creative Production", desc: "Designing converting landing pages, email copy, and motion graphics for social channels." },
+      { title: "CRO & UX Auditing", desc: "Comprehensive user experience reviews to convert standard site visitors into buyers." }
+    ],
+    hours: "10:00 AM - 6:30 PM (Mon - Fri)",
+    website: "https://nexusmarketing.io",
+    phone: "+91 80 5002 8111",
+    email: "growth@nexusmarketing.io",
+    linkedin: "/company/nexus-marketing-global",
+    bannerImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Sara Khan", role: "Partner, Summit", content: "Our lead generation increased by 60% within three months of hiring Nexus. They really understand paid performance advertising.", rating: 5 }
+    ],
+    member: {
+      name: "Neha Gupta",
+      role: "Managing Partner",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop"
+    }
+  },
+  {
+    id: 4,
+    name: "Prime Builders",
+    category: "Construction",
+    location: "Pune",
+    rating: 4.9,
+    reviews: 31,
+    verified: true,
+    tagline: "Sustainable Commercial Infrastructure & Eco-friendly Buildings",
+    about: "Prime Builders is an award-winning civil construction and engineering firm. We design and construct green-certified commercial office spaces, warehouse hubs, and retail malls utilizing eco-friendly materials and renewable energy integration.",
+    founded: "2010",
+    teamSize: "95+ builders",
+    industry: "Real Estate & Construction",
+    projects: "45+ commercial hubs built",
+    services: [
+      { title: "Architectural Planning", desc: "Biophilic and structural blueprints prioritizing green energy and natural ventilation." },
+      { title: "Commercial EPC", desc: "End-to-end engineering, procurement, and construction services for high-capacity hubs." },
+      { title: "Smart Retrofitting", desc: "Modifying existing commercial buildings to install solar arrays and smart HVAC systems." },
+      { title: "Zoning Consulting", desc: "Securing environmental clearance, building code compliance, and structural approvals." }
+    ],
+    hours: "10:00 AM - 6:00 PM (Mon - Sat)",
+    website: "https://primebuilders.in",
+    phone: "+91 20 6699 3010",
+    email: "build@primebuilders.in",
+    linkedin: "/company/primebuilders-co",
+    bannerImage: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Neha Gupta", role: "Marketing Lead, Nexus", content: "They completed our corporate headquarters six weeks ahead of schedule. Professional engineering at its finest.", rating: 5 },
+      { reviewer: "Dev Patel", role: "Engineer, CloudOps", content: "Impressive focus on sustainability and structural energy efficiency. Highly recommend them for commercial builds.", rating: 5 }
+    ],
+    member: {
+      name: "Pooja Verma",
+      role: "Chief Architect & CEO",
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop"
+    }
+  },
+  {
+    id: 5,
+    name: "Zenith Finance",
+    category: "Financial Services",
+    location: "Mumbai",
+    rating: 4.6,
+    reviews: 15,
+    verified: false,
+    tagline: "Corporate Wealth Management & Strategic Advisory",
+    about: "Zenith Finance provides financial consulting, tax planning, and investment management for private firms and high-net-worth individuals. We align financial structures with long-term scaling targets.",
+    founded: "2012",
+    teamSize: "18 advisors",
+    industry: "Financial Services",
+    projects: "₹500Cr+ assets managed",
+    services: [
+      { title: "Capital Raising", desc: "Advising on venture debt, angel equity rounds, and banking credit facility structures." },
+      { title: "Corporate Tax Auditing", desc: "Optimizing structures to minimize tax liabilities while maintaining complete compliance." },
+      { title: "Asset Management", desc: "Diversified investments across equities, fixed-income yields, and real assets." },
+      { title: "Mergers & Valuations", desc: "Evaluating acquisition targets, handling valuations, and strategic mergers." }
+    ],
+    hours: "9:00 AM - 6:00 PM (Mon - Fri)",
+    website: "https://zenithfinance.com",
+    phone: "+91 22 6609 5019",
+    email: "advisory@zenithfinance.com",
+    linkedin: "/company/zenith-financial-advisory",
+    bannerImage: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Ravi Sharma", role: "CEO, TechWave", content: "Zenith structured our Series A round. Excellent attention to details and deep banking connections.", rating: 5 }
+    ],
+    member: {
+      name: "Karan Mehta",
+      role: "Managing Director",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop"
+    }
+  },
+  {
+    id: 6,
+    name: "Eco Energy",
+    category: "Renewables",
+    location: "Hyderabad",
+    rating: 4.7,
+    reviews: 20,
+    verified: true,
+    tagline: "Commercial Solar Power & Smart Grid Solutions",
+    about: "Eco Energy designs, installs, and maintains industrial solar installations and energy storage grids. We help businesses slash their utility bills and achieve carbon-neutral operations through clean energy.",
+    founded: "2017",
+    teamSize: "35+ technical staff",
+    industry: "Energy & Utilities",
+    projects: "25MW+ installed capacity",
+    services: [
+      { title: "Solar Installation", desc: "Rooftop and ground-mounted solar panels for industrial plants and offices." },
+      { title: "Power Storage Systems", desc: "High-capacity lithium battery storage setups for off-grid operations." },
+      { title: "Energy Audits", desc: "Comprehensive evaluation of energy leakage and power efficiency recommendations." },
+      { title: "Carbon Offsetting", desc: "Certified carbon credit investments and ESG reporting frameworks." }
+    ],
+    hours: "9:00 AM - 5:30 PM (Mon - Fri)",
+    website: "https://ecoenergy.co",
+    phone: "+91 40 4455 1289",
+    email: "solar@ecoenergy.co",
+    linkedin: "/company/eco-energy-india",
+    bannerImage: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Amit Shah", role: "Director, BuildCo", content: "They retrofitted our warehouses with solar panels. Our electricity costs dropped by 45% in the first quarter itself.", rating: 5 }
+    ],
+    member: {
+      name: "Dev Patel",
+      role: "Head of Engineering",
+      avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=150&auto=format&fit=crop"
+    }
+  },
+  {
+    id: 7,
+    name: "Summit Consulting",
+    category: "Business Strategy",
+    location: "Mumbai",
+    rating: 4.4,
+    reviews: 10,
+    verified: true,
+    tagline: "Operational Scaling, Leadership Development & Restructuring",
+    about: "Summit Consulting is a management advisory firm dedicated to helping mid-market enterprises resolve bottleneck operations, restructure organizational frameworks, and execute high-growth strategies.",
+    founded: "2014",
+    teamSize: "15 principal consultants",
+    industry: "Management Consulting",
+    projects: "120+ corporate audits",
+    services: [
+      { title: "Workflow Analysis", desc: "Time-motion analysis and workflow evaluations to cut waste and improve efficiency." },
+      { title: "Executive Mentorship", desc: "Mentorship for corporate leaders and strategic succession planning." },
+      { title: "Market Entry Strategy", desc: "Structured strategic planning models detailing market entry and product expansion." },
+      { title: "Corporate Alignment", desc: "Optimizing departments and reporting lines for improved organizational agility." }
+    ],
+    hours: "9:00 AM - 6:00 PM (Mon - Fri)",
+    website: "https://summitconsulting.in",
+    phone: "+91 22 5590 1900",
+    email: "partner@summitconsulting.in",
+    linkedin: "/company/summit-strategy-group",
+    bannerImage: "https://images.unsplash.com/photo-1454165833762-02ad50e8958?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Karan Mehta", role: "CEO, Zenith", content: "Summit helped us reorganize our operations during a merger. Highly objective and deeply analytical.", rating: 4 }
+    ],
+    member: {
+      name: "Sara Khan",
+      role: "Senior Partner",
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=150&auto=format&fit=crop"
+    }
+  },
+  {
+    id: 8,
+    name: "Alpha Tech Lab",
+    category: "Software Development",
+    location: "Chennai",
+    rating: 4.9,
+    reviews: 45,
+    verified: true,
+    tagline: "Bespoke SaaS Platforms & IoT Hardware Integrations",
+    about: "Alpha Tech Lab is a software R&D laboratory building complex web systems, connected IoT devices, and deep-learning platforms. We combine agile engineering with bleeding-edge stack development.",
+    founded: "2019",
+    teamSize: "30+ programmers",
+    industry: "Information Technology",
+    projects: "60+ products built",
+    services: [
+      { title: "SaaS Engineering", desc: "Multi-tenant web applications with secure payment processing and detailed analytics dashboards." },
+      { title: "IoT Firmware Development", desc: "Embedded hardware programming for smart sensors and industrial automation." },
+      { title: "Penetration Auditing", desc: "Penetration testing, source code auditing, and encryption compliance protocols." },
+      { title: "DevOps Pipelines", desc: "Automating builds, tests, and cloud deployments with Kubernetes and Terraform." }
+    ],
+    hours: "10:00 AM - 7:00 PM (Mon - Fri)",
+    website: "https://alphatechlab.com",
+    phone: "+91 44 4450 1928",
+    email: "contact@alphatechlab.com",
+    linkedin: "/company/alpha-tech-lab-r-d",
+    bannerImage: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop",
+    reviewsList: [
+      { reviewer: "Ravi Sharma", role: "Founder, TechWave", content: "The Alpha Tech Lab team is unmatched in their technical capability. They helped us develop a custom sensor firmware in record time.", rating: 5 },
+      { reviewer: "Dev Patel", role: "Engineer, CloudOps", content: "Clean code, excellent automated testing pipeline, and deep domain knowledge in container orchestration.", rating: 5 }
+    ],
+    member: {
+      name: "Aisha Rao",
+      role: "Chief R&D Officer",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop"
+    }
+  }
 ];
 
 export default function BusinessDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
-  const business = mockBusinesses.find(b => b.id.toString() === id) || mockBusinesses[0];
+  const { user, isAuthenticated } = useAuth();
+
+  const [business, setBusiness] = useState<BusinessDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Form states
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [msg, setMsg] = useState("");
+
+  // Review states
+  const [reviewName, setReviewName] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState("");
+  const [dbReviews, setDbReviews] = useState<any[]>([]);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+
+  useEffect(() => {
+    async function loadBusiness() {
+      try {
+        setLoading(true);
+        const [list, reviewsData] = await Promise.all([
+          fetchBusinesses(),
+          fetchReviews(Number(id)).catch(() => [])
+        ]);
+        setDbReviews(reviewsData || []);
+
+        const matched = list.find((b: any) => b.id.toString() === id);
+        if (matched) {
+          // Map backend services (since services is stored as a JSON array in Laravel)
+          let coreServices: ServiceItem[] = [];
+          if (Array.isArray(matched.services)) {
+            coreServices = matched.services.map((s: string) => ({
+              title: s,
+              desc: `Vetted capability in ${s}`
+            }));
+          } else if (typeof matched.services === "string" && matched.services) {
+            try {
+              const parsed = JSON.parse(matched.services);
+              if (Array.isArray(parsed)) {
+                coreServices = parsed.map((s: string) => ({
+                  title: s,
+                  desc: `Vetted capability in ${s}`
+                }));
+              }
+            } catch {
+              coreServices = matched.services.split(",").map((s: string) => ({
+                title: s.trim(),
+                desc: `Vetted capability in ${s.trim()}`
+              }));
+            }
+          }
+
+          // Fallback to detailed mock data if it aligns, for extra services/banners/reviews fallback
+          const mockDetail = detailedBusinesses.find(
+            b => b.name.toLowerCase() === matched.name.toLowerCase() || b.id.toString() === id
+          );
+
+          const logoUrl = matched.logo ? `http://localhost:8000${matched.logo}` : "";
+          const coverUrl = matched.cover_image ? `http://localhost:8000${matched.cover_image}` : "";
+
+          // Populate the business details dynamically
+          setBusiness({
+            id: matched.id,
+            name: matched.name,
+            category: matched.category,
+            location: matched.location || (mockDetail ? mockDetail.location : "Gujarat, India"),
+            rating: mockDetail ? mockDetail.rating : 5.0,
+            reviews: mockDetail ? mockDetail.reviews : 0,
+            verified: matched.is_verified,
+            tagline: matched.tagline || (mockDetail ? mockDetail.tagline : `Vetted provider of ${matched.category}`),
+            about: matched.description || (mockDetail ? mockDetail.about : "No description provided yet."),
+            founded: matched.founded || (mockDetail ? mockDetail.founded : "Recent"),
+            teamSize: matched.team_size || (mockDetail ? mockDetail.teamSize : "1-10 members"),
+            industry: matched.category,
+            projects: matched.projects || (mockDetail ? mockDetail.projects : "Vetted projects"),
+            services: coreServices.length > 0 ? coreServices : (mockDetail ? mockDetail.services : []),
+            hours: matched.hours || (mockDetail ? mockDetail.hours : "9:00 AM - 6:00 PM (Mon - Fri)"),
+            website: matched.website || (mockDetail ? mockDetail.website : ""),
+            phone: matched.phone || (mockDetail ? mockDetail.phone : ""),
+            email: matched.email || (mockDetail ? mockDetail.email : ""),
+            linkedin: matched.linkedin || (mockDetail ? mockDetail.linkedin : ""),
+            instagram: matched.instagram || "",
+            youtube: matched.youtube || "",
+            twitter: matched.twitter || "",
+            whatsapp: matched.whatsapp || "",
+            bannerImage: getCoverImage(coverUrl, matched.category),
+            logo: logoUrl || "",
+            reviewsList: mockDetail ? mockDetail.reviewsList : [],
+            member: matched.user ? {
+              name: matched.user.name,
+              role: `${matched.user.designation || 'SABHA Member'}, ${matched.user.company || 'Member Company'}`,
+              avatar: matched.user.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop"
+            } : (mockDetail ? mockDetail.member : {
+              name: "SABHA Owner",
+              role: "Verified Community Member",
+              avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop"
+            })
+          });
+        } else {
+          setBusiness(null);
+        }
+      } catch (e) {
+        console.error("Failed to load business details:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (id) {
+      loadBusiness();
+    }
+  }, [id]);
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitted(true);
+    setName("");
+    setEmail("");
+    setSubject("");
+    setMsg("");
+    setTimeout(() => setFormSubmitted(false), 5000);
+  };
+
+  const handleAddReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewContent) return;
+    setReviewSubmitting(true);
+    setReviewError("");
+
+    try {
+      const res = await submitReview(Number(id), {
+        rating: reviewRating,
+        content: reviewContent
+      });
+      setDbReviews(prev => [res.review, ...prev]);
+      setReviewSubmitted(true);
+      setReviewContent("");
+      setTimeout(() => setReviewSubmitted(false), 5000);
+    } catch (err: any) {
+      setReviewError(err.message || "Failed to submit review.");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background font-outfit">
+        <div className="text-center space-y-3">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-medium text-muted">Loading business details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!business) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background font-outfit text-center p-6">
+        <h2 className="text-2xl font-bold text-foreground">Business not found</h2>
+        <p className="mt-2 text-sm text-muted">The requested business listing is pending approval or does not exist.</p>
+        <button
+          onClick={() => router.push("/businesses")}
+          className="mt-6 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+        >
+          Back to directory
+        </button>
+      </div>
+    );
+  }
+
+  const allReviews = [...dbReviews, ...(business.reviewsList || [])];
 
   return (
-    <div className="min-h-screen bg-background font-outfit text-white pt-20">
-      {/* Dynamic Header */}
-      <section className="relative py-24 lg:py-32 overflow-hidden border-b border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-30" />
-        <div className="absolute top-0 right-0 w-full h-full -z-10">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[140px] animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[140px] animate-pulse" />
-        </div>
-        
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
-          <button 
-            onClick={() => router.back()} 
-            className="flex items-center gap-3 text-white/30 hover:text-primary mb-12 transition-all group font-black text-[10px] uppercase tracking-[0.3em]"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform" />
-            Back to Directory
-          </button>
-          
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-16">
-            <div className="flex flex-col md:flex-row gap-12 items-start md:items-center">
-              <div className="w-40 h-40 rounded-[3rem] glass border-white/10 flex items-center justify-center text-5xl font-black text-white shrink-0 relative overflow-hidden group shadow-2xl">
-                <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span className="relative z-10">{business.name[0]}</span>
-              </div>
-              <div className="space-y-8">
-                <div className="flex flex-wrap items-center gap-6">
-                  {business.verified && (
-                    <div className="glass text-primary px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/20 flex items-center gap-3">
-                       <ShieldCheck className="w-4 h-4" />
-                       Elite Partner
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2.5 text-accent font-black text-xs glass px-4 py-2 rounded-full border border-accent/20">
-                    <Star size={16} className="fill-accent" />
-                    {business.rating} <span className="text-white/30 font-bold uppercase tracking-widest ml-2 px-3 border-l border-white/10">({business.reviews} reviews)</span>
-                  </div>
-                </div>
-                <h1 className="text-5xl md:text-8xl font-black text-white leading-none tracking-tighter uppercase">
-                   {business.name.split(' ')[0]} <span className="text-gradient leading-none">{business.name.split(' ').slice(1).join(' ')}</span>
-                </h1>
-                <div className="flex flex-wrap gap-8 text-[11px] text-white/40 font-black uppercase tracking-[0.2em]">
-                  <span className="flex items-center gap-3"><MapPin size={18} className="text-primary" /> {business.location}</span>
-                  <span className="flex items-center gap-3"><Briefcase size={18} className="text-primary" /> {business.category}</span>
-                  <span className="flex items-center gap-3"><Clock size={18} className="text-primary" /> Open: {business.hours}</span>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen bg-background font-outfit">
+      {/* Cover Banner with Profile Bar */}
+      <section className="relative h-80 sm:h-96 lg:h-[28rem] w-full overflow-hidden bg-slate-900">
+        <img
+          src={business.bannerImage}
+          alt={`${business.name} workspace`}
+          className="h-full w-full object-cover"
+        />
+        {/* Shadow gradient at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-            <div className="flex gap-6 w-full lg:w-fit">
-              <button className="btn-premium flex-1 lg:flex-none px-12 py-6 text-sm flex items-center justify-center gap-4 group">
-                Connect Now
-                <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-              </button>
-              <button className="p-6 rounded-3xl glass border-white/5 text-white/40 hover:text-primary hover:border-primary/40 transition-all flex items-center justify-center">
-                <MessageCircle size={28} />
-              </button>
+        {/* Back button */}
+        <div className="absolute top-6 left-6 z-10">
+          <button
+            onClick={() => router.back()}
+            className="group inline-flex items-center gap-1.5 rounded-lg bg-black/30 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-black/50"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            Back to directory
+          </button>
+        </div>
+
+        {/* Profile Bar at bottom of cover */}
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <div className="mx-auto max-w-7xl px-6 pb-6">
+            <div className="flex flex-col md:flex-row md:items-end gap-5">
+              {/* Logo */}
+              <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl bg-gradient-to-tr from-primary to-primary-dark text-white text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
+                {business.name?.[0] ?? "?"}
+              </div>
+
+              {/* Name & Details */}
+              <div className="flex-1 space-y-1.5 md:pb-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {business.verified && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-white border border-white/20">
+                      <ShieldCheck className="h-3 w-3" /> Verified
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-400/20">
+                    <Star className="h-3 w-3 fill-current" /> {business.rating} ({allReviews.length})
+                  </span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg">
+                  {business.name}
+                </h1>
+                <p className="text-sm font-semibold text-white/70">
+                  {business.tagline}
+                </p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/60 font-medium">
+                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {business.location}</span>
+                  <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" /> {business.category}</span>
+                  <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> Open {business.hours.split(" (")[0]}</span>
+                </div>
+              </div>
+
+              {/* Connection Actions */}
+              <div className="flex gap-2 shrink-0 md:pb-1">
+                <a
+                  href={`tel:${business.phone}`}
+                  className="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-3 text-xs font-bold text-slate-900 shadow-lg transition-all hover:bg-primary hover:text-white active:scale-[0.98]"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  Connect now
+                </a>
+                <a
+                  href={`mailto:${business.email}`}
+                  className="flex items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-3.5 py-3 text-white transition-colors hover:bg-white/25 shadow-sm"
+                  aria-label="Email"
+                  title="Send Email"
+                >
+                  <Mail size={16} />
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-24">
-          {/* Main Info */}
-          <div className="lg:col-span-2 space-y-24">
-            <section>
-              <div className="flex items-center gap-4 mb-10">
-                 <div className="w-2 h-12 bg-primary rounded-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" />
-                 <h2 className="text-4xl font-black tracking-tighter uppercase text-white">Strategic Profile</h2>
+      {/* Main Grid Content */}
+      <div className="mx-auto max-w-7xl px-6 py-10">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+          
+          {/* Main Column */}
+          <div className="space-y-10 lg:col-span-2">
+            
+            {/* About Section */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2.5">
+                <span className="h-5 w-1 rounded-full bg-primary" />
+                <h2 className="text-lg font-bold text-foreground">About the company</h2>
               </div>
-              <p className="text-2xl text-white/40 leading-relaxed font-bold uppercase tracking-tight">
-                "{business.about}"
+              <p className="text-sm leading-relaxed text-muted">
+                {business.about}
               </p>
+
+              {/* Highlights/Key Stats Grid */}
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 pt-4">
+                <div className="glass-card p-4 text-center">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Founded</span>
+                  <p className="mt-1 text-sm font-bold text-foreground">{business.founded}</p>
+                </div>
+                <div className="glass-card p-4 text-center">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Team size</span>
+                  <p className="mt-1 text-sm font-bold text-foreground">{business.teamSize}</p>
+                </div>
+                <div className="glass-card p-4 text-center">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Industry</span>
+                  <p className="mt-1 text-sm font-bold text-foreground truncate">{business.industry.split(" & ")[0]}</p>
+                </div>
+                <div className="glass-card p-4 text-center">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Volume</span>
+                  <p className="mt-1 text-sm font-bold text-foreground">{business.projects.split(" ")[0]}</p>
+                </div>
+              </div>
             </section>
 
-            <section>
-              <div className="flex items-center gap-4 mb-10">
-                 <div className="w-2 h-12 bg-primary rounded-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" />
-                 <h2 className="text-4xl font-black tracking-tighter uppercase text-white">Gallery & Showcase</h2>
+            {/* Services Grid */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2.5">
+                <span className="h-5 w-1 rounded-full bg-primary" />
+                <h2 className="text-lg font-bold text-foreground">Core Services & Expertise</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {[1, 2].map((i) => (
-                  <div key={i} className="aspect-video glass rounded-[3rem] overflow-hidden relative group border-white/5">
-                    <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white font-black uppercase text-xs tracking-[0.3em] z-10 backdrop-blur-md">Showcase {i}</div>
-                    <img 
-                      src={`https://images.unsplash.com/photo-${i === 1 ? '1522071823991-b471e724092f' : '1552664730-d307ca884978'}?auto=format&fit=crop&q=80&w=800`} 
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
-                      alt="Work Detail"
-                    />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {business.services.map((service, i) => (
+                  <div key={i} className="glass-card flex items-start gap-3.5 p-4">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                      <Zap className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-bold text-foreground">{service.title}</h3>
+                      <p className="text-xs text-muted leading-relaxed">{service.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section>
-              <div className="flex items-center gap-4 mb-10">
-                 <div className="w-2 h-12 bg-primary rounded-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]" />
-                 <h2 className="text-4xl font-black tracking-tighter uppercase text-white">Service Portfolio</h2>
+            {/* Reviews list & submit review */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-2.5">
+                <span className="h-5 w-1 rounded-full bg-primary" />
+                <h2 className="text-lg font-bold text-foreground">Member Recommendations</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {business.services.map(service => (
-                  <div key={service} className="p-10 rounded-[3rem] glass border-white/5 flex items-center justify-between group hover:border-primary/40 transition-all">
-                    <span className="font-black text-white/50 uppercase tracking-tight group-hover:text-white transition-colors">{service}</span>
-                    <Zap className="w-6 h-6 text-primary opacity-0 group-hover:opacity-100 transition-all transform scale-0 group-hover:scale-100" />
+
+              {/* Add review form */}
+              <div className="glass-card p-5 space-y-4 bg-surface/30">
+                <h3 className="text-sm font-bold text-foreground inline-flex items-center gap-1.5">
+                  <MessageSquare className="h-4 w-4 text-primary" /> Recommend this business
+                </h3>
+                <form onSubmit={handleAddReview} className="space-y-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-muted">Your name</label>
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        value={reviewName}
+                        onChange={(e) => setReviewName(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-muted">Rating</label>
+                      <select
+                        value={reviewRating}
+                        onChange={(e) => setReviewRating(Number(e.target.value))}
+                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                      >
+                        {[5, 4, 3, 2, 1].map((r) => (
+                          <option key={r} value={r}>{r} Stars</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-muted">Recommendation text</label>
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="What was your experience working with them?"
+                      value={reviewContent}
+                      onChange={(e) => setReviewContent(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                  >
+                    Submit review
+                  </button>
+                  <AnimatePresence>
+                    {reviewSubmitted && (
+                      <motion.span
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="ml-3 text-xs text-green-600 font-semibold inline-flex items-center gap-1"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Recommendation submitted successfully!
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </form>
+              </div>
+
+              {/* Reviews items list */}
+              <div className="space-y-3.5">
+                {allReviews.map((rev, idx) => (
+                  <div key={idx} className="glass-card p-5 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-primary shrink-0 select-none">
+                          {rev.reviewer[0]}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-foreground leading-none">{rev.reviewer}</h4>
+                          <span className="text-[10px] text-muted leading-none mt-0.5 inline-block">{rev.role}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5 text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/30">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3 w-3 ${i < rev.rating ? "fill-current" : "text-amber-200"}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted leading-relaxed font-medium bg-surface/40 p-3 rounded-lg">
+                      "{rev.content}"
+                    </p>
                   </div>
                 ))}
               </div>
             </section>
           </div>
 
-          {/* Sidebar Info */}
-          <div className="space-y-10">
-            <div className="glass rounded-[4rem] p-12 border-white/5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[80px]" />
-              <h3 className="text-[10px] font-black mb-12 border-b border-white/5 pb-4 uppercase tracking-[0.4em] text-white/20 relative z-10">Professional Coordinates</h3>
-              <div className="space-y-10 relative z-10">
-                <div className="flex items-center gap-6 group">
-                  <div className="w-14 h-14 rounded-[1.25rem] glass border-white/10 flex items-center justify-center shrink-0 group-hover:border-primary/50 transition-colors">
-                    <Globe size={24} className="text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-white/20 font-black uppercase tracking-widest mb-1.5">Network Hub</p>
-                    <Link href={business.website} target="_blank" className="text-base font-black text-white hover:text-primary transition-colors uppercase tracking-tight">{business.name.toLowerCase().replace(" ", "")}.com</Link>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6 group">
-                  <div className="w-14 h-14 rounded-[1.25rem] glass border-white/10 flex items-center justify-center shrink-0 group-hover:border-primary/50 transition-colors">
-                    <Share2 size={24} className="text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-white/20 font-black uppercase tracking-widest mb-1.5">LinkedIn Node</p>
-                    <span className="text-base font-black text-white uppercase tracking-tight">/company/{business.name.toLowerCase().replace(" ", "-")}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6 group">
-                  <div className="w-14 h-14 rounded-[1.25rem] glass border-white/10 flex items-center justify-center shrink-0 group-hover:border-primary/50 transition-colors">
-                    <Mail size={24} className="text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-white/20 font-black uppercase tracking-widest mb-1.5">Direct Signal</p>
-                    <span className="text-base font-black text-white uppercase tracking-tight">hello@{business.name.toLowerCase().replace(" ", "")}.com</span>
-                  </div>
+          {/* Sidebar Column */}
+          <div className="space-y-6">
+
+            {/* Listed by Member Card */}
+            <div className="glass-card p-5 space-y-4">
+              <h3 className="border-b border-border pb-3 text-sm font-semibold text-foreground">Listed by Member</h3>
+              <div className="flex items-center gap-4">
+                <img
+                  src={business.member.avatar}
+                  alt={business.member.name}
+                  className="h-14 w-14 rounded-full object-cover border border-border shadow-sm shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-bold text-slate-900 truncate">{business.member.name}</h4>
+                  <p className="text-xs text-primary font-semibold truncate mt-0.5">{business.member.role}</p>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground mt-1">
+                    <ShieldCheck className="h-3 w-3 text-green-500 fill-green-50/50" /> Verified Member
+                  </span>
                 </div>
               </div>
-              <button className="w-full mt-16 py-6 rounded-3xl border-2 border-primary/20 text-primary font-black text-[10px] uppercase tracking-[0.3em] hover:bg-primary hover:text-white hover:border-primary transition-all shadow-xl shadow-primary/5 relative z-10">
-                Strategic Brochure
-              </button>
             </div>
 
-            <div className="bg-primary p-12 rounded-[4rem] shadow-2xl shadow-primary/20 text-white relative overflow-hidden group">
-              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity blur-3xl" />
-              <h3 className="text-3xl font-black mb-6 relative z-10 uppercase tracking-tighter leading-none">Sabha Verified</h3>
-              <p className="text-white/70 text-lg leading-relaxed mb-10 font-bold uppercase tracking-tight relative z-10">
-                "{business.name} is a high-trust catalyst in our ecosystem. They hold an elite status with 4.8+ community confidence."
-              </p>
-              <div className="flex items-center gap-4 glass border-white/20 p-5 rounded-3xl relative z-10 w-fit">
-                <ShieldCheck className="w-6 h-6 text-white" />
-                <span className="text-[11px] font-black uppercase tracking-widest">Community Vetted</span>
+            {/* Contact Details Card */}
+            <div className="glass-card p-5">
+              <h3 className="border-b border-border pb-3 text-sm font-semibold text-foreground">Contact & Channels</h3>
+              <div className="mt-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                    <Globe size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold text-muted leading-none">Website</p>
+                    <Link
+                      href={business.website}
+                      target="_blank"
+                      className="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block"
+                    >
+                      {business.website.replace("https://", "")}
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                    <Mail size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold text-muted leading-none">Email address</p>
+                    <a
+                      href={`mailto:${business.email}`}
+                      className="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block"
+                    >
+                      {business.email}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                    <Phone size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold text-muted leading-none">Direct phone</p>
+                    <a
+                      href={`tel:${business.phone}`}
+                      className="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block"
+                    >
+                      {business.phone}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                    <Share2 size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold text-muted leading-none">LinkedIn URL</p>
+                    <span className="mt-1 text-xs font-semibold text-foreground block truncate">
+                      {business.linkedin}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media Icons */}
+              {(business.instagram || business.youtube || business.twitter || business.linkedin || business.whatsapp) && (
+                <div className="mt-5 border-t border-border pt-4">
+                  <p className="text-[10px] font-semibold text-muted mb-3 uppercase tracking-wider">Social Channels</p>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {business.instagram && (
+                      <a href={business.instagram} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-xl bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="Instagram">
+                        <InstagramIcon size={18} />
+                      </a>
+                    )}
+                    {business.youtube && (
+                      <a href={business.youtube} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-xl bg-red-600 text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="Youtube">
+                        <YoutubeIcon size={18} />
+                      </a>
+                    )}
+                    {business.twitter && (
+                      <a href={business.twitter} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-xl bg-black text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="Twitter / X">
+                        <TwitterIcon size={18} />
+                      </a>
+                    )}
+                    {business.linkedin && (
+                      <a href={business.linkedin} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-xl bg-[#0A66C2] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="LinkedIn">
+                        <LinkedinIcon size={18} />
+                      </a>
+                    )}
+                    {business.whatsapp && (
+                      <a href={`https://wa.me/${business.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="WhatsApp">
+                        <WhatsappIcon size={18} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Coordinates Map Preview */}
+              <div className="mt-6 border-t border-border pt-5">
+                <p className="text-[10px] font-semibold text-muted mb-2.5">Geographic Location</p>
+                <div className="h-28 w-full rounded-xl bg-slate-100 border border-border overflow-hidden relative flex items-center justify-center select-none">
+                  {/* Subtle Grid dots */}
+                  <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+                  <div className="flex flex-col items-center z-10 text-center p-4">
+                    <MapPin className="h-5 w-5 text-primary animate-bounce mb-1" />
+                    <span className="text-[10px] font-bold text-foreground truncate max-w-full">{business.location}, India</span>
+                    <span className="text-[8px] text-muted-foreground mt-0.5">Vetted Corporate Office</span>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Direct Inquiry Message Form */}
+            <div className="glass-card p-5 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Send Direct Inquiry</h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Responses are usually sent within 1 business day.</p>
+              </div>
+              <form onSubmit={handleSendMessage} className="space-y-2.5">
+                <input
+                  type="text"
+                  required
+                  placeholder="Your Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                />
+                <input
+                  type="email"
+                  required
+                  placeholder="Your Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                />
+                <input
+                  type="text"
+                  required
+                  placeholder="Subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                />
+                <textarea
+                  required
+                  rows={3}
+                  placeholder="Your Message..."
+                  value={msg}
+                  onChange={(e) => setMsg(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none"
+                />
+                <button
+                  type="submit"
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 active:scale-[0.98]"
+                >
+                  Send Inquiry
+                </button>
+                <AnimatePresence>
+                  {formSubmitted && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-[10px] text-center text-green-600 font-semibold p-2 bg-green-50 rounded-lg border border-green-200/50"
+                    >
+                      Your inquiry has been successfully sent!
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </form>
+            </div>
+
+            {/* Vetted member Trust badge */}
+            <div className="rounded-2xl border border-border bg-primary p-5 text-white space-y-3.5">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-white" />
+                <h4 className="text-sm font-bold">Vetted Member</h4>
+              </div>
+              <p className="text-xs leading-relaxed text-white/80">
+                SABHA verifies the identity, registration, and active community status of listed businesses to maintain a high-trust professional network.
+              </p>
+              <div className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5">
+                <ShieldCheck className="h-4 w-4 text-white" />
+                <span className="text-[10px] font-bold">100% verified profile</span>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
+      {/* Floating WhatsApp Button */}
+      {(business.whatsapp || business.phone) && (
+        <a
+          href={`https://wa.me/${(business.whatsapp || business.phone).replace(/[^0-9]/g, '')}?text=Hi, I found your business on Sabha and would like to connect!`}
+          target="_blank"
+          rel="noreferrer"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-full bg-[#25D366] pl-4 pr-5 py-3.5 text-white shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95"
+          title="Chat on WhatsApp"
+        >
+          {/* Pulse ring */}
+          <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" />
+          <WhatsappIcon size={22} />
+          <span className="text-sm font-bold relative">WhatsApp</span>
+        </a>
+      )}
     </div>
   );
 }

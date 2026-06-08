@@ -3,27 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X, Users, Calendar, Info, Mail, LogIn, Briefcase, Zap, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Menu, X, ArrowRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
 
 const navigation = [
-  { name: "Home", href: "/", icon: Users },
-  { name: "Businesses", href: "/businesses", icon: Briefcase },
-  { name: "Events", href: "/events", icon: Calendar },
-  { name: "Gallery", href: "/gallery", icon: Zap },
-  { name: "About", href: "/about", icon: Info },
-  { name: "Contact", href: "/contact", icon: Mail },
+  { name: "Home", href: "/" },
+  { name: "Businesses", href: "/businesses" },
+  { name: "Events", href: "/events" },
+  { name: "Gallery", href: "/gallery" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { isAuthenticated, user, openLogin, openRegister, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 16);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -31,40 +32,26 @@ export default function Navbar() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        isScrolled ? "py-4" : "py-6"
+        "fixed inset-x-0 top-0 z-50 transition-all duration-300 border-b",
+        isScrolled
+          ? "glass border-border shadow-sm"
+          : "bg-background/80 backdrop-blur-sm border-transparent"
       )}
     >
-      <div className="container mx-auto px-6">
-        <nav
-          className={cn(
-            "flex items-center justify-between transition-all duration-500 px-8 py-3 rounded-full border border-transparent",
-            isScrolled ? "glass shadow-2xl border-white/10" : "bg-transparent"
-          )}
-          aria-label="Global"
-        >
-          <div className="flex lg:flex-1">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-premium rounded-xl flex items-center justify-center glow-purple group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-black tracking-tighter text-white">
-                SABHA<span className="text-primary italic-none">.</span>
-              </span>
-            </Link>
-          </div>
+      <div className="mx-auto max-w-7xl px-6">
+        <nav className="flex h-16 items-center justify-between" aria-label="Global">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <img
+              src="/logo.png"
+              alt="SABHA"
+              className="h-10 w-10 rounded-full object-contain transition-transform group-hover:scale-105"
+            />
+            <span className="text-xl font-bold tracking-tight text-primary-dark">SABHA</span>
+          </Link>
 
-          <div className="flex lg:hidden">
-            <button
-              type="button"
-              className="p-2 text-white/70 hover:text-white"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div className="hidden lg:flex lg:gap-x-10">
+          {/* Desktop nav */}
+          <div className="hidden lg:flex lg:items-center lg:gap-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -72,15 +59,17 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "text-sm font-bold uppercase tracking-widest transition-all hover:text-white relative py-1",
-                    isActive ? "text-white" : "text-white/50"
+                    "relative rounded-lg px-3.5 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "text-primary"
+                      : "text-muted hover:text-foreground hover:bg-surface"
                   )}
                 >
                   {item.name}
                   {isActive && (
-                    <motion.span 
+                    <motion.span
                       layoutId="nav-underline"
-                      className="absolute inset-x-0 -bottom-1 h-0.5 bg-premium rounded-full" 
+                      className="absolute inset-x-3.5 -bottom-px h-0.5 rounded-full bg-primary"
                     />
                   )}
                 </Link>
@@ -88,73 +77,167 @@ export default function Navbar() {
             })}
           </div>
 
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-6 items-center">
-            <Link
-              href="/login"
-              className="text-sm font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/register"
-              className="btn-premium px-6 py-2.5 text-sm"
-            >
-              Join <ArrowRight size={16} />
-            </Link>
+          {/* Desktop actions */}
+          <div className="hidden lg:flex lg:items-center lg:gap-2">
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/profile"
+                  className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted hover:text-foreground hover:bg-surface"
+                >
+                  My Profile
+                </Link>
+                {user?.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary-soft text-primary border border-primary/15 px-4 py-2 text-sm font-semibold hover:opacity-95"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+                <button
+                  onClick={logout}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+                >
+                  <LogOut size={15} /> Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={openLogin}
+                  className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface"
+                >
+                  Log in
+                </button>
+                <button
+                  onClick={openRegister}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
+                >
+                  Join <ArrowRight size={15} />
+                </button>
+              </>
+            )}
           </div>
+
+          {/* Mobile toggle */}
+          <button
+            type="button"
+            className="lg:hidden rounded-lg p-2 text-foreground hover:bg-surface"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
         </nav>
       </div>
 
       {/* Mobile menu */}
       <div
         className={cn(
-          "lg:hidden fixed inset-0 z-50 transition-all duration-300",
+          "lg:hidden fixed inset-0 z-50 transition-opacity duration-200",
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl" />
-        <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto px-10 py-10">
-          <div className="flex items-center justify-between mb-12">
-            <Link href="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-              <div className="w-10 h-10 bg-premium rounded-xl flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-black text-white">SABHA.</span>
+        <div
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+        <div className="fixed inset-y-0 right-0 w-full max-w-sm overflow-y-auto bg-background px-6 py-6 shadow-xl">
+          <div className="mb-8 flex items-center justify-between">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <img src="/logo.png" alt="SABHA" className="h-10 w-10 rounded-full object-contain" />
+              <span className="text-xl font-bold tracking-tight text-primary-dark">SABHA</span>
             </Link>
             <button
               type="button"
-              className="p-2 text-white/70"
+              className="rounded-lg p-2 text-muted hover:bg-surface"
               onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
             >
-              <X className="h-8 w-8" aria-hidden="true" />
+              <X className="h-6 w-6" />
             </button>
           </div>
-          
-          <div className="flex flex-col gap-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-3xl font-black text-white/50 hover:text-white transition-all uppercase tracking-tighter"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            <hr className="border-white/10 my-4" />
-            <Link
-              href="/register"
-              className="btn-premium text-xl py-5"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Join Community <ArrowRight size={20} />
-            </Link>
+
+          <div className="flex flex-col gap-1">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "rounded-lg px-4 py-3 text-base font-medium transition-colors",
+                    isActive ? "bg-primary-soft text-primary" : "text-foreground hover:bg-surface"
+                  )}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+
+          <hr className="my-6 border-border" />
+
+          <div className="flex flex-col gap-3">
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface"
+                >
+                  My Profile
+                </Link>
+                {user?.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-soft text-primary border border-primary/15 px-4 py-3 text-sm font-semibold"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface"
+                >
+                  <LogOut size={16} /> Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    openLogin();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold text-foreground hover:bg-surface"
+                >
+                  Log in
+                </button>
+                <button
+                  onClick={() => {
+                    openRegister();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white cursor-pointer"
+                >
+                  Join the community <ArrowRight size={16} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
     </header>
   );
 }
-
-// Simple motion mock if needed, but framer-motion is installed.
-import { motion } from "framer-motion";

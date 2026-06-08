@@ -1,140 +1,245 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Phone, ArrowRight, ShieldCheck, Zap, Briefcase, Star } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowRight, Key, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const { registerSendOtp, registerConfirm } = useAuth();
+  const router = useRouter();
+
+  const [step, setStep] = useState<1 | 2>(1);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [simulatedOtp, setSimulatedOtp] = useState("");
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await registerSendOtp(name, email, password);
+      if (res.otp) {
+        setSimulatedOtp(res.otp);
+      }
+      setStep(2);
+    } catch (err: any) {
+      setError(err.message || "Registration validation failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await registerConfirm(email, otp);
+      // Redirect to profile or home page
+      router.push("/profile");
+    } catch (err: any) {
+      setError(err.message || "Invalid or expired OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background font-outfit px-6 pt-32 pb-20">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
-        <div className="absolute top-[-5%] right-[-10%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] animate-pulse delay-700" />
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative z-10 w-full max-w-3xl"
+    <div className="min-h-screen flex items-center justify-center bg-background font-outfit px-6 pt-28 pb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="w-full max-w-2xl"
       >
-        <div className="text-center mb-16">
-          <Link href="/" className="inline-flex items-center gap-4 mb-10 group">
-            <div className="w-14 h-14 bg-premium rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-              <Zap className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-4xl font-black text-white tracking-tighter uppercase">Sabha<span className="text-primary italic-none">.</span></span>
+        {/* Logo + heading */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-8 group">
+            <img src="/logo.png" alt="SABHA" className="h-12 w-12 rounded-full object-contain" />
+            <span className="text-2xl font-bold tracking-tight text-primary-dark">SABHA</span>
           </Link>
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 uppercase tracking-tighter leading-none">Join the Elite.</h1>
-          <p className="text-white/30 font-black uppercase tracking-[0.4em] text-[10px]">Scale your business with verified industry partners</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+            {step === 1 ? "Create your account" : "Verify your email"}
+          </h1>
+          <p className="text-sm text-muted">
+            {step === 1
+              ? "Join the community and list your business"
+              : `Enter the 6-digit verification code sent to ${email}`}
+          </p>
         </div>
 
-        <div className="glass rounded-[4rem] p-12 md:p-16 border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="flex items-center gap-6 glass border-white/10 p-6 rounded-[2rem] mb-12">
-            <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/20 shrink-0">
-               <ShieldCheck className="w-7 h-7 text-primary" />
+        {/* Card */}
+        <div className="bg-white border border-border rounded-2xl shadow-sm p-8 md:p-10">
+          {error && (
+            <div className="mb-6 rounded-xl bg-red-50 border border-red-100 p-4 text-center text-sm font-semibold text-red-600">
+              {error}
             </div>
-            <p className="text-xs font-black text-white/40 leading-relaxed uppercase tracking-widest">
-              "Your profile will be vetted by our community moderators for professional integrity and authenticity."
-            </p>
-          </div>
+          )}
 
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-10" onSubmit={(e) => e.preventDefault()}>
-            {/* Full Name */}
-            <div className="space-y-4 md:col-span-2">
-              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Business or Founder Identity</label>
-              <div className="relative group">
-                <User className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 text-white/10 group-focus-within:text-primary transition-colors" />
-                <input
-                  type="text"
-                  placeholder="E.g. John Doe / Acme Corp"
-                  className="w-full glass border-white/5 rounded-3xl py-6 pl-20 pr-8 text-white font-bold outline-none focus:border-primary transition-all placeholder:text-white/5"
-                />
+          {step === 2 && simulatedOtp && (
+            <div className="mb-6 rounded-xl bg-amber-50 border border-amber-100 p-4 text-center text-sm font-semibold text-amber-700 flex items-center gap-2.5">
+              <ShieldCheck className="h-5 w-5 text-amber-700 shrink-0 animate-bounce" />
+              <span>Simulated Email OTP code received: <strong>{simulatedOtp}</strong>. Enter it below to register.</span>
+            </div>
+          )}
+
+          {step === 1 ? (
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-5" onSubmit={handleSendOtp}>
+              {/* Full Name */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-foreground">Full name or business name</label>
+                <div className="relative group">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="E.g. John Doe / Acme Corp"
+                    className="w-full rounded-xl border border-border bg-white pl-11 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Email */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Elite Node (Email)</label>
-              <div className="relative group">
-                <Mail className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 text-white/10 group-focus-within:text-primary transition-colors" />
-                <input
-                  type="email"
-                  placeholder="name@company.com"
-                  className="w-full glass border-white/5 rounded-3xl py-6 pl-20 pr-8 text-white font-bold outline-none focus:border-primary transition-all placeholder:text-white/5"
-                />
+              {/* Email */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Email</label>
+                <div className="relative group">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="w-full rounded-xl border border-border bg-white pl-11 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Phone */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Direct Signal (Phone)</label>
-              <div className="relative group">
-                <Phone className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 text-white/10 group-focus-within:text-primary transition-colors" />
-                <input
-                  type="tel"
-                  placeholder="+91 99999 55555"
-                  className="w-full glass border-white/5 rounded-3xl py-6 pl-20 pr-8 text-white font-bold outline-none focus:border-primary transition-all placeholder:text-white/5"
-                />
+              {/* Phone */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Phone</label>
+                <div className="relative group">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+91 99999 55555"
+                    className="w-full rounded-xl border border-border bg-white pl-11 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Password */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Secure Key (Password)</label>
-              <div className="relative group">
-                <Lock className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 text-white/10 group-focus-within:text-primary transition-colors" />
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full glass border-white/5 rounded-3xl py-6 pl-20 pr-8 text-white font-bold outline-none focus:border-primary transition-all placeholder:text-white/5"
-                />
+              {/* Password */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Password</label>
+                <div className="relative group">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password"
+                    className="w-full rounded-xl border border-border bg-white pl-11 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Confirm Password */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Confirmation</label>
-              <div className="relative group">
-                <Lock className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 text-white/10 group-focus-within:text-primary transition-colors" />
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full glass border-white/5 rounded-3xl py-6 pl-20 pr-8 text-white font-bold outline-none focus:border-primary transition-all placeholder:text-white/5"
-                />
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Confirm password</label>
+                <div className="relative group">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your password"
+                    className="w-full rounded-xl border border-border bg-white pl-11 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary transition-colors"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="md:col-span-2 pt-8">
-              <button
-                type="submit"
-                className="btn-premium w-full py-6 text-lg flex items-center justify-center gap-4 group"
-              >
-                Create Elite Profile
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-              </button>
-            </div>
-          </form>
+              <div className="md:col-span-2 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+                >
+                  {loading ? "Sending Verification code..." : "Create account"}
+                  {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form className="space-y-6 max-w-md mx-auto" onSubmit={handleVerifyOtp}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Enter the 6-Digit Code (OTP)</label>
+                <div className="relative group">
+                  <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <input
+                    type="text"
+                    required
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="E.g. 123456"
+                    className="w-full rounded-xl border border-border bg-white pl-11 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary transition-colors tracking-[0.2em] font-mono text-center text-lg"
+                    maxLength={6}
+                  />
+                </div>
+              </div>
 
-          <div className="mt-16 text-center space-y-8 pt-12 border-t border-white/5">
-             <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em]">Already have access?</span>
-              <Link href="/login" className="text-white hover:text-primary transition-colors font-black text-xl uppercase tracking-tighter">Sign in to Node</Link>
-            </div>
-          </div>
+              <div className="flex gap-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex-1 rounded-xl border border-border bg-white px-5 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer text-center"
+                >
+                  Go Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+                >
+                  {loading ? "Verifying..." : "Verify & Complete"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          <p className="mt-8 text-center text-sm text-muted">
+            Already have an account?{" "}
+            <Link href="/login" className="font-semibold text-primary hover:opacity-80 transition-opacity">
+              Log in
+            </Link>
+          </p>
         </div>
 
-        <div className="mt-12 flex justify-center gap-12 opacity-30">
-           <div className="flex items-center gap-3">
-              <Briefcase className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black text-white tracking-widest uppercase">Business Focused</span>
-           </div>
-           <div className="flex items-center gap-3">
-              <ShieldCheck className="w-5 h-5 text-accent" />
-              <span className="text-[10px] font-black text-white tracking-widest uppercase">Verified Network</span>
-           </div>
+        {/* Plain trust line */}
+        <div className="mt-8 flex justify-center gap-8 text-sm text-muted">
+          <span>Business focused</span>
+          <span>Community driven</span>
         </div>
       </motion.div>
     </div>

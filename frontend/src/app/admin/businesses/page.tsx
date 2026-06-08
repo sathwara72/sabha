@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness 
+import {
+  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness
 } from "@/lib/api";
-import { 
-  ShieldCheck, XCircle, CheckCircle2, 
-  MapPin, Globe, Briefcase, Star, Info 
+import {
+  ShieldCheck, XCircle, CheckCircle2,
+  Globe, Briefcase, Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -49,8 +49,14 @@ export default function AdminBusinessesPage() {
   }
 
   async function handleReject(id: number) {
+    const reason = prompt("Please enter the reason for rejection:");
+    if (reason === null) return; // User cancelled
+    if (!reason.trim()) {
+      alert("Rejection reason is required.");
+      return;
+    }
     try {
-      await rejectBusiness(id);
+      await rejectBusiness(id, reason.trim());
       loadData();
     } catch (error) {
       alert("Rejection failed");
@@ -58,22 +64,20 @@ export default function AdminBusinessesPage() {
   }
 
   return (
-    <div className="space-y-16">
-      <div className="flex flex-col gap-6">
-        <h1 className="text-4xl md:text-6xl font-black text-white leading-none tracking-tighter uppercase">
-           Entity <span className="text-gradient">Verification.</span>
-        </h1>
-        <p className="text-[11px] font-black uppercase tracking-[0.4em] text-white/30 px-2 italic-none">Vetting the elite professional network</p>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Business approvals</h1>
+        <p className="text-sm text-muted">Review and approve member businesses</p>
       </div>
 
-      <div className="flex items-center gap-4 glass bg-primary/5 border-primary/20 p-6 rounded-[2rem] mb-12">
-        <Info className="w-6 h-6 text-primary" />
-        <p className="text-[10px] font-black uppercase text-white/50 tracking-widest leading-relaxed">
-          "Every entity must undergo a multi-layered verification process. Ensure professional integrity before granting approved status."
+      <div className="flex items-center gap-3 rounded-xl bg-primary-soft p-4">
+        <Info className="h-5 w-5 shrink-0 text-primary" />
+        <p className="text-sm font-medium text-foreground">
+          Review each business carefully before approving it for the community.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-5">
         <AnimatePresence>
           {businesses.map((biz) => (
             <motion.div
@@ -82,73 +86,71 @@ export default function AdminBusinessesPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="glass p-12 rounded-[3.5rem] border-white/5 relative overflow-hidden group hover:border-primary/20 transition-all"
+              className="glass-card p-6"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-colors" />
-              
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-12 relative z-10">
-                <div className="flex flex-col md:flex-row items-center gap-10">
-                  <div className="w-24 h-24 rounded-3xl glass border-white/10 flex items-center justify-center text-4xl font-black text-primary shadow-2xl">
-                    {biz.name[0]}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-2xl font-semibold text-primary">
+                    {biz.name?.[0] ?? "?"}
                   </div>
                   <div>
-                    <div className="flex items-center gap-4 mb-3">
-                      <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{biz.name}</h3>
-                      <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                        biz.status === "approved" 
-                          ? "bg-primary/10 text-primary border-primary/20" 
-                          : "bg-white/5 text-white/30 border-white/5"
+                    <div className="flex items-center gap-3 mb-1.5">
+                      <h3 className="text-lg font-semibold text-foreground">{biz.name}</h3>
+                      <span className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        biz.status === "approved"
+                          ? "bg-primary-soft text-primary"
+                          : "bg-surface text-muted"
                       }`}>
                         {biz.status}
-                      </div>
+                      </span>
                     </div>
-                    <div className="flex flex-wrap gap-6 text-[10px] font-black uppercase tracking-widest text-white/30">
-                      <span className="flex items-center gap-2"><Briefcase size={14} className="text-primary" /> {biz.category}</span>
-                      <span className="flex items-center gap-2"><Globe size={14} className="text-primary" /> {biz.website}</span>
+                    <div className="flex flex-wrap gap-4 text-sm text-muted">
+                      <span className="flex items-center gap-1.5"><Briefcase size={14} className="text-primary" /> {biz.category}</span>
+                      <span className="flex items-center gap-1.5"><Globe size={14} className="text-primary" /> {biz.website}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6 w-full lg:w-auto">
+                <div className="flex items-center gap-3 w-full lg:w-auto">
                   {biz.status === "pending" ? (
                     <>
-                      <button 
+                      <button
                         onClick={() => handleApprove(biz.id)}
-                        className="flex-1 lg:flex-none flex items-center gap-3 bg-primary text-white font-black text-xs uppercase tracking-widest px-10 py-5 rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20"
+                        className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
                       >
-                        <CheckCircle2 size={18} />
+                        <CheckCircle2 size={16} />
                         Approve
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleReject(biz.id)}
-                        className="flex-1 lg:flex-none flex items-center gap-3 bg-white/5 text-white/40 font-black text-xs uppercase tracking-widest px-10 py-5 rounded-2xl hover:bg-white/10 active:scale-95 transition-all"
+                        className="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 rounded-xl border border-red-100 bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98]"
                       >
-                        <XCircle size={18} />
+                        <XCircle size={16} />
                         Reject
                       </button>
                     </>
                   ) : (
-                    <div className="flex items-center gap-4 text-white/20 font-black text-[10px] uppercase tracking-widest border border-white/5 px-8 py-4 rounded-full">
-                       <ShieldCheck size={16} className={biz.status === "approved" ? "text-primary" : "text-white/20"} />
-                       Entity {biz.status}
+                    <div className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-muted">
+                      <ShieldCheck size={15} className={biz.status === "approved" ? "text-primary" : "text-muted"} />
+                      {biz.status === "approved" ? "Verified" : biz.status}
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-10 pt-10 border-t border-white/5 relative z-10">
-                 <p className="text-lg text-white/40 font-bold leading-relaxed max-w-4xl italic-none uppercase tracking-tight">
-                    "{biz.description || "No professional overview available for this entity. Pending manual audit."}"
-                 </p>
+              <div className="mt-5 pt-5 border-t border-border">
+                <p className="max-w-4xl text-sm leading-relaxed text-muted">
+                  {biz.description || "No description available for this business yet."}
+                </p>
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
 
         {businesses.length === 0 && !loading && (
-           <div className="text-center py-40 glass rounded-[4rem] border-white/5">
-              <p className="text-3xl font-black text-white/10 uppercase tracking-widest">No Signals Detected.</p>
-           </div>
+          <div className="rounded-xl border border-dashed border-border py-20 text-center text-muted">
+            No businesses to review.
+          </div>
         )}
       </div>
     </div>
