@@ -10,6 +10,7 @@ Route::post('/register', [SabhaController::class, 'register']);
 Route::post('/register/send-otp', [SabhaController::class, 'registerSendOtp']);
 Route::post('/register/confirm', [SabhaController::class, 'registerConfirm']);
 Route::post('/login', [SabhaController::class, 'login']);
+Route::post('/demo-login', [SabhaController::class, 'demoLogin']);
 Route::post('/forgot-password', [SabhaController::class, 'forgotPassword']);
 Route::get('/businesses', [SabhaController::class, 'getBusinesses']);
 Route::get('/businesses/{id}/reviews', [SabhaController::class, 'getReviews']);

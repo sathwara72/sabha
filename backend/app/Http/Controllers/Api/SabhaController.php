@@ -214,6 +214,30 @@ class SabhaController extends Controller
         ]);
     }
 
+    /**
+     * Instant dummy/demo login — creates (or reuses) a temporary throwaway
+     * account so the app can be explored without real credentials or OTP.
+     */
+    public function demoLogin(Request $request)
+    {
+        $user = User::firstOrCreate(
+            ['email' => 'demo@sabha.test'],
+            [
+                'name' => 'Demo Member',
+                'password' => Hash::make('demo1234'),
+                'role' => 'user',
+            ]
+        );
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Logged in with demo account',
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
     public function submitBusiness(Request $request)
     {
         $validated = $request->validate([

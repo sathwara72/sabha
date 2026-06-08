@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchEvents, fetchGallery, uploadGalleryImage } from "@/lib/api";
+import { API_ORIGIN } from "@/lib/config";
 import {
   Upload, Image, Film, Trash, Plus,
   Info, CheckCircle2, AlertCircle, Calendar,
@@ -55,7 +56,7 @@ export default function AdminGalleryPage() {
     if (path.startsWith("http://") || path.startsWith("https://")) {
       return path;
     }
-    return `http://localhost:8000${path}`;
+    return `${API_ORIGIN}${path}`;
   };
 
   const isVideoFile = (path: string) => {

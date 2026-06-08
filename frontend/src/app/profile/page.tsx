@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from "@/components/SocialIcons";
 import { getUserBusiness, submitBusiness, updateProfile } from "@/lib/api";
+import { assetUrl } from "@/lib/config";
 
 export default function ProfilePage() {
   const { isAuthenticated, isReady, user, updateLocalUser, openLogin, logout } = useAuth();
@@ -248,7 +249,7 @@ export default function ProfilePage() {
 
   const inputClass = "w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold";
   const labelClass = "text-xs font-bold text-muted-foreground mb-1 block";
-  const avatarSrc = avatarPreview || (user.avatar ? `http://localhost:8000${user.avatar}` : "");
+  const avatarSrc = avatarPreview || assetUrl(user.avatar);
 
   return (
     <div className="min-h-screen bg-background font-outfit py-12 px-6">
@@ -895,7 +896,7 @@ export default function ProfilePage() {
                       {/* Cover Image Banner */}
                       <div className="relative rounded-2xl overflow-hidden border border-border h-48 sm:h-60 bg-slate-900 shadow-sm">
                         <img
-                          src={business.cover_image ? `http://localhost:8000${business.cover_image}` : "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"}
+                          src={business.cover_image ? assetUrl(business.cover_image) : "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"}
                           alt="Business Cover"
                           className="h-full w-full object-cover opacity-85"
                         />
@@ -906,7 +907,7 @@ export default function ProfilePage() {
                           <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl bg-white border border-border p-1.5 shadow-md flex items-center justify-center overflow-hidden shrink-0">
                             {business.logo ? (
                               <img
-                                src={`http://localhost:8000${business.logo}`}
+                                src={assetUrl(business.logo)}
                                 alt="Logo"
                                 className="h-full w-full object-contain"
                               />
@@ -1048,12 +1049,12 @@ export default function ProfilePage() {
                           <span className="text-[10px] uppercase font-bold text-muted block mb-2">Community Fee Verification Screenshot</span>
                           <div className="relative rounded-xl border border-border overflow-hidden h-32 w-52 bg-slate-900 group">
                             <img
-                              src={`http://localhost:8000${business.payment_screenshot}`}
+                              src={assetUrl(business.payment_screenshot)}
                               alt="Payment Screenshot"
                               className="h-full w-full object-cover group-hover:scale-105 transition-transform"
                             />
                             <a
-                              href={`http://localhost:8000${business.payment_screenshot}`}
+                              href={assetUrl(business.payment_screenshot)}
                               target="_blank"
                               rel="noreferrer"
                               className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold gap-1"

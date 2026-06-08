@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Lock, Phone, ArrowRight, X, Key, ShieldCheck } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowRight, X, Key, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export default function RegisterModal() {
-  const { isRegisterOpen, closeRegister, openLogin, registerSendOtp, registerConfirm } = useAuth();
+  const { isRegisterOpen, closeRegister, openLogin, registerSendOtp, registerConfirm, demoLogin } = useAuth();
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -17,7 +17,20 @@ export default function RegisterModal() {
   
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [simulatedOtp, setSimulatedOtp] = useState("");
+
+  const handleDemoLogin = async () => {
+    setError("");
+    setDemoLoading(true);
+    try {
+      await demoLogin();
+    } catch (err: any) {
+      setError(err.message || "Could not start a demo session.");
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,6 +258,29 @@ export default function RegisterModal() {
                   </button>
                 </div>
               </form>
+            )}
+
+            {step === 1 && (
+              <>
+                <div className="my-5 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-border" />
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">or</span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleDemoLogin}
+                  disabled={demoLoading || loading}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary-soft px-6 py-3 text-sm font-semibold text-primary transition-all hover:bg-primary/10 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {demoLoading ? "Starting demo..." : "Skip — try a demo account"}
+                </button>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                  No email or OTP needed. Explore the app instantly.
+                </p>
+              </>
             )}
 
             <p className="mt-6 text-center text-sm text-muted">

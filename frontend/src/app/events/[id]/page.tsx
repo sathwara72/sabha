@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
 import { fetchEvents, getUserBusiness } from "@/lib/api";
+import { API_ORIGIN } from "@/lib/config";
 
 interface Speaker {
   name: string;
@@ -63,7 +64,7 @@ export default function EventDetailsPage() {
     if (path.startsWith("http://") || path.startsWith("https://")) {
       return path;
     }
-    return `http://localhost:8000${path}`;
+    return `${API_ORIGIN}${path}`;
   };
 
   const isVideoFile = (path: string) => {

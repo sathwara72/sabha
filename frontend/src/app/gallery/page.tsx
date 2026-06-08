@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { fetchEvents, fetchGallery, fetchStatistics } from "@/lib/api";
+import { API_ORIGIN } from "@/lib/config";
 
 interface GalleryItem {
   id: number;
@@ -37,7 +38,7 @@ export default function GalleryPage() {
     if (path.startsWith("http://") || path.startsWith("https://")) {
       return path;
     }
-    return `http://localhost:8000${path}`;
+    return `${API_ORIGIN}${path}`;
   };
 
   useEffect(() => {

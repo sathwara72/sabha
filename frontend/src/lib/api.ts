@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8000/api";
+import { API_BASE_URL } from "./config";
 
 function getHeaders(contentType: string | null = "application/json") {
   const headers: Record<string, string> = {};

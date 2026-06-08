@@ -12,6 +12,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { fetchBusinesses, fetchReviews, submitReview } from "@/lib/api";
+import { assetUrl } from "@/lib/config";
 import { useAuth } from "@/lib/auth";
 import { getCoverImage } from "@/lib/categoryCover";
 
@@ -415,8 +416,8 @@ export default function BusinessDetailsPage() {
             b => b.name.toLowerCase() === matched.name.toLowerCase() || b.id.toString() === id
           );
 
-          const logoUrl = matched.logo ? `http://localhost:8000${matched.logo}` : "";
-          const coverUrl = matched.cover_image ? `http://localhost:8000${matched.cover_image}` : "";
+          const logoUrl = assetUrl(matched.logo);
+          const coverUrl = assetUrl(matched.cover_image);
 
           // Populate the business details dynamically
           setBusiness({

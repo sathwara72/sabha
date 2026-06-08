@@ -10,8 +10,7 @@ import {
 } from "react";
 import LoginModal from "@/components/shared/LoginModal";
 import RegisterModal from "@/components/shared/RegisterModal";
-
-const API_BASE_URL = "http://localhost:8000/api";
+import { API_BASE_URL } from "@/lib/config";
 
 interface UserProfile {
   name: string;
@@ -36,6 +35,7 @@ interface AuthContextValue {
   openRegister: () => void;
   closeRegister: () => void;
   login: (email: string, password: string) => Promise<void>;
+  demoLogin: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   registerSendOtp: (name: string, email: string, password: string) => Promise<{ otp: string }>;
   registerConfirm: (email: string, otp: string) => Promise<void>;
@@ -81,6 +81,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       throw new Error(errData.message || "Invalid email or password");
+    }
+
+    const data = await response.json();
+    const token = data.token;
+    const profile: UserProfile = {
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role,
+      phone: data.user.phone || "",
+      city: data.user.city || "",
+      designation: data.user.designation || "",
+      company: data.user.company || "",
+      bio: data.user.bio || "",
+      avatar: data.user.avatar || "",
+    };
+
+    localStorage.setItem("sabha_token", token);
+    localStorage.setItem("sabha_user", JSON.stringify(profile));
+    localStorage.setItem("sabha_auth", "1");
+
+    setUser(profile);
+    setIsAuthenticated(true);
+    setIsLoginOpen(false);
+    setIsRegisterOpen(false);
+  }, []);
+
+  const demoLogin = useCallback(async () => {
+    const response = await fetch(`${API_BASE_URL}/demo-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.message || "Could not start a demo session.");
     }
 
     const data = await response.json();
@@ -227,6 +262,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         openRegister,
         closeRegister,
         login,
+        demoLogin,
         register,
         registerSendOtp,
         registerConfirm,
