@@ -59,7 +59,8 @@ export default function AdminGalleryPage() {
     return `${API_ORIGIN}${path}`;
   };
 
-  const isVideoFile = (path: string) => {
+  const isVideoFile = (path?: string) => {
+    if (!path) return false;
     const ext = path.split(".").pop()?.toLowerCase();
     return ["mp4", "mov", "avi", "webm", "mkv"].includes(ext || "");
   };

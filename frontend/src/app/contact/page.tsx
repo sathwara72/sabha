@@ -15,7 +15,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
-import { fetchSettings } from "@/lib/api";
+import { useLanguage } from "@/lib/language";
 
 interface Coordinator {
   city: string;
@@ -27,6 +27,7 @@ interface Coordinator {
 }
 
 export default function ContactPage() {
+  const { t } = useLanguage();
   const [inquiryType, setInquiryType] = useState("Membership");
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -65,37 +66,7 @@ export default function ContactPage() {
     }
   ]);
 
-  useEffect(() => {
-    async function loadSettings() {
-      try {
-        const data = await fetchSettings();
-        if (data.contact_email) setContactEmail(data.contact_email);
-        if (data.response_time) setResponseTime(data.response_time);
-        
-        if (data.coordinators) {
-          const parsed = typeof data.coordinators === "string" 
-            ? JSON.parse(data.coordinators) 
-            : data.coordinators;
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const styles = [
-              { bg: "bg-blue-50/50", border: "border-blue-100" },
-              { bg: "bg-emerald-50/50", border: "border-emerald-100" },
-              { bg: "bg-amber-50/50", border: "border-amber-100" }
-            ];
-            const styledCoords = parsed.map((item: any, idx: number) => ({
-              ...item,
-              bg: styles[idx % styles.length].bg,
-              border: styles[idx % styles.length].border
-            }));
-            setCoordinators(styledCoords);
-          }
-        }
-      } catch (err) {
-        console.error("Error loading contact settings:", err);
-      }
-    }
-    loadSettings();
-  }, []);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,9 +83,9 @@ export default function ContactPage() {
     <div className="bg-background">
       {/* Hero */}
       <PageHeader
-        kicker="Sathwara Association of Business, Harmony & Advancement"
-        title="Contact SABHA"
-        subtitle="Have questions about listing your business, joining upcoming events, or general partnerships? Get in touch with our team."
+        kicker={t("contact.kicker")}
+        title={t("contact.title")}
+        subtitle={t("contact.subtitle")}
       />
 
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
@@ -123,12 +94,12 @@ export default function ContactPage() {
           {/* Contact details & Chapters info */}
           <div className="lg:col-span-5 space-y-10">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">Get in Touch</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("contact.get_in_touch")}</span>
               <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-                Reach Our Committee
+                {t("contact.reach_title")}
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-muted font-medium">
-                Pick the coordinator closest to your area or complete the direct inquiry form.
+                {t("contact.reach_subtitle")}
               </p>
             </div>
 
@@ -139,7 +110,7 @@ export default function ContactPage() {
                   <Mail size={18} />
                 </div>
                 <div>
-                  <h3 className="text-[10px] font-bold text-muted uppercase">General Email</h3>
+                  <h3 className="text-[10px] font-bold text-muted uppercase">{t("contact.general_email")}</h3>
                   <p className="mt-1 text-sm font-extrabold text-slate-900">{contactEmail}</p>
                 </div>
               </div>
@@ -148,7 +119,7 @@ export default function ContactPage() {
                   <Clock size={18} />
                 </div>
                 <div>
-                  <h3 className="text-[10px] font-bold text-muted uppercase">Response Time</h3>
+                  <h3 className="text-[10px] font-bold text-muted uppercase">{t("contact.response_time")}</h3>
                   <p className="mt-1 text-sm font-extrabold text-slate-900">{responseTime}</p>
                 </div>
               </div>
@@ -156,14 +127,20 @@ export default function ContactPage() {
 
             {/* Chapter Coordinators */}
             <div className="space-y-4 pt-6 border-t border-border/80">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Regional Contacts</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">{t("contact.regional_contacts")}</h3>
               <div className="grid grid-cols-1 gap-4">
                 {coordinators.map((ch, idx) => (
                   <div key={idx} className={`rounded-2xl border ${ch.border || "border-border"} ${ch.bg || "bg-white"} p-4.5 space-y-2.5`}>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-extrabold text-foreground">{ch.city}</span>
+                      <span className="text-xs font-extrabold text-foreground">
+                        {(() => {
+                          const translationKey = `contact.${ch.city.toLowerCase().replace(/ /g, "_")}`;
+                          const translated = t(translationKey);
+                          return translated === translationKey ? ch.city : translated;
+                        })()}
+                      </span>
                       <span className="inline-flex items-center gap-1 text-[8px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
-                        Coordinator
+                        {t("contact.coordinator")}
                       </span>
                     </div>
                     <div className="space-y-1">
@@ -182,27 +159,32 @@ export default function ContactPage() {
           {/* Contact form */}
           <div className="lg:col-span-7">
             <div className="glass-card p-7 sm:p-9 border border-border/85">
-              <h3 className="text-lg font-bold text-foreground">Send a Message</h3>
-              <p className="text-xs text-muted font-medium mt-1">Fill out the details below and we will route it to the appropriate coordinator.</p>
+              <h3 className="text-lg font-bold text-foreground">{t("contact.send_message")}</h3>
+              <p className="text-xs text-muted font-medium mt-1">{t("contact.send_subtitle")}</p>
               
               <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                 
                 {/* Inquiry Type Radio/Tabs */}
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted">Inquiry Category</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted">{t("contact.inquiry_category")}</label>
                   <div className="flex flex-wrap gap-2">
-                    {["Membership", "Sponsorship", "Event hosting", "Technical Support"].map((type) => (
+                    {[
+                      { value: "Membership", tKey: "contact.inquiry_membership" },
+                      { value: "Sponsorship", tKey: "contact.inquiry_sponsorship" },
+                      { value: "Event hosting", tKey: "contact.inquiry_event" },
+                      { value: "Technical Support", tKey: "contact.inquiry_support" },
+                    ].map(({ value, tKey }) => (
                       <button
-                        key={type}
+                        key={value}
                         type="button"
-                        onClick={() => setInquiryType(type)}
+                        onClick={() => setInquiryType(value)}
                         className={`rounded-xl border px-3.5 py-2 text-xs font-bold transition-all ${
-                          inquiryType === type
+                          inquiryType === value
                             ? "border-primary bg-primary text-white shadow-sm"
                             : "border-border bg-white text-muted hover:bg-surface hover:text-foreground"
                         }`}
                       >
-                        {type}
+                        {t(tKey)}
                       </button>
                     ))}
                   </div>
@@ -210,22 +192,22 @@ export default function ContactPage() {
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-foreground">Full Name</label>
+                    <label className="text-xs font-bold text-foreground">{t("contact.full_name")}</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. John Doe"
+                      placeholder={t("contact.ph_name")}
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-foreground">Email Address</label>
+                    <label className="text-xs font-bold text-foreground">{t("contact.email_address")}</label>
                     <input
                       type="email"
                       required
-                      placeholder="e.g. hello@domain.com"
+                      placeholder={t("contact.ph_email")}
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
@@ -234,11 +216,11 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-foreground">Subject</label>
+                  <label className="text-xs font-bold text-foreground">{t("contact.subject")}</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Partnering with Mumbai chapter"
+                    placeholder={t("contact.ph_subject")}
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
@@ -246,11 +228,11 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-foreground">Your Message</label>
+                  <label className="text-xs font-bold text-foreground">{t("contact.your_message")}</label>
                   <textarea
                     required
                     rows={5}
-                    placeholder="Write your details here..."
+                    placeholder={t("contact.ph_message")}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full resize-none rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"
@@ -261,7 +243,7 @@ export default function ContactPage() {
                   type="submit"
                   className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
                 >
-                  Send Inquiry
+                  {t("contact.send_inquiry")}
                   <Send className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </button>
 
@@ -275,8 +257,8 @@ export default function ContactPage() {
                     >
                       <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
                       <div>
-                        <p>Inquiry sent successfully!</p>
-                        <p className="text-[10px] text-green-600 font-semibold mt-0.5">We will route this to the regional coordinator.</p>
+                        <p>{t("contact.success_msg")}</p>
+                        <p className="text-[10px] text-green-600 font-semibold mt-0.5">{t("contact.success_note")}</p>
                       </div>
                     </motion.div>
                   )}
@@ -296,10 +278,10 @@ export default function ContactPage() {
             <ShieldCheck className="h-5 w-5" />
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-            SABHA Integrity System
+            {t("contact.integrity_title")}
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-xs leading-relaxed text-muted font-semibold">
-            We review and moderate all listings and member requests to ensure a safe, collaborative, and professional environment. Your inquiries are treated with confidentiality.
+            {t("contact.integrity_desc")}
           </p>
         </div>
       </section>

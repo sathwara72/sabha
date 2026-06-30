@@ -10,11 +10,12 @@ import {
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from "@/components/SocialIcons";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { fetchBusinesses, fetchReviews, submitReview } from "@/lib/api";
 import { assetUrl } from "@/lib/config";
 import { useAuth } from "@/lib/auth";
 import { getCoverImage } from "@/lib/categoryCover";
+import { useLanguage } from "@/lib/language";
 
 interface ServiceItem {
   title: string;
@@ -354,6 +355,7 @@ const detailedBusinesses: BusinessDetail[] = [
 export default function BusinessDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const { user, isAuthenticated } = useAuth();
 
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
@@ -375,6 +377,19 @@ export default function BusinessDetailsPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
 
+  const allReviews = useMemo(() => {
+    return [...dbReviews, ...(business?.reviewsList || [])];
+  }, [dbReviews, business?.reviewsList]);
+
+  const hasUserReviewed = useMemo(() => {
+    if (!isAuthenticated || !user) return false;
+    return allReviews.some(
+      (rev: any) =>
+        (rev.reviewer?.toLowerCase() === user.name?.toLowerCase()) ||
+        (rev.user?.name?.toLowerCase() === user.name?.toLowerCase())
+    );
+  }, [allReviews, user, isAuthenticated]);
+
   useEffect(() => {
     async function loadBusiness() {
       try {
@@ -385,7 +400,7 @@ export default function BusinessDetailsPage() {
         ]);
         setDbReviews(reviewsData || []);
 
-        const matched = list.find((b: any) => b.id.toString() === id);
+        const matched = list.find((b: any) => b.id.toString() === id) as any;
         if (matched) {
           // Map backend services (since services is stored as a JSON array in Laravel)
           let coreServices: ServiceItem[] = [];
@@ -497,7 +512,7 @@ export default function BusinessDetailsPage() {
       setReviewContent("");
       setTimeout(() => setReviewSubmitted(false), 5000);
     } catch (err: any) {
-      setReviewError(err.message || "Failed to submit review.");
+      setReviewError(err.message || t("businessDetail.review_failed"));
     } finally {
       setReviewSubmitting(false);
     }
@@ -508,7 +523,7 @@ export default function BusinessDetailsPage() {
       <div className="min-h-screen flex items-center justify-center bg-background font-outfit">
         <div className="text-center space-y-3">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
-          <p className="text-sm font-medium text-muted">Loading business details...</p>
+          <p className="text-sm font-medium text-muted">{t("businessDetail.loading")}</p>
         </div>
       </div>
     );
@@ -517,19 +532,19 @@ export default function BusinessDetailsPage() {
   if (!business) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background font-outfit text-center p-6">
-        <h2 className="text-2xl font-bold text-foreground">Business not found</h2>
-        <p className="mt-2 text-sm text-muted">The requested business listing is pending approval or does not exist.</p>
+        <h2 className="text-2xl font-bold text-foreground">{t("businessDetail.not_found_title")}</h2>
+        <p className="mt-2 text-sm text-muted">{t("businessDetail.not_found_desc")}</p>
         <button
           onClick={() => router.push("/businesses")}
           className="mt-6 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
         >
-          Back to directory
+          {t("businessDetail.back_to_directory")}
         </button>
       </div>
     );
   }
 
-  const allReviews = [...dbReviews, ...(business.reviewsList || [])];
+
 
   return (
     <div className="min-h-screen bg-background font-outfit">
@@ -550,7 +565,7 @@ export default function BusinessDetailsPage() {
             className="group inline-flex items-center gap-1.5 rounded-lg bg-black/30 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-black/50"
           >
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            Back to directory
+            {t("businessDetail.back_to_directory")}
           </button>
         </div>
 
@@ -558,9 +573,12 @@ export default function BusinessDetailsPage() {
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <div className="mx-auto max-w-7xl px-6 pb-6">
             <div className="flex flex-col md:flex-row md:items-end gap-5">
-              {/* Logo */}
-              <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl bg-gradient-to-tr from-primary to-primary-dark text-white text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
-                {business.name?.[0] ?? "?"}
+              <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-gradient-to-tr from-primary to-primary-dark text-white text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
+                {business.logo ? (
+                  <img src={business.logo} alt={business.name} className="h-full w-full object-cover" />
+                ) : (
+                  business.name?.[0] ?? "?"
+                )}
               </div>
 
               {/* Name & Details */}
@@ -568,7 +586,7 @@ export default function BusinessDetailsPage() {
                 <div className="flex flex-wrap items-center gap-2.5">
                   {business.verified && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-white border border-white/20">
-                      <ShieldCheck className="h-3 w-3" /> Verified
+                      <ShieldCheck className="h-3 w-3" /> {t("businessDetail.verified")}
                     </span>
                   )}
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-400/20">
@@ -584,7 +602,7 @@ export default function BusinessDetailsPage() {
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/60 font-medium">
                   <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {business.location}</span>
                   <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" /> {business.category}</span>
-                  <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> Open {business.hours.split(" (")[0]}</span>
+                  <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {t("businessDetail.open")} {business.hours.split(" (")[0]}</span>
                 </div>
               </div>
 
@@ -595,7 +613,7 @@ export default function BusinessDetailsPage() {
                   className="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-3 text-xs font-bold text-slate-900 shadow-lg transition-all hover:bg-primary hover:text-white active:scale-[0.98]"
                 >
                   <Phone className="h-3.5 w-3.5" />
-                  Connect now
+                  {t("businessDetail.connect_now")}
                 </a>
                 <a
                   href={`mailto:${business.email}`}
@@ -622,29 +640,25 @@ export default function BusinessDetailsPage() {
             <section className="space-y-4">
               <div className="flex items-center gap-2.5">
                 <span className="h-5 w-1 rounded-full bg-primary" />
-                <h2 className="text-lg font-bold text-foreground">About the company</h2>
+                <h2 className="text-lg font-bold text-foreground">{t("businessDetail.about_company")}</h2>
               </div>
               <p className="text-sm leading-relaxed text-muted">
                 {business.about}
               </p>
 
               {/* Highlights/Key Stats Grid */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 pt-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 pt-4">
                 <div className="glass-card p-4 text-center">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Founded</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{t("businessDetail.founded")}</span>
                   <p className="mt-1 text-sm font-bold text-foreground">{business.founded}</p>
                 </div>
                 <div className="glass-card p-4 text-center">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Team size</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{t("businessDetail.team_size")}</span>
                   <p className="mt-1 text-sm font-bold text-foreground">{business.teamSize}</p>
                 </div>
                 <div className="glass-card p-4 text-center">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Industry</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{t("businessDetail.industry")}</span>
                   <p className="mt-1 text-sm font-bold text-foreground truncate">{business.industry.split(" & ")[0]}</p>
-                </div>
-                <div className="glass-card p-4 text-center">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Volume</span>
-                  <p className="mt-1 text-sm font-bold text-foreground">{business.projects.split(" ")[0]}</p>
                 </div>
               </div>
             </section>
@@ -653,7 +667,7 @@ export default function BusinessDetailsPage() {
             <section className="space-y-4">
               <div className="flex items-center gap-2.5">
                 <span className="h-5 w-1 rounded-full bg-primary" />
-                <h2 className="text-lg font-bold text-foreground">Core Services & Expertise</h2>
+                <h2 className="text-lg font-bold text-foreground">{t("businessDetail.core_services")}</h2>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {business.services.map((service, i) => (
@@ -674,85 +688,94 @@ export default function BusinessDetailsPage() {
             <section className="space-y-6">
               <div className="flex items-center gap-2.5">
                 <span className="h-5 w-1 rounded-full bg-primary" />
-                <h2 className="text-lg font-bold text-foreground">Member Recommendations</h2>
+                <h2 className="text-lg font-bold text-foreground">{t("businessDetail.member_recommendations")}</h2>
               </div>
 
               {/* Add review form */}
               <div className="glass-card p-5 space-y-4 bg-surface/30">
                 <h3 className="text-sm font-bold text-foreground inline-flex items-center gap-1.5">
-                  <MessageSquare className="h-4 w-4 text-primary" /> Recommend this business
+                  <MessageSquare className="h-4 w-4 text-primary" /> {t("businessDetail.recommend_business")}
                 </h3>
-                <form onSubmit={handleAddReview} className="space-y-3">
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {hasUserReviewed ? (
+                  <div className="rounded-xl border border-dashed border-emerald-200 bg-emerald-50/50 p-4 text-center text-xs font-semibold text-emerald-800 flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" /> {t("businessDetail.already_reviewed")}
+                  </div>
+                ) : (
+                  <form onSubmit={handleAddReview} className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-muted">{t("businessDetail.your_name")}</label>
+                        <input
+                          type="text"
+                          placeholder="John Doe"
+                          value={reviewName}
+                          onChange={(e) => setReviewName(e.target.value)}
+                          className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-muted">{t("businessDetail.rating")}</label>
+                        <select
+                          value={reviewRating}
+                          onChange={(e) => setReviewRating(Number(e.target.value))}
+                          className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                        >
+                          {[5, 4, 3, 2, 1].map((r) => (
+                            <option key={r} value={r}>{r} {t("businessDetail.stars")}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-muted">Your name</label>
-                      <input
-                        type="text"
-                        placeholder="John Doe"
-                        value={reviewName}
-                        onChange={(e) => setReviewName(e.target.value)}
-                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
+                      <label className="text-xs font-semibold text-muted">{t("businessDetail.recommendation_text")}</label>
+                      <textarea
+                        required
+                        rows={3}
+                        placeholder={t("businessDetail.recommendation_placeholder")}
+                        value={reviewContent}
+                        onChange={(e) => setReviewContent(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-muted">Rating</label>
-                      <select
-                        value={reviewRating}
-                        onChange={(e) => setReviewRating(Number(e.target.value))}
-                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
-                      >
-                        {[5, 4, 3, 2, 1].map((r) => (
-                          <option key={r} value={r}>{r} Stars</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-muted">Recommendation text</label>
-                    <textarea
-                      required
-                      rows={3}
-                      placeholder="What was your experience working with them?"
-                      value={reviewContent}
-                      onChange={(e) => setReviewContent(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-                  >
-                    Submit review
-                  </button>
-                  <AnimatePresence>
-                    {reviewSubmitted && (
-                      <motion.span
-                        initial={{ opacity: 0, x: -5 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="ml-3 text-xs text-green-600 font-semibold inline-flex items-center gap-1"
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Recommendation submitted successfully!
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </form>
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                    >
+                      {t("businessDetail.submit_review")}
+                    </button>
+                    <AnimatePresence>
+                      {reviewSubmitted && (
+                        <motion.span
+                          initial={{ opacity: 0, x: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="ml-3 text-xs text-green-600 font-semibold inline-flex items-center gap-1"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {t("businessDetail.review_submitted")}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </form>
+                )}
               </div>
 
               {/* Reviews items list */}
               <div className="space-y-3.5">
-                {allReviews.map((rev, idx) => (
-                  <div key={idx} className="glass-card p-5 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-primary shrink-0 select-none">
-                          {rev.reviewer[0]}
+                {allReviews.map((rev: any, idx) => {
+                  const reviewerName = rev.reviewer || rev.user?.name || t("businessDetail.anonymous_member");
+                  const reviewerRole = rev.role || t("businessDetail.verified_member");
+                  return (
+                    <div key={idx} className="glass-card p-5 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-primary shrink-0 select-none">
+                            {reviewerName[0]}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-foreground leading-none">{reviewerName}</h4>
+                            <span className="text-[10px] text-muted leading-none mt-0.5 inline-block">{reviewerRole}</span>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-foreground leading-none">{rev.reviewer}</h4>
-                          <span className="text-[10px] text-muted leading-none mt-0.5 inline-block">{rev.role}</span>
-                        </div>
-                      </div>
                       <div className="flex gap-0.5 text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/30">
                         {[...Array(5)].map((_, i) => (
                           <Star
@@ -766,7 +789,8 @@ export default function BusinessDetailsPage() {
                       "{rev.content}"
                     </p>
                   </div>
-                ))}
+                );
+              })}
               </div>
             </section>
           </div>
@@ -776,7 +800,7 @@ export default function BusinessDetailsPage() {
 
             {/* Listed by Member Card */}
             <div className="glass-card p-5 space-y-4">
-              <h3 className="border-b border-border pb-3 text-sm font-semibold text-foreground">Listed by Member</h3>
+              <h3 className="border-b border-border pb-3 text-sm font-semibold text-foreground">{t("businessDetail.listed_by")}</h3>
               <div className="flex items-center gap-4">
                 <img
                   src={business.member.avatar}
@@ -787,7 +811,7 @@ export default function BusinessDetailsPage() {
                   <h4 className="text-sm font-bold text-slate-900 truncate">{business.member.name}</h4>
                   <p className="text-xs text-primary font-semibold truncate mt-0.5">{business.member.role}</p>
                   <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground mt-1">
-                    <ShieldCheck className="h-3 w-3 text-green-500 fill-green-50/50" /> Verified Member
+                    <ShieldCheck className="h-3 w-3 text-green-500 fill-green-50/50" /> {t("businessDetail.verified_member")}
                   </span>
                 </div>
               </div>
@@ -795,14 +819,14 @@ export default function BusinessDetailsPage() {
 
             {/* Contact Details Card */}
             <div className="glass-card p-5">
-              <h3 className="border-b border-border pb-3 text-sm font-semibold text-foreground">Contact & Channels</h3>
+              <h3 className="border-b border-border pb-3 text-sm font-semibold text-foreground">{t("businessDetail.contact_channels")}</h3>
               <div className="mt-5 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                     <Globe size={18} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold text-muted leading-none">Website</p>
+                    <p className="text-[10px] font-semibold text-muted leading-none">{t("businessDetail.website")}</p>
                     <Link
                       href={business.website}
                       target="_blank"
@@ -818,7 +842,7 @@ export default function BusinessDetailsPage() {
                     <Mail size={18} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold text-muted leading-none">Email address</p>
+                    <p className="text-[10px] font-semibold text-muted leading-none">{t("businessDetail.email_address")}</p>
                     <a
                       href={`mailto:${business.email}`}
                       className="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block"
@@ -833,7 +857,7 @@ export default function BusinessDetailsPage() {
                     <Phone size={18} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold text-muted leading-none">Direct phone</p>
+                    <p className="text-[10px] font-semibold text-muted leading-none">{t("businessDetail.direct_phone")}</p>
                     <a
                       href={`tel:${business.phone}`}
                       className="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block"
@@ -848,7 +872,7 @@ export default function BusinessDetailsPage() {
                     <Share2 size={18} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold text-muted leading-none">LinkedIn URL</p>
+                    <p className="text-[10px] font-semibold text-muted leading-none">{t("businessDetail.linkedin_url")}</p>
                     <span className="mt-1 text-xs font-semibold text-foreground block truncate">
                       {business.linkedin}
                     </span>
@@ -859,7 +883,7 @@ export default function BusinessDetailsPage() {
               {/* Social Media Icons */}
               {(business.instagram || business.youtube || business.twitter || business.linkedin || business.whatsapp) && (
                 <div className="mt-5 border-t border-border pt-4">
-                  <p className="text-[10px] font-semibold text-muted mb-3 uppercase tracking-wider">Social Channels</p>
+                  <p className="text-[10px] font-semibold text-muted mb-3 uppercase tracking-wider">{t("businessDetail.social_channels")}</p>
                   <div className="flex flex-wrap items-center gap-2.5">
                     {business.instagram && (
                       <a href={business.instagram} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-xl bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="Instagram">
@@ -892,14 +916,14 @@ export default function BusinessDetailsPage() {
 
               {/* Coordinates Map Preview */}
               <div className="mt-6 border-t border-border pt-5">
-                <p className="text-[10px] font-semibold text-muted mb-2.5">Geographic Location</p>
+                <p className="text-[10px] font-semibold text-muted mb-2.5">{t("businessDetail.geographic_location")}</p>
                 <div className="h-28 w-full rounded-xl bg-slate-100 border border-border overflow-hidden relative flex items-center justify-center select-none">
                   {/* Subtle Grid dots */}
                   <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
                   <div className="flex flex-col items-center z-10 text-center p-4">
                     <MapPin className="h-5 w-5 text-primary animate-bounce mb-1" />
                     <span className="text-[10px] font-bold text-foreground truncate max-w-full">{business.location}, India</span>
-                    <span className="text-[8px] text-muted-foreground mt-0.5">Vetted Corporate Office</span>
+                    <span className="text-[8px] text-muted-foreground mt-0.5">{t("businessDetail.vetted_office")}</span>
                   </div>
                 </div>
               </div>
@@ -908,14 +932,14 @@ export default function BusinessDetailsPage() {
             {/* Direct Inquiry Message Form */}
             <div className="glass-card p-5 space-y-4">
               <div>
-                <h3 className="text-sm font-semibold text-foreground">Send Direct Inquiry</h3>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Responses are usually sent within 1 business day.</p>
+                <h3 className="text-sm font-semibold text-foreground">{t("businessDetail.send_inquiry_title")}</h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{t("businessDetail.response_time")}</p>
               </div>
               <form onSubmit={handleSendMessage} className="space-y-2.5">
                 <input
                   type="text"
                   required
-                  placeholder="Your Name"
+                  placeholder={t("businessDetail.ph_name")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
@@ -923,7 +947,7 @@ export default function BusinessDetailsPage() {
                 <input
                   type="email"
                   required
-                  placeholder="Your Email"
+                  placeholder={t("businessDetail.ph_email")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
@@ -931,7 +955,7 @@ export default function BusinessDetailsPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Subject"
+                  placeholder={t("businessDetail.ph_subject")}
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary"
@@ -939,7 +963,7 @@ export default function BusinessDetailsPage() {
                 <textarea
                   required
                   rows={3}
-                  placeholder="Your Message..."
+                  placeholder={t("businessDetail.ph_message")}
                   value={msg}
                   onChange={(e) => setMsg(e.target.value)}
                   className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none"
@@ -948,7 +972,7 @@ export default function BusinessDetailsPage() {
                   type="submit"
                   className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 active:scale-[0.98]"
                 >
-                  Send Inquiry
+                  {t("businessDetail.send_inquiry")}
                 </button>
                 <AnimatePresence>
                   {formSubmitted && (
@@ -958,7 +982,7 @@ export default function BusinessDetailsPage() {
                       exit={{ opacity: 0 }}
                       className="text-[10px] text-center text-green-600 font-semibold p-2 bg-green-50 rounded-lg border border-green-200/50"
                     >
-                      Your inquiry has been successfully sent!
+                      {t("businessDetail.inquiry_sent")}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -969,14 +993,14 @@ export default function BusinessDetailsPage() {
             <div className="rounded-2xl border border-border bg-primary p-5 text-white space-y-3.5">
               <div className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-white" />
-                <h4 className="text-sm font-bold">Vetted Member</h4>
+                <h4 className="text-sm font-bold">{t("businessDetail.vetted_member")}</h4>
               </div>
               <p className="text-xs leading-relaxed text-white/80">
-                SABHA verifies the identity, registration, and active community status of listed businesses to maintain a high-trust professional network.
+                {t("businessDetail.vetted_desc")}
               </p>
               <div className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5">
                 <ShieldCheck className="h-4 w-4 text-white" />
-                <span className="text-[10px] font-bold">100% verified profile</span>
+                <span className="text-[10px] font-bold">{t("businessDetail.verified_profile")}</span>
               </div>
             </div>
 

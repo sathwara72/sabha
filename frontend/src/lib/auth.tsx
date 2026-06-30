@@ -72,32 +72,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.message || "Invalid email or password");
-    }
-
-    const data = await response.json();
-    const token = data.token;
+    await new Promise((r) => setTimeout(r, 1000));
+    
     const profile: UserProfile = {
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
-      phone: data.user.phone || "",
-      city: data.user.city || "",
-      designation: data.user.designation || "",
-      company: data.user.company || "",
-      bio: data.user.bio || "",
-      avatar: data.user.avatar || "",
+      name: "Demo User",
+      email: email,
+      role: email.includes("admin") ? "admin" : "user",
+      phone: "",
+      city: "",
+      designation: "",
+      company: "",
+      bio: "",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
     };
 
-    localStorage.setItem("sabha_token", token);
+    localStorage.setItem("sabha_token", "dummy-token");
     localStorage.setItem("sabha_user", JSON.stringify(profile));
     localStorage.setItem("sabha_auth", "1");
 
@@ -108,31 +97,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const demoLogin = useCallback(async () => {
-    const response = await fetch(`${API_BASE_URL}/demo-login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.message || "Could not start a demo session.");
-    }
-
-    const data = await response.json();
-    const token = data.token;
+    await new Promise((r) => setTimeout(r, 1000));
+    
     const profile: UserProfile = {
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
-      phone: data.user.phone || "",
-      city: data.user.city || "",
-      designation: data.user.designation || "",
-      company: data.user.company || "",
-      bio: data.user.bio || "",
-      avatar: data.user.avatar || "",
+      name: "Demo Guest",
+      email: "demo@example.com",
+      role: "user",
+      phone: "",
+      city: "",
+      designation: "",
+      company: "",
+      bio: "",
+      avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop",
     };
 
-    localStorage.setItem("sabha_token", token);
+    localStorage.setItem("sabha_token", "dummy-token");
     localStorage.setItem("sabha_user", JSON.stringify(profile));
     localStorage.setItem("sabha_auth", "1");
 
@@ -145,26 +124,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Backwards compatibility register helper (falls back to sending OTP and confirming automatically if wanted, 
   // but we will use the two step send and confirm functions in UI)
   const register = useCallback(async (name: string, email: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.message || "Registration failed. Try again.");
-    }
-
-    const data = await response.json();
-    const token = data.token;
+    await new Promise((r) => setTimeout(r, 1000));
+    
     const profile: UserProfile = {
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
+      name: name,
+      email: email,
+      role: "user",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop",
     };
 
-    localStorage.setItem("sabha_token", token);
+    localStorage.setItem("sabha_token", "dummy-token");
     localStorage.setItem("sabha_user", JSON.stringify(profile));
     localStorage.setItem("sabha_auth", "1");
 
@@ -175,47 +144,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const registerSendOtp = useCallback(async (name: string, email: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/register/send-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.message || "Registration validation failed.");
-    }
-
-    return response.json(); // returns { message, email, otp }
+    await new Promise((r) => setTimeout(r, 1000));
+    return { message: "OTP sent successfully", email, otp: "1234" };
   }, []);
 
   const registerConfirm = useCallback(async (email: string, otp: string) => {
-    const response = await fetch(`${API_BASE_URL}/register/confirm`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp }),
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.message || "Invalid OTP verification code.");
+    await new Promise((r) => setTimeout(r, 1000));
+    
+    if (otp !== "1234") {
+      throw new Error("Invalid OTP verification code.");
     }
 
-    const data = await response.json();
-    const token = data.token;
     const profile: UserProfile = {
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
-      phone: data.user.phone || "",
-      city: data.user.city || "",
-      designation: data.user.designation || "",
-      company: data.user.company || "",
-      bio: data.user.bio || "",
-      avatar: data.user.avatar || "",
+      name: "New User",
+      email: email,
+      role: "user",
+      phone: "",
+      city: "",
+      designation: "",
+      company: "",
+      bio: "",
+      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop",
     };
 
-    localStorage.setItem("sabha_token", token);
+    localStorage.setItem("sabha_token", "dummy-token");
     localStorage.setItem("sabha_user", JSON.stringify(profile));
     localStorage.setItem("sabha_auth", "1");
 

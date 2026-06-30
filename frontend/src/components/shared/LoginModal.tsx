@@ -71,11 +71,7 @@ export default function LoginModal() {
             </button>
 
             <div className="mb-6 text-center">
-              <img
-                src="/logo.png"
-                alt="SABHA"
-                className="mx-auto mb-4 h-12 w-12 rounded-full object-contain"
-              />
+              <img src="/logo.png" alt="SABHA" className="mx-auto h-12 w-12 rounded-full object-contain mb-4" />
               <h2 className="text-xl font-bold text-foreground">Log in to continue</h2>
               <p className="mt-1 text-sm text-muted">
                 Please log in to view this content.

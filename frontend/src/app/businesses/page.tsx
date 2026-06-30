@@ -7,16 +7,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { fetchBusinesses, submitBusiness } from "@/lib/api";
+import { useLanguage } from "@/lib/language";
 
 export default function BusinessDirectory() {
   const { isAuthenticated, isReady, openLogin } = useAuth();
+  const { t } = useLanguage();
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
 
   // Form states for business submission
   const [submitting, setSubmitting] = useState(false);
@@ -60,7 +62,7 @@ export default function BusinessDirectory() {
   const filteredBusinesses = useMemo(() => {
     return businesses.filter(b => {
       const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            b.category.toLowerCase().includes(searchQuery.toLowerCase());
+        b.category.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === "All" || b.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -152,24 +154,18 @@ export default function BusinessDirectory() {
           <div>
             <div className="mb-2 flex items-center gap-2.5">
               <span className="h-4 w-1.5 rounded-full bg-accent" />
-              <span className="text-sm font-semibold text-accent">Directory</span>
+              <span className="text-sm font-semibold text-accent">{t("directory.label")}</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Business directory
+              {t("directory.title")}
             </h1>
             <p className="mt-1 text-sm text-muted">
-              Browse and connect with members across the network.
+              {t("directory.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSubmitOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4.5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
-            >
-              <Plus size={16} /> Register business
-            </button>
             <p className="text-sm font-medium text-muted">
-              {filteredBusinesses.length} {filteredBusinesses.length === 1 ? "business" : "businesses"}
+              {filteredBusinesses.length} {filteredBusinesses.length === 1 ? t("directory.business") : t("directory.showing")}
             </p>
           </div>
         </div>
@@ -180,8 +176,8 @@ export default function BusinessDirectory() {
             <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search businesses by name or category"
-              className="w-full rounded-xl border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              placeholder={t("directory.search_placeholder")}
+              className="w-full rounded-xl border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold"
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
             />
@@ -242,12 +238,7 @@ export default function BusinessDirectory() {
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      {business.is_verified && (
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary border border-primary/10">
-                          <ShieldCheck size={12} />
-                          Verified
-                        </div>
-                      )}
+
                       <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
                         <Star size={14} className="fill-current" />
                         {business.rating || "5.0"}

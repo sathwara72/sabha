@@ -7,9 +7,11 @@ import {
   Play, X, ChevronLeft, ChevronRight, Maximize2,
   Calendar, Eye
 } from "lucide-react";
+import Link from "next/link";
 import PageHeader from "@/components/shared/PageHeader";
 import { fetchEvents, fetchGallery, fetchStatistics } from "@/lib/api";
 import { API_ORIGIN } from "@/lib/config";
+import { useLanguage } from "@/lib/language";
 
 interface GalleryItem {
   id: number;
@@ -20,6 +22,7 @@ interface GalleryItem {
 }
 
 export default function GalleryPage() {
+  const { t } = useLanguage();
   const [events, setEvents] = useState<any[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +72,8 @@ export default function GalleryPage() {
     loadData();
   }, []);
 
-  const isVideoFile = (path: string) => {
+  const isVideoFile = (path?: string) => {
+    if (!path) return false;
     const ext = path.split(".").pop()?.toLowerCase();
     return ["mp4", "mov", "avi", "webm", "mkv"].includes(ext || "");
   };
@@ -127,9 +131,9 @@ export default function GalleryPage() {
     <div className="bg-background font-outfit min-h-screen">
       {/* Header */}
       <PageHeader
-        kicker="Gallery"
-        title="Moments from our community"
-        subtitle="Explore the mixers, masterminds, and milestones that bring our members together."
+        kicker={t("gallery.label")}
+        title={t("gallery.title")}
+        subtitle={t("gallery.subtitle")}
       />
 
       {/* Stats Section */}
@@ -141,17 +145,17 @@ export default function GalleryPage() {
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
                   <Camera size={22} />
                 </div>
-                <h2 className="text-xl font-semibold text-foreground">A visual legacy</h2>
+                <h2 className="text-xl font-semibold text-foreground">{t("gallery.visual_legacy_title")}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-muted">
-                  Every folder captures a unique Sabha event. Look inside to see the connections, keynote speaker panels, and workshops that inspire our network.
+                  {t("gallery.visual_legacy_desc")}
                 </p>
               </div>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-medium text-primary">
-                  {gallery.length} uploads
+                  {gallery.length} {t("gallery.uploads")}
                 </span>
                 <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-medium text-primary">
-                  {eventFolders.length} event folders
+                  {eventFolders.length} {t("gallery.folders")}
                 </span>
               </div>
             </div>
@@ -161,7 +165,7 @@ export default function GalleryPage() {
                 <Users size={22} />
               </div>
               <p className="text-4xl font-bold text-foreground sm:text-5xl">{stats.members}</p>
-              <p className="mt-2 text-sm font-medium text-muted">Members</p>
+              <p className="mt-2 text-sm font-medium text-muted">{t("gallery.members")}</p>
             </div>
 
             <div className="glass-card flex flex-col items-center justify-center p-7 text-center">
@@ -169,7 +173,7 @@ export default function GalleryPage() {
                 <Target size={22} />
               </div>
               <p className="text-4xl font-bold text-foreground sm:text-5xl">{stats.cities}</p>
-              <p className="mt-2 text-sm font-medium text-muted">Cities covered</p>
+              <p className="mt-2 text-sm font-medium text-muted">{t("gallery.cities")}</p>
             </div>
           </div>
         </div>
@@ -180,7 +184,7 @@ export default function GalleryPage() {
         {loading ? (
           <div className="py-20 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
-            <p className="mt-3 text-sm text-muted">Loading gallery media...</p>
+            <p className="mt-3 text-sm text-muted">{t("gallery.loading")}</p>
           </div>
         ) : (
           <>
@@ -188,12 +192,12 @@ export default function GalleryPage() {
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 rounded-full bg-primary" />
-                <h2 className="text-2xl font-bold text-foreground">Event Folders</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t("gallery.event_folders")}</h2>
               </div>
-              <p className="text-sm text-muted">Photos and videos grouped by community event. Click a folder to open its slideshow.</p>
+              <p className="text-sm text-muted">{t("gallery.event_folders_desc")}</p>
 
               {eventFolders.length === 0 ? (
-                <p className="text-sm text-muted italic">No event folders populated yet.</p>
+                <p className="text-sm text-muted italic">{t("gallery.no_folders")}</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {eventFolders.map((folder) => {
@@ -201,10 +205,13 @@ export default function GalleryPage() {
                     const isVideo = firstItem ? isVideoFile(firstItem.image_path) : false;
 
                     return (
-                      <motion.div
+                      <Link
                         key={folder.id}
+                        href={`/gallery/event/${folder.id}`}
+                        className="group relative cursor-pointer block"
+                      >
+                      <motion.div
                         whileHover={{ y: -5 }}
-                        onClick={() => handleOpenFolder(folder.media)}
                         className="group relative cursor-pointer"
                       >
                         {/* Folder Backing Effect */}
@@ -232,18 +239,18 @@ export default function GalleryPage() {
                               )
                             ) : (
                               <div className="h-full w-full bg-slate-200 flex items-center justify-center text-muted">
-                                No Cover
+                                {t("gallery.no_cover")}
                               </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             <div className="absolute top-4 left-4">
                               <span className="flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">
-                                <Folder size={13} className="text-primary" /> Event Folder
+                                <Folder size={13} className="text-primary" /> {t("gallery.event_folder")}
                               </span>
                             </div>
                             <div className="absolute bottom-4 right-4">
                               <span className="text-xs font-semibold text-white bg-primary px-2.5 py-1 rounded-md shadow-sm">
-                                {folder.media.length} items
+                                {folder.media.length} {t("gallery.items")}
                               </span>
                             </div>
                           </div>
@@ -260,11 +267,12 @@ export default function GalleryPage() {
                               </p>
                             </div>
                             <span className="text-xs font-bold text-primary group-hover:underline inline-flex items-center gap-1 mt-3">
-                              View Slideshow <Eye size={12} />
+                              {t("gallery.view_all_photos")} <Eye size={12} />
                             </span>
                           </div>
                         </div>
                       </motion.div>
+                      </Link>
                     );
                   })}
                 </div>
@@ -275,12 +283,12 @@ export default function GalleryPage() {
             <div className="space-y-6 pt-6 border-t border-border">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 rounded-full bg-accent" />
-                <h2 className="text-2xl font-bold text-foreground">Common Gallery</h2>
+                <h2 className="text-2xl font-bold text-foreground">{t("gallery.common_gallery")}</h2>
               </div>
-              <p className="text-sm text-muted">Miscellaneous photos and videos from around the community. Click to expand.</p>
+              <p className="text-sm text-muted">{t("gallery.common_gallery_desc")}</p>
 
               {groupedGallery.common.length === 0 ? (
-                <p className="text-sm text-muted italic">No common photos or videos uploaded yet.</p>
+                <p className="text-sm text-muted italic">{t("gallery.no_common")}</p>
               ) : (
                 <div className="columns-1 gap-6 space-y-6 md:columns-2 lg:columns-3">
                   {groupedGallery.common.map((item) => {
@@ -313,7 +321,7 @@ export default function GalleryPage() {
                               <Play size={24} className="ml-1" />
                             </div>
                             <span className="absolute bottom-3 left-3 flex items-center gap-1 text-[10px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
-                              <Film size={10} /> Video
+                              <Film size={10} /> {t("gallery.video")}
                             </span>
                           </div>
                         ) : (
@@ -325,7 +333,7 @@ export default function GalleryPage() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
                               <span className="mb-2 w-fit rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold text-white backdrop-blur-sm uppercase">
-                                Image
+                                {t("gallery.image")}
                               </span>
                               {item.caption && <h3 className="text-sm font-semibold text-white">{item.caption}</h3>}
                             </div>
@@ -359,9 +367,9 @@ export default function GalleryPage() {
             {/* Header / Controls */}
             <div className="flex items-center justify-between text-white border-b border-white/10 pb-4">
               <div>
-                <h4 className="text-lg font-bold">Event Photos & Videos</h4>
+                <h4 className="text-lg font-bold">{t("gallery.event_photos_videos")}</h4>
                 <p className="text-xs text-white/60">
-                  Item {currentIndex + 1} of {activeSliderMedia.length}
+                  {t("gallery.item")} {currentIndex + 1} {t("gallery.of")} {activeSliderMedia.length}
                 </p>
               </div>
               <button
@@ -426,7 +434,7 @@ export default function GalleryPage() {
             {/* Bottom Section (Caption) */}
             <div className="text-center text-white space-y-4 py-4 max-w-3xl mx-auto border-t border-white/10 w-full">
               <p className="text-sm font-medium">
-                {activeSliderMedia[currentIndex].caption || "No description provided."}
+                {activeSliderMedia[currentIndex].caption || t("gallery.no_description")}
               </p>
               
               {/* Pagination indicators */}
@@ -458,8 +466,8 @@ export default function GalleryPage() {
             {/* Header / Controls */}
             <div className="flex items-center justify-between text-white border-b border-white/10 pb-4">
               <div>
-                <h4 className="text-lg font-bold">Community Gallery</h4>
-                <p className="text-xs text-white/60">Common Upload</p>
+                <h4 className="text-lg font-bold">{t("gallery.community_gallery")}</h4>
+                <p className="text-xs text-white/60">{t("gallery.common_upload")}</p>
               </div>
               <button
                 onClick={() => setSingleActiveMedia(null)}
@@ -492,7 +500,7 @@ export default function GalleryPage() {
             {/* Bottom Caption */}
             <div className="text-center text-white py-4 max-w-3xl mx-auto border-t border-white/10 w-full">
               <p className="text-sm font-medium">
-                {singleActiveMedia.caption || "No description provided."}
+                {singleActiveMedia.caption || t("gallery.no_description")}
               </p>
             </div>
           </motion.div>

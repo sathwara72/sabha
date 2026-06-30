@@ -33,6 +33,11 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::post('/gallery/upload', [SabhaController::class, 'uploadGalleryImage']);
     Route::post('/statistics/{id}', [SabhaController::class, 'updateStatistic']);
     Route::post('/settings', [SabhaController::class, 'updateSettings']);
+    
+    // Event Booking Management for Admin
+    Route::get('/registrations', [SabhaController::class, 'getAllEventRegistrations']);
+    Route::post('/registrations/{id}/approve', [SabhaController::class, 'approveEventRegistration']);
+    Route::post('/registrations/{id}/reject', [SabhaController::class, 'rejectEventRegistration']);
 });
 
 Route::get('/user', function (Request $request) {
@@ -41,6 +46,14 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/user/business', [SabhaController::class, 'getUserBusiness'])->middleware('auth:sanctum');
 Route::post('/user/profile', [SabhaController::class, 'updateProfile'])->middleware('auth:sanctum');
+
+// User Authenticated Event Reservation & Registrations
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/events/{id}/reserve', [SabhaController::class, 'reserveEventSpot']);
+    Route::get('/user/registrations', [SabhaController::class, 'getUserRegistrations']);
+    Route::post('/events/{id}/upload-photos', [SabhaController::class, 'uploadEventPhotos']);
+    Route::post('/gallery/upload', [SabhaController::class, 'uploadGalleryImage']);
+});
 
 // Programmatic Migration & Seeding Runners (to bypass terminal command permissions)
 Route::get('/migrate', function() {
@@ -54,6 +67,7 @@ Route::get('/migrate', function() {
             'database/migrations/2026_06_08_000006_add_social_and_covers_to_businesses_table.php',
             'database/migrations/2026_06_08_000007_create_reviews_table.php',
             'database/migrations/2026_06_08_000008_add_avatar_to_users_table.php',
+            'database/migrations/2026_06_30_000000_create_event_registrations_table.php',
         ];
         
         $output = '';

@@ -7,19 +7,21 @@ import { motion } from "framer-motion";
 import { Menu, X, ArrowRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/language";
 
 const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Businesses", href: "/businesses" },
-  { name: "Events", href: "/events" },
-  { name: "Gallery", href: "/gallery" },
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contact" },
+  { name: "Home", href: "/", tKey: "nav.home" },
+  { name: "Businesses", href: "/businesses", tKey: "nav.directory" },
+  { name: "Events", href: "/events", tKey: "nav.events" },
+  { name: "Gallery", href: "/gallery", tKey: "nav.gallery" },
+  { name: "About Us", href: "/about", tKey: "nav.about" },
+  { name: "Contact Us", href: "/contact", tKey: "nav.contact" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isAuthenticated, user, openLogin, openRegister, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -56,7 +58,7 @@ export default function Navbar() {
               const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.name}
+                  key={item.tKey}
                   href={item.href}
                   className={cn(
                     "relative rounded-lg px-3.5 py-2 text-sm font-medium transition-colors",
@@ -65,7 +67,7 @@ export default function Navbar() {
                       : "text-muted hover:text-foreground hover:bg-surface"
                   )}
                 >
-                  {item.name}
+                  {t(item.tKey)}
                   {isActive && (
                     <motion.span
                       layoutId="nav-underline"
@@ -85,39 +87,67 @@ export default function Navbar() {
                   href="/profile"
                   className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted hover:text-foreground hover:bg-surface"
                 >
-                  My Profile
+                  {t("nav.profile")}
                 </Link>
                 {user?.role === "admin" && (
                   <Link
                     href="/admin"
                     className="inline-flex items-center gap-1.5 rounded-lg bg-primary-soft text-primary border border-primary/15 px-4 py-2 text-sm font-semibold hover:opacity-95"
                   >
-                    Admin Panel
+                    {t("nav.admin")}
                   </Link>
                 )}
                 <button
                   onClick={logout}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground cursor-pointer"
                 >
-                  <LogOut size={15} /> Log out
+                  <LogOut size={15} /> {t("nav.logout")}
                 </button>
               </>
             ) : (
               <>
                 <button
                   onClick={openLogin}
-                  className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface"
+                  className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface cursor-pointer"
                 >
-                  Log in
+                  {t("nav.login")}
                 </button>
                 <button
                   onClick={openRegister}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
                 >
-                  Join <ArrowRight size={15} />
+                  {t("nav.register")} <ArrowRight size={15} />
                 </button>
               </>
             )}
+
+            {/* Language Switcher */}
+            <div className="ml-4 border-l border-border pl-4 flex items-center">
+              <div className="flex items-center gap-0.5 bg-slate-100 border border-slate-200/50 p-1 rounded-full shadow-inner">
+                <button
+                  onClick={() => setLanguage("en")}
+                  className={cn(
+                    "px-3 py-1 text-xs font-bold rounded-full cursor-pointer transition-all duration-200 select-none",
+                    language === "en"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-muted hover:text-foreground"
+                  )}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => setLanguage("gu")}
+                  className={cn(
+                    "px-3 py-1 text-xs font-bold rounded-full cursor-pointer transition-all duration-200 select-none",
+                    language === "gu"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-muted hover:text-foreground"
+                  )}
+                >
+                  GU
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Mobile toggle */}
@@ -168,7 +198,7 @@ export default function Navbar() {
               const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.name}
+                  key={item.tKey}
                   href={item.href}
                   className={cn(
                     "rounded-lg px-4 py-3 text-base font-medium transition-colors",
@@ -176,7 +206,7 @@ export default function Navbar() {
                   )}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  {item.name}
+                  {t(item.tKey)}
                 </Link>
               );
             })}
@@ -192,7 +222,7 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface"
                 >
-                  My Profile
+                  {t("nav.profile")}
                 </Link>
                 {user?.role === "admin" && (
                   <Link
@@ -200,7 +230,7 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-soft text-primary border border-primary/15 px-4 py-3 text-sm font-semibold"
                   >
-                    Admin Panel
+                    {t("nav.admin")}
                   </Link>
                 )}
                 <button
@@ -208,9 +238,9 @@ export default function Navbar() {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface cursor-pointer"
                 >
-                  <LogOut size={16} /> Log out
+                  <LogOut size={16} /> {t("nav.logout")}
                 </button>
               </>
             ) : (
@@ -220,9 +250,9 @@ export default function Navbar() {
                     openLogin();
                     setMobileMenuOpen(false);
                   }}
-                  className="rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold text-foreground hover:bg-surface"
+                  className="rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold text-foreground hover:bg-surface cursor-pointer"
                 >
-                  Log in
+                  {t("nav.login")}
                 </button>
                 <button
                   onClick={() => {
@@ -231,10 +261,39 @@ export default function Navbar() {
                   }}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white cursor-pointer"
                 >
-                  Join the community <ArrowRight size={16} />
+                  {t("nav.register")} <ArrowRight size={16} />
                 </button>
               </>
             )}
+
+            {/* Mobile Language Switcher */}
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <span className="text-xs font-semibold text-muted">Language / ભાષા</span>
+              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg">
+                <button
+                  onClick={() => setLanguage("en")}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-bold rounded cursor-pointer transition-colors select-none",
+                    language === "en"
+                      ? "bg-primary text-white"
+                      : "text-muted hover:text-foreground"
+                  )}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => setLanguage("gu")}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-bold rounded cursor-pointer transition-colors select-none",
+                    language === "gu"
+                      ? "bg-primary text-white"
+                      : "text-muted hover:text-foreground"
+                  )}
+                >
+                  GU
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

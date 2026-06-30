@@ -2,28 +2,30 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand palette — derived from the SABHA logo (royal blue + coral red) */
+  /* Brand palette — derived from user's color list */
   --background: #f7f9fc;        /* very light blue-tinted gray — page background */
-  --foreground: #0f1e3d;        /* deep navy — primary text */
+  --foreground: #113552;        /* Dark navy/slate blue */
   --muted: #5b6b85;             /* muted slate-blue — secondary text */
   --muted-foreground: #94a3b8;  /* slate-400 — tertiary text */
 
-  --primary: #1d4ed8;           /* royal blue (logo ring/shield) */
-  --primary-dark: #1e3a8a;      /* deep navy (SABHA wordmark) */
+  --primary: #00379D;           /* Deep blue */
+  --primary-dark: #0F3459;      /* Dark navy/slate */
   --primary-foreground: #ffffff;
-  --primary-soft: #eef3ff;      /* blue-50 — soft accent surfaces */
+  --primary-soft: rgba(0, 55, 157, 0.05); /* soft version of primary */
 
-  --accent: #e23744;            /* coral red (logo inner shield/text) */
+  --accent: #CD0E1B;            /* Bright red */
+  --accent-dark: #7E0A57;       /* Deep magenta/plum */
   --accent-foreground: #ffffff;
-  --accent-soft: #fdecee;       /* red-50 — soft accent surfaces */
+  --accent-soft: rgba(212, 128, 126, 0.15); /* soft version of coral pink #D4807E */
+  --accent-coral: #D4807E;      /* Coral pink / pastel red */
 
   --card: #ffffff;
-  --card-foreground: #0f1e3d;
+  --card-foreground: #113552;
   --surface: #eef2f8;           /* subtle blue-tinted section bg */
 
   --border: #dbe3ef;            /* light blue-gray border */
   --input: #ffffff;
-  --ring: #1d4ed8;
+  --ring: #00379D;
   --radius: 0.875rem;
 }
 
@@ -38,8 +40,10 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-coral: var(--accent-coral);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-surface: var(--surface);

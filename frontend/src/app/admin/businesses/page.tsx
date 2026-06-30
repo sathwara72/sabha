@@ -15,7 +15,7 @@ interface Business {
   name: string;
   category: string;
   description: string;
-  website: string;
+  website?: string;
   status: string;
   is_verified: boolean;
 }

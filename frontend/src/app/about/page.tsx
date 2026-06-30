@@ -18,32 +18,29 @@ import {
 import Link from "next/link";
 import PageHeader from "@/components/shared/PageHeader";
 import { fetchStatistics } from "@/lib/api";
+import { useLanguage } from "@/lib/language";
 
 const values = [
   {
-    name: "Trust First",
-    description: "Every business and member in SABHA undergoes rigorous verification to maintain professional integrity and authenticity.",
+    tKey: "value_1",
     icon: ShieldCheck,
     color: "text-blue-600",
     bg: "bg-blue-50"
   },
   {
-    name: "Collaborative Growth",
-    description: "We align community strength with business strategy. Collaboration is our primary driver for scaling operations.",
+    tKey: "value_2",
     icon: Users,
     color: "text-emerald-600",
     bg: "bg-emerald-50"
   },
   {
-    name: "Harmony & Connection",
-    description: "Fostering respect, mutual alignment, and community synergy to build relationships that extend beyond business.",
+    tKey: "value_3",
     icon: Heart,
     color: "text-rose-600",
     bg: "bg-rose-50"
   },
   {
-    name: "Advancement",
-    description: "Equipping young entrepreneurs and established enterprises with modern tools, workshops, and strategic mentorship.",
+    tKey: "value_4",
     icon: TrendingUp,
     color: "text-amber-600",
     bg: "bg-amber-50"
@@ -52,27 +49,19 @@ const values = [
 
 const team = [
   {
-    name: "Ravi Sharma",
-    role: "President & Trustee",
-    org: "Founder, Vertex Solutions",
+    tKey: "team_member_1",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
   },
   {
-    name: "Pooja Verma",
-    role: "Vice President",
-    org: "Chief Architect & CEO, Prime Builders",
+    tKey: "team_member_2",
     avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop"
   },
   {
-    name: "Amit Shah",
-    role: "Treasurer & Growth Lead",
-    org: "Director of Operations, Global Logistics",
+    tKey: "team_member_3",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
   },
   {
-    name: "Sara Khan",
-    role: "General Secretary",
-    org: "Senior Partner, Summit Consulting",
+    tKey: "team_member_4",
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=150&auto=format&fit=crop"
   }
 ];
@@ -80,22 +69,20 @@ const team = [
 const milestones = [
   {
     year: "2024",
-    title: "Foundation & Vision",
-    description: "SABHA was conceptualized by community visionaries to create a unified ecosystem that fosters trust, business referrals, and professional advancement."
+    tKey: "milestone_1"
   },
   {
     year: "2025",
-    title: "Directory & Chapters Launch",
-    description: "Introduced our digital business directory platform and registered 200+ local enterprises. Launched regional chapters across Mumbai, Pune, and Delhi."
+    tKey: "milestone_2"
   },
   {
     year: "2026",
-    title: "Harmony Mixers & Scale",
-    description: "Grown to 500+ active verified businesses. Hosted 50+ corporate networking meets, generating millions in business referrals and mutual trade."
+    tKey: "milestone_3"
   }
 ];
 
 export default function AboutPage() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
     members: "500+",
     businessExchanged: "₹10Cr+",
@@ -126,9 +113,9 @@ export default function AboutPage() {
     <div className="bg-background">
       {/* Hero */}
       <PageHeader
-        kicker="Sathwara Association of Business, Harmony & Advancement"
-        title="About SABHA"
-        subtitle="SABHA unites entrepreneurs, service providers, and professionals. We believe in building trust, driving growth, and advancing our community together."
+        kicker={t("about.kicker")}
+        title={t("about.title")}
+        subtitle={t("about.subtitle")}
       />
 
       {/* Mission & Impact */}
@@ -150,7 +137,7 @@ export default function AboutPage() {
                 <Users className="h-6 w-6" />
               </div>
               <p className="text-base font-bold leading-relaxed text-white">
-                Monthly Mixers • Technical Panels • Business Referrals
+                {t("about.mixers_panels")}
               </p>
             </div>
           </motion.div>
@@ -161,26 +148,26 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="space-y-6"
           >
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">Our Mission & Vision</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.mission_label")}</span>
             <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Empowering Community-Led Global Businesses
+              {t("about.mission_title")}
             </h2>
             <p className="text-sm leading-relaxed text-muted font-medium">
-              SABHA provides the digital tools, strategic networks, and interactive platforms necessary to help Sathwara entrepreneurs showcase their capabilities, exchange vetted business leads, and achieve mutual growth.
+              {t("about.mission_desc")}
             </p>
 
             <div className="grid grid-cols-3 gap-6 pt-4 border-t border-border/80">
               <div className="space-y-1">
                 <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.members}</p>
-                <p className="text-[11px] font-bold text-muted uppercase">Verified Members</p>
+                <p className="text-[11px] font-bold text-muted uppercase">{t("about.verified_members")}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.businessExchanged}</p>
-                <p className="text-[11px] font-bold text-muted uppercase">Business Exchanged</p>
+                <p className="text-[11px] font-bold text-muted uppercase">{t("about.business_exchanged")}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.monthlyMixers}</p>
-                <p className="text-[11px] font-bold text-muted uppercase">Monthly Mixers</p>
+                <p className="text-[11px] font-bold text-muted uppercase">{t("about.monthly_mixers")}</p>
               </div>
             </div>
           </motion.div>
@@ -191,16 +178,16 @@ export default function AboutPage() {
       <section className="border-y border-border bg-surface">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
           <div className="mb-14 text-center max-w-2xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">Core Principles</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.values_label")}</span>
             <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              What We Stand For
+              {t("about.values_title")}
             </h2>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v, i) => (
               <motion.div
-                key={v.name}
+                key={v.tKey}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -210,9 +197,9 @@ export default function AboutPage() {
                 <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl ${v.bg} ${v.color}`}>
                   <v.icon className="h-5.5 w-5.5" />
                 </div>
-                <h3 className="text-base font-bold text-foreground">{v.name}</h3>
+                <h3 className="text-base font-bold text-foreground">{t(`about.${v.tKey}_title`)}</h3>
                 <p className="mt-2.5 text-xs leading-relaxed text-muted flex-1">
-                  {v.description}
+                  {t(`about.${v.tKey}_desc`)}
                 </p>
               </motion.div>
             ))}
@@ -223,9 +210,9 @@ export default function AboutPage() {
       {/* Evolution Timeline */}
       <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24 border-b border-border">
         <div className="mb-14 text-center max-w-2xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">Our Timeline</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.timeline_label")}</span>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            SABHA's Journey & Evolution
+            {t("about.timeline_title")}
           </h2>
         </div>
 
@@ -242,7 +229,7 @@ export default function AboutPage() {
               {/* Year badge left-aligned on desktop */}
               <div className="hidden md:flex absolute right-full mr-10 top-0.5 text-right flex-col">
                 <span className="text-2xl font-extrabold text-primary">{m.year}</span>
-                <span className="text-[10px] font-bold text-muted uppercase">Milestone</span>
+                <span className="text-[10px] font-bold text-muted uppercase">{t("about.milestone")}</span>
               </div>
 
               {/* Dot indicator */}
@@ -250,8 +237,8 @@ export default function AboutPage() {
 
               <div>
                 <span className="inline-block md:hidden text-lg font-extrabold text-primary mb-1">{m.year}</span>
-                <h3 className="text-base font-bold text-foreground">{m.title}</h3>
-                <p className="mt-2 text-xs leading-relaxed text-muted font-medium max-w-3xl">{m.description}</p>
+                <h3 className="text-base font-bold text-foreground">{t(`about.${m.tKey}_title`)}</h3>
+                <p className="mt-2 text-xs leading-relaxed text-muted font-medium max-w-3xl">{t(`about.${m.tKey}_desc`)}</p>
               </div>
             </motion.div>
           ))}
@@ -261,17 +248,17 @@ export default function AboutPage() {
       {/* Leadership Board */}
       <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mb-14 text-center max-w-2xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">Trustees & Leadership</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.leadership_label")}</span>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Meet Our Core Committee
+            {t("about.leadership_title")}
           </h2>
           <p className="mt-4 text-xs text-muted font-medium">
-            The visionary leaders steering SABHA towards community empowerment, business alignment, and global opportunities.
+            {t("about.leadership_subtitle")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {team.map((t, idx) => (
+          {team.map((member, idx) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 15 }}
@@ -281,16 +268,16 @@ export default function AboutPage() {
               className="glass-card hover-card p-5 text-center flex flex-col items-center border border-border"
             >
               <img
-                src={t.avatar}
-                alt={t.name}
+                src={member.avatar}
+                alt={t(`about.${member.tKey}_name`)}
                 className="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
               />
               <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full mb-2 border border-emerald-100">
-                Verified Trustee
+                {t("about.verified_trustee")}
               </span>
-              <h3 className="text-sm font-extrabold text-foreground">{t.name}</h3>
-              <p className="text-[11px] font-bold text-primary mt-0.5">{t.role}</p>
-              <p className="text-[10px] text-muted font-semibold mt-1 truncate max-w-full">{t.org}</p>
+              <h3 className="text-sm font-extrabold text-foreground">{t(`about.${member.tKey}_name`)}</h3>
+              <p className="text-[11px] font-bold text-primary mt-0.5">{t(`about.${member.tKey}_role`)}</p>
+              <p className="text-[10px] text-muted font-semibold mt-1 truncate max-w-full">{t(`about.${member.tKey}_org`)}</p>
             </motion.div>
           ))}
         </div>
@@ -300,16 +287,16 @@ export default function AboutPage() {
       <section className="mx-auto max-w-7xl px-6 pb-24">
         <div className="rounded-2xl border border-border bg-primary px-8 py-14 text-center text-white lg:px-16 shadow-lg">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Grow Your Business & Network Today
+            {t("about.cta_title")}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-white/80 leading-relaxed">
-            Join 500+ community owners, list your services, receive qualified referrals, and advance your startup.
+            {t("about.cta_subtitle")}
           </p>
           <Link
             href="/register"
             className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-md transition-all hover:opacity-90 active:scale-[0.98]"
           >
-            Join SABHA Community <ArrowRight size={16} />
+            {t("about.cta_btn")} <ArrowRight size={16} />
           </Link>
         </div>
       </section>

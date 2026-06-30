@@ -7,14 +7,16 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { fetchEvents, getUserBusiness } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/language";
 
 export default function EventsPage() {
+  const { t } = useLanguage();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
 
   const { isAuthenticated } = useAuth();
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
@@ -126,17 +128,17 @@ export default function EventsPage() {
           <div>
             <div className="mb-2 flex items-center gap-2.5">
               <span className="h-4 w-1.5 rounded-full bg-accent" />
-              <span className="text-sm font-semibold text-accent">Community events</span>
+              <span className="text-sm font-semibold text-accent">{t("events.label")}</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Events
+              {t("events.title")}
             </h1>
-            <p className="mt-1 text-sm text-muted">
-              Networking mixers, workshops, and summits to help you connect and grow.
+            <p className="mt-1 text-sm text-muted font-medium">
+              {t("events.subtitle")}
             </p>
           </div>
           <p className="text-sm font-medium text-muted">
-            {filteredEvents.length} {filteredEvents.length === 1 ? "event" : "events"}
+            {filteredEvents.length} {filteredEvents.length === 1 ? t("events.event") : t("events.events_count")}
           </p>
         </div>
 
@@ -146,8 +148,8 @@ export default function EventsPage() {
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search events by name or category"
-              className="w-full rounded-xl border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              placeholder={t("events.search_placeholder")}
+              className="w-full rounded-xl border border-border bg-white py-3 pl-12 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold"
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
             />
@@ -157,14 +159,14 @@ export default function EventsPage() {
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-2 text-sm font-semibold text-muted">
                 <Filter className="h-4 w-4 text-primary" />
-                Status
+                {t("events.status")}
               </span>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { key: "all", label: "All Events" },
-                  { key: "current", label: "🟢 Booking Available" },
-                  { key: "upcoming", label: "🟡 Booking Open Soon" },
-                  { key: "past", label: "⚫ Past Events" },
+                  { key: "all", label: t("events.all_events") },
+                  { key: "current", label: `🟢 ${t("events.booking_available")}` },
+                  { key: "upcoming", label: `🟡 ${t("events.booking_soon")}` },
+                  { key: "past", label: `⚫ ${t("events.past")}` },
                 ].map(({ key, label }) => (
                   <button
                     key={key}
@@ -184,7 +186,7 @@ export default function EventsPage() {
 
             <div className="flex items-center gap-2 rounded-xl bg-primary-soft px-4 py-2.5 text-sm font-medium text-primary md:ml-auto">
               <Info className="h-4 w-4" />
-              Verified members (with registered businesses) get lower ticket pricing.
+              {t("events.verified_info")}
             </div>
           </div>
         </div>
@@ -193,7 +195,7 @@ export default function EventsPage() {
         {loading ? (
           <div className="py-20 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
-            <p className="mt-3 text-sm text-muted">Loading events...</p>
+            <p className="mt-3 text-sm text-muted">{t("events.loading")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -207,86 +209,111 @@ export default function EventsPage() {
                    exit={{ opacity: 0, scale: 0.97 }}
                    className="glass-card group flex h-full flex-col overflow-hidden p-0 hover:shadow-md transition-shadow"
                 >
-                  <div className="relative h-52 w-full overflow-hidden">
+                  <div className="relative h-40 w-full overflow-hidden">
                     <img
                       src={event.image}
                       alt={event.title}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                    <div className="absolute left-4 top-4">
-                      <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
+                    <div className="absolute left-3 top-3">
+                      <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
                         {event.category}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-6">
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium capitalize text-primary">
-                        <Tag size={12} /> {event.type}
+                  <div className="flex flex-1 flex-col p-4.5">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold capitalize text-primary">
+                        <Tag size={10} /> {event.type}
                       </span>
                       {event.status === "upcoming" && (
-                        <span className="rounded-full bg-amber-50 border border-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 uppercase tracking-wider">
-                          Upcoming - Booking open soon
+                        <span className="rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[9px] font-bold text-amber-700 uppercase tracking-wider">
+                          {t("events.upcoming")}
                         </span>
                       )}
                       {event.status === "current" && (
-                        <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
-                          Current - Booking Available
+                        <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 uppercase tracking-wider">
+                          {t("events.current")}
                         </span>
                       )}
                       {event.status === "past" && (
-                        <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                          Past - Booking Closed
+                        <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                          {t("events.past")}
                         </span>
                       )}
                     </div>
  
                     <div className="flex-1">
-                      <div className="mb-2 flex items-center gap-1.5 text-sm text-muted">
-                        <Calendar size={14} className="text-primary" /> {event.date}
+                      <div className="mb-1 flex items-center gap-1 text-xs text-muted">
+                        <Calendar size={12} className="text-primary" /> {event.date}
                       </div>
-                      <h3 className="text-lg font-semibold text-foreground transition-colors group-hover:text-primary">
+                      <h3 className="text-sm font-bold text-foreground transition-colors group-hover:text-primary leading-snug line-clamp-1">
                         {event.title}
                       </h3>
-                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted font-medium">
                         {event.description}
                       </p>
                     </div>
  
-                    <div className="mt-6 border-t border-border pt-5">
-                      <div className="mb-4 flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-                          <MapPin size={14} className="text-primary" /> {event.attendees} going
-                        </span>
-                        <div className="text-right">
-                          {isVerifiedMember ? (
-                            <div>
-                              <span className="text-lg font-bold text-foreground">{event.price_verified}</span>
-                              <span className="text-[10px] font-semibold text-emerald-600 flex items-center justify-end gap-0.5 mt-0.5">
-                                <ShieldCheck size={11} /> Verified price
+                    <div className="mt-4 border-t border-border pt-4">
+                      {(() => {
+                        const hasDiscount = event.price_verified && event.price_verified !== event.price_normal;
+                        const displayPrice = isVerifiedMember && hasDiscount ? event.price_verified : event.price_normal;
+                        const isFree = displayPrice.toLowerCase() === "free" || displayPrice === "₹0" || displayPrice === "0";
+                        return (
+                          <div className={cn(
+                            "mb-4 flex items-center justify-between gap-3 rounded-xl border px-3.5 py-3 transition-colors",
+                            isVerifiedMember && hasDiscount
+                              ? "border-emerald-200 bg-emerald-50/30"
+                              : "border-border bg-slate-50/50"
+                          )}>
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                                {t("events.ticket_price")}
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-[11px] text-muted font-bold">
+                                <MapPin size={11} className="text-primary" /> {event.attendees} {t("events.going")}
                               </span>
                             </div>
-                          ) : (
-                            <div>
-                              <span className="text-lg font-bold text-foreground">{event.price_normal}</span>
-                              {event.price_verified && event.price_verified !== event.price_normal && (
-                                <span className="block text-[10px] text-muted-foreground font-semibold mt-0.5">
-                                  {event.price_verified} for Verified Members
+                            <div className="flex flex-col items-end">
+                              <div className="flex items-center gap-1.5">
+                                {isVerifiedMember && hasDiscount && (
+                                  <span className="text-xs font-semibold text-muted-foreground line-through decoration-slate-400">
+                                    {event.price_normal}
+                                  </span>
+                                )}
+                                <span className={cn(
+                                  "text-lg font-black leading-none",
+                                  isFree ? "text-emerald-600 uppercase" : "text-primary"
+                                )}>
+                                  {displayPrice}
+                                </span>
+                              </div>
+                              {hasDiscount && !isVerifiedMember && (
+                                <span className="inline-flex items-center gap-0.5 rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-600 mt-1 border border-emerald-100/60">
+                                  <ShieldCheck size={9} className="shrink-0" />
+                                  {t("events.verified")}: {event.price_verified}
+                                </span>
+                              )}
+                              {isVerifiedMember && hasDiscount && (
+                                <span className="inline-flex items-center gap-0.5 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-800 mt-1">
+                                  <ShieldCheck size={9} className="shrink-0" />
+                                  {t("events.verified_discount")}
                                 </span>
                               )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                      
+                          </div>
+                        );
+                      })()}
+
                       {event.status === "current" && (
                         <Link
                           href={`/events/${event.id}`}
                           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
                         >
-                          Book ticket <ArrowRight size={16} />
+                          {t("events.book_ticket")} <ArrowRight size={16} />
                         </Link>
                       )}
 
@@ -295,13 +322,13 @@ export default function EventsPage() {
                           href={`/events/${event.id}`}
                           className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50/50 px-5 py-3 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-50 active:scale-[0.98]"
                         >
-                          Booking open soon <ArrowRight size={16} />
+                          {t("events.booking_soon")} <ArrowRight size={16} />
                         </Link>
                       )}
 
                       {event.status === "past" && (
                         <div className="w-full text-center py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-semibold text-sm">
-                          Booking Closed
+                          {t("events.closed")}
                         </div>
                       )}
                     </div>
@@ -314,9 +341,9 @@ export default function EventsPage() {
 
         {filteredEvents.length === 0 && !loading && (
           <div className="rounded-2xl border border-dashed border-border py-24 text-center">
-            <h3 className="text-xl font-semibold text-foreground">No events found</h3>
+            <h3 className="text-xl font-semibold text-foreground">{t("events.no_events")}</h3>
             <p className="mx-auto mt-2 max-w-xs text-sm text-muted">
-              Check back shortly. New sessions are being added regularly.
+              {t("events.no_events_hint")}
             </p>
           </div>
         )}

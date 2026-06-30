@@ -10,6 +10,7 @@ use App\Models\GalleryImage;
 use App\Models\User;
 use App\Models\Setting;
 use App\Models\Review;
+use App\Models\EventRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
@@ -337,8 +338,14 @@ class SabhaController extends Controller
 
         if ($userId) {
             $existing = Business::where('user_id', $userId)->first();
-            if ($existing && $existing->status === 'pending') {
-                return response()->json(['message' => 'Your business profile is already in progress. Please wait for approval.'], 400);
+            if ($existing) {
+                if ($existing->status === 'pending') {
+                    return response()->json(['message' => 'Your business profile is already in progress. Please wait for approval.'], 400);
+                }
+                if ($existing->status === 'approved') {
+                    $businessData['status'] = 'approved';
+                    $businessData['is_verified'] = true;
+                }
             }
 
             $businessData['user_id'] = $userId;
@@ -517,6 +524,142 @@ class SabhaController extends Controller
         return response()->json([
             'message' => 'Review submitted successfully',
             'review' => $review
+        ]);
+    }
+
+    public function reserveEventSpot(Request $request, $id)
+    {
+        $event = Event::findOrFail($id);
+        $user = $request->user();
+
+        $existing = EventRegistration::where('event_id', $id)->where('user_id', $user->id)->first();
+        if ($existing) {
+            return response()->json([
+                'message' => 'You have already requested a reservation for this event.',
+                'registration' => $existing
+            ], 400);
+        }
+
+        $validated = $request->validate([
+            'ticket_type' => 'required|string|in:standard,verified',
+            'amount_paid' => 'required|numeric',
+            'payment_screenshot' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+        ]);
+
+        $screenshotPath = null;
+        if ($request->hasFile('payment_screenshot')) {
+            $file = $request->file('payment_screenshot');
+            $fileName = time() . '_ticket_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public/event_payments', $fileName);
+            $screenshotPath = '/storage/event_payments/' . $fileName;
+        }
+
+        // Generate custom ticket number
+        $ticketNo = 'SABHA-' . date('Y') . '-' . mt_rand(1000, 9999) . '-' . mt_rand(10, 99);
+
+        $registration = EventRegistration::create([
+            'event_id' => $id,
+            'user_id' => $user->id,
+            'ticket_number' => $ticketNo,
+            'status' => 'pending',
+            'payment_screenshot' => $screenshotPath,
+            'ticket_type' => $validated['ticket_type'],
+            'amount_paid' => $validated['amount_paid'],
+        ]);
+
+        return response()->json([
+            'message' => 'Reservation request submitted successfully and is pending verification',
+            'registration' => $registration
+        ]);
+    }
+
+    public function getUserRegistrations(Request $request)
+    {
+        $user = $request->user();
+        $registrations = EventRegistration::where('user_id', $user->id)->with('event')->latest()->get();
+        return response()->json($registrations);
+    }
+
+    public function getAllEventRegistrations()
+    {
+        $registrations = EventRegistration::with(['user', 'event'])->latest()->get();
+        return response()->json($registrations);
+    }
+
+    public function approveEventRegistration($id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $registration->update([
+            'status' => 'approved',
+            'rejection_reason' => null
+        ]);
+        return response()->json([
+            'message' => 'Event registration approved successfully',
+            'registration' => $registration
+        ]);
+    }
+
+    public function rejectEventRegistration(Request $request, $id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string',
+        ]);
+
+        $registration->update([
+            'status' => 'rejected',
+            'rejection_reason' => $validated['rejection_reason']
+        ]);
+
+        return response()->json([
+            'message' => 'Event registration rejected successfully',
+            'registration' => $registration
+        ]);
+    }
+
+    public function uploadEventPhotos(Request $request, $id)
+    {
+        $event = Event::findOrFail($id);
+        $user = $request->user();
+
+        // Check if event is in the past
+        if ($event->date > now()) {
+            return response()->json(['message' => 'This event has not finished yet.'], 400);
+        }
+
+        // Verify that the user has an approved registration for this event
+        $reg = EventRegistration::where('event_id', $id)
+            ->where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->first();
+
+        if (!$reg) {
+            return response()->json(['message' => 'You must be an approved attendee of this event to upload photos.'], 403);
+        }
+
+        $validated = $request->validate([
+            'image' => 'required|file|mimes:jpeg,png,jpg,gif,webp|max:20480',
+            'caption' => 'nullable|string',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public/gallery', $fileName);
+            $imagePath = '/storage/gallery/' . $fileName;
+        } else {
+            return response()->json(['message' => 'No file uploaded'], 400);
+        }
+
+        $galleryImage = GalleryImage::create([
+            'event_id' => $id,
+            'image_path' => $imagePath,
+            'caption' => $validated['caption'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'Event media uploaded successfully',
+            'gallery_image' => $galleryImage
         ]);
     }
 }
