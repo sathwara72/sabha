@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SabhaController extends Controller
 {
@@ -78,6 +79,33 @@ class SabhaController extends Controller
             'price_normal' => 'required|string',
             'price_verified' => 'required|string',
         ]);
+
+        // Automatically generate event code
+        $cleanTitle = preg_replace('/[^a-zA-Z0-9\s]/', '', $validated['title']);
+        $words = explode(' ', trim($cleanTitle));
+        $code = '';
+        if (count($words) >= 2) {
+            foreach ($words as $word) {
+                $code .= strtoupper(substr($word, 0, 1));
+            }
+        } else {
+            $code = strtoupper(substr($cleanTitle, 0, 4));
+        }
+        $code = preg_replace('/[^A-Z0-9]/', '', $code);
+        if (strlen($code) < 3) {
+            $code .= mt_rand(100, 999);
+        }
+        $eventCode = substr($code, 0, 6);
+
+        // Ensure uniqueness of event_code
+        $originalCode = $eventCode;
+        $counter = 1;
+        while (Event::where('event_code', $eventCode)->exists()) {
+            $eventCode = substr($originalCode, 0, 4) . $counter;
+            $counter++;
+        }
+
+        $validated['event_code'] = $eventCode;
 
         $event = Event::create($validated);
         return response()->json(['message' => 'Event created successfully', 'event' => $event]);
@@ -242,8 +270,8 @@ class SabhaController extends Controller
     public function submitBusiness(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string',
-            'category' => 'required|string',
+            'name' => 'nullable|string',
+            'category' => 'nullable|string',
             'tagline' => 'nullable|string',
             'location' => 'nullable|string',
             'description' => 'nullable|string',
@@ -269,7 +297,7 @@ class SabhaController extends Controller
         if ($request->hasFile('payment_screenshot')) {
             $file = $request->file('payment_screenshot');
             $fileName = time() . '_payment_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/payments', $fileName);
+            $file->storeAs('payments', $fileName, 'public');
             $screenshotPath = '/storage/payments/' . $fileName;
         }
 
@@ -277,7 +305,7 @@ class SabhaController extends Controller
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             $fileName = time() . '_logo_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/logos', $fileName);
+            $file->storeAs('logos', $fileName, 'public');
             $logoPath = '/storage/logos/' . $fileName;
         }
 
@@ -285,11 +313,15 @@ class SabhaController extends Controller
         if ($request->hasFile('cover_image')) {
             $file = $request->file('cover_image');
             $fileName = time() . '_cover_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/covers', $fileName);
+            $file->storeAs('covers', $fileName, 'public');
             $coverPath = '/storage/covers/' . $fileName;
         }
 
-        $userId = $request->user() ? $request->user()->id : null;
+        $user = $request->user();
+        $userId = $user ? $user->id : null;
+        
+        $name = ($validated['name'] ?? null) ?: ('Business of ' . ($user ? $user->name : 'User'));
+        $category = ($validated['category'] ?? null) ?: 'Software Development';
 
         $servicesInput = $request->input('services');
         if (is_string($servicesInput)) {
@@ -303,8 +335,8 @@ class SabhaController extends Controller
         }
 
         $businessData = [
-            'name' => $validated['name'],
-            'category' => $validated['category'],
+            'name' => $name,
+            'category' => $category,
             'tagline' => $validated['tagline'] ?? null,
             'location' => $validated['location'] ?? null,
             'description' => $validated['description'] ?? null,
@@ -376,6 +408,9 @@ class SabhaController extends Controller
     {
         $user = $request->user();
         $business = Business::where('user_id', $user->id)->with('user')->first();
+        if (!$business) {
+            return response()->json(null, 404);
+        }
         return response()->json($business);
     }
 
@@ -409,7 +444,7 @@ class SabhaController extends Controller
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
             $fileName = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/avatars', $fileName);
+            $file->storeAs('avatars', $fileName, 'public');
             $user->avatar = '/storage/avatars/' . $fileName;
         }
 
@@ -438,7 +473,7 @@ class SabhaController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/gallery', $fileName);
+            $file->storeAs('gallery', $fileName, 'public');
             $imagePath = '/storage/gallery/' . $fileName;
         } else {
             return response()->json(['message' => 'No file uploaded'], 400);
@@ -550,17 +585,14 @@ class SabhaController extends Controller
         if ($request->hasFile('payment_screenshot')) {
             $file = $request->file('payment_screenshot');
             $fileName = time() . '_ticket_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/event_payments', $fileName);
+            $file->storeAs('event_payments', $fileName, 'public');
             $screenshotPath = '/storage/event_payments/' . $fileName;
         }
-
-        // Generate custom ticket number
-        $ticketNo = 'SABHA-' . date('Y') . '-' . mt_rand(1000, 9999) . '-' . mt_rand(10, 99);
 
         $registration = EventRegistration::create([
             'event_id' => $id,
             'user_id' => $user->id,
-            'ticket_number' => $ticketNo,
+            'ticket_number' => null,
             'status' => 'pending',
             'payment_screenshot' => $screenshotPath,
             'ticket_type' => $validated['ticket_type'],
@@ -588,11 +620,92 @@ class SabhaController extends Controller
 
     public function approveEventRegistration($id)
     {
-        $registration = EventRegistration::findOrFail($id);
+        $registration = EventRegistration::with(['user', 'event'])->findOrFail($id);
+        $event = $registration->event;
+
+        // Generate event code if not present
+        $eventCode = $event->event_code;
+        if (!$eventCode) {
+            $cleanTitle = preg_replace('/[^a-zA-Z0-9\s]/', '', $event->title);
+            $words = explode(' ', trim($cleanTitle));
+            $code = '';
+            if (count($words) >= 2) {
+                foreach ($words as $word) {
+                    $code .= strtoupper(substr($word, 0, 1));
+                }
+            } else {
+                $code = strtoupper(substr($cleanTitle, 0, 4));
+            }
+            $code = preg_replace('/[^A-Z0-9]/', '', $code);
+            if (strlen($code) < 3) {
+                $code .= mt_rand(100, 999);
+            }
+            $eventCode = substr($code, 0, 6);
+            $event->update(['event_code' => $eventCode]);
+        }
+
+        // Get the year from event date or current year
+        $year = $event->date ? $event->date->format('Y') : date('Y');
+
+        // Generate custom unique ticket number: {year}-{eventcode}-{number}
+        $ticketNo = $registration->ticket_number;
+        if (!$ticketNo) {
+            do {
+                $ticketNo = $year . '-' . $eventCode . '-' . mt_rand(1000, 9999);
+            } while (EventRegistration::where('ticket_number', $ticketNo)->exists());
+        }
+
         $registration->update([
             'status' => 'approved',
+            'ticket_number' => $ticketNo,
             'rejection_reason' => null
         ]);
+
+        // Generate QR code and send email to the user
+        try {
+            $userEmail = $registration->user->email;
+            $userName = $registration->user->name;
+            $eventName = $event->title;
+            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($ticketNo);
+
+            Mail::send([], [], function ($message) use ($userEmail, $userName, $eventName, $ticketNo, $qrCodeUrl) {
+                $message->to($userEmail)
+                    ->subject("Your Ticket for {$eventName} is Approved!")
+                    ->html("
+                        <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded-xl; background-color: #ffffff;\">
+                            <h2 style=\"color: #1e3a8a; margin-bottom: 20px;\">Hello {$userName},</h2>
+                            <p style=\"font-size: 16px; color: #334155; line-height: 1.6;\">
+                                We are excited to inform you that your seat reservation request for the event <strong>{$eventName}</strong> has been approved!
+                            </p>
+                            <div style=\"margin: 25px 0; padding: 15px; background-color: #f1f5f9; border-radius: 8px; text-align: center;\">
+                                <span style=\"font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block;\">Your Ticket Number</span>
+                                <strong style=\"font-size: 22px; color: #0f172a; font-family: monospace;\">{$ticketNo}</strong>
+                            </div>
+                            <p style=\"font-size: 15px; color: #334155; margin-bottom: 10px;\">
+                                Please present the QR code below at the entry gate to check in:
+                            </p>
+                            <div style=\"text-align: center; margin: 25px 0;\">
+                                <img src=\"{$qrCodeUrl}\" alt=\"Ticket QR Code\" style=\"border: 2px solid #cbd5e1; padding: 10px; border-radius: 12px; background-color: #fff; width: 220px; height: 220px;\" />
+                            </div>
+                            <p style=\"font-size: 14px; color: #64748b; line-height: 1.5;\">
+                                If the image does not load, you can access your QR code directly at: <br/>
+                                <a href=\"{$qrCodeUrl}\" target=\"_blank\" style=\"color: #2563eb; text-decoration: underline;\">{$qrCodeUrl}</a>
+                            </p>
+                            <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;\" />
+                            <p style=\"font-size: 15px; color: #334155;\">See you at the event!</p>
+                            <p style=\"font-size: 15px; font-weight: bold; color: #0f172a; margin-top: 5px;\">
+                                Best regards,<br/>
+                                Sabha Team
+                            </p>
+                        </div>
+                    ");
+            });
+
+            Log::info("SABHA Approved Ticket Email successfully dispatched to {$userEmail}. Ticket No: {$ticketNo}. QR: {$qrCodeUrl}");
+        } catch (\Exception $e) {
+            Log::error("Failed to send approval email to {$registration->user->email}: " . $e->getMessage());
+        }
+
         return response()->json([
             'message' => 'Event registration approved successfully',
             'registration' => $registration
@@ -645,7 +758,7 @@ class SabhaController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/gallery', $fileName);
+            $file->storeAs('gallery', $fileName, 'public');
             $imagePath = '/storage/gallery/' . $fileName;
         } else {
             return response()->json(['message' => 'No file uploaded'], 400);
@@ -660,6 +773,55 @@ class SabhaController extends Controller
         return response()->json([
             'message' => 'Event media uploaded successfully',
             'gallery_image' => $galleryImage
+        ]);
+    }
+
+    public function toggleAttendance($id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $registration->update([
+            'is_attended' => !$registration->is_attended
+        ]);
+        return response()->json([
+            'message' => 'Attendance status updated successfully',
+            'registration' => $registration
+        ]);
+    }
+
+    public function checkInTicket(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'ticket_number' => 'required|string',
+        ]);
+
+        $registration = EventRegistration::where('ticket_number', $validated['ticket_number'])->first();
+
+        if (!$registration) {
+            return response()->json([
+                'message' => 'Ticket not found.'
+            ], 404);
+        }
+
+        if ($registration->status !== 'approved' && $registration->status !== 'confirmed') {
+            return response()->json([
+                'message' => 'Ticket is not approved yet. Current status: ' . $registration->status
+            ], 400);
+        }
+
+        if ($registration->is_attended) {
+            return response()->json([
+                'message' => 'Ticket is already marked as attended.',
+                'registration' => $registration->load('user', 'event')
+            ], 200);
+        }
+
+        $registration->update([
+            'is_attended' => true
+        ]);
+
+        return response()->json([
+            'message' => 'Attendance marked successfully for ' . ($registration->user->name ?? 'attendee') . '!',
+            'registration' => $registration->load('user', 'event')
         ]);
     }
 }

@@ -131,17 +131,17 @@ export default function EventDetailsPage() {
         if (matched) {
           const matchedDate = new Date(matched.date);
           
-          // Determine status
-          const now = new Date();
-          let status = "upcoming";
-          const dateOnly = new Date(matchedDate.getFullYear(), matchedDate.getMonth(), matchedDate.getDate());
-          const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-          if (dateOnly.getTime() === todayOnly.getTime()) {
-            status = "current";
-          } else if (dateOnly < todayOnly) {
-            status = "past";
-          }
+           // Determine status
+           const now = new Date();
+           let status = "current";
+           const dateOnly = new Date(matchedDate.getFullYear(), matchedDate.getMonth(), matchedDate.getDate());
+           const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+ 
+           if (dateOnly.getTime() === todayOnly.getTime()) {
+             status = "current";
+           } else if (dateOnly < todayOnly) {
+             status = "past";
+           }
 
           const mockDetail = mockEvents.find(
             e => e.title.toLowerCase() === matched.title.toLowerCase() || e.id.toString() === id
@@ -654,6 +654,10 @@ export default function EventDetailsPage() {
                     try {
                       const data = new FormData();
                       data.append("payment_screenshot", paymentFile);
+                      data.append("ticket_type", isVerifiedMember ? "verified" : "standard");
+                      const priceStr = isVerifiedMember ? event.price_verified : event.price_normal;
+                      const amountPaid = priceStr.toLowerCase() === "free" ? "0" : priceStr.replace(/[^0-9]/g, "");
+                      data.append("amount_paid", amountPaid);
                       await reserveEventSeat(event.id, data);
                       setReserveSuccess(true);
                       setPaymentFile(null);

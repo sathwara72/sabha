@@ -21,7 +21,7 @@ Route::get('/gallery', [SabhaController::class, 'getGalleryImages']);
 Route::get('/settings', [SabhaController::class, 'getSettings']);
 
 // User Submitted Business Route
-Route::post('/businesses', [SabhaController::class, 'submitBusiness']);
+Route::post('/businesses', [SabhaController::class, 'submitBusiness'])->middleware('auth:sanctum');
 
 // Admin Routes (protected with Sanctum middleware)
 Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
@@ -38,6 +38,8 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::get('/registrations', [SabhaController::class, 'getAllEventRegistrations']);
     Route::post('/registrations/{id}/approve', [SabhaController::class, 'approveEventRegistration']);
     Route::post('/registrations/{id}/reject', [SabhaController::class, 'rejectEventRegistration']);
+    Route::post('/registrations/{id}/toggle-attendance', [SabhaController::class, 'toggleAttendance']);
+    Route::post('/registrations/check-in', [SabhaController::class, 'checkInTicket']);
 });
 
 Route::get('/user', function (Request $request) {

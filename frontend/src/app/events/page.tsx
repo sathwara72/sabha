@@ -47,7 +47,7 @@ export default function EventsPage() {
         const liveEvents = (data || []).map((e: any) => {
           const eventDate = new Date(e.date);
           const now = new Date();
-          let status = "upcoming";
+          let status = "current";
           
           // Clear time component for accurate comparison
           const dateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());

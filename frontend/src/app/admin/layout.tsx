@@ -39,6 +39,7 @@ export default function AdminLayout({
     { name: "Overview", icon: LayoutDashboard, href: "/admin" },
     { name: "Businesses", icon: Briefcase, href: "/admin/businesses" },
     { name: "Events", icon: Calendar, href: "/admin/events" },
+    { name: "Bookings", icon: ShieldCheck, href: "/admin/bookings" },
     { name: "Users", icon: Users, href: "/admin/users" },
     { name: "Gallery", icon: Image, href: "/admin/gallery" },
     { name: "Statistics", icon: BarChart3, href: "/admin/statistics" },

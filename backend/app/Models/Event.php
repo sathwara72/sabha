@@ -17,6 +17,7 @@ class Event extends Model
         'image',
         'price_normal',
         'price_verified',
+        'event_code',
     ];
 
     protected $casts = [

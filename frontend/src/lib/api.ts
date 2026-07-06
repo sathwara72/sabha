@@ -1,5 +1,6 @@
 // Temporary Dummy Data implementation for showcase
 // Original fetch implementations are replaced with mock delays
+import { API_BASE_URL } from "@/lib/config";
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -516,164 +517,84 @@ export async function fetchBusinesses() {
 }
 
 export async function fetchEvents() {
-  await delay(500);
-  return [
-    {
-      id: 1,
-      title: "Sabha Grand Business Summit 2026",
-      description: "Unlock key networking opportunities, interact with angel investors, and listen to community business leaders outlining strategic roadmaps for 2026.",
-      date: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 days later -> upcoming
-      location: "Ahmedabad Exhibition Center, Gujarat",
-      type: "Conference",
-      price_normal: "₹999",
-      price_verified: "₹499",
-      image: "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      title: "Harmony Networking Mixer",
-      description: "An informal, high-energy networking meet designed for local business owners, service providers, and startup founders to exchange referrals.",
-      date: new Date().toISOString(), // Today -> current
-      location: "DoubleTree by Hilton, Pune",
-      type: "Mixer",
-      price_normal: "₹999",
-      price_verified: "₹499",
-      image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 3,
-      title: "Digital Growth & Local SEO Workshop",
-      description: "A hands-on, practical session with digital marketing specialists training store owners to capture local markets using online business profiles.",
-      date: new Date(Date.now() - 86400000).toISOString(), // Yesterday -> past
-      location: "Inder Residency, Rajkot",
-      type: "Workshop",
-      price_normal: "Free",
-      price_verified: "Free",
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 4,
-      title: "AgriTech & Supply Chain Symposium",
-      description: "Panel discussions on cold storage integrations, automated sorting technologies, and direct-to-market channels for community farmers.",
-      date: new Date(Date.now() + 86400000 * 7).toISOString(), // 7 days later -> upcoming
-      location: "Sardar Patel Hall, Mehsana",
-      type: "Conference",
-      price_normal: "₹999",
-      price_verified: "₹499",
-      image: "https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 5,
-      title: "SME Capital Funding & Debt Seminar",
-      description: "Bank leaders and debt syndication experts explaining rules, documentation, and government subsidies for machinery loans and cash credits.",
-      date: new Date(Date.now() + 86400000 * 12).toISOString(), // 12 days later -> upcoming
-      location: "Courtyard by Marriott, Surat",
-      type: "Seminar",
-      price_normal: "₹999",
-      price_verified: "₹499",
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 6,
-      title: "Renewable Energy & Solar Expo",
-      description: "Exhibitions showcasing solar agricultural pumps, industrial rooftop installations, and wind turbine components with government net-metering experts.",
-      date: new Date(Date.now() - 86400000 * 4).toISOString(), // 4 days ago -> past
-      location: "Grand Bhagwati, Vadodara",
-      type: "Exhibition",
-      price_normal: "Free",
-      price_verified: "Free",
-      image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 7,
-      title: "Global Export-Import Summit",
-      description: "Detailed seminar on custom regulations, shipping logistics, and cross-border trade for export-oriented SMEs.",
-      date: new Date(Date.now() + 86400000 * 20).toISOString(),
-      location: "Hotel Hyatt, Ahmedabad",
-      type: "Conference",
-      price_normal: "₹999",
-      price_verified: "₹499",
-      image: "https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 8,
-      title: "Cyber-Security for Retail",
-      description: "Essential training for business owners on managing payment gateway security and customer data privacy compliance.",
-      date: new Date(Date.now() + 86400000 * 25).toISOString(),
-      location: "Virtual Webinar",
-      type: "Workshop",
-      price_normal: "₹999",
-      price_verified: "₹499",
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop"
+  const response = await fetch(`${API_BASE_URL}/events`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
     }
-  ];
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch events");
+  }
+
+  const events = await response.json();
+  return events.map((event: any) => {
+    const formatPrice = (price: string) => {
+      if (!price) return "";
+      const trimmed = price.trim();
+      if (trimmed.toLowerCase() === "free") return "Free";
+      if (trimmed.startsWith("₹") || trimmed.startsWith("$")) return trimmed;
+      return `₹${trimmed}`;
+    };
+    return {
+      ...event,
+      price_normal: formatPrice(event.price_normal),
+      price_verified: formatPrice(event.price_verified),
+      image: event.image || "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=800&auto=format&fit=crop"
+    };
+  });
 }
 
 export async function fetchStatistics() {
-  await delay(300);
-  return [
-    { id: 1, label: "Active Members", value: "5000+" },
-    { id: 2, label: "Businesses Registered", value: "1200+" },
-    { id: 3, label: "Events Hosted", value: "150+" }
-  ];
+  const response = await fetch(`${API_BASE_URL}/statistics`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch statistics");
+  }
+
+  return await response.json();
 }
 
 export async function fetchGallery() {
-  await delay(300);
-  return [
-    // ── Event 1: Sabha Grand Business Summit 2026 ───────────────────────────
-    { id: 1,  image_path: "https://images.unsplash.com/photo-1540575461501-7ad0582373f3?q=80&w=1200&auto=format&fit=crop", caption: "Grand Summit – Opening Ceremony", event_id: 1, created_at: new Date().toISOString() },
-    { id: 2,  image_path: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200&auto=format&fit=crop", caption: "Keynote Address on Community Growth", event_id: 1, created_at: new Date().toISOString() },
-    { id: 3,  image_path: "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=1200&auto=format&fit=crop", caption: "Panel Discussion – Future of SMEs", event_id: 1, created_at: new Date().toISOString() },
-    { id: 4,  image_path: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1200&auto=format&fit=crop", caption: "Awards Ceremony & Recognition", event_id: 1, created_at: new Date().toISOString() },
-    { id: 5,  image_path: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1200&auto=format&fit=crop", caption: "Attendee Networking Lounge", event_id: 1, created_at: new Date().toISOString() },
-    { id: 6,  image_path: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1200&auto=format&fit=crop", caption: "Investor Meet – Ahmedabad Hall A", event_id: 1, created_at: new Date().toISOString() },
-    { id: 7,  image_path: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1200&auto=format&fit=crop", caption: "Post-Summit Group Photo", event_id: 1, created_at: new Date().toISOString() },
+  const response = await fetch(`${API_BASE_URL}/gallery`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
 
-    // ── Event 2: Harmony Networking Mixer ───────────────────────────────────
-    { id: 8,  image_path: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop", caption: "Mixer – Speed Networking Rounds", event_id: 2, created_at: new Date().toISOString() },
-    { id: 9,  image_path: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1200&auto=format&fit=crop", caption: "Community Members Connecting", event_id: 2, created_at: new Date().toISOString() },
-    { id: 10, image_path: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1200&auto=format&fit=crop", caption: "Welcome Address – Pune Chapter", event_id: 2, created_at: new Date().toISOString() },
-    { id: 11, image_path: "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?q=80&w=1200&auto=format&fit=crop", caption: "Dinner & Gala – Mixer Evening", event_id: 2, created_at: new Date().toISOString() },
-    { id: 12, image_path: "https://images.unsplash.com/photo-1530099486328-e021101a494a?q=80&w=1200&auto=format&fit=crop", caption: "Business Card Exchange Zone", event_id: 2, created_at: new Date().toISOString() },
+  if (!response.ok) {
+    throw new Error("Failed to fetch gallery");
+  }
 
-    // ── Event 3: Digital Growth & Local SEO Workshop ─────────────────────────
-    { id: 13, image_path: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1200&auto=format&fit=crop", caption: "SEO Workshop – Hands-on Training", event_id: 3, created_at: new Date().toISOString() },
-    { id: 14, image_path: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200&auto=format&fit=crop", caption: "Google Maps Optimization Session", event_id: 3, created_at: new Date().toISOString() },
-    { id: 15, image_path: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=1200&auto=format&fit=crop", caption: "Rajkot Workshop – Presentation", event_id: 3, created_at: new Date().toISOString() },
-    { id: 16, image_path: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format&fit=crop", caption: "Q&A With Digital Marketing Experts", event_id: 3, created_at: new Date().toISOString() },
-
-    // ── Event 4: AgriTech & Supply Chain Symposium ───────────────────────────
-    { id: 17, image_path: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=1200&auto=format&fit=crop", caption: "AgriTech Panel – Mehsana Hall", event_id: 4, created_at: new Date().toISOString() },
-    { id: 18, image_path: "https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?q=80&w=1200&auto=format&fit=crop", caption: "Cold Storage Technology Demo", event_id: 4, created_at: new Date().toISOString() },
-    { id: 19, image_path: "https://images.unsplash.com/photo-1470115636492-6d2b56f9146d?q=80&w=1200&auto=format&fit=crop", caption: "Supply Chain Exhibition Floor", event_id: 4, created_at: new Date().toISOString() },
-    { id: 20, image_path: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1200&auto=format&fit=crop", caption: "Farmer & Exporter Roundtable", event_id: 4, created_at: new Date().toISOString() },
-    { id: 21, image_path: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1200&auto=format&fit=crop", caption: "Award of Excellence – AgriTech", event_id: 4, created_at: new Date().toISOString() },
-
-    // ── Event 5: SME Capital Funding & Debt Seminar ──────────────────────────
-    { id: 22, image_path: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1200&auto=format&fit=crop", caption: "SME Funding Seminar – Surat", event_id: 5, created_at: new Date().toISOString() },
-    { id: 23, image_path: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1200&auto=format&fit=crop", caption: "Bank Representatives Briefing", event_id: 5, created_at: new Date().toISOString() },
-    { id: 24, image_path: "https://images.unsplash.com/photo-1473186505569-9c61870c11f9?q=80&w=1200&auto=format&fit=crop", caption: "Debt Syndication Workshop", event_id: 5, created_at: new Date().toISOString() },
-
-    // ── Common Gallery (no event_id – miscellaneous) ─────────────────────────
-    { id: 25, image_path: "https://images.unsplash.com/photo-1464746133101-a2c3f88e0dd9?q=80&w=1200&auto=format&fit=crop", caption: "SABHA Members – Morning Session", event_id: null, created_at: new Date().toISOString() },
-    { id: 26, image_path: "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?q=80&w=1200&auto=format&fit=crop", caption: "Office Inauguration – Ahmedabad HQ", event_id: null, created_at: new Date().toISOString() },
-    { id: 27, image_path: "https://images.unsplash.com/photo-1556484687-30636164638b?q=80&w=1200&auto=format&fit=crop", caption: "Committee Review & Planning", event_id: null, created_at: new Date().toISOString() },
-    { id: 28, image_path: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop", caption: "Leaders Brainstorming Session", event_id: null, created_at: new Date().toISOString() },
-    { id: 29, image_path: "https://images.unsplash.com/photo-1508780709619-79562169bc64?q=80&w=1200&auto=format&fit=crop", caption: "Community Members Volunteer Meet", event_id: null, created_at: new Date().toISOString() },
-    { id: 30, image_path: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1200&auto=format&fit=crop", caption: "Youth Entrepreneurs Cohort", event_id: null, created_at: new Date().toISOString() },
-    { id: 31, image_path: "https://images.unsplash.com/photo-1560523160-754a9e25c68f?q=80&w=1200&auto=format&fit=crop", caption: "Regional Chapter Launch – Rajkot", event_id: null, created_at: new Date().toISOString() },
-    { id: 32, image_path: "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?q=80&w=1200&auto=format&fit=crop", caption: "Award Ceremony – Best Business 2025", event_id: null, created_at: new Date().toISOString() },
-    { id: 33, image_path: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop", caption: "SABHA Annual Gala Night", event_id: null, created_at: new Date().toISOString() },
-    { id: 34, image_path: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?q=80&w=1200&auto=format&fit=crop", caption: "Member Spotlight Shoot – Mumbai", event_id: null, created_at: new Date().toISOString() },
-    { id: 35, image_path: "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?q=80&w=1200&auto=format&fit=crop", caption: "Community Charity Drive 2025", event_id: null, created_at: new Date().toISOString() },
-    { id: 36, image_path: "https://images.unsplash.com/photo-1541178735493-479c1a27ed24?q=80&w=1200&auto=format&fit=crop", caption: "Founders' Dinner – Vadodara", event_id: null, created_at: new Date().toISOString() }
-  ];
+  return await response.json();
 }
 
 export async function submitBusiness(formData: FormData) {
-  await delay(1000);
-  return { success: true, message: "Business submitted successfully" };
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/businesses`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: formData
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to submit business details");
+  }
+
+  return { success: true, message: resData.message || "Business submitted successfully" };
 }
 
 export async function forgotPassword(email: string) {
@@ -695,107 +616,235 @@ export async function registerConfirm(email: string, otp: string) {
 }
 
 export async function updateProfile(data: FormData) {
-  await delay(1000);
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/user/profile`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: data
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to update profile");
+  }
+
   return {
     success: true,
-    message: "Profile updated successfully",
-    user: {
-      name: (data.get("name") as string) || "Demo User",
-      email: (data.get("email") as string) || "user@example.com",
-      role: "user",
-      phone: (data.get("phone") as string) || "",
-      city: (data.get("city") as string) || "",
-      designation: (data.get("designation") as string) || "",
-      company: (data.get("company") as string) || "",
-      bio: (data.get("bio") as string) || "",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop"
-    }
+    message: resData.message || "Profile updated successfully",
+    user: resData.user
   };
 }
 
 export async function getUserBusiness() {
-  await delay(500);
-  return {
-    id: 99,
-    name: "User Demo Business",
-    status: "approved",
-    category: "Software Development",
-    website: "https://userdemobusiness.com",
-    description: "This is a demo business associated with the logged-in user.",
-    tagline: "Innovative solutions for custom software systems",
-    location: "Ahmedabad, Gujarat",
-    hours: "9:00 AM - 6:00 PM (Mon - Fri)",
-    founded: "2020",
-    team_size: "10-25 members",
-    projects: "30+ projects completed",
-    phone: "+91 98765 43210",
-    email: "contact@userdemobusiness.com",
-    linkedin: "https://linkedin.com/company/userdemobusiness",
-    instagram: "",
-    youtube: "",
-    twitter: "",
-    whatsapp: "+919876543210",
-    services: ["Web Development", "Mobile App Development", "UI/UX Design"]
-  };
+  const token = localStorage.getItem("sabha_token");
+  if (!token) return null;
+
+  const response = await fetch(`${API_BASE_URL}/user/business`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (response.status === 404 || response.status === 401) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to load business details");
+  }
+
+  return await response.json();
 }
 
 export async function fetchAllBusinessesAdmin() {
-  const list = await fetchBusinesses();
-  return list.map(b => ({ ...b, status: "approved" }));
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/admin/businesses`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch businesses for admin");
+  }
+
+  return await response.json();
 }
 
 export async function approveBusiness(id: number) {
-  await delay(500);
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/admin/businesses/${id}/approve`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to approve business");
+  }
+
   return { success: true };
 }
 
 export async function rejectBusiness(id: number, rejectionReason: string) {
-  await delay(500);
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/admin/businesses/${id}/reject`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ rejection_reason: rejectionReason })
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to reject business");
+  }
+
   return { success: true };
 }
 
 export async function createEventAdmin(eventData: any) {
-  await delay(500);
+  const token = localStorage.getItem("sabha_token");
+
+  const response = await fetch(`${API_BASE_URL}/admin/events`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(eventData)
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to create event");
+  }
+
   return { success: true };
 }
 
 export async function fetchUsersAdmin() {
-  await delay(500);
-  return [
-    { id: 1, email: "admin@sabha.com", role: "admin", created_at: new Date().toISOString(), name: "Admin" },
-    { id: 2, email: "user@example.com", role: "user", created_at: new Date().toISOString(), name: "Demo User" }
-  ];
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/users`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch users");
+  }
+
+  return await response.json();
 }
 
 export async function uploadGalleryImage(formData: FormData) {
-  await delay(500);
-  return { success: true, image_url: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop" };
-}
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/gallery/upload`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: formData
+  });
 
-export async function updateStatistic(id: number, statData: { value: string; label: string }) {
-  await delay(500);
-  return { success: true };
-}
+  const resData = await response.json();
 
-export async function fetchSettings() {
-  await delay(300);
-  return {
-    platformName: "Sabha",
-    contactEmail: "hello@sabha.global",
-    contact_email: "hello@sabha.global",
-    response_time: "Within 1 Business Day",
-    coordinators: [
-      { city: "Mumbai Coordinator", contact: "Ravi Sharma", phone: "+91 98200 12345", email: "mumbai@sabha.global" },
-      { city: "Pune Coordinator", contact: "Pooja Verma", phone: "+91 96110 54321", email: "pune@sabha.global" },
-      { city: "Ahmedabad Coordinator", contact: "Dev Patel", phone: "+91 94260 98765", email: "ahmedabad@sabha.global" }
-    ],
-    theme: "light",
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to upload gallery media");
+  }
+
+  return { 
+    success: true, 
+    image_url: resData.gallery_image?.image_path 
   };
 }
 
+export async function updateStatistic(id: number, statData: { value: string; label: string }) {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/statistics/${id}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(statData)
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update statistic");
+  }
+
+  return data;
+}
+
+export async function fetchSettings() {
+  const response = await fetch(`${API_BASE_URL}/settings`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch settings");
+  }
+
+  return await response.json();
+}
+
 export async function updateSettingsAdmin(settingsData: Record<string, any>) {
-  await delay(500);
-  return { success: true };
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/settings`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ settings: settingsData })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update settings");
+  }
+
+  return data;
 }
 
 export async function fetchReviews(businessId: number) {
@@ -820,7 +869,145 @@ export async function submitReview(businessId: number, reviewData: { content: st
   };
 }
 
+export async function getUserRegistrations() {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) return [];
+
+  const response = await fetch(`${API_BASE_URL}/user/registrations`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load registrations");
+  }
+
+  return await response.json();
+}
+
 export async function reserveEventSeat(eventId: number, formData: FormData) {
-  await delay(1000);
-  return { success: true, message: "Seat reserved successfully" };
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/events/${eventId}/reserve`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: formData
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to reserve seat");
+  }
+
+  return data;
+}
+
+export async function getAllEventRegistrations() {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/registrations`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch event registrations");
+  }
+
+  return await response.json();
+}
+
+export async function approveEventRegistration(id: number) {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/registrations/${id}/approve`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to approve registration");
+  }
+
+  return data;
+}
+
+export async function rejectEventRegistration(id: number, reason: string) {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/registrations/${id}/reject`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ rejection_reason: reason })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to reject registration");
+  }
+
+  return data;
+}
+
+export async function toggleAttendance(id: number) {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/registrations/${id}/toggle-attendance`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update attendance status");
+  }
+
+  return data;
+}
+
+export async function checkInTicket(ticketNumber: string) {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/registrations/check-in`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ ticket_number: ticketNumber })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to mark attendance");
+  }
+
+  return data;
 }

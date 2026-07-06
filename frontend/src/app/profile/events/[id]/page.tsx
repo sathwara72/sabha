@@ -22,73 +22,23 @@ import {
   Info,
   ShieldCheck,
 } from "lucide-react";
-import { fetchEvents } from "@/lib/api";
+import { fetchEvents, getUserRegistrations } from "@/lib/api";
+import { assetUrl } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 
 // Mirrors the mock list in profile page
-const REGISTERED_EVENTS = [
-  {
-    id: 1,
-    title: "Sabha Grand Business Summit 2026",
-    date: "Oct 12, 2026",
-    time: "10:00 AM – 5:00 PM",
-    location: "Ahmedabad Exhibition Center, Gujarat",
-    status: "confirmed",
-    price: "₹999",
-    ticket_no: "SABHA-2026-0011",
-    image:
-      "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=1200&auto=format&fit=crop",
-    category: "Conference",
-    type: "Physical",
-    attendees: "500+",
-    description:
-      "The flagship annual summit gathering 500+ Sathwara entrepreneurs, investors, and community leaders across Gujarat for a full-day immersive business experience.",
-    agenda: [
-      "10:00 AM – Inauguration & Welcome Address",
-      "11:00 AM – Keynote: Future of SME Ecosystem",
-      "01:00 PM – Business Referral Networking Lunch",
-      "02:30 PM – Panel Discussion: Digital Transformation",
-      "04:00 PM – Awards & Community Recognition",
-      "05:00 PM – Closing Ceremony",
-    ],
-    notes:
-      "Please carry your QR code / ticket number at entry. Dress code: Business Formal.",
-    paid_on: "Jun 28, 2026",
-  },
-  {
-    id: 2,
-    title: "Harmony Networking Mixer",
-    date: "Oct 15, 2026",
-    time: "6:30 PM – 10:00 PM",
-    location: "DoubleTree by Hilton, Pune",
-    status: "pending",
-    price: "₹499",
-    ticket_no: "SABHA-2026-0042",
-    image:
-      "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1200&auto=format&fit=crop",
-    category: "Networking",
-    type: "Physical",
-    attendees: "120+",
-    description:
-      "A premium evening networking mixer for Sathwara professionals to build partnerships, share referrals, and collaborate over curated conversations.",
-    agenda: [
-      "6:30 PM – Welcome Drinks & Registration",
-      "7:00 PM – Speed Networking Rounds",
-      "8:00 PM – Open Networking Floor",
-      "9:00 PM – Dinner & Awards",
-      "10:00 PM – Closing",
-    ],
-    notes:
-      "Your payment is under verification. You will receive a confirmation email once approved.",
-    paid_on: "Jun 29, 2026",
-  },
-];
-
 const statusConfig: Record<
   string,
   { tKey: string; color: string; bg: string; border: string; icon: any }
 > = {
   confirmed: {
+    tKey: "bookingDetail.status_confirmed",
+    color: "text-emerald-700",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    icon: CheckCircle2,
+  },
+  approved: {
     tKey: "bookingDetail.status_confirmed",
     color: "text-emerald-700",
     bg: "bg-emerald-50",
@@ -116,9 +66,8 @@ export default function BookingDetailPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const { isAuthenticated, isReady } = useAuth();
-  const [event, setEvent] = useState<(typeof REGISTERED_EVENTS)[0] | null>(
-    null
-  );
+  const [event, setEvent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -128,9 +77,49 @@ export default function BookingDetailPage() {
   }, [isReady, isAuthenticated, router]);
 
   useEffect(() => {
-    const found = REGISTERED_EVENTS.find((e) => e.id === Number(id));
-    setEvent(found || null);
-  }, [id]);
+    async function loadRegistration() {
+      if (!isReady || !isAuthenticated) return;
+      try {
+        setLoading(true);
+        const registrations = await getUserRegistrations();
+        const found = registrations.find((r: any) => r.id.toString() === id);
+        if (found && found.event) {
+          const matchedDate = new Date(found.event.date);
+          
+          setEvent({
+            id: found.id,
+            title: found.event.title,
+            date: matchedDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+            time: matchedDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+            location: found.event.location,
+            status: found.status,
+            price: Number(found.amount_paid) === 0 ? "Free" : `₹${Number(found.amount_paid).toLocaleString("en-IN")}`,
+            ticket_no: found.ticket_number,
+            is_attended: found.is_attended,
+            image: assetUrl(found.event.cover_image) || "/placeholder-event.jpg",
+            category: found.event.type || "Event",
+            type: found.event.type === "Virtual" ? "Virtual" : "Physical",
+            attendees: "100+",
+            description: found.event.description || "",
+            agenda: ["Registration & Welcome", "Expert Panel Discussion", "Q&A Session", "Networking Mixer"],
+            notes: found.status === "confirmed" || found.status === "approved"
+              ? "Please carry your QR code / ticket number at entry. Dress code: Business Formal." 
+              : found.status === "rejected"
+              ? `Your registration request was rejected. Reason: ${found.rejection_reason || "None specified"}`
+              : "Your payment is under verification. You will receive a confirmation email once approved.",
+            paid_on: new Date(found.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          });
+        } else {
+          setEvent(null);
+        }
+      } catch (err) {
+        console.error("Failed to load registration detail:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadRegistration();
+  }, [id, isReady, isAuthenticated]);
 
   const handleCopy = () => {
     if (event) {
@@ -140,9 +129,9 @@ export default function BookingDetailPage() {
     }
   };
 
-  if (!isReady || !isAuthenticated) {
+  if (!isReady || !isAuthenticated || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-background font-outfit">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -346,7 +335,7 @@ export default function BookingDetailPage() {
                 {t("bookingDetail.agenda")}
               </h2>
               <ol className="space-y-3">
-                {event.agenda.map((item, i) => (
+                {event.agenda.map((item: any, i: number) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold mt-0.5">
                       {i + 1}
@@ -392,13 +381,19 @@ export default function BookingDetailPage() {
               </div>
 
               {/* Dashed divider */}
-              <div className="flex items-center gap-2 px-5 py-3 border-y border-dashed border-border">
+              <div className="flex items-center justify-between px-5 py-3 border-y border-dashed border-border">
                 <div
                   className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold border ${status.bg} ${status.color} ${status.border}`}
                 >
                   <StatusIcon size={12} />
                   {statusLabel}
                 </div>
+                {event.is_attended && (
+                  <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold border border-emerald-100 bg-emerald-50 text-emerald-700 animate-pulse">
+                    <CheckCircle2 size={12} />
+                    Attended
+                  </div>
+                )}
               </div>
 
               <div className="px-5 py-5 space-y-4">
@@ -408,37 +403,39 @@ export default function BookingDetailPage() {
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <p className="text-sm font-extrabold text-foreground font-mono tracking-wider">
-                      {event.ticket_no}
+                      {event.ticket_no || "Pending Approval"}
                     </p>
-                    <button
-                      onClick={handleCopy}
-                      className="text-primary hover:opacity-70 transition-opacity"
-                      title="Copy ticket number"
-                    >
-                      <AnimatePresence mode="wait">
-                        {copied ? (
-                          <motion.span
-                            key="check"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                            className="inline-block"
-                          >
-                            <CheckCircle2 size={15} className="text-emerald-500" />
-                          </motion.span>
-                        ) : (
-                          <motion.span
-                            key="copy"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                            className="inline-block"
-                          >
-                            <Share2 size={15} />
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </button>
+                    {event.ticket_no && (
+                      <button
+                        onClick={handleCopy}
+                        className="text-primary hover:opacity-70 transition-opacity"
+                        title="Copy ticket number"
+                      >
+                        <AnimatePresence mode="wait">
+                          {copied ? (
+                            <motion.span
+                              key="check"
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                              className="inline-block"
+                            >
+                              <CheckCircle2 size={15} className="text-emerald-500" />
+                            </motion.span>
+                          ) : (
+                            <motion.span
+                              key="copy"
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                              className="inline-block"
+                            >
+                              <Share2 size={15} />
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -470,22 +467,33 @@ export default function BookingDetailPage() {
                   </div>
                 </div>
 
-                {/* Barcode visual */}
-                <div className="mt-2 flex justify-center">
-                  <div className="h-14 w-full rounded-lg bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 flex items-center justify-center gap-px px-4 overflow-hidden">
-                    {Array.from({ length: 38 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="bg-white rounded-sm"
-                        style={{
-                          height: `${Math.random() * 60 + 30}%`,
-                          width: i % 3 === 0 ? "3px" : "2px",
-                          opacity: Math.random() * 0.5 + 0.5,
-                        }}
-                      />
-                    ))}
+                {/* QR code / Barcode visual */}
+                {event.ticket_no && (event.status === "confirmed" || event.status === "approved") ? (
+                  <div className="mt-2 flex flex-col items-center justify-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(event.ticket_no)}`} 
+                      alt="Ticket QR Code" 
+                      className="w-32 h-32 border border-slate-200 rounded-lg p-1 bg-white"
+                    />
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Scan QR at Entrance</span>
                   </div>
-                </div>
+                ) : (
+                  <div className="mt-2 flex justify-center">
+                    <div className="h-14 w-full rounded-lg bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 flex items-center justify-center gap-px px-4 overflow-hidden">
+                      {Array.from({ length: 38 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="bg-white rounded-sm"
+                          style={{
+                            height: `${Math.random() * 60 + 30}%`,
+                            width: i % 3 === 0 ? "3px" : "2px",
+                            opacity: Math.random() * 0.5 + 0.5,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}

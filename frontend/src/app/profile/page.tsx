@@ -10,7 +10,7 @@ import {
   Phone, MessageCircle, Layers, Camera, LogOut, ChevronRight, Calendar
 } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from "@/components/SocialIcons";
-import { getUserBusiness, submitBusiness, updateProfile } from "@/lib/api";
+import { getUserBusiness, submitBusiness, updateProfile, getUserRegistrations } from "@/lib/api";
 import { assetUrl } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 
@@ -22,27 +22,9 @@ export default function ProfilePage() {
   // Active section in the side menu
   const [activeTab, setActiveTab] = useState<"profile" | "business" | "events">("profile");
 
-  // Registered events mock list
-  const [registeredEvents, setRegisteredEvents] = useState([
-    {
-      id: 1,
-      title: "Sabha Grand Business Summit 2026",
-      date: "Oct 12, 2026",
-      location: "Ahmedabad Exhibition Center, Gujarat",
-      status: "confirmed",
-      price: "₹1,499",
-      image: "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      title: "Harmony Networking Mixer",
-      date: "Oct 15, 2026",
-      location: "DoubleTree by Hilton, Pune",
-      status: "pending",
-      price: "₹499",
-      image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=800&auto=format&fit=crop"
-    }
-  ]);
+  // Registered events list
+  const [registeredEvents, setRegisteredEvents] = useState<any[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   // Avatar upload
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -138,6 +120,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isAuthenticated) {
       loadUserBusiness();
+      loadUserRegistrations();
     }
   }, [isAuthenticated]);
 
@@ -170,6 +153,18 @@ export default function ProfilePage() {
       console.error("Failed to load user business:", err);
     } finally {
       setBizLoading(false);
+    }
+  }
+
+  async function loadUserRegistrations() {
+    try {
+      setEventsLoading(true);
+      const data = await getUserRegistrations();
+      setRegisteredEvents(data || []);
+    } catch (err) {
+      console.error("Failed to load user registrations:", err);
+    } finally {
+      setEventsLoading(false);
     }
   }
 
@@ -206,8 +201,10 @@ export default function ProfilePage() {
       setAvatarFile(null);
       setProfileSuccess(t("profile.profile_success"));
       setProfilePassword("");
+      setTimeout(() => setProfileSuccess(""), 4000);
     } catch (err: any) {
       setProfileError(err.message || t("profile.profile_error"));
+      setTimeout(() => setProfileError(""), 5000);
     } finally {
       setProfileLoading(false);
     }
@@ -263,8 +260,10 @@ export default function ProfilePage() {
       setLogoFile(null);
       setCoverFile(null);
       loadUserBusiness();
+      setTimeout(() => setBizSuccess(""), 4000);
     } catch (err: any) {
       setBizError(err.message || "Failed to submit business details.");
+      setTimeout(() => setBizError(""), 5000);
     } finally {
       setBizSubmitting(false);
     }
@@ -985,47 +984,77 @@ export default function ProfilePage() {
                   <p className="mt-2 text-xs text-muted">{t("profile.events_subtitle")}</p>
                 </div>
 
-                {registeredEvents.length === 0 ? (
+                {eventsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent animate-spin" />
+                  </div>
+                ) : registeredEvents.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border py-12 text-center text-sm text-muted">
                     {t("profile.no_events")}
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {registeredEvents.map((evt) => (
-                      <Link
-                        key={evt.id}
-                        href={`/profile/events/${evt.id}`}
-                        className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-white hover:shadow-sm hover:border-primary/20 transition-all group"
-                      >
-                        <div className="h-16 w-28 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-border">
-                          <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{evt.title}</h4>
-                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium mt-1">
-                            <span className="inline-flex items-center gap-1 flex-wrap"><Calendar size={12} /> {evt.date}</span>
-                            <span className="inline-flex items-center gap-1 flex-wrap"><MapPin size={12} /> {evt.location}</span>
-                            <span className="font-semibold text-foreground">{t("profile.paid")}: {evt.price}</span>
+                    {registeredEvents.map((evt) => {
+                      const eventDetails = evt.event;
+                      if (!eventDetails) return null;
+
+                      const eventDate = new Date(eventDetails.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric"
+                      });
+
+                      const ticketPrice = Number(evt.amount_paid) === 0 ? "Free" : `₹${Number(evt.amount_paid).toLocaleString("en-IN")}`;
+                      const coverImg = assetUrl(eventDetails.cover_image) || "/placeholder-event.jpg";
+
+                      const isApproved = evt.status === "approved" || evt.status === "confirmed";
+                      const isRejected = evt.status === "rejected";
+
+                      return (
+                        <Link
+                          key={evt.id}
+                          href={`/profile/events/${evt.id}`}
+                          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-white hover:shadow-sm hover:border-primary/20 transition-all group"
+                        >
+                          <div className="h-16 w-28 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-border">
+                            <img src={coverImg} alt={eventDetails.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                           </div>
-                        </div>
-                        <div className="shrink-0 flex flex-col sm:items-end gap-2 pt-2 sm:pt-0">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide border ${
-                            evt.status === "confirmed"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200/50"
-                              : "bg-amber-50 text-amber-700 border-amber-200/50"
-                          }`}>
-                            {evt.status === "confirmed" ? (
-                              <><CheckCircle2 size={12} /> {t("profile.event_confirmed")}</>
-                            ) : (
-                              <><Clock size={12} /> {t("profile.event_pending")}</>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{eventDetails.title}</h4>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium mt-1">
+                              <span className="inline-flex items-center gap-1 flex-wrap"><Calendar size={12} /> {eventDate}</span>
+                              <span className="inline-flex items-center gap-1 flex-wrap"><MapPin size={12} /> {eventDetails.location}</span>
+                              <span className="font-semibold text-foreground">{t("profile.paid")}: {ticketPrice}</span>
+                            </div>
+                          </div>
+                          <div className="shrink-0 flex flex-col sm:items-end gap-2 pt-2 sm:pt-0">
+                            <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide border ${
+                              isApproved
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200/50"
+                                : isRejected
+                                ? "bg-red-50 text-red-700 border-red-200/50"
+                                : "bg-amber-50 text-amber-700 border-amber-200/50"
+                            }`}>
+                              {isApproved ? (
+                                <><CheckCircle2 size={12} /> {t("profile.event_confirmed")}</>
+                              ) : isRejected ? (
+                                <><XCircle size={12} /> {t("bookingDetail.status_rejected") || "REJECTED"}</>
+                              ) : (
+                                <><Clock size={12} /> {t("profile.event_pending")}</>
+                              )}
+                            </span>
+                            {evt.is_attended && (
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100/70 border border-emerald-200/50 px-2 py-0.5 text-[9px] font-bold text-emerald-800 uppercase tracking-wider animate-pulse self-start sm:self-end">
+                                <CheckCircle2 size={10} /> Attended
+                              </span>
                             )}
-                          </span>
-                          <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-                            {t("profile.view_details")} <ChevronRight size={12} />
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
+                            <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                              {t("profile.view_details")} <ChevronRight size={12} />
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>

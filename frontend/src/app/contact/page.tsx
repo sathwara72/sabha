@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { useLanguage } from "@/lib/language";
+import { fetchSettings } from "@/lib/api";
 
 interface Coordinator {
   city: string;
@@ -65,6 +66,37 @@ export default function ContactPage() {
       border: "border-amber-100"
     }
   ]);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const data = await fetchSettings();
+        if (data.contact_email) setContactEmail(data.contact_email);
+        if (data.response_time) setResponseTime(data.response_time);
+        if (data.coordinators) {
+          const coords = typeof data.coordinators === "string" 
+            ? JSON.parse(data.coordinators) 
+            : data.coordinators;
+          
+          const styledCoords = coords.map((c: any, idx: number) => {
+            const styles = [
+              { bg: "bg-blue-50/50", border: "border-blue-100" },
+              { bg: "bg-emerald-50/50", border: "border-emerald-100" },
+              { bg: "bg-amber-50/50", border: "border-amber-100" },
+            ];
+            return {
+              ...c,
+              ...(styles[idx % styles.length])
+            };
+          });
+          setCoordinators(styledCoords);
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+    }
+    loadSettings();
+  }, []);
 
 
 
