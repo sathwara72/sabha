@@ -6,6 +6,20 @@ function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const originalFetch = globalThis.fetch;
+const fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+  const response = await originalFetch(input, init);
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("sabha_token");
+      localStorage.removeItem("sabha_user");
+      localStorage.removeItem("sabha_auth");
+      window.location.href = "/";
+    }
+  }
+  return response;
+};
+
 export async function fetchBusinesses() {
   const response = await fetch(`${API_BASE_URL}/businesses`, {
     method: "GET",
