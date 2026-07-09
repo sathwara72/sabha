@@ -37,7 +37,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   demoLogin: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  registerSendOtp: (name: string, email: string, password: string) => Promise<{ otp: string }>;
+  registerSendOtp: (name: string, email: string, password: string) => Promise<{ message: string; email: string }>;
   registerConfirm: (email: string, otp: string) => Promise<void>;
   logout: () => void;
   updateLocalUser: (newProfile: UserProfile) => void;
@@ -184,21 +184,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const registerSendOtp = useCallback(async (name: string, email: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/register/send-otp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to send verification code");
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}/register/send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+    } catch {
+      throw new Error("Cannot connect to server. Please make sure the backend is running.");
     }
 
-    return { message: data.message, email: data.email, otp: data.otp };
+    let data: any = {};
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("Unexpected server response. Please try again.");
+    }
+
+    if (!response.ok) {
+      // Extract Laravel validation errors (e.g. duplicate email)
+      if (data.errors) {
+        const firstField = Object.keys(data.errors)[0];
+        const firstMsg = data.errors[firstField]?.[0];
+        throw new Error(firstMsg || data.message || "Validation failed.");
+      }
+      throw new Error(data.message || "Failed to send verification code.");
+    }
+
+    // Do NOT return otp — users must check their email
+    return { message: data.message, email: data.email };
   }, []);
 
   const registerConfirm = useCallback(async (email: string, otp: string) => {

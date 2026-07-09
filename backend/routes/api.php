@@ -15,10 +15,15 @@ Route::post('/forgot-password', [SabhaController::class, 'forgotPassword']);
 Route::get('/businesses', [SabhaController::class, 'getBusinesses']);
 Route::get('/businesses/{id}/reviews', [SabhaController::class, 'getReviews']);
 Route::post('/businesses/{id}/reviews', [SabhaController::class, 'submitReview'])->middleware('auth:sanctum');
+Route::post('/businesses/{id}/inquiry', [SabhaController::class, 'submitBusinessInquiry']);
 Route::get('/events', [SabhaController::class, 'getEvents']);
 Route::get('/statistics', [SabhaController::class, 'getStatistics']);
 Route::get('/gallery', [SabhaController::class, 'getGalleryImages']);
 Route::get('/settings', [SabhaController::class, 'getSettings']);
+Route::get('/hero-images', [SabhaController::class, 'getHeroImages']);
+Route::get('/qr-code', [SabhaController::class, 'generateQrCode']);
+Route::post('/contact', [SabhaController::class, 'submitContactInquiry']);
+Route::get('/categories', [SabhaController::class, 'getCategories']);
 
 // User Submitted Business Route
 Route::post('/businesses', [SabhaController::class, 'submitBusiness'])->middleware('auth:sanctum');
@@ -29,10 +34,16 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::post('/businesses/{id}/approve', [SabhaController::class, 'approveBusiness']);
     Route::post('/businesses/{id}/reject', [SabhaController::class, 'rejectBusiness']);
     Route::post('/events', [SabhaController::class, 'storeEvent']);
+    Route::post('/events/{id}', [SabhaController::class, 'updateEvent']);
     Route::get('/users', [SabhaController::class, 'getUsers']);
     Route::post('/gallery/upload', [SabhaController::class, 'uploadGalleryImage']);
+    Route::delete('/gallery/{id}', [SabhaController::class, 'deleteGalleryImage']);
     Route::post('/statistics/{id}', [SabhaController::class, 'updateStatistic']);
     Route::post('/settings', [SabhaController::class, 'updateSettings']);
+    
+    // Hero Slider Images Management for Admin
+    Route::post('/hero-images', [SabhaController::class, 'storeHeroImage']);
+    Route::delete('/hero-images/{id}', [SabhaController::class, 'deleteHeroImage']);
     
     // Event Booking Management for Admin
     Route::get('/registrations', [SabhaController::class, 'getAllEventRegistrations']);
@@ -40,6 +51,11 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::post('/registrations/{id}/reject', [SabhaController::class, 'rejectEventRegistration']);
     Route::post('/registrations/{id}/toggle-attendance', [SabhaController::class, 'toggleAttendance']);
     Route::post('/registrations/check-in', [SabhaController::class, 'checkInTicket']);
+
+    // Business Category Management
+    Route::get('/categories', [SabhaController::class, 'getAllCategories']);
+    Route::post('/categories', [SabhaController::class, 'storeCategory']);
+    Route::delete('/categories/{id}', [SabhaController::class, 'deleteCategory']);
 });
 
 Route::get('/user', function (Request $request) {

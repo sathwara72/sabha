@@ -21,7 +21,7 @@ export default function RegisterPage() {
   
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [simulatedOtp, setSimulatedOtp] = useState("");
+  const [otpSentEmail, setOtpSentEmail] = useState("");
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +30,14 @@ export default function RegisterPage() {
       setError("Passwords do not match!");
       return;
     }
+    if (phone.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await registerSendOtp(name, email, password);
-      if (res.otp) {
-        setSimulatedOtp(res.otp);
-      }
+      setOtpSentEmail(res.email || email);
       setStep(2);
     } catch (err: any) {
       setError(err.message || "Registration validation failed. Try again.");
@@ -91,10 +93,10 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {step === 2 && simulatedOtp && (
-            <div className="mb-6 rounded-xl bg-amber-50 border border-amber-100 p-4 text-center text-sm font-semibold text-amber-700 flex items-center gap-2.5">
-              <ShieldCheck className="h-5 w-5 text-amber-700 shrink-0 animate-bounce" />
-              <span>Simulated Email OTP code received: <strong>{simulatedOtp}</strong>. Enter it below to register.</span>
+          {step === 2 && otpSentEmail && (
+            <div className="mb-6 rounded-xl bg-green-50 border border-green-100 p-4 text-sm font-semibold text-green-700 flex items-center gap-2.5">
+              <ShieldCheck className="h-5 w-5 text-green-600 shrink-0" />
+              <span>A 6-digit OTP has been sent to <strong>{otpSentEmail}</strong>. Please check your inbox.</span>
             </div>
           )}
 
@@ -141,8 +143,11 @@ export default function RegisterPage() {
                     type="tel"
                     required
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 99999 55555"
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      setPhone(val);
+                    }}
+                    placeholder="10-digit mobile number"
                     className="w-full rounded-xl border border-border bg-white pl-11 pr-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary transition-colors"
                   />
                 </div>

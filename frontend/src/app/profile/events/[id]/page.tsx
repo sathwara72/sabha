@@ -25,6 +25,7 @@ import {
 import { fetchEvents, getUserRegistrations } from "@/lib/api";
 import { assetUrl } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
+import { QRCodeComponent } from "@/components/QRCodeComponent";
 
 // Mirrors the mock list in profile page
 const statusConfig: Record<
@@ -96,12 +97,12 @@ export default function BookingDetailPage() {
             price: Number(found.amount_paid) === 0 ? "Free" : `₹${Number(found.amount_paid).toLocaleString("en-IN")}`,
             ticket_no: found.ticket_number,
             is_attended: found.is_attended,
-            image: assetUrl(found.event.cover_image) || "/placeholder-event.jpg",
+            image: assetUrl(found.event.image || found.event.cover_image) || "/placeholder-event.jpg",
             category: found.event.type || "Event",
             type: found.event.type === "Virtual" ? "Virtual" : "Physical",
             attendees: "100+",
             description: found.event.description || "",
-            agenda: ["Registration & Welcome", "Expert Panel Discussion", "Q&A Session", "Networking Mixer"],
+            agenda: found.event.agenda || null,
             notes: found.status === "confirmed" || found.status === "approved"
               ? "Please carry your QR code / ticket number at entry. Dress code: Business Formal." 
               : found.status === "rejected"
@@ -325,28 +326,30 @@ export default function BookingDetailPage() {
             </motion.div>
 
             {/* Agenda */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="glass-card p-6 space-y-4"
-            >
-              <h2 className="text-base font-bold text-foreground border-b border-border pb-2">
-                {t("bookingDetail.agenda")}
-              </h2>
-              <ol className="space-y-3">
-                {event.agenda.map((item: any, i: number) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold mt-0.5">
-                      {i + 1}
-                    </span>
-                    <span className="text-sm font-medium text-foreground">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </motion.div>
+            {event.agenda && event.agenda.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="glass-card p-6 space-y-4"
+              >
+                <h2 className="text-base font-bold text-foreground border-b border-border pb-2">
+                  {t("bookingDetail.agenda")}
+                </h2>
+                <ol className="space-y-3">
+                  {event.agenda.map((item: any, i: number) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold mt-0.5">
+                        {i + 1}
+                      </span>
+                      <span className="text-sm font-medium text-foreground">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </motion.div>
+            )}
 
             {/* Notes */}
             {event.notes && (
@@ -470,10 +473,10 @@ export default function BookingDetailPage() {
                 {/* QR code / Barcode visual */}
                 {event.ticket_no && (event.status === "confirmed" || event.status === "approved") ? (
                   <div className="mt-2 flex flex-col items-center justify-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(event.ticket_no)}`} 
-                      alt="Ticket QR Code" 
-                      className="w-32 h-32 border border-slate-200 rounded-lg p-1 bg-white"
+                    <QRCodeComponent 
+                      value={event.ticket_no} 
+                      size={120} 
+                      className="border border-slate-200 rounded-lg p-1 bg-white"
                     />
                     <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Scan QR at Entrance</span>
                   </div>

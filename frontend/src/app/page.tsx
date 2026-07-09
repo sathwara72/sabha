@@ -12,8 +12,10 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { fetchBusinesses, fetchEvents, fetchStatistics } from "@/lib/api";
+import { fetchBusinesses, fetchEvents, fetchStatistics, fetchHeroImages } from "@/lib/api";
+import { assetUrl } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
+import { useAuth } from "@/lib/auth";
 
 interface Business {
   id: number;
@@ -41,21 +43,21 @@ interface Stat {
   value: string;
 }
 
-const heroImages = [
-  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=2000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000&auto=format&fit=crop"
-];
-
 export default function Home() {
   const { t } = useLanguage();
+  const { isAuthenticated, openRegister } = useAuth();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [stats, setStats] = useState<Stat[]>([
-    { label: "Active Members", value: "500+" },
-    { label: "Businesses Registered", value: "120+" },
-    { label: "Events Hosted", value: "50+" },
+    { label: "Active Members", value: "5000+" },
+    { label: "Businesses Registered", value: "1200+" },
+    { label: "Events Hosted", value: "150+" },
+  ]);
+  const [heroImages, setHeroImages] = useState<string[]>([
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000&auto=format&fit=crop"
   ]);
 
   // Map known backend stat labels to translation keys so they localize.
@@ -81,10 +83,11 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [bizData, eventData, statData] = await Promise.all([
+        const [bizData, eventData, statData, heroData] = await Promise.all([
           fetchBusinesses(),
           fetchEvents(),
           fetchStatistics(),
+          fetchHeroImages().catch(() => []),
         ]);
         
         // Defensive uniqueness filters
@@ -101,6 +104,18 @@ export default function Home() {
         setBusinesses(uniqueBiz);
         setEvents(uniqueEvents);
         if (uniqueStats && uniqueStats.length > 0) setStats(uniqueStats);
+
+        const dynamicHeroImages = (heroData || []).map((item: any) => {
+          const path = item.image_path;
+          if (path.startsWith("http://") || path.startsWith("https://")) {
+            return path;
+          }
+          return assetUrl(path);
+        });
+
+        if (dynamicHeroImages && dynamicHeroImages.length > 0) {
+          setHeroImages(dynamicHeroImages);
+        }
       } catch (error) {
         console.error("Error loading live data:", error);
       } finally {
@@ -111,11 +126,20 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (heroImages.length === 0) return;
     const timer = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroImages.length]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background">
@@ -141,12 +165,21 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col items-center gap-3 sm:flex-row w-full sm:w-auto">
-              <Link
-                href="/register"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] sm:w-auto cursor-pointer"
-              >
-                {t("nav.register")} <ArrowRight size={18} />
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  href="/profile"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] sm:w-auto cursor-pointer"
+                >
+                  {t("nav.profile") || "Go to Profile"} <ArrowRight size={18} />
+                </Link>
+              ) : (
+                <button
+                  onClick={openRegister}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] sm:w-auto cursor-pointer"
+                >
+                  {t("nav.register")} <ArrowRight size={18} />
+                </button>
+              )}
               <Link
                 href="/events"
                 className="inline-flex w-full items-center justify-center rounded-xl border border-border bg-white px-7 py-3.5 text-base font-semibold text-foreground transition-colors hover:bg-surface sm:w-auto cursor-pointer"
@@ -195,7 +228,7 @@ export default function Home() {
       {/* Stats */}
       <section className="border-b border-border bg-surface">
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-6 py-14 text-center sm:grid-cols-3">
-          {stats.map((stat, i) => (
+          {stats.slice(0, 3).map((stat, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 12 }}

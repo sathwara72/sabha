@@ -18,10 +18,14 @@ class Event extends Model
         'price_normal',
         'price_verified',
         'event_code',
+        'agenda',
+        'speakers',
     ];
 
     protected $casts = [
         'date' => 'datetime',
+        'agenda' => 'array',
+        'speakers' => 'array',
     ];
 
     public function registrations(): HasMany

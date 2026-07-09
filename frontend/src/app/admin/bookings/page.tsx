@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   getAllEventRegistrations,
   approveEventRegistration,
@@ -57,6 +58,20 @@ export default function AdminBookingsPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (previewImage || isScannerOpen) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [previewImage, isScannerOpen]);
 
   async function loadData() {
     try {
@@ -176,10 +191,10 @@ export default function AdminBookingsPage() {
   const rejected = registrations.filter(r => r.status === "rejected").length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Event bookings</h1>
+        <div className="flex flex-col">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">Event bookings</h1>
           <p className="text-sm text-muted">Review, verify payments, and approve event seat registrations</p>
         </div>
         <div className="flex items-center gap-3">
@@ -202,7 +217,7 @@ export default function AdminBookingsPage() {
       </div>
 
       {/* Stats Banner */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {[
           { label: "Total Bookings", value: total, color: "border-border text-foreground" },
           { label: "Pending Review", value: pending, color: "border-amber-200 text-amber-600 bg-amber-50/20" },
@@ -224,7 +239,7 @@ export default function AdminBookingsPage() {
       </div>
 
       {/* Bookings List */}
-      <div className="space-y-4">
+      <div>
         {loading ? (
           <div className="py-20 text-center text-sm text-muted">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent mr-2" />
@@ -235,175 +250,156 @@ export default function AdminBookingsPage() {
             No event booking requests found.
           </div>
         ) : (
-          <AnimatePresence>
-            {registrations.map((reg) => (
-              <motion.div
-                key={reg.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="glass-card p-6 border border-border"
-              >
-                <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
-                  {/* Grid section */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
-                    {/* User Profile */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence>
+              {registrations.map((reg) => (
+                <motion.div
+                  key={reg.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="glass-card p-4 border border-border flex flex-col justify-between h-full bg-white rounded-2xl"
+                >
+                  <div className="flex flex-col justify-between h-full gap-3">
                     <div className="space-y-3">
-                      <p className="text-xs font-bold text-muted uppercase tracking-wider">Attendee Info</p>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-lg font-bold text-primary">
-                          {reg.user?.name?.[0] ?? "?"}
+                      {/* Attendee Info */}
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Attendee Info</p>
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-base font-bold text-primary">
+                            {reg.user?.name?.[0] ?? "?"}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-bold text-foreground truncate">{reg.user?.name || "Unknown"}</h4>
+                            <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                              <Mail size={11} /> {reg.user?.email}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <h4 className="text-sm font-bold text-foreground truncate">{reg.user?.name || "Unknown"}</h4>
-                          <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                            <Mail size={12} /> {reg.user?.email}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-1">
-                        <span className={`inline-flex items-center gap-1 rounded bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                          reg.ticket_type === "verified" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : "text-muted"
-                        }`}>
-                          {reg.ticket_type === "verified" ? "⭐ Sabha Member" : "Standard Tier"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Event Detail */}
-                    <div className="space-y-3">
-                      <p className="text-xs font-bold text-muted uppercase tracking-wider">Event Details</p>
-                      <div>
-                        <h4 className="text-sm font-bold text-foreground leading-snug">{reg.event?.title || "Unknown Event"}</h4>
-                        <span className="inline-block rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary mt-1">
-                          {reg.event?.type}
-                        </span>
-                      </div>
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        <p className="flex items-center gap-1.5"><Calendar size={12} className="text-primary" /> {new Date(reg.event?.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
-                        <p className="flex items-center gap-1.5"><MapPin size={12} className="text-primary" /> {reg.event?.location}</p>
-                      </div>
-                    </div>
-
-                    {/* Ticket and Payment Details */}
-                    <div className="space-y-3">
-                      <p className="text-xs font-bold text-muted uppercase tracking-wider">Payment & Ticket</p>
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground">Ticket No: <span className="font-semibold text-foreground font-mono">{reg.ticket_number || "Pending Approval"}</span></p>
-                        <p className="text-xs text-muted-foreground">Amount Paid: <span className="font-bold text-primary">₹{Number(reg.amount_paid).toLocaleString("en-IN")}</span></p>
-                        <p className="text-xs text-muted-foreground">Status: 
-                          <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide inline-block ${
-                            reg.status === "pending"
-                              ? "bg-amber-50 text-amber-700 border border-amber-100"
-                              : reg.status === "approved" || reg.status === "confirmed"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                              : "bg-red-50 text-red-700 border border-red-100"
-                          }`}>
-                            {reg.status}
+                        <div className="mt-1">
+                          <span className={`inline-flex items-center gap-1 rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${reg.ticket_type === "verified" ? "text-emerald-700 bg-emerald-50 border-emerald-100" : "text-muted"
+                            }`}>
+                            {reg.ticket_type === "verified" ? "⭐ Sabha Member" : "Standard Tier"}
                           </span>
-                        </p>
+                        </div>
                       </div>
 
-                      {/* Payment Screenshot Proof */}
-                      {reg.payment_screenshot ? (
-                        <div className="flex items-center gap-2">
+                      {/* Subtle Separator */}
+                      <div className="border-t border-border/80" />
+
+                      {/* Ticket and Payment Details */}
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Payment & Ticket</p>
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground">Ticket No: <span className="font-semibold text-foreground font-mono">{reg.ticket_number || "Pending Approval"}</span></p>
+                        </div>
+
+                        {/* Payment Screenshot Proof */}
+                        {reg.payment_screenshot ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setPreviewImage(assetUrl(reg.payment_screenshot!))}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer"
+                            >
+                              <FileText size={14} /> View Receipt
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-red-500 font-semibold flex items-center gap-1">
+                            <Info size={12} /> No screenshot uploaded
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions Column */}
+                    <div className="border-t border-border/80 pt-3 mt-auto">
+                      {reg.status === "pending" ? (
+                        <div className="flex items-center gap-2 w-full">
                           <button
-                            onClick={() => setPreviewImage(assetUrl(reg.payment_screenshot!))}
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer"
+                            onClick={() => handleApprove(reg.id)}
+                            className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
                           >
-                            <FileText size={14} /> View Receipt
+                            <CheckCircle2 size={12} />
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleReject(reg.id)}
+                            className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl border border-red-100 bg-red-50 py-2 text-xs font-semibold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98] cursor-pointer"
+                          >
+                            <XCircle size={12} />
+                            Reject
                           </button>
                         </div>
                       ) : (
-                        <p className="text-xs text-red-500 font-semibold flex items-center gap-1">
-                          <Info size={12} /> No screenshot uploaded
-                        </p>
+                        <div className="w-full flex flex-col gap-2">
+                          {reg.status === "rejected" && reg.rejection_reason && (
+                            <p className="text-[10px] text-red-500 bg-red-50 border border-red-100/50 rounded-lg p-1.5 text-left max-w-full leading-relaxed">
+                              <strong>Reason:</strong> {reg.rejection_reason}
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold text-muted justify-center shrink-0">
+                              <ShieldCheck size={12} className={reg.status === "approved" || reg.status === "confirmed" ? "text-primary" : "text-muted"} />
+                              {reg.status === "approved" || reg.status === "confirmed" ? "Verified" : "Rejected"}
+                            </div>
+
+                            {(reg.status === "approved" || reg.status === "confirmed") && (
+                              <button
+                                onClick={() => handleToggleAttendance(reg.id)}
+                                className={`inline-flex items-center justify-center gap-1 rounded-xl border px-2.5 py-1 text-[10px] font-bold cursor-pointer transition-all active:scale-[0.98] shrink-0 ${reg.is_attended
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                                  }`}
+                              >
+                                <span className={`h-1.5 w-1.5 rounded-full ${reg.is_attended ? "bg-emerald-600 animate-pulse" : "bg-slate-400"}`} />
+                                {reg.is_attended ? "Attended" : "Attendance"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
-
-                  {/* Actions Column */}
-                  <div className="flex items-center xl:flex-col gap-2.5 w-full xl:w-auto xl:border-l xl:border-border xl:pl-6 pt-4 xl:pt-0 shrink-0">
-                    {reg.status === "pending" ? (
-                      <>
-                        <button
-                          onClick={() => handleApprove(reg.id)}
-                          className="flex-1 xl:flex-none w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4.5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
-                        >
-                          <CheckCircle2 size={14} />
-                          Approve Seat
-                        </button>
-                        <button
-                          onClick={() => handleReject(reg.id)}
-                          className="flex-1 xl:flex-none w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-4.5 py-2.5 text-xs font-semibold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98] cursor-pointer"
-                        >
-                          <XCircle size={14} />
-                          Reject Request
-                        </button>
-                      </>
-                    ) : (
-                      <div className="w-full space-y-2">
-                        {reg.status === "rejected" && reg.rejection_reason && (
-                          <p className="text-[10px] text-red-500 bg-red-50 border border-red-100/50 rounded-lg p-2 text-left mb-2 max-w-[200px] leading-relaxed">
-                            <strong>Reason:</strong> {reg.rejection_reason}
-                          </p>
-                        )}
-                        <div className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-bold text-muted w-full justify-center">
-                          <ShieldCheck size={14} className={reg.status === "approved" || reg.status === "confirmed" ? "text-primary" : "text-muted"} />
-                          {reg.status === "approved" || reg.status === "confirmed" ? "Verified seat" : "Rejected"}
-                        </div>
-
-                        {(reg.status === "approved" || reg.status === "confirmed") && (
-                          <button
-                            onClick={() => handleToggleAttendance(reg.id)}
-                            className={`w-full inline-flex items-center justify-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-bold cursor-pointer transition-all active:scale-[0.98] ${
-                              reg.is_attended 
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" 
-                                : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                            }`}
-                          >
-                            <span className={`h-2 w-2 rounded-full ${reg.is_attended ? "bg-emerald-600 animate-pulse" : "bg-slate-400"}`} />
-                            {reg.is_attended ? "Marked: Attended" : "Mark Attendance"}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         )}
       </div>
 
       {/* Image Preview Lightbox Modal */}
-      {previewImage && (
-        <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      {previewImage && typeof window !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={() => setPreviewImage(null)}
         >
-          <div className="relative max-w-3xl max-h-[85vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-            <button
-              onClick={() => setPreviewImage(null)}
-              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
-            >
-              <X size={18} />
-            </button>
+          {/* Close Button */}
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 md:top-6 md:right-6 z-10 p-2.5 rounded-full bg-white/15 text-white hover:bg-white/25 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
+          >
+            <X size={22} />
+          </button>
+
+          {/* Centered Receipt Image */}
+          <div className="max-w-[95vw] max-h-[88vh] flex items-center justify-center p-2" onClick={e => e.stopPropagation()}>
             <img
               src={previewImage}
               alt="Payment receipt proof"
-              className="rounded-xl max-w-full max-h-[85vh] object-contain shadow-2xl"
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/10"
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* QR Code Scanner / Attendance Check-in Modal */}
-      {isScannerOpen && (
+      {isScannerOpen && typeof window !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-[340px] overflow-hidden border border-border shadow-2xl flex flex-col">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-4.5 py-3 border-b border-border">
               <div className="flex items-center gap-2">
@@ -420,7 +416,7 @@ export default function AdminBookingsPage() {
 
             {/* Modal Content */}
             <div className="p-4.5 space-y-4 flex-1 overflow-y-auto">
-              
+
               {/* Scan Results Screen */}
               {scanResult ? (
                 <div className="text-center py-4 space-y-3">
@@ -445,7 +441,7 @@ export default function AdminBookingsPage() {
                       </p>
                     </>
                   )}
-                  
+
                   <div className="pt-2 flex items-center gap-2.5 justify-center">
                     <button
                       onClick={() => setScanResult(null)}
@@ -467,7 +463,7 @@ export default function AdminBookingsPage() {
                   {/* Camera view container */}
                   <div className="relative rounded-xl overflow-hidden bg-slate-900 h-[180px] w-full flex flex-col items-center justify-center border border-slate-800">
                     <div id="qr-reader" className="w-full h-full overflow-hidden [&_video]:object-cover [&_video]:w-full [&_video]:h-full" />
-                    
+
                     {/* Overlay target frame */}
                     <div className="absolute inset-0 border-[20px] border-black/40 pointer-events-none flex items-center justify-center">
                       <div className="w-[110px] h-[110px] border-2 border-dashed border-primary relative">
@@ -475,7 +471,7 @@ export default function AdminBookingsPage() {
                         <div className="absolute left-0 right-0 h-0.5 bg-primary/80 top-0 animate-[scan_2s_ease-in-out_infinite]" />
                       </div>
                     </div>
-                    
+
                     {scanningLoading && (
                       <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2">
                         <div className="inline-block animate-spin rounded-full h-6 w-6 border-4 border-primary border-t-transparent" />
@@ -518,7 +514,8 @@ export default function AdminBookingsPage() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style>{`

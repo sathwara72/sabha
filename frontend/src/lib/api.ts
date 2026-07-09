@@ -1,12 +1,40 @@
 // Temporary Dummy Data implementation for showcase
 // Original fetch implementations are replaced with mock delays
-import { API_BASE_URL } from "@/lib/config";
+import { API_BASE_URL, API_ORIGIN } from "@/lib/config";
 
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function fetchBusinesses() {
+  const response = await fetch(`${API_BASE_URL}/businesses`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch businesses");
+  }
+
+  const data = await response.json();
+
+  return data.map((b: any) => {
+    const resolveUrl = (path: string | null) => {
+      if (!path) return "";
+      if (/^https?:\/\//i.test(path)) return path;
+      return `${API_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`;
+    };
+    return {
+      ...b,
+      logo: resolveUrl(b.logo),
+      cover_image: resolveUrl(b.cover_image)
+    };
+  });
+}
+
+export async function dummyFetchBusinesses() {
   await delay(500);
   return [
     {
@@ -576,6 +604,74 @@ export async function fetchGallery() {
   return await response.json();
 }
 
+export async function fetchHeroImages() {
+  const response = await fetch(`${API_BASE_URL}/hero-images`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch hero images");
+  }
+
+  return await response.json();
+}
+
+export async function uploadHeroImage(formData: FormData) {
+  const token = localStorage.getItem("sabha_token");
+  const response = await fetch(`${API_BASE_URL}/admin/hero-images`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: formData
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to upload hero image");
+  }
+
+  return await response.json();
+}
+
+export async function deleteHeroImage(id: number | string) {
+  const token = localStorage.getItem("sabha_token");
+  const response = await fetch(`${API_BASE_URL}/admin/hero-images/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete hero image");
+  }
+
+  return await response.json();
+}
+
+export async function deleteGalleryImage(id: number | string) {
+  const token = localStorage.getItem("sabha_token");
+  const response = await fetch(`${API_BASE_URL}/admin/gallery/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete gallery image");
+  }
+
+  return await response.json();
+}
+
 export async function submitBusiness(formData: FormData) {
   const token = localStorage.getItem("sabha_token");
   
@@ -726,20 +822,56 @@ export async function rejectBusiness(id: number, rejectionReason: string) {
 export async function createEventAdmin(eventData: any) {
   const token = localStorage.getItem("sabha_token");
 
+  const isFormData = eventData instanceof FormData;
+
+  const headers: Record<string, string> = {
+    "Accept": "application/json",
+    "Authorization": `Bearer ${token}`
+  };
+
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(`${API_BASE_URL}/admin/events`, {
     method: "POST",
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: JSON.stringify(eventData)
+    headers,
+    body: isFormData ? eventData : JSON.stringify(eventData)
   });
 
   const resData = await response.json();
 
   if (!response.ok) {
     throw new Error(resData.message || "Failed to create event");
+  }
+
+  return { success: true };
+}
+
+export async function updateEventAdmin(id: number | string, eventData: any) {
+  const token = localStorage.getItem("sabha_token");
+
+  const isFormData = eventData instanceof FormData;
+
+  const headers: Record<string, string> = {
+    "Accept": "application/json",
+    "Authorization": `Bearer ${token}`
+  };
+
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const response = await fetch(`${API_BASE_URL}/admin/events/${id}`, {
+    method: "POST",
+    headers,
+    body: isFormData ? eventData : JSON.stringify(eventData)
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to update event");
   }
 
   return { success: true };
@@ -848,25 +980,41 @@ export async function updateSettingsAdmin(settingsData: Record<string, any>) {
 }
 
 export async function fetchReviews(businessId: number) {
-  await delay(500);
-  return [
-    { id: 1, content: "Great service and very professional.", rating: 5, user: { name: "John Doe" }, created_at: new Date().toISOString() },
-    { id: 2, content: "Highly recommend their products.", rating: 4, user: { name: "Jane Smith" }, created_at: new Date().toISOString() }
-  ];
+  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}/reviews`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch reviews");
+  }
+
+  return await response.json();
 }
 
 export async function submitReview(businessId: number, reviewData: { content: string; rating: number }) {
-  await delay(500);
-  return {
-    success: true,
-    review: {
-      id: Date.now(),
-      content: reviewData.content,
-      rating: reviewData.rating,
-      user: { name: "Demo User" },
-      created_at: new Date().toISOString()
-    }
-  };
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}/reviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(reviewData)
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to submit review");
+  }
+
+  return resData;
 }
 
 export async function getUserRegistrations() {
@@ -1009,5 +1157,108 @@ export async function checkInTicket(ticketNumber: string) {
     throw new Error(data.message || "Failed to mark attendance");
   }
 
+  return data;
+}
+
+export async function submitContactInquiry(inquiryData: {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  category?: string;
+}) {
+  const response = await fetch(`${API_BASE_URL}/contact`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify(inquiryData)
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to submit inquiry");
+  }
+
+  return data;
+}
+
+export async function submitBusinessInquiry(businessId: number, inquiryData: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  const response = await fetch(`${API_BASE_URL}/businesses/${businessId}/inquiry`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify(inquiryData)
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to submit inquiry");
+  }
+
+  return data;
+}
+
+// ─── Business Categories ─────────────────────────────────────────────────────
+
+export async function fetchCategories(): Promise<string[]> {
+  const response = await fetch(`${API_BASE_URL}/categories`, {
+    method: "GET",
+    headers: { "Accept": "application/json" }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to fetch categories");
+  return data;
+}
+
+export async function fetchAdminCategories(): Promise<{ id: number; name: string; sort_order: number; is_active: boolean }[]> {
+  const token = localStorage.getItem("sabha_token");
+  const response = await fetch(`${API_BASE_URL}/admin/categories`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` })
+    }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to fetch admin categories");
+  return data;
+}
+
+export async function storeCategory(name: string): Promise<any> {
+  const token = localStorage.getItem("sabha_token");
+  const response = await fetch(`${API_BASE_URL}/admin/categories`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` })
+    },
+    body: JSON.stringify({ name })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to add category");
+  return data;
+}
+
+export async function deleteCategory(id: number): Promise<any> {
+  const token = localStorage.getItem("sabha_token");
+  const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` })
+    }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to delete category");
   return data;
 }
