@@ -138,49 +138,45 @@ export default function GalleryPage() {
 
       {/* Stats Section */}
       <section className="border-b border-border bg-surface">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-            <div className="glass-card flex flex-col justify-between p-7 md:col-span-2">
-              <div>
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <Camera size={22} />
-                </div>
-                <h2 className="text-xl font-semibold text-foreground">{t("gallery.visual_legacy_title")}</h2>
-                <p className="mt-3 text-sm leading-relaxed text-muted">
+        <div className="mx-auto max-w-7xl px-6 py-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <div className="glass-card flex items-start gap-4 p-5 md:col-span-2">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                <Camera size={20} />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-base font-semibold text-foreground">{t("gallery.visual_legacy_title")}</h2>
+                <p className="text-xs leading-relaxed text-muted">
                   {t("gallery.visual_legacy_desc")}
                 </p>
               </div>
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-medium text-primary">
-                  {gallery.length} {t("gallery.uploads")}
-                </span>
-                <span className="rounded-full bg-primary-soft px-4 py-1.5 text-sm font-medium text-primary">
-                  {eventFolders.length} {t("gallery.folders")}
-                </span>
+            </div>
+
+            <div className="glass-card flex items-center gap-4 p-5">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                <Users size={20} />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-foreground leading-none">{stats.members}</p>
+                <p className="mt-1.5 text-xs font-medium text-muted">{t("gallery.members")}</p>
               </div>
             </div>
 
-            <div className="glass-card flex flex-col items-center justify-center p-7 text-center">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Users size={22} />
+            <div className="glass-card flex items-center gap-4 p-5">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                <Target size={20} />
               </div>
-              <p className="text-4xl font-bold text-foreground sm:text-5xl">{stats.members}</p>
-              <p className="mt-2 text-sm font-medium text-muted">{t("gallery.members")}</p>
-            </div>
-
-            <div className="glass-card flex flex-col items-center justify-center p-7 text-center">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Target size={22} />
+              <div>
+                <p className="text-3xl font-bold text-foreground leading-none">{stats.cities}</p>
+                <p className="mt-1.5 text-xs font-medium text-muted">{t("gallery.cities")}</p>
               </div>
-              <p className="text-4xl font-bold text-foreground sm:text-5xl">{stats.cities}</p>
-              <p className="mt-2 text-sm font-medium text-muted">{t("gallery.cities")}</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Main Gallery Section */}
-      <section className="mx-auto max-w-7xl px-6 py-16 lg:py-20 space-y-16">
+      <section className="mx-auto max-w-7xl px-6 py-16 lg:py-10 space-y-10">
         {loading ? (
           <div className="py-20 text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
@@ -189,7 +185,7 @@ export default function GalleryPage() {
         ) : (
           <>
             {/* 1. Event Folders Section */}
-            <div className="space-y-6">
+            <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 rounded-full bg-primary" />
                 <h2 className="text-2xl font-bold text-foreground">{t("gallery.event_folders")}</h2>
@@ -280,7 +276,7 @@ export default function GalleryPage() {
             </div>
 
             {/* 2. Common Gallery Section */}
-            <div className="space-y-6 pt-6 border-t border-border">
+            <div className="space-y-3 pt-4 border-t border-border">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 rounded-full bg-accent" />
                 <h2 className="text-2xl font-bold text-foreground">{t("gallery.common_gallery")}</h2>
@@ -290,7 +286,7 @@ export default function GalleryPage() {
               {groupedGallery.common.length === 0 ? (
                 <p className="text-sm text-muted italic">{t("gallery.no_common")}</p>
               ) : (
-                <div className="columns-1 gap-6 space-y-6 md:columns-2 lg:columns-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {groupedGallery.common.map((item) => {
                     const isVideo = isVideoFile(item.image_path);
 
@@ -301,14 +297,14 @@ export default function GalleryPage() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         onClick={() => setSingleActiveMedia(item)}
-                        className={`group relative break-inside-avoid overflow-hidden rounded-2xl border cursor-pointer ${
+                        className={`group relative aspect-square overflow-hidden rounded-2xl border cursor-pointer ${
                           isVideo 
                             ? "border-accent/40 shadow-[0_0_15px_rgba(244,63,94,0.08)] bg-slate-950" 
                             : "border-border bg-white shadow-sm"
                         }`}
                       >
                         {isVideo ? (
-                          <div className="relative w-full aspect-video flex items-center justify-center bg-black">
+                          <div className="relative w-full h-full flex items-center justify-center bg-black">
                             <video
                               src={getMediaUrl(item.image_path)}
                               className="w-full h-full object-cover opacity-80"
@@ -317,32 +313,31 @@ export default function GalleryPage() {
                             />
                             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors" />
                             {/* Play button overlay for video */}
-                            <div className="absolute h-14 w-14 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                              <Play size={24} className="ml-1" />
+                            <div className="absolute h-10 w-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <Play size={18} className="ml-0.5" />
                             </div>
-                            <span className="absolute bottom-3 left-3 flex items-center gap-1 text-[10px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
-                              <Film size={10} /> {t("gallery.video")}
+                            <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 text-[9px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
+                              <Film size={9} /> {t("gallery.video")}
                             </span>
+                            {item.caption && (
+                              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end pt-8">
+                                <h3 className="text-[11px] font-semibold text-white line-clamp-2">{item.caption}</h3>
+                              </div>
+                            )}
                           </div>
                         ) : (
-                          <div className="relative">
+                          <div className="relative w-full h-full">
                             <img
                               src={getMediaUrl(item.image_path)}
-                              className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                               alt={item.caption || "Gallery image"}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
-                              <span className="mb-2 w-fit rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold text-white backdrop-blur-sm uppercase">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
+                              <span className="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm uppercase">
                                 {t("gallery.image")}
                               </span>
-                              {item.caption && <h3 className="text-sm font-semibold text-white">{item.caption}</h3>}
+                              {item.caption && <h3 className="text-xs font-semibold text-white line-clamp-2">{item.caption}</h3>}
                             </div>
-                          </div>
-                        )}
-                        {/* Display caption for video card */}
-                        {isVideo && item.caption && (
-                          <div className="p-4 bg-slate-950 text-white border-t border-accent/25">
-                            <h3 className="text-sm font-medium line-clamp-1">{item.caption}</h3>
                           </div>
                         )}
                       </motion.div>

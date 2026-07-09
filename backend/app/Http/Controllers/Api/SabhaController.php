@@ -11,11 +11,15 @@ use App\Models\User;
 use App\Models\Setting;
 use App\Models\Review;
 use App\Models\EventRegistration;
+use App\Models\HeroImage;
+use App\Models\BusinessCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
 
 class SabhaController extends Controller
 {
@@ -33,11 +37,43 @@ class SabhaController extends Controller
 
     public function getEvents()
     {
-        return response()->json(Event::with('galleryImages')->get());
+        return response()->json(Event::with(['galleryImages', 'approvedRegistrations.user'])->get());
     }
 
     public function getStatistics()
     {
+        try {
+            // Count registered users
+            $userCount = User::count();
+            if ($userCount > 0) {
+                Statistic::where('label', 'like', '%Professional%')
+                    ->orWhere('label', 'like', '%Member%')
+                    ->update(['value' => $userCount . '+']);
+            }
+
+            // Count events
+            $eventCount = Event::count();
+            if ($eventCount > 0) {
+                Statistic::where('label', 'like', '%Event%')
+                    ->update(['value' => $eventCount . '+']);
+                Statistic::where('label', 'like', '%Mixer%')
+                    ->update(['value' => $eventCount . '+']);
+            }
+
+            // Count unique business locations/cities
+            $cityCount = Business::whereNotNull('location')
+                ->where('location', '!=', '')
+                ->distinct('location')
+                ->count('location');
+            
+            if ($cityCount > 0) {
+                Statistic::where('label', 'like', '%Cit%')
+                    ->update(['value' => $cityCount . '+']);
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to dynamically update statistics: " . $e->getMessage());
+        }
+
         return response()->json(Statistic::all());
     }
 
@@ -68,6 +104,22 @@ class SabhaController extends Controller
 
     public function storeEvent(Request $request)
     {
+        $agenda = $request->input('agenda');
+        if (is_string($agenda)) {
+            $decoded = json_decode($agenda, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $request->merge(['agenda' => $decoded]);
+            }
+        }
+
+        $speakers = $request->input('speakers');
+        if (is_string($speakers)) {
+            $decoded = json_decode($speakers, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $request->merge(['speakers' => $decoded]);
+            }
+        }
+
         $validated = $request->validate([
             'title' => 'required|string',
             'description' => 'required|string',
@@ -77,10 +129,93 @@ class SabhaController extends Controller
             'type' => 'required|string',
             'price_normal' => 'required|string',
             'price_verified' => 'required|string',
+            'agenda' => 'nullable|array',
+            'speakers' => 'nullable|array',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
+
+        // Automatically generate event code
+        $cleanTitle = preg_replace('/[^a-zA-Z0-9\s]/', '', $validated['title']);
+        $words = explode(' ', trim($cleanTitle));
+        $code = '';
+        if (count($words) >= 2) {
+            foreach ($words as $word) {
+                $code .= strtoupper(substr($word, 0, 1));
+            }
+        } else {
+            $code = strtoupper(substr($cleanTitle, 0, 4));
+        }
+        $code = preg_replace('/[^A-Z0-9]/', '', $code);
+        if (strlen($code) < 3) {
+            $code .= mt_rand(100, 999);
+        }
+        $eventCode = substr($code, 0, 6);
+
+        // Ensure uniqueness of event_code
+        $originalCode = $eventCode;
+        $counter = 1;
+        while (Event::where('event_code', $eventCode)->exists()) {
+            $eventCode = substr($originalCode, 0, 4) . $counter;
+            $counter++;
+        }
+
+        $validated['event_code'] = $eventCode;
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = time() . '_event_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('events', $fileName, 'public');
+            $validated['image'] = '/storage/events/' . $fileName;
+        }
 
         $event = Event::create($validated);
         return response()->json(['message' => 'Event created successfully', 'event' => $event]);
+    }
+
+    public function updateEvent(Request $request, $id)
+    {
+        $event = Event::findOrFail($id);
+
+        $agenda = $request->input('agenda');
+        if (is_string($agenda)) {
+            $decoded = json_decode($agenda, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $request->merge(['agenda' => $decoded]);
+            }
+        }
+
+        $speakers = $request->input('speakers');
+        if (is_string($speakers)) {
+            $decoded = json_decode($speakers, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $request->merge(['speakers' => $decoded]);
+            }
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'date' => 'required|date',
+            'location' => 'required|string',
+            'google_map_link' => 'nullable|string',
+            'type' => 'required|string',
+            'price_normal' => 'required|string',
+            'price_verified' => 'required|string',
+            'agenda' => 'nullable|array',
+            'speakers' => 'nullable|array',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = time() . '_event_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('events', $fileName, 'public');
+            $validated['image'] = '/storage/events/' . $fileName;
+        }
+
+        $event->update($validated);
+
+        return response()->json(['message' => 'Event updated successfully', 'event' => $event]);
     }
 
     public function getUsers()
@@ -105,12 +240,20 @@ class SabhaController extends Controller
             'otp' => $otp
         ], 900);
 
-        Log::info("SABHA Registration OTP for {$validated['email']}: {$otp}");
+        // Send OTP email
+        try {
+            Mail::to($validated['email'])->send(new OtpMail($otp, $validated['name']));
+            Log::info("SABHA Registration OTP email sent to {$validated['email']}");
+        } catch (\Exception $e) {
+            Log::error("SABHA OTP email failed for {$validated['email']}: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Could not send verification email. Please check your email address and try again.',
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Email verification code has been sent to your email.',
             'email' => $validated['email'],
-            'otp' => $otp
         ]);
     }
 
@@ -242,13 +385,13 @@ class SabhaController extends Controller
     public function submitBusiness(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string',
-            'category' => 'required|string',
+            'name' => 'nullable|string',
+            'category' => 'nullable|string',
             'tagline' => 'nullable|string',
             'location' => 'nullable|string',
             'description' => 'nullable|string',
             'website' => 'nullable|string',
-            'phone' => 'nullable|string',
+            'phone' => 'nullable|string|max:10',
             'email' => 'nullable|string',
             'linkedin' => 'nullable|string',
             'instagram' => 'nullable|string',
@@ -269,7 +412,7 @@ class SabhaController extends Controller
         if ($request->hasFile('payment_screenshot')) {
             $file = $request->file('payment_screenshot');
             $fileName = time() . '_payment_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/payments', $fileName);
+            $file->storeAs('payments', $fileName, 'public');
             $screenshotPath = '/storage/payments/' . $fileName;
         }
 
@@ -277,7 +420,7 @@ class SabhaController extends Controller
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             $fileName = time() . '_logo_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/logos', $fileName);
+            $file->storeAs('logos', $fileName, 'public');
             $logoPath = '/storage/logos/' . $fileName;
         }
 
@@ -285,11 +428,15 @@ class SabhaController extends Controller
         if ($request->hasFile('cover_image')) {
             $file = $request->file('cover_image');
             $fileName = time() . '_cover_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/covers', $fileName);
+            $file->storeAs('covers', $fileName, 'public');
             $coverPath = '/storage/covers/' . $fileName;
         }
 
-        $userId = $request->user() ? $request->user()->id : null;
+        $user = $request->user();
+        $userId = $user ? $user->id : null;
+        
+        $name = ($validated['name'] ?? null) ?: ('Business of ' . ($user ? $user->name : 'User'));
+        $category = ($validated['category'] ?? null) ?: 'Software Development';
 
         $servicesInput = $request->input('services');
         if (is_string($servicesInput)) {
@@ -303,8 +450,8 @@ class SabhaController extends Controller
         }
 
         $businessData = [
-            'name' => $validated['name'],
-            'category' => $validated['category'],
+            'name' => $name,
+            'category' => $category,
             'tagline' => $validated['tagline'] ?? null,
             'location' => $validated['location'] ?? null,
             'description' => $validated['description'] ?? null,
@@ -376,6 +523,9 @@ class SabhaController extends Controller
     {
         $user = $request->user();
         $business = Business::where('user_id', $user->id)->with('user')->first();
+        if (!$business) {
+            return response()->json(null, 404);
+        }
         return response()->json($business);
     }
 
@@ -386,7 +536,7 @@ class SabhaController extends Controller
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6',
-            'phone' => 'nullable|string',
+            'phone' => 'nullable|string|max:10',
             'city' => 'nullable|string',
             'designation' => 'nullable|string',
             'company' => 'nullable|string',
@@ -409,7 +559,7 @@ class SabhaController extends Controller
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
             $fileName = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/avatars', $fileName);
+            $file->storeAs('avatars', $fileName, 'public');
             $user->avatar = '/storage/avatars/' . $fileName;
         }
 
@@ -438,7 +588,7 @@ class SabhaController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/gallery', $fileName);
+            $file->storeAs('gallery', $fileName, 'public');
             $imagePath = '/storage/gallery/' . $fileName;
         } else {
             return response()->json(['message' => 'No file uploaded'], 400);
@@ -454,6 +604,20 @@ class SabhaController extends Controller
             'message' => 'Gallery media uploaded successfully',
             'gallery_image' => $galleryImage
         ]);
+    }
+
+    public function deleteGalleryImage($id)
+    {
+        $galleryImage = GalleryImage::findOrFail($id);
+        
+        $path = public_path($galleryImage->image_path);
+        if (file_exists($path)) {
+            @unlink($path);
+        }
+
+        $galleryImage->delete();
+
+        return response()->json(['message' => 'Gallery media deleted successfully']);
     }
 
     public function updateStatistic(Request $request, $id)
@@ -550,17 +714,14 @@ class SabhaController extends Controller
         if ($request->hasFile('payment_screenshot')) {
             $file = $request->file('payment_screenshot');
             $fileName = time() . '_ticket_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/event_payments', $fileName);
+            $file->storeAs('event_payments', $fileName, 'public');
             $screenshotPath = '/storage/event_payments/' . $fileName;
         }
-
-        // Generate custom ticket number
-        $ticketNo = 'SABHA-' . date('Y') . '-' . mt_rand(1000, 9999) . '-' . mt_rand(10, 99);
 
         $registration = EventRegistration::create([
             'event_id' => $id,
             'user_id' => $user->id,
-            'ticket_number' => $ticketNo,
+            'ticket_number' => null,
             'status' => 'pending',
             'payment_screenshot' => $screenshotPath,
             'ticket_type' => $validated['ticket_type'],
@@ -588,11 +749,102 @@ class SabhaController extends Controller
 
     public function approveEventRegistration($id)
     {
-        $registration = EventRegistration::findOrFail($id);
+        $registration = EventRegistration::with(['user', 'event'])->findOrFail($id);
+        $event = $registration->event;
+
+        // Generate event code if not present
+        $eventCode = $event->event_code;
+        if (!$eventCode) {
+            $cleanTitle = preg_replace('/[^a-zA-Z0-9\s]/', '', $event->title);
+            $words = explode(' ', trim($cleanTitle));
+            $code = '';
+            if (count($words) >= 2) {
+                foreach ($words as $word) {
+                    $code .= strtoupper(substr($word, 0, 1));
+                }
+            } else {
+                $code = strtoupper(substr($cleanTitle, 0, 4));
+            }
+            $code = preg_replace('/[^A-Z0-9]/', '', $code);
+            if (strlen($code) < 3) {
+                $code .= mt_rand(100, 999);
+            }
+            $eventCode = substr($code, 0, 6);
+            $event->update(['event_code' => $eventCode]);
+        }
+
+        // Get the year from event date or current year
+        $year = $event->date ? $event->date->format('Y') : date('Y');
+
+        // Generate custom unique ticket number: {year}-{eventcode}-{number}
+        $ticketNo = $registration->ticket_number;
+        if (!$ticketNo) {
+            do {
+                $ticketNo = $year . '-' . $eventCode . '-' . mt_rand(1000, 9999);
+            } while (EventRegistration::where('ticket_number', $ticketNo)->exists());
+        }
+
         $registration->update([
             'status' => 'approved',
+            'ticket_number' => $ticketNo,
             'rejection_reason' => null
         ]);
+
+        // Generate QR code and send email to the user
+        try {
+            $userEmail = $registration->user->email;
+            $userName = $registration->user->name;
+            $eventName = $event->title;
+
+            // Generate QR code image content inline
+            $qrCode = new \App\Utils\QRCode($ticketNo, [
+                's' => 'qrm', // Medium ECC
+                'sf' => 8,    // Scale factor
+                'p' => 2,     // Padding
+            ]);
+            $image = $qrCode->render_image();
+            ob_start();
+            imagepng($image);
+            $imageData = ob_get_clean();
+            imagedestroy($image);
+
+            Mail::send([], [], function ($message) use ($userEmail, $userName, $eventName, $ticketNo, $imageData) {
+                // Embed raw binary image data into the email
+                $qrCodeCid = $message->embedData($imageData, 'qrcode.png', 'image/png');
+
+                $message->to($userEmail)
+                    ->subject("Your Ticket for {$eventName} is Approved!")
+                    ->html("
+                        <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;\">
+                            <h2 style=\"color: #1e3a8a; margin-bottom: 20px;\">Hello {$userName},</h2>
+                            <p style=\"font-size: 16px; color: #334155; line-height: 1.6;\">
+                                We are excited to inform you that your seat reservation request for the event <strong>{$eventName}</strong> has been approved!
+                            </p>
+                            <div style=\"margin: 25px 0; padding: 15px; background-color: #f1f5f9; border-radius: 8px; text-align: center;\">
+                                <span style=\"font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block;\">Your Ticket Number</span>
+                                <strong style=\"font-size: 22px; color: #0f172a; font-family: monospace;\">{$ticketNo}</strong>
+                            </div>
+                            <p style=\"font-size: 15px; color: #334155; margin-bottom: 10px;\">
+                                Please present the QR code below at the entry gate to check in:
+                            </p>
+                            <div style=\"text-align: center; margin: 25px 0;\">
+                                <img src=\"{$qrCodeCid}\" alt=\"Ticket QR Code\" style=\"border: 2px solid #cbd5e1; padding: 10px; border-radius: 12px; background-color: #fff; width: 220px; height: 220px;\" />
+                            </div>
+                            <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;\" />
+                            <p style=\"font-size: 15px; color: #334155;\">See you at the event!</p>
+                            <p style=\"font-size: 15px; font-weight: bold; color: #0f172a; margin-top: 5px;\">
+                                Best regards,<br/>
+                                Sabha Team
+                            </p>
+                        </div>
+                    ");
+            });
+
+            Log::info("SABHA Approved Ticket Email successfully dispatched to {$userEmail}. Ticket No: {$ticketNo}.");
+        } catch (\Exception $e) {
+            Log::error("Failed to send approval email to {$registration->user->email}: " . $e->getMessage());
+        }
+
         return response()->json([
             'message' => 'Event registration approved successfully',
             'registration' => $registration
@@ -645,7 +897,7 @@ class SabhaController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/gallery', $fileName);
+            $file->storeAs('gallery', $fileName, 'public');
             $imagePath = '/storage/gallery/' . $fileName;
         } else {
             return response()->json(['message' => 'No file uploaded'], 400);
@@ -661,5 +913,334 @@ class SabhaController extends Controller
             'message' => 'Event media uploaded successfully',
             'gallery_image' => $galleryImage
         ]);
+    }
+
+    public function toggleAttendance($id)
+    {
+        $registration = EventRegistration::findOrFail($id);
+        $registration->update([
+            'is_attended' => !$registration->is_attended
+        ]);
+        return response()->json([
+            'message' => 'Attendance status updated successfully',
+            'registration' => $registration
+        ]);
+    }
+
+    public function generateQrCode(Request $request)
+    {
+        $data = $request->query('data');
+        if (empty($data)) {
+            return response('Missing data parameter', 400);
+        }
+
+        $qrCode = new \App\Utils\QRCode($data, [
+            's' => 'qrm', // Medium ECC
+            'sf' => 8,    // Scale factor
+            'p' => 2,     // Padding
+        ]);
+
+        $image = $qrCode->render_image();
+
+        ob_start();
+        imagepng($image);
+        $imageData = ob_get_clean();
+        imagedestroy($image);
+
+        return response($imageData)
+            ->header('Content-Type', 'image/png')
+            ->header('Cache-Control', 'public, max-age=31536000');
+    }
+
+    public function checkInTicket(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'ticket_number' => 'required|string',
+        ]);
+
+        $registration = EventRegistration::where('ticket_number', $validated['ticket_number'])->first();
+
+        if (!$registration) {
+            return response()->json([
+                'message' => 'Ticket not found.'
+            ], 404);
+        }
+
+        if ($registration->status !== 'approved' && $registration->status !== 'confirmed') {
+            return response()->json([
+                'message' => 'Ticket is not approved yet. Current status: ' . $registration->status
+            ], 400);
+        }
+
+        if ($registration->is_attended) {
+            return response()->json([
+                'message' => 'Ticket is already marked as attended.',
+                'registration' => $registration->load('user', 'event')
+            ], 200);
+        }
+
+        $registration->update([
+            'is_attended' => true
+        ]);
+
+        return response()->json([
+            'message' => 'Attendance marked successfully for ' . ($registration->user->name ?? 'attendee') . '!',
+            'registration' => $registration->load('user', 'event')
+        ]);
+    }
+
+    public function submitContactInquiry(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'nullable|string|max:255',
+            'message' => 'required|string',
+            'category' => 'nullable|string|max:255',
+        ]);
+
+        // Get admin contact email from settings
+        $contactEmailSetting = Setting::where('key', 'contact_email')->first();
+        $adminEmail = $contactEmailSetting ? $contactEmailSetting->value : config('mail.from.address', 'hello@sabha.global');
+        
+        $name = $validated['name'];
+        $email = $validated['email'];
+        $subject = $validated['subject'] ?? 'New Contact Inquiry';
+        $inquiryMessage = $validated['message'];
+        $category = $validated['category'] ?? 'General';
+
+        // Send email to admin
+        try {
+            Mail::send([], [], function ($message) use ($adminEmail, $name, $email, $subject, $inquiryMessage, $category) {
+                $message->to($adminEmail)
+                    ->subject("New Inquiry: {$subject}")
+                    ->html("
+                        <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;\">
+                            <h2 style=\"color: #1e3a8a; margin-bottom: 20px;\">New Contact Inquiry Received</h2>
+                            <p style=\"font-size: 15px; color: #334155; line-height: 1.6;\">
+                                <strong>Category:</strong> {$category}<br>
+                                <strong>Name:</strong> {$name}<br>
+                                <strong>Email:</strong> {$email}<br>
+                                <strong>Subject:</strong> {$subject}<br>
+                            </p>
+                            <div style=\"margin: 20px 0; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;\">
+                                <strong style=\"font-size: 14px; color: #475569; display: block; margin-bottom: 5px;\">Message:</strong>
+                                <p style=\"font-size: 14px; color: #0f172a; margin: 0; white-space: pre-wrap;\">{$inquiryMessage}</p>
+                            </div>
+                            <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;\" />
+                            <p style=\"font-size: 12px; color: #64748b;\">This inquiry was submitted from the Contact form on the Sabha website.</p>
+                        </div>
+                    ");
+            });
+
+            // Optionally, send a confirmation email back to the user
+            Mail::send([], [], function ($message) use ($email, $name, $subject) {
+                $message->to($email)
+                    ->subject("We received your inquiry: {$subject}")
+                    ->html("
+                        <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;\">
+                            <h2 style=\"color: #1e3a8a; margin-bottom: 20px;\">Hello {$name},</h2>
+                            <p style=\"font-size: 15px; color: #334155; line-height: 1.6;\">
+                                Thank you for reaching out to us! We have received your inquiry regarding \"{$subject}\" and our team will get back to you as soon as possible.
+                            </p>
+                            <p style=\"font-size: 15px; color: #334155;\">
+                                We usually respond within 1 business day.
+                            </p>
+                            <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;\" />
+                            <p style=\"font-size: 13px; color: #64748b;\">
+                                Best regards,<br>
+                                Sabha Team
+                            </p>
+                        </div>
+                    ");
+            });
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Your inquiry has been sent successfully!'
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to send contact inquiry email: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send inquiry. Please try again later.'
+            ], 500);
+        }
+    }
+
+    public function submitBusinessInquiry(Request $request, $id)
+    {
+        $business = Business::with('user')->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        $name = $validated['name'];
+        $email = $validated['email'];
+        $subject = $validated['subject'];
+        $inquiryMessage = $validated['message'];
+
+        // Recipient is the business email, or the user's email who listed it, or admin fallback
+        $recipientEmail = $business->email ?: ($business->user ? $business->user->email : null);
+        if (!$recipientEmail) {
+            $contactEmailSetting = Setting::where('key', 'contact_email')->first();
+            $recipientEmail = $contactEmailSetting ? $contactEmailSetting->value : config('mail.from.address', 'hello@sabha.global');
+        }
+
+        try {
+            // Send email to business owner
+            Mail::send([], [], function ($message) use ($recipientEmail, $name, $email, $subject, $inquiryMessage, $business) {
+                $message->to($recipientEmail)
+                    ->subject("New Inquiry for {$business->name}: {$subject}")
+                    ->html("
+                        <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;\">
+                            <h2 style=\"color: #1e3a8a; margin-bottom: 20px;\">New Business Inquiry Received</h2>
+                            <p style=\"font-size: 15px; color: #334155; line-height: 1.6;\">
+                                <strong>Business:</strong> {$business->name}<br>
+                                <strong>Sender Name:</strong> {$name}<br>
+                                <strong>Sender Email:</strong> {$email}<br>
+                                <strong>Subject:</strong> {$subject}<br>
+                            </p>
+                            <div style=\"margin: 20px 0; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;\">
+                                <strong style=\"font-size: 14px; color: #475569; display: block; margin-bottom: 5px;\">Message:</strong>
+                                <p style=\"font-size: 14px; color: #0f172a; margin: 0; white-space: pre-wrap;\">{$inquiryMessage}</p>
+                            </div>
+                            <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;\" />
+                            <p style=\"font-size: 12px; color: #64748b;\">This inquiry was submitted from the Sabha Business Directory listing page for {$business->name}.</p>
+                        </div>
+                    ");
+            });
+
+            // Send confirmation email back to the user
+            Mail::send([], [], function ($message) use ($email, $name, $subject, $business) {
+                $message->to($email)
+                    ->subject("Inquiry submitted to {$business->name}: {$subject}")
+                    ->html("
+                        <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;\">
+                            <h2 style=\"color: #1e3a8a; margin-bottom: 20px;\">Hello {$name},</h2>
+                            <p style=\"font-size: 15px; color: #334155; line-height: 1.6;\">
+                                Your inquiry has been successfully sent to <strong>{$business->name}</strong> regarding \"{$subject}\".
+                            </p>
+                            <p style=\"font-size: 15px; color: #334155;\">
+                                The business owner will review your message and get back to you directly.
+                            </p>
+                            <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;\" />
+                            <p style=\"font-size: 13px; color: #64748b;\">
+                                Best regards,<br>
+                                Sabha Team
+                            </p>
+                        </div>
+                    ");
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Your inquiry has been sent successfully!'
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Failed to send business inquiry email: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send inquiry. Please try again later.'
+            ], 500);
+        }
+    }
+
+    public function getHeroImages()
+    {
+        return response()->json(HeroImage::latest()->get());
+    }
+
+    public function storeHeroImage(Request $request)
+    {
+        $validated = $request->validate([
+            'image' => 'required|file|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB max
+            'title' => 'nullable|string',
+            'caption' => 'nullable|string',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('hero', $fileName, 'public');
+            $imagePath = '/storage/hero/' . $fileName;
+        } else {
+            return response()->json(['message' => 'No file uploaded'], 400);
+        }
+
+        $heroImage = HeroImage::create([
+            'image_path' => $imagePath,
+            'title' => $validated['title'] ?? null,
+            'caption' => $validated['caption'] ?? null,
+        ]);
+
+        return response()->json($heroImage, 201);
+    }
+
+    public function deleteHeroImage($id)
+    {
+        $heroImage = HeroImage::findOrFail($id);
+        
+        $path = public_path($heroImage->image_path);
+        if (file_exists($path)) {
+            @unlink($path);
+        }
+
+        $heroImage->delete();
+
+        return response()->json(['message' => 'Hero image deleted successfully']);
+    }
+
+    // ─── Business Categories ──────────────────────────────────────────
+
+    public function getCategories()
+    {
+        $categories = BusinessCategory::where('is_active', true)
+            ->orderBy('sort_order')
+            ->pluck('name');
+        return response()->json($categories);
+    }
+
+    public function getAllCategories()
+    {
+        $categories = BusinessCategory::orderBy('sort_order')->get();
+        $categoriesWithCounts = $categories->map(function ($cat) {
+            return [
+                'id' => $cat->id,
+                'name' => $cat->name,
+                'sort_order' => $cat->sort_order,
+                'is_active' => $cat->is_active,
+                'businesses_count' => \App\Models\Business::where('category', $cat->name)->count(),
+            ];
+        });
+        return response()->json($categoriesWithCounts);
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100|unique:business_categories,name',
+        ]);
+
+        $maxOrder = BusinessCategory::max('sort_order') ?? -1;
+
+        $category = BusinessCategory::create([
+            'name'       => $validated['name'],
+            'sort_order' => $maxOrder + 1,
+            'is_active'  => true,
+        ]);
+
+        return response()->json($category, 201);
+    }
+
+    public function deleteCategory($id)
+    {
+        $category = BusinessCategory::findOrFail($id);
+        $category->delete();
+        return response()->json(['message' => 'Category deleted']);
     }
 }

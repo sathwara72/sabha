@@ -12,12 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->string('status')->default('pending')->after('website'); // pending, approved, rejected
-            $table->boolean('is_verified')->default(false)->after('status');
+            if (!Schema::hasColumn('businesses', 'status')) {
+                $table->string('status')->default('pending')->after('website'); // pending, approved, rejected
+            }
+            if (!Schema::hasColumn('businesses', 'is_verified')) {
+                $table->boolean('is_verified')->default(false)->after('status');
+            }
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('user')->after('email'); // admin, user
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->string('role')->default('user')->after('email'); // admin, user
+            }
         });
     }
 
@@ -31,7 +37,9 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role']);
+            if (Schema::hasColumn('users', 'role')) {
+                $table->dropColumn(['role']);
+            }
         });
     }
 };

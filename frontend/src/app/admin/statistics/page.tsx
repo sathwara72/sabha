@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { fetchStatistics, updateStatistic } from "@/lib/api";
 import {
   BarChart3, Save, CheckCircle2, AlertCircle,
-  HelpCircle, RefreshCw, Layers
+  RefreshCw, Layers
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface StatisticItem {
   id: number;
@@ -18,25 +17,17 @@ export default function AdminStatisticsPage() {
   const [stats, setStats] = useState<StatisticItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
-  
-  // Feedback states
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-
-  // Editing values
   const [editValues, setEditValues] = useState<Record<number, { label: string; value: string }>>({});
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   async function loadData() {
     try {
       setLoading(true);
       const data = await fetchStatistics();
       setStats(data || []);
-      
-      // Initialize edit values
       const initialEdits: Record<number, { label: string; value: string }> = {};
       data.forEach((item: StatisticItem) => {
         initialEdits[item.id] = { label: item.label, value: item.value };
@@ -50,29 +41,21 @@ export default function AdminStatisticsPage() {
   }
 
   const handleInputChange = (id: number, field: "label" | "value", text: string) => {
-    setEditValues((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: text,
-      },
-    }));
+    setEditValues((prev) => ({ ...prev, [id]: { ...prev[id], [field]: text } }));
   };
 
   const handleUpdate = async (id: number) => {
     const dataToUpdate = editValues[id];
-    if (!dataToUpdate || !dataToUpdate.label || !dataToUpdate.value) {
+    if (!dataToUpdate?.label || !dataToUpdate?.value) {
       setErrorMsg("Label and value cannot be empty.");
       return;
     }
-
     setUpdatingId(id);
     setErrorMsg("");
     setSuccessMsg("");
-
     try {
       await updateStatistic(id, dataToUpdate);
-      setSuccessMsg(`Statistic "${dataToUpdate.label}" updated successfully!`);
+      setSuccessMsg(`"${dataToUpdate.label}" updated successfully!`);
       await loadData();
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (err: any) {
@@ -82,99 +65,100 @@ export default function AdminStatisticsPage() {
     }
   };
 
-  const inputClass = "w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary font-semibold";
-  const labelClass = "text-xs font-semibold text-muted mb-1 block";
+  const inputClass = "w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors focus:border-primary font-semibold";
 
   return (
-    <div className="space-y-10 max-w-4xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Website statistics</h1>
-          <p className="text-sm text-muted">Dynamically manage numbers and labels displayed across the website</p>
+    <div className="space-y-3">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Website statistics</h1>
+          <p className="text-xs text-muted">Manage numbers and labels displayed across the website</p>
         </div>
         <button
           onClick={loadData}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-muted hover:bg-surface hover:text-foreground cursor-pointer transition-colors"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-white text-muted hover:bg-surface hover:text-foreground cursor-pointer transition-colors self-start sm:self-auto"
           title="Refresh Data"
         >
-          <RefreshCw size={16} />
+          <RefreshCw size={14} />
         </button>
       </div>
 
+      {/* Alerts */}
       {successMsg && (
-        <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-sm font-semibold text-emerald-800 flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+        <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
-
       {errorMsg && (
-        <div className="rounded-xl bg-red-50 border border-red-100 p-4 text-sm font-semibold text-red-800 flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+        <div className="rounded-xl bg-red-50 border border-red-100 px-3 py-2 text-xs font-semibold text-red-800 flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
+      {/* Content */}
       {loading ? (
         <div className="py-20 text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
           <p className="mt-3 text-sm text-muted">Loading website stats...</p>
         </div>
       ) : stats.length === 0 ? (
-        <div className="glass-card py-20 text-center text-muted border border-dashed border-border rounded-xl">
-          No statistics found in the database. Run database seeder to populate default values.
+        <div className="glass-card py-20 text-center text-muted border border-dashed border-border rounded-xl text-xs">
+          No statistics found. Run the database seeder to populate default values.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {stats.map((stat) => {
             const currentEdit = editValues[stat.id] || { label: "", value: "" };
             const isUpdating = updatingId === stat.id;
 
             return (
-              <div key={stat.id} className="glass-card p-6 flex flex-col gap-5 justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary-soft px-2.5 py-1 rounded-md">
-                      <Layers size={12} /> Stat #{stat.id}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-semibold">
-                      Live: {stat.value} ({stat.label})
-                    </span>
+              <div key={stat.id} className="glass-card p-4 flex flex-col gap-3">
+                {/* Card header */}
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-md">
+                    <Layers size={10} /> Stat #{stat.id}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-semibold truncate max-w-[140px]">
+                    Live: <span className="text-foreground">{stat.value}</span> — {stat.label}
+                  </span>
+                </div>
+
+                {/* Inputs row */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-0.5">
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">Label</label>
+                    <input
+                      type="text"
+                      value={currentEdit.label}
+                      onChange={(e) => handleInputChange(stat.id, "label", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. Active Members"
+                    />
                   </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className={labelClass}>Statistic Label</label>
-                      <input
-                        type="text"
-                        value={currentEdit.label}
-                        onChange={(e) => handleInputChange(stat.id, "label", e.target.value)}
-                        className={inputClass}
-                        placeholder="e.g. Active Members"
-                      />
-                    </div>
-
-                    <div>
-                      <label className={labelClass}>Statistic Value</label>
-                      <input
-                        type="text"
-                        value={currentEdit.value}
-                        onChange={(e) => handleInputChange(stat.id, "value", e.target.value)}
-                        className={inputClass}
-                        placeholder="e.g. 500+"
-                      />
-                    </div>
+                  <div className="space-y-0.5">
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">Value</label>
+                    <input
+                      type="text"
+                      value={currentEdit.value}
+                      onChange={(e) => handleInputChange(stat.id, "value", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. 500+"
+                    />
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border flex items-center justify-end">
+                {/* Save */}
+                <div className="flex justify-end">
                   <button
                     onClick={() => handleUpdate(stat.id)}
                     disabled={isUpdating}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
                   >
-                    <Save size={14} />
-                    {isUpdating ? "Saving..." : "Save Changes"}
+                    <Save size={12} />
+                    {isUpdating ? "Saving..." : "Save"}
                   </button>
                 </div>
               </div>
@@ -183,17 +167,18 @@ export default function AdminStatisticsPage() {
         </div>
       )}
 
-      <div className="glass-card p-6 flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-          <BarChart3 className="h-6 w-6" />
+      {/* Info card */}
+      {/* <div className="glass-card p-4 flex items-center gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+          <BarChart3 className="h-4 w-4" />
         </div>
         <div>
-          <h4 className="text-lg font-semibold text-foreground mb-1">About dynamic stats</h4>
-          <p className="text-sm leading-relaxed text-muted">
-            The stats managed here directly control the values displayed in the hero grids on the website homepage, about us sections, and galleries. Make sure the labels and values are punchy and accurate!
+          <h4 className="text-xs font-bold text-foreground mb-0.5">About dynamic stats</h4>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            These values control the hero grids on the homepage, about us sections, and gallery. Keep labels punchy and values accurate.
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

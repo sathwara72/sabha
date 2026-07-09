@@ -7,10 +7,11 @@ import Link from "next/link";
 import {
   User, Mail, Lock, Briefcase, Globe, CheckCircle2,
   ShieldCheck, Clock, XCircle, AlertCircle, Upload, Eye, MapPin,
-  Phone, MessageCircle, Layers, Camera, LogOut, ChevronRight, Calendar
+  Phone, MessageCircle, Layers, Camera, LogOut, ChevronRight, Calendar,
+  Plus, Trash2
 } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from "@/components/SocialIcons";
-import { getUserBusiness, submitBusiness, updateProfile } from "@/lib/api";
+import { getUserBusiness, submitBusiness, updateProfile, getUserRegistrations, fetchCategories } from "@/lib/api";
 import { assetUrl } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 
@@ -22,27 +23,9 @@ export default function ProfilePage() {
   // Active section in the side menu
   const [activeTab, setActiveTab] = useState<"profile" | "business" | "events">("profile");
 
-  // Registered events mock list
-  const [registeredEvents, setRegisteredEvents] = useState([
-    {
-      id: 1,
-      title: "Sabha Grand Business Summit 2026",
-      date: "Oct 12, 2026",
-      location: "Ahmedabad Exhibition Center, Gujarat",
-      status: "confirmed",
-      price: "₹1,499",
-      image: "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=800&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      title: "Harmony Networking Mixer",
-      date: "Oct 15, 2026",
-      location: "DoubleTree by Hilton, Pune",
-      status: "pending",
-      price: "₹499",
-      image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=800&auto=format&fit=crop"
-    }
-  ]);
+  // Registered events list
+  const [registeredEvents, setRegisteredEvents] = useState<any[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   // Avatar upload
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -84,7 +67,7 @@ export default function ProfilePage() {
   const [bizYoutube, setBizYoutube] = useState("");
   const [bizTwitter, setBizTwitter] = useState("");
   const [bizWhatsapp, setBizWhatsapp] = useState("");
-  const [bizServices, setBizServices] = useState("");
+  const [bizServices, setBizServices] = useState<{ title: string; desc: string; }[]>([]);
 
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -96,16 +79,16 @@ export default function ProfilePage() {
 
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
 
-  const categories = [
-    "Software Development",
-    "Supply Chain",
-    "Digital Marketing",
-    "Construction",
-    "Financial Services",
-    "Renewables",
-    "Creative Agency",
-    "Venture Capital"
-  ];
+  const [categories, setCategories] = useState<string[]>(["Software Development"]);
+
+  useEffect(() => {
+    fetchCategories()
+      .then(data => setCategories(data))
+      .catch(() => {
+        // fallback to defaults if API fails
+        setCategories(["Software Development", "Supply Chain", "Digital Marketing", "Construction", "Financial Services", "Renewables", "Creative Agency", "Venture Capital"]);
+      });
+  }, []);
 
   useEffect(() => {
     if (isReady && !isAuthenticated) {
@@ -138,6 +121,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isAuthenticated) {
       loadUserBusiness();
+      loadUserRegistrations();
     }
   }, [isAuthenticated]);
 
@@ -164,12 +148,45 @@ export default function ProfilePage() {
         setBizYoutube(biz.youtube || "");
         setBizTwitter(biz.twitter || "");
         setBizWhatsapp(biz.whatsapp || "");
-        setBizServices(Array.isArray(biz.services) ? biz.services.join(", ") : (biz.services || ""));
+        let servicesParsed: { title: string; desc: string; }[] = [];
+        if (biz.services) {
+          let sData: any = [];
+          if (typeof biz.services === "string") {
+            try {
+              sData = JSON.parse(biz.services);
+            } catch (e) {
+              sData = biz.services.split(",").map((s: string) => ({ title: s.trim(), desc: "" }));
+            }
+          } else {
+            sData = biz.services;
+          }
+          if (Array.isArray(sData)) {
+            servicesParsed = sData.map((s: any) => {
+              if (s && typeof s === "object") {
+                return { title: s.title || "", desc: s.desc || "" };
+              }
+              return { title: String(s), desc: "" };
+            });
+          }
+        }
+        setBizServices(servicesParsed);
       }
     } catch (err) {
       console.error("Failed to load user business:", err);
     } finally {
       setBizLoading(false);
+    }
+  }
+
+  async function loadUserRegistrations() {
+    try {
+      setEventsLoading(true);
+      const data = await getUserRegistrations();
+      setRegisteredEvents(data || []);
+    } catch (err) {
+      console.error("Failed to load user registrations:", err);
+    } finally {
+      setEventsLoading(false);
     }
   }
 
@@ -206,8 +223,10 @@ export default function ProfilePage() {
       setAvatarFile(null);
       setProfileSuccess(t("profile.profile_success"));
       setProfilePassword("");
+      setTimeout(() => setProfileSuccess(""), 4000);
     } catch (err: any) {
       setProfileError(err.message || t("profile.profile_error"));
+      setTimeout(() => setProfileError(""), 5000);
     } finally {
       setProfileLoading(false);
     }
@@ -244,7 +263,7 @@ export default function ProfilePage() {
       formData.append("youtube", bizYoutube);
       formData.append("twitter", bizTwitter);
       formData.append("whatsapp", bizWhatsapp);
-      formData.append("services", bizServices);
+      formData.append("services", JSON.stringify(bizServices));
 
       if (paymentFile) {
         formData.append("payment_screenshot", paymentFile);
@@ -263,8 +282,10 @@ export default function ProfilePage() {
       setLogoFile(null);
       setCoverFile(null);
       loadUserBusiness();
+      setTimeout(() => setBizSuccess(""), 4000);
     } catch (err: any) {
       setBizError(err.message || "Failed to submit business details.");
+      setTimeout(() => setBizError(""), 5000);
     } finally {
       setBizSubmitting(false);
     }
@@ -281,28 +302,28 @@ export default function ProfilePage() {
     );
   }
 
-  const inputClass = "w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold";
-  const labelClass = "text-xs font-bold text-muted-foreground mb-1 block";
+  const inputClass = "w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold";
+  const labelClass = "text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5 block";
   const avatarSrc = avatarPreview || assetUrl(user.avatar);
 
   return (
-    <div className="min-h-screen bg-background font-outfit py-12 px-6">
-      <div className="mx-auto max-w-6xl space-y-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div className="bg-background font-outfit py-3 px-2">
+      <div className="mx-auto max-w-6xl space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
           {/* ===== Side Menu ===== */}
-          <aside className="lg:col-span-3 lg:sticky lg:top-24 space-y-4">
+          <aside className="lg:col-span-3 lg:sticky lg:top-20 space-y-3">
             {/* Identity card */}
-            <div className="glass-card p-5 flex flex-col items-center text-center">
+            <div className="glass-card p-4 flex flex-col items-center text-center">
               <div className="relative">
-                <div className="h-20 w-20 rounded-2xl overflow-hidden bg-primary/10 border border-border flex items-center justify-center shadow-sm">
+                <div className="h-16 w-16 rounded-xl overflow-hidden bg-primary/10 border border-border flex items-center justify-center shadow-sm">
                   {avatarSrc ? (
                     <img src={avatarSrc} alt="Profile" className="h-full w-full object-cover" />
                   ) : (
-                    <span className="text-3xl font-bold text-primary uppercase">{user.name?.[0] ?? "?"}</span>
+                    <span className="text-2xl font-bold text-primary uppercase">{user.name?.[0] ?? "?"}</span>
                   )}
                 </div>
-                <label className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer shadow-md transition-opacity hover:opacity-90" title="Upload photo">
-                  <Camera size={14} />
+                <label className="absolute -bottom-1.5 -right-1.5 h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer shadow-md transition-opacity hover:opacity-90" title="Upload photo">
+                  <Camera size={11} />
                   <input
                     type="file"
                     accept="image/*"
@@ -316,46 +337,46 @@ export default function ProfilePage() {
                   />
                 </label>
               </div>
-              <h2 className="mt-3 text-base font-bold text-foreground leading-tight">{user.name}</h2>
-              <p className="text-[11px] text-muted font-medium truncate max-w-full">{user.email}</p>
-              <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+              <h2 className="mt-2 text-sm font-bold text-foreground leading-tight">{user.name}</h2>
+              <p className="text-[10px] text-muted font-medium truncate max-w-full">{user.email}</p>
+              <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
                 {user.role === "admin" ? t("profile.administrator") : t("profile.member")}
               </span>
               {avatarFile && (
-                <p className="mt-2 text-[10px] font-semibold text-amber-600">{t("profile.photo_pending")}</p>
+                <p className="mt-1 text-[10px] font-semibold text-amber-600">{t("profile.photo_pending")}</p>
               )}
             </div>
 
             {/* Navigation */}
-            <nav className="glass-card p-2 space-y-1">
+            <nav className="glass-card p-1.5 space-y-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab("profile")}
-                className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors cursor-pointer ${
+                className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   activeTab === "profile"
                     ? "bg-primary text-white shadow-sm"
                     : "text-foreground hover:bg-surface"
                 }`}
               >
-                <User size={17} className={activeTab === "profile" ? "text-white" : "text-primary"} />
+                <User size={14} className={activeTab === "profile" ? "text-white" : "text-primary"} />
                 <span className="flex-1 text-left">{t("profile.tab_profile")}</span>
-                <ChevronRight size={15} className={activeTab === "profile" ? "text-white/80" : "text-muted-foreground"} />
+                <ChevronRight size={13} className={activeTab === "profile" ? "text-white/80" : "text-muted-foreground"} />
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("business")}
-                className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors cursor-pointer ${
+                className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   activeTab === "business"
                     ? "bg-primary text-white shadow-sm"
                     : "text-foreground hover:bg-surface"
                 }`}
               >
-                <Briefcase size={17} className={activeTab === "business" ? "text-white" : "text-primary"} />
+                <Briefcase size={14} className={activeTab === "business" ? "text-white" : "text-primary"} />
                 <span className="flex-1 text-left">{t("profile.tab_business")}</span>
                 {business && !bizLoading && (
                   <span
-                    className={`h-2 w-2 rounded-full ${
+                    className={`h-1.5 w-1.5 rounded-full ${
                       business.status === "approved"
                         ? "bg-emerald-500"
                         : business.status === "rejected"
@@ -365,28 +386,28 @@ export default function ProfilePage() {
                     title={business.status}
                   />
                 )}
-                <ChevronRight size={15} className={activeTab === "business" ? "text-white/80" : "text-muted-foreground"} />
+                <ChevronRight size={13} className={activeTab === "business" ? "text-white/80" : "text-muted-foreground"} />
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("events")}
-                className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors cursor-pointer ${
+                className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   activeTab === "events"
                     ? "bg-primary text-white shadow-sm"
                     : "text-foreground hover:bg-surface"
                 }`}
               >
-                <Calendar size={17} className={activeTab === "events" ? "text-white" : "text-primary"} />
+                <Calendar size={14} className={activeTab === "events" ? "text-white" : "text-primary"} />
                 <span className="flex-1 text-left">{t("profile.tab_events")}</span>
-                <span className={`inline-flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-bold ${
+                <span className={`inline-flex h-4 items-center justify-center rounded-full px-1.5 text-[9px] font-bold ${
                   activeTab === "events"
                     ? "bg-white/20 text-white"
                     : "bg-primary-soft text-primary border border-primary/10"
                 }`}>
                   {registeredEvents.length}
                 </span>
-                <ChevronRight size={15} className={activeTab === "events" ? "text-white/80" : "text-muted-foreground"} />
+                <ChevronRight size={13} className={activeTab === "events" ? "text-white/80" : "text-muted-foreground"} />
               </button>
 
               <div className="my-1 border-t border-border" />
@@ -394,25 +415,25 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => { logout(); router.replace("/"); }}
-                className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
+                className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
               >
-                <LogOut size={17} />
+                <LogOut size={14} />
                 <span className="flex-1 text-left">{t("profile.logout")}</span>
               </button>
             </nav>
           </aside>
 
           {/* ===== Content ===== */}
-          <div className="lg:col-span-9 space-y-6">
+          <div className="lg:col-span-9 space-y-3">
 
           {/* Personal Settings */}
           {activeTab === "profile" && (
-          <div className="glass-card p-6 space-y-6 h-fit">
-            <div className="flex items-center gap-2 border-b border-border pb-3">
-              <User size={18} className="text-primary" />
+          <div className="glass-card p-4 space-y-4 h-fit">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <User size={15} className="text-primary" />
               <div>
-                <h2 className="text-lg font-bold text-foreground leading-tight">{t("profile.profile_title")}</h2>
-                <p className="text-[11px] text-muted font-medium">{t("profile.profile_subtitle")}</p>
+                <h2 className="text-sm font-bold text-foreground leading-tight">{t("profile.profile_title")}</h2>
+                <p className="text-[10px] text-muted font-medium">{t("profile.profile_subtitle")}</p>
               </div>
             </div>
 
@@ -428,116 +449,69 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div>
-                <label className={labelClass}>{t("profile.full_name")}</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    required
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    className={`${inputClass} pl-10`}
-                  />
+            <form onSubmit={handleUpdateProfile} className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>{t("profile.full_name")}</label>
+                  <div className="relative">
+                    <User className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input type="text" required value={profileName} onChange={(e) => setProfileName(e.target.value)} className={`${inputClass} pl-8`} />
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <label className={labelClass}>{t("profile.email")}</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="email"
-                    required
-                    value={profileEmail}
-                    onChange={(e) => setProfileEmail(e.target.value)}
-                    className={`${inputClass} pl-10`}
-                  />
+                <div>
+                  <label className={labelClass}>{t("profile.email")}</label>
+                  <div className="relative">
+                    <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input type="email" required value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} className={`${inputClass} pl-8`} />
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <label className={labelClass}>{t("profile.phone")}</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={profilePhone}
-                    onChange={(e) => setProfilePhone(e.target.value)}
-                    placeholder="e.g. +91 98200 12345"
-                    className={`${inputClass} pl-10`}
-                  />
+                <div>
+                  <label className={labelClass}>{t("profile.phone")}</label>
+                  <div className="relative">
+                    <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={profilePhone}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setProfilePhone(val);
+                      }}
+                      placeholder="10-digit mobile number"
+                      className={`${inputClass} pl-8`}
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <label className={labelClass}>{t("profile.city")}</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={profileCity}
-                    onChange={(e) => setProfileCity(e.target.value)}
-                    placeholder="e.g. Ahmedabad"
-                    className={`${inputClass} pl-10`}
-                  />
+                <div>
+                  <label className={labelClass}>{t("profile.city")}</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <input type="text" value={profileCity} onChange={(e) => setProfileCity(e.target.value)} placeholder="e.g. Ahmedabad" className={`${inputClass} pl-8`} />
+                  </div>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>{t("profile.designation")}</label>
-                  <input
-                    type="text"
-                    value={profileDesignation}
-                    onChange={(e) => setProfileDesignation(e.target.value)}
-                    placeholder="e.g. Co-Founder"
-                    className={inputClass}
-                  />
+                  <input type="text" value={profileDesignation} onChange={(e) => setProfileDesignation(e.target.value)} placeholder="e.g. Co-Founder" className={inputClass} />
                 </div>
                 <div>
                   <label className={labelClass}>{t("profile.company")}</label>
-                  <input
-                    type="text"
-                    value={profileCompany}
-                    onChange={(e) => setProfileCompany(e.target.value)}
-                    placeholder="e.g. TechCorp"
-                    className={inputClass}
-                  />
+                  <input type="text" value={profileCompany} onChange={(e) => setProfileCompany(e.target.value)} placeholder="e.g. TechCorp" className={inputClass} />
                 </div>
               </div>
 
               <div>
                 <label className={labelClass}>{t("profile.bio")}</label>
-                <textarea
-                  rows={3}
-                  value={profileBio}
-                  onChange={(e) => setProfileBio(e.target.value)}
-                  placeholder="Tell us about your professional background..."
-                  className={`${inputClass} resize-none`}
-                />
+                <textarea rows={2} value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell us about your professional background..." className={`${inputClass} resize-none`} />
               </div>
 
               <div>
                 <label className={labelClass}>{t("profile.password")}</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="password"
-                    placeholder="New password"
-                    value={profilePassword}
-                    onChange={(e) => setProfilePassword(e.target.value)}
-                    className={`${inputClass} pl-10`}
-                  />
+                  <Lock className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <input type="password" placeholder="New password" value={profilePassword} onChange={(e) => setProfilePassword(e.target.value)} className={`${inputClass} pl-8`} />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={profileLoading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
-              >
+              <button type="submit" disabled={profileLoading} className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer">
                 {profileLoading ? t("profile.saving_btn") : t("profile.save_btn")}
               </button>
             </form>
@@ -546,11 +520,11 @@ export default function ProfilePage() {
 
           {/* Business Details Section */}
           {activeTab === "business" && (
-          <div className="space-y-6">
-            <div className="glass-card p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Briefcase size={18} className="text-primary" /> {t("profile.business_title")}
+          <div className="space-y-3">
+            <div className="glass-card p-4 space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Briefcase size={15} className="text-primary" /> {t("profile.business_title")}
                 </h2>
                 {business && !bizLoading && (
                   <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
@@ -810,9 +784,12 @@ export default function ProfilePage() {
                             <div>
                               <span className="text-[10px] uppercase font-bold text-muted block mb-2">{t("profile.core_services")}</span>
                               <div className="flex flex-wrap gap-2">
-                                {(Array.isArray(business.services) ? business.services : [business.services]).map((s: any, idx: number) => (
-                                  <span key={idx} className="rounded-full bg-primary-soft border border-primary/10 px-3 py-1 text-xs font-semibold text-primary">{s}</span>
-                                ))}
+                                {(Array.isArray(business.services) ? business.services : [business.services]).map((s: any, idx: number) => {
+                                  const serviceTitle = s && typeof s === "object" ? s.title : String(s);
+                                  return (
+                                    <span key={idx} className="rounded-full bg-primary-soft border border-primary/10 px-3 py-1 text-xs font-semibold text-primary">{serviceTitle}</span>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
@@ -883,12 +860,72 @@ export default function ProfilePage() {
                             <textarea rows={4} required value={bizDescription} onChange={(e) => setBizDescription(e.target.value)} placeholder="Provide a comprehensive summary of your services, goals, and history..." className={`${inputClass} resize-none`} />
                           </div>
 
-                          <div className="space-y-1.5">
-                            <label className={labelClass}>{t("profile.biz_services")}</label>
-                            <div className="relative">
-                              <Layers className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <input type="text" value={bizServices} onChange={(e) => setBizServices(e.target.value)} placeholder="e.g. Cloud Migration, Custom ERP, AI Integrations" className={`${inputClass} pl-10`} />
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <label className={labelClass}>{t("profile.biz_services")} (Max 4)</label>
+                              {bizServices.length < 4 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setBizServices([...bizServices, { title: "", desc: "" }])}
+                                  className="inline-flex items-center gap-1 text-[10px] font-extrabold text-primary hover:opacity-85"
+                                >
+                                  <Plus size={12} /> {t("profile.add_service") || "Add Service"}
+                                </button>
+                              )}
                             </div>
+
+                            {bizServices.length === 0 ? (
+                              <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground font-medium">
+                                No services added yet. Click &quot;Add Service&quot; above to list your core services.
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {bizServices.map((service, idx) => (
+                                  <div key={idx} className="glass-card p-3 border border-border/60 relative space-y-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => setBizServices(bizServices.filter((_, i) => i !== idx))}
+                                      className="absolute right-3 top-3 text-muted hover:text-red-500 transition-colors"
+                                      title="Remove Service"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+
+                                    <div className="grid grid-cols-1 gap-2 pr-6">
+                                      <div>
+                                        <label className="text-[9px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Title</label>
+                                        <input
+                                          type="text"
+                                          required
+                                          value={service.title}
+                                          onChange={(e) => {
+                                            const updated = [...bizServices];
+                                            updated[idx] = { ...updated[idx], title: e.target.value };
+                                            setBizServices(updated);
+                                          }}
+                                          placeholder="e.g. Cloud Migration"
+                                          className={inputClass}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="text-[9px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Description</label>
+                                        <textarea
+                                          rows={2}
+                                          value={service.desc}
+                                          onChange={(e) => {
+                                            const updated = [...bizServices];
+                                            updated[idx] = { ...updated[idx], desc: e.target.value };
+                                            setBizServices(updated);
+                                          }}
+                                          placeholder="e.g. End-to-end cloud strategy and deployment services."
+                                          className={`${inputClass} resize-none`}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
 
                           <div className="space-y-4 border-t border-border pt-4">
@@ -900,7 +937,16 @@ export default function ProfilePage() {
                               </div>
                               <div>
                                 <label className={labelClass}>{t("profile.biz_phone")}</label>
-                                <input type="text" value={bizPhone} onChange={(e) => setBizPhone(e.target.value)} placeholder="e.g. +91 22 5550 1928" className={inputClass} />
+                                <input
+                                  type="text"
+                                  value={bizPhone}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                    setBizPhone(val);
+                                  }}
+                                  placeholder="10-digit mobile number"
+                                  className={inputClass}
+                                />
                               </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -976,56 +1022,86 @@ export default function ProfilePage() {
 
           {/* Registered Events Section */}
           {activeTab === "events" && (
-            <div className="space-y-6">
-              <div className="glass-card p-6 space-y-6">
+            <div className="space-y-3">
+              <div className="glass-card p-4 space-y-4">
                 <div>
-                  <h2 className="text-lg font-bold text-foreground flex items-center gap-2 border-b border-border pb-3">
-                    <Calendar size={18} className="text-primary" /> {t("profile.events_title")}
+                  <h2 className="text-sm font-bold text-foreground flex items-center gap-2 border-b border-border pb-2">
+                    <Calendar size={15} className="text-primary" /> {t("profile.events_title")}
                   </h2>
-                  <p className="mt-2 text-xs text-muted">{t("profile.events_subtitle")}</p>
+                  <p className="mt-1 text-xs text-muted">{t("profile.events_subtitle")}</p>
                 </div>
 
-                {registeredEvents.length === 0 ? (
+                {eventsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent animate-spin" />
+                  </div>
+                ) : registeredEvents.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border py-12 text-center text-sm text-muted">
                     {t("profile.no_events")}
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {registeredEvents.map((evt) => (
-                      <Link
-                        key={evt.id}
-                        href={`/profile/events/${evt.id}`}
-                        className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-white hover:shadow-sm hover:border-primary/20 transition-all group"
-                      >
-                        <div className="h-16 w-28 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-border">
-                          <img src={evt.image} alt={evt.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{evt.title}</h4>
-                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium mt-1">
-                            <span className="inline-flex items-center gap-1 flex-wrap"><Calendar size={12} /> {evt.date}</span>
-                            <span className="inline-flex items-center gap-1 flex-wrap"><MapPin size={12} /> {evt.location}</span>
-                            <span className="font-semibold text-foreground">{t("profile.paid")}: {evt.price}</span>
+                    {registeredEvents.map((evt) => {
+                      const eventDetails = evt.event;
+                      if (!eventDetails) return null;
+
+                      const eventDate = new Date(eventDetails.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric"
+                      });
+
+                      const ticketPrice = Number(evt.amount_paid) === 0 ? "Free" : `₹${Number(evt.amount_paid).toLocaleString("en-IN")}`;
+                      const coverImg = assetUrl(eventDetails.cover_image) || "/placeholder-event.jpg";
+
+                      const isApproved = evt.status === "approved" || evt.status === "confirmed";
+                      const isRejected = evt.status === "rejected";
+
+                      return (
+                        <Link
+                          key={evt.id}
+                          href={`/profile/events/${evt.id}`}
+                          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-white hover:shadow-sm hover:border-primary/20 transition-all group"
+                        >
+                          <div className="h-16 w-28 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-border">
+                            <img src={coverImg} alt={eventDetails.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                           </div>
-                        </div>
-                        <div className="shrink-0 flex flex-col sm:items-end gap-2 pt-2 sm:pt-0">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide border ${
-                            evt.status === "confirmed"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200/50"
-                              : "bg-amber-50 text-amber-700 border-amber-200/50"
-                          }`}>
-                            {evt.status === "confirmed" ? (
-                              <><CheckCircle2 size={12} /> {t("profile.event_confirmed")}</>
-                            ) : (
-                              <><Clock size={12} /> {t("profile.event_pending")}</>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{eventDetails.title}</h4>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium mt-1">
+                              <span className="inline-flex items-center gap-1 flex-wrap"><Calendar size={12} /> {eventDate}</span>
+                              <span className="inline-flex items-center gap-1 flex-wrap"><MapPin size={12} /> {eventDetails.location}</span>
+                              <span className="font-semibold text-foreground">{t("profile.paid")}: {ticketPrice}</span>
+                            </div>
+                          </div>
+                          <div className="shrink-0 flex flex-col sm:items-end gap-2 pt-2 sm:pt-0">
+                            <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide border ${
+                              isApproved
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200/50"
+                                : isRejected
+                                ? "bg-red-50 text-red-700 border-red-200/50"
+                                : "bg-amber-50 text-amber-700 border-amber-200/50"
+                            }`}>
+                              {isApproved ? (
+                                <><CheckCircle2 size={12} /> {t("profile.event_confirmed")}</>
+                              ) : isRejected ? (
+                                <><XCircle size={12} /> {t("bookingDetail.status_rejected") || "REJECTED"}</>
+                              ) : (
+                                <><Clock size={12} /> {t("profile.event_pending")}</>
+                              )}
+                            </span>
+                            {evt.is_attended && (
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100/70 border border-emerald-200/50 px-2 py-0.5 text-[9px] font-bold text-emerald-800 uppercase tracking-wider animate-pulse self-start sm:self-end">
+                                <CheckCircle2 size={10} /> Attended
+                              </span>
                             )}
-                          </span>
-                          <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-                            {t("profile.view_details")} <ChevronRight size={12} />
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
+                            <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                              {t("profile.view_details")} <ChevronRight size={12} />
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>

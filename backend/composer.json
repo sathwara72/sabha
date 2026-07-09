@@ -59,6 +59,12 @@
         }
     },
     "config": {
+        "platform": {
+            "php": "8.2.12"
+        },
+        "audit": {
+            "block-insecure": false
+        },
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,

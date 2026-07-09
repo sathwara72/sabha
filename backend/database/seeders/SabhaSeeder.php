@@ -161,6 +161,36 @@ class SabhaSeeder extends Seeder
              ])]
          );
 
+         \App\Models\Setting::updateOrCreate(
+             ['key' => 'trustees'],
+             ['value' => json_encode([
+                 [
+                     'name' => 'Ravi Sharma',
+                     'role' => 'President & Trustee',
+                     'company' => 'Founder, Vertex Solutions',
+                     'avatar' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop'
+                 ],
+                 [
+                     'name' => 'Pooja Verma',
+                     'role' => 'Vice President',
+                     'company' => 'Chief Architect & CEO, Prime Builders',
+                     'avatar' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop'
+                 ],
+                 [
+                     'name' => 'Amit Shah',
+                     'role' => 'Treasurer & Growth Lead',
+                     'company' => 'Director of Operations, Global Logistics',
+                     'avatar' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop'
+                 ],
+                 [
+                     'name' => 'Sara Khan',
+                     'role' => 'General Secretary',
+                     'company' => 'Senior Partner, Summit Consulting',
+                     'avatar' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=150&auto=format&fit=crop'
+                 ]
+             ])]
+         );
+
          // Seed gallery images and videos
          $evt1 = \App\Models\Event::where('title', 'Sabha Networking Mixer')->first();
          $evt2 = \App\Models\Event::where('title', 'Scaling 101 Workshop')->first();
@@ -193,6 +223,20 @@ class SabhaSeeder extends Seeder
          \App\Models\GalleryImage::firstOrCreate(
              ['image_path' => 'https://assets.mixkit.co/videos/preview/mixkit-business-people-meeting-in-a-modern-office-41585-large.mp4'],
              ['event_id' => null, 'caption' => 'Sabha strategic leadership and innovation video briefing.']
+         );
+
+         // Seed hero images
+         \App\Models\HeroImage::firstOrCreate(
+             ['image_path' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop'],
+             ['title' => 'SABHA Business Network', 'caption' => 'A trusted community of Sathwara entrepreneurs.']
+         );
+         \App\Models\HeroImage::firstOrCreate(
+             ['image_path' => 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=2000&auto=format&fit=crop'],
+             ['title' => 'Sabha Networking Mixer', 'caption' => 'Rooftop mixers with 50+ industry leaders.']
+         );
+         \App\Models\HeroImage::firstOrCreate(
+             ['image_path' => 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop'],
+             ['title' => 'Summit Discussions', 'caption' => 'Roundtable sessions with top founders.']
          );
      }
 }

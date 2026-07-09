@@ -6,11 +6,11 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
-import { fetchBusinesses, submitBusiness } from "@/lib/api";
+import { fetchBusinesses, submitBusiness, fetchCategories } from "@/lib/api";
 import { useLanguage } from "@/lib/language";
 
 export default function BusinessDirectory() {
-  const { isAuthenticated, isReady, openLogin } = useAuth();
+  const { isAuthenticated, isReady, openLogin, openRegister } = useAuth();
   const { t } = useLanguage();
   const [businesses, setBusinesses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,31 +29,41 @@ export default function BusinessDirectory() {
     category: "Software Development",
     description: "",
     website: "",
+    services: "",
   });
 
-  const categories = [
-    "All",
-    "Software Development",
-    "Supply Chain",
-    "Digital Marketing",
-    "Construction",
-    "Financial Services",
-    "Renewables",
-    "Creative Agency",
-    "Venture Capital"
-  ];
+  const [categories, setCategories] = useState<string[]>(["All"]);
 
   useEffect(() => {
-    loadBusinessesData();
+    loadData();
   }, []);
 
-  async function loadBusinessesData() {
+  async function loadData() {
     try {
       setLoading(true);
-      const data = await fetchBusinesses();
-      setBusinesses(data || []);
+      const [bizData, catData] = await Promise.all([
+        fetchBusinesses(),
+        fetchCategories().catch(() => [])
+      ]);
+      setBusinesses(bizData || []);
+      if (catData && catData.length > 0) {
+        setCategories(["All", ...catData]);
+        setFormData(prev => ({ ...prev, category: catData[0] }));
+      } else {
+        setCategories([
+          "All",
+          "Software Development",
+          "Supply Chain",
+          "Digital Marketing",
+          "Construction",
+          "Financial Services",
+          "Renewables",
+          "Creative Agency",
+          "Venture Capital"
+        ]);
+      }
     } catch (err) {
-      console.error("Failed to load businesses:", err);
+      console.error("Failed to load directory data:", err);
     } finally {
       setLoading(false);
     }
@@ -93,17 +103,20 @@ export default function BusinessDirectory() {
       data.append("category", formData.category);
       data.append("description", formData.description || "");
       data.append("website", formData.website || "");
+      data.append("services", formData.services || "");
 
       await submitBusiness(data);
       setFormSuccess("Your business has been submitted successfully and is pending administrator review!");
+      const defaultCategory = categories.filter(c => c !== "All")[0] || "Software Development";
       setFormData({
         name: "",
-        category: "Software Development",
+        category: defaultCategory,
         description: "",
         website: "",
+        services: "",
       });
       // Reload business list (though newly added will be pending so it won't show yet)
-      loadBusinessesData();
+      loadData();
       setTimeout(() => {
         setIsSubmitOpen(false);
         setFormSuccess("");
@@ -136,9 +149,12 @@ export default function BusinessDirectory() {
             </button>
             <p className="mt-4 text-sm text-muted">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="font-semibold text-primary hover:opacity-80">
+              <button
+                onClick={openRegister}
+                className="font-semibold text-primary hover:opacity-80 cursor-pointer"
+              >
                 Create one
-              </Link>
+              </button>
             </p>
           </div>
         </div>
@@ -184,10 +200,10 @@ export default function BusinessDirectory() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted">
+            {/* <div className="flex items-center gap-2 text-sm font-medium text-muted">
               <Filter className="h-4 w-4 text-primary" />
               Filter by category
-            </div>
+            </div> */}
             <div className="flex flex-wrap gap-2">
               {categories.map((cat) => (
                 <button
@@ -402,6 +418,17 @@ export default function BusinessDirectory() {
                     value={formData.website}
                     onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                     placeholder="https://example.com"
+                    className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted">Core Services (Comma separated)</label>
+                  <input
+                    type="text"
+                    value={formData.services}
+                    onChange={(e) => setFormData({ ...formData, services: e.target.value })}
+                    placeholder="E.g. Web Development, Cloud Services, UI Design"
                     className="w-full rounded-xl border border-border bg-white px-4 py-3 text-xs text-foreground outline-none focus:border-primary transition-colors"
                   />
                 </div>

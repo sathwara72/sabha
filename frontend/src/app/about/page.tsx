@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/shared/PageHeader";
-import { fetchStatistics } from "@/lib/api";
+import { fetchStatistics, fetchSettings } from "@/lib/api";
 import { useLanguage } from "@/lib/language";
+import { useAuth } from "@/lib/auth";
+import { API_ORIGIN } from "@/lib/config";
 
 const values = [
   {
@@ -47,7 +49,7 @@ const values = [
   },
 ];
 
-const team = [
+const fallbackTeam = [
   {
     tKey: "team_member_1",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
@@ -83,19 +85,21 @@ const milestones = [
 
 export default function AboutPage() {
   const { t } = useLanguage();
+  const { isAuthenticated, openRegister } = useAuth();
   const [stats, setStats] = useState({
     members: "500+",
     businessExchanged: "₹10Cr+",
     monthlyMixers: "50+"
   });
+  const [team, setTeam] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadStats() {
       try {
         const statData = await fetchStatistics();
         const foundMembers = statData.find((s: any) => s.label.toLowerCase().includes("member") || s.label.toLowerCase().includes("professional"));
-        const foundBusiness = statData.find((s: any) => s.label.toLowerCase().includes("exchange") || s.label.toLowerCase().includes("success"));
-        const foundMixers = statData.find((s: any) => s.label.toLowerCase().includes("mixer") || s.label.toLowerCase().includes("event"));
+        const foundBusiness = statData.find((s: any) => s.label.toLowerCase().includes("exchange"));
+        const foundMixers = statData.find((s: any) => s.label.toLowerCase().includes("mixer"));
 
         setStats({
           members: foundMembers ? foundMembers.value : "500+",
@@ -104,6 +108,24 @@ export default function AboutPage() {
         });
       } catch (e) {
         console.error("Failed to load statistics for about page:", e);
+      }
+
+      try {
+        const settingsData = await fetchSettings();
+        let loadedTeam = [];
+        if (settingsData.trustees) {
+          loadedTeam = typeof settingsData.trustees === "string"
+            ? JSON.parse(settingsData.trustees)
+            : settingsData.trustees;
+        }
+        if (loadedTeam && loadedTeam.length > 0) {
+          setTeam(loadedTeam);
+        } else {
+          setTeam(fallbackTeam);
+        }
+      } catch (e) {
+        console.error("Failed to load settings/trustees for about page:", e);
+        setTeam(fallbackTeam);
       }
     }
     loadStats();
@@ -119,8 +141,8 @@ export default function AboutPage() {
       />
 
       {/* Mission & Impact */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-5">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -176,15 +198,15 @@ export default function AboutPage() {
 
       {/* Values Grid */}
       <section className="border-y border-border bg-surface">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
-          <div className="mb-14 text-center max-w-2xl mx-auto">
+        <div className="mx-auto max-w-7xl px-3 py-20 lg:py-5">
+          <div className="mb-3 text-center max-w-2xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.values_label")}</span>
             <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               {t("about.values_title")}
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {values.map((v, i) => (
               <motion.div
                 key={v.tKey}
@@ -208,8 +230,8 @@ export default function AboutPage() {
       </section>
 
       {/* Evolution Timeline */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24 border-b border-border">
-        <div className="mb-14 text-center max-w-2xl mx-auto">
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-5 border-b border-border">
+        <div className="mb-3 text-center max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.timeline_label")}</span>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             {t("about.timeline_title")}
@@ -246,8 +268,8 @@ export default function AboutPage() {
       </section>
 
       {/* Leadership Board */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
-        <div className="mb-14 text-center max-w-2xl mx-auto">
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-5">
+        <div className="mb-3 text-center max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.leadership_label")}</span>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             {t("about.leadership_title")}
@@ -257,34 +279,40 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {team.map((member, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.05 }}
-              className="glass-card hover-card p-5 text-center flex flex-col items-center border border-border"
-            >
-              <img
-                src={member.avatar}
-                alt={t(`about.${member.tKey}_name`)}
-                className="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
-              />
-              <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full mb-2 border border-emerald-100">
-                {t("about.verified_trustee")}
-              </span>
-              <h3 className="text-sm font-extrabold text-foreground">{t(`about.${member.tKey}_name`)}</h3>
-              <p className="text-[11px] font-bold text-primary mt-0.5">{t(`about.${member.tKey}_role`)}</p>
-              <p className="text-[10px] text-muted font-semibold mt-1 truncate max-w-full">{t(`about.${member.tKey}_org`)}</p>
-            </motion.div>
-          ))}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {team.map((member, idx) => {
+            const name = member.tKey ? t(`about.${member.tKey}_name`) : member.name;
+            const role = member.tKey ? t(`about.${member.tKey}_role`) : member.role;
+            const company = member.tKey ? t(`about.${member.tKey}_org`) : (member.company || member.org);
+
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className="glass-card hover-card p-5 text-center flex flex-col items-center border border-border"
+              >
+                <img
+                  src={member.avatar.startsWith("http") ? member.avatar : `${API_ORIGIN}${member.avatar}`}
+                  alt={name}
+                  className="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
+                />
+                {/* <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full mb-2 border border-emerald-100">
+                  {t("about.verified_trustee")}
+                </span> */}
+                <h3 className="text-sm font-extrabold text-foreground">{name}</h3>
+                <p className="text-[11px] font-bold text-primary mt-0.5">{role}</p>
+                <p className="text-[10px] text-muted font-semibold mt-1 truncate max-w-full">{company}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-7xl px-6 pb-24">
+      <section className="mx-auto max-w-7xl px-6 pb-5">
         <div className="rounded-2xl border border-border bg-primary px-8 py-14 text-center text-white lg:px-16 shadow-lg">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t("about.cta_title")}
@@ -292,12 +320,21 @@ export default function AboutPage() {
           <p className="mx-auto mt-3 max-w-xl text-sm text-white/80 leading-relaxed">
             {t("about.cta_subtitle")}
           </p>
-          <Link
-            href="/register"
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-md transition-all hover:opacity-90 active:scale-[0.98]"
-          >
-            {t("about.cta_btn")} <ArrowRight size={16} />
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/profile"
+              className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-md transition-all hover:opacity-90 active:scale-[0.98]"
+            >
+              {t("nav.profile") || "Go to Profile"} <ArrowRight size={16} />
+            </Link>
+          ) : (
+            <button
+              onClick={openRegister}
+              className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-md transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
+            >
+              {t("about.cta_btn")} <ArrowRight size={16} />
+            </button>
+          )}
         </div>
       </section>
     </div>

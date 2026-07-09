@@ -26,7 +26,7 @@ export default function PageHeader({
 
   return (
     <section className="hero-surface relative border-b border-border">
-      <div className="mx-auto max-w-7xl px-6 py-9 lg:px-8 lg:py-11">
+      <div className="mx-auto max-w-7xl px-6 py-9 lg:px-8 lg:py-6">
         <div
           className={
             centered

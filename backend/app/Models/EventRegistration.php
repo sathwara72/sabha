@@ -15,10 +15,12 @@ class EventRegistration extends Model
         'ticket_type',
         'amount_paid',
         'rejection_reason',
+        'is_attended',
     ];
 
     protected $casts = [
         'amount_paid' => 'decimal:2',
+        'is_attended' => 'boolean',
     ];
 
     public function event()
