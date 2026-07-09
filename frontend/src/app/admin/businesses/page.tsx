@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
   fetchAllBusinessesAdmin, approveBusiness, rejectBusiness
@@ -9,7 +10,7 @@ import { API_ORIGIN } from "@/lib/config";
 import {
   ShieldCheck, XCircle, CheckCircle2,
   Globe, Info, Search, ChevronLeft, ChevronRight,
-  MapPin, Phone, Receipt, X, ZoomIn
+  MapPin, Phone, Receipt, X, ZoomIn, Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -36,6 +37,7 @@ function getMediaUrl(path?: string) {
 }
 
 export default function AdminBusinessesPage() {
+  const router = useRouter();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,192 +107,204 @@ export default function AdminBusinessesPage() {
 
   return (
     <>
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-col">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Business Approvals</h1>
-        <p className="text-sm text-muted">Review and approve member businesses</p>
-      </div>
-
-      <div className="flex items-center gap-3 rounded-xl bg-primary-soft p-3">
-        <Info className="h-5 w-5 shrink-0 text-primary" />
-        <p className="text-sm font-semibold text-foreground">
-          Review each business carefully before approving it for the community.
-        </p>
-      </div>
-
-      {/* Search + Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search by name, category, or description..."
-            className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      <div className="space-y-4">
+        {/* Page Header */}
+        <div className="flex flex-col">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Business Approvals</h1>
+          <p className="text-sm text-muted">Review and approve member businesses</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-muted">Status:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-border bg-white px-3 py-2 text-xs font-bold text-foreground outline-none transition-colors focus:border-primary"
-          >
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Cards Grid */}
-      {loading ? (
-        <div className="py-20 text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
-          <p className="mt-3 text-sm text-muted">Loading businesses...</p>
+        <div className="flex items-center gap-3 rounded-xl bg-primary-soft p-3">
+          <Info className="h-5 w-5 shrink-0 text-primary" />
+          <p className="text-sm font-semibold text-foreground">
+            Review each business carefully before approving it for the community.
+          </p>
         </div>
-      ) : (
-        <>
-          {filteredBusinesses.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border py-20 text-center text-muted">
-              {businesses.length === 0 ? "No businesses to review." : "No businesses match your search/filter."}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              <AnimatePresence>
-                {paginatedBusinesses.map((biz) => (
-                  <motion.div
-                    key={biz.id}
-                    layout
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="glass-card p-0 flex flex-col rounded-2xl border border-border"
-                  >
-                    {/* Cover Image */}
-                    <div className="relative h-28 w-full overflow-hidden rounded-t-2xl shrink-0">
-                      {biz.cover_image ? (
-                        <img
-                          src={getMediaUrl(biz.cover_image)}
-                          alt={biz.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/10 via-primary/5 to-slate-100" />
-                      )}
-                      {/* Status Badge */}
-                      <span className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${statusColor[biz.status] || "bg-surface text-muted border-border"}`}>
-                        {biz.status.charAt(0).toUpperCase() + biz.status.slice(1)}
-                      </span>
-                    </div>
 
-                    {/* Card Body */}
-                    <div className="px-4 pb-4 flex flex-col gap-2.5 flex-1">
-                      {/* Logo + Name */}
-                      <div className="flex items-center gap-3 -mt-7">
-                        <div className="relative z-10 shrink-0 h-14 w-14 rounded-xl border-2 border-white shadow-lg bg-white overflow-hidden flex items-center justify-center">
-                          {biz.logo ? (
-                            <img
-                              src={getMediaUrl(biz.logo)}
-                              alt={biz.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-xl font-bold text-primary">{biz.name?.[0] ?? "?"}</span>
-                          )}
-                        </div>
-                        <div className="flex-1 mt-8">
-                          <h3 className="text-sm font-bold text-foreground leading-tight line-clamp-1">{biz.name}</h3>
-                          {biz.tagline && (
-                            <p className="text-[10px] text-muted italic line-clamp-1 mt-0.5">{biz.tagline}</p>
-                          )}
-                        </div>
+        {/* Search + Filter */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by name, category, or description..."
+              className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border self-start sm:self-auto justify-center">
+            {(["all", "pending", "approved", "rejected"] as const).map((status) => (
+              <button
+                key={status}
+                onClick={() => {
+                  setStatusFilter(status);
+                  setCurrentPage(1);
+                }}
+                className={`px-4 py-1.5 text-xs font-bold rounded-lg capitalize transition-all cursor-pointer ${statusFilter === status
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-muted hover:text-foreground"
+                  }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Cards Grid */}
+        {loading ? (
+          <div className="py-20 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+            <p className="mt-3 text-sm text-muted">Loading businesses...</p>
+          </div>
+        ) : (
+          <>
+            {filteredBusinesses.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border py-20 text-center text-muted">
+                {businesses.length === 0 ? "No businesses to review." : "No businesses match your search/filter."}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <AnimatePresence>
+                  {paginatedBusinesses.map((biz) => (
+                    <motion.div
+                      key={biz.id}
+                      layout
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="glass-card p-0 flex flex-col rounded-2xl border border-border"
+                    >
+                      {/* Cover Image */}
+                      <div className="relative h-28 w-full overflow-hidden rounded-t-2xl shrink-0">
+                        {biz.cover_image ? (
+                          <img
+                            src={getMediaUrl(biz.cover_image)}
+                            alt={biz.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/10 via-primary/5 to-slate-100" />
+                        )}
+                        {/* Status Badge */}
+                        <span className={`absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${statusColor[biz.status] || "bg-surface text-muted border-border"}`}>
+                          {biz.status.charAt(0).toUpperCase() + biz.status.slice(1)}
+                        </span>
                       </div>
 
-                      {/* Meta info */}
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium">
-                        <span className="flex items-center gap-1 text-primary font-semibold">{biz.category}</span>
-                        {biz.location && <span className="flex items-center gap-1"><MapPin size={11} className="text-primary" /> {biz.location}</span>}
-                        {biz.phone && <span className="flex items-center gap-1"><Phone size={11} className="text-primary" /> {biz.phone}</span>}
-                        {biz.website && (
-                          <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                            <Globe size={11} /> Website
-                          </a>
+                      {/* Card Body */}
+                      <div className="px-4 pb-4 flex flex-col gap-2.5 flex-1">
+                        {/* Logo + Name */}
+                        <div className="flex items-center gap-3 -mt-7">
+                          <div className="relative z-10 shrink-0 h-14 w-14 rounded-xl border-2 border-white shadow-lg bg-white overflow-hidden flex items-center justify-center">
+                            {biz.logo ? (
+                              <img
+                                src={getMediaUrl(biz.logo)}
+                                alt={biz.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xl font-bold text-primary">{biz.name?.[0] ?? "?"}</span>
+                            )}
+                          </div>
+                          <div className="flex-1 mt-8">
+                            <h3 className="text-sm font-bold text-foreground leading-tight line-clamp-1">{biz.name}</h3>
+                            {biz.tagline && (
+                              <p className="text-[10px] text-muted italic line-clamp-1 mt-0.5">{biz.tagline}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Meta info */}
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium">
+                          <span className="flex items-center gap-1 text-primary font-semibold">{biz.category}</span>
+                          {biz.location && <span className="flex items-center gap-1"><MapPin size={11} className="text-primary" /> {biz.location}</span>}
+                          {biz.phone && <span className="flex items-center gap-1"><Phone size={11} className="text-primary" /> {biz.phone}</span>}
+                          {biz.website && (
+                            <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
+                              <Globe size={11} /> Website
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-[11px] text-muted leading-relaxed line-clamp-2 flex-1">
+                          {biz.description || "No description available for this business."}
+                        </p>
+
+                        {/* Payment Screenshot Button */}
+                        {biz.payment_screenshot && (
+                          <button
+                            onClick={() => setPaymentModalUrl(getMediaUrl(biz.payment_screenshot))}
+                            className="flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 hover:bg-amber-100 transition-colors w-full justify-center"
+                          >
+                            <Receipt size={12} /> View Payment Screenshot
+                          </button>
+                        )}
+
+                        {/* View Details Button */}
+                        <button
+                          onClick={() => router.push(`/admin/businesses/${biz.id}`)}
+                          className={`flex items-center gap-1.5 text-[10px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 hover:bg-slate-100 transition-colors w-full justify-center cursor-pointer ${!biz.payment_screenshot ? "mt-auto" : ""}`}
+                        >
+                          <Eye size={12} /> View Details
+                        </button>
+
+                        {/* Action buttons — only for pending */}
+                        {biz.status === "pending" && (
+                          <div className="flex items-center gap-2 pt-2 border-t border-border">
+                            <button
+                              onClick={() => handleApprove(biz.id)}
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+                            >
+                              <CheckCircle2 size={13} /> Approve
+                            </button>
+                            <button
+                              onClick={() => handleReject(biz.id)}
+                              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-[11px] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98]"
+                            >
+                              <XCircle size={13} /> Reject
+                            </button>
+                          </div>
                         )}
                       </div>
-
-                      {/* Description */}
-                      <p className="text-[11px] text-muted leading-relaxed line-clamp-2 flex-1">
-                        {biz.description || "No description available for this business."}
-                      </p>
-
-                      {/* Payment Screenshot Button */}
-                      {biz.payment_screenshot && (
-                        <button
-                          onClick={() => setPaymentModalUrl(getMediaUrl(biz.payment_screenshot))}
-                          className="flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 hover:bg-amber-100 transition-colors w-full justify-center"
-                        >
-                          <Receipt size={12} /> View Payment Screenshot
-                        </button>
-                      )}
-
-                      {/* Action buttons — only for pending */}
-                      {biz.status === "pending" && (
-                        <div className="flex items-center gap-2 pt-2 border-t border-border mt-auto">
-                          <button
-                            onClick={() => handleApprove(biz.id)}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
-                          >
-                            <CheckCircle2 size={13} /> Approve
-                          </button>
-                          <button
-                            onClick={() => handleReject(biz.id)}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-[11px] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98]"
-                          >
-                            <XCircle size={13} /> Reject
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
-              <p className="text-xs text-muted font-medium">
-                Showing <span className="font-semibold">{Math.min((currentPage - 1) * itemsPerPage + 1, filteredBusinesses.length)}</span> to{" "}
-                <span className="font-semibold">{Math.min(currentPage * itemsPerPage, filteredBusinesses.length)}</span> of{" "}
-                <span className="font-semibold">{filteredBusinesses.length}</span> businesses
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-muted hover:bg-surface disabled:opacity-50 transition-colors"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <span className="text-xs font-bold text-foreground px-2">Page {currentPage} of {totalPages}</span>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-muted hover:bg-surface disabled:opacity-50 transition-colors"
-                >
-                  <ChevronRight size={16} />
-                </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
+                <p className="text-xs text-muted font-medium">
+                  Showing <span className="font-semibold">{Math.min((currentPage - 1) * itemsPerPage + 1, filteredBusinesses.length)}</span> to{" "}
+                  <span className="font-semibold">{Math.min(currentPage * itemsPerPage, filteredBusinesses.length)}</span> of{" "}
+                  <span className="font-semibold">{filteredBusinesses.length}</span> businesses
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-muted hover:bg-surface disabled:opacity-50 transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="text-xs font-bold text-foreground px-2">Page {currentPage} of {totalPages}</span>
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-muted hover:bg-surface disabled:opacity-50 transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Payment Screenshot Lightbox Modal */}
       {typeof window !== "undefined" && paymentModalUrl && createPortal(

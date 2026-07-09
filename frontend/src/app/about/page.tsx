@@ -86,6 +86,7 @@ const milestones = [
 export default function AboutPage() {
   const { t } = useLanguage();
   const { isAuthenticated, openRegister } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     members: "500+",
     businessExchanged: "₹10Cr+",
@@ -96,7 +97,12 @@ export default function AboutPage() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const statData = await fetchStatistics();
+        setLoading(true);
+        const [statData, settingsData] = await Promise.all([
+          fetchStatistics().catch(() => []),
+          fetchSettings().catch(() => null)
+        ]);
+
         const foundMembers = statData.find((s: any) => s.label.toLowerCase().includes("member") || s.label.toLowerCase().includes("professional"));
         const foundBusiness = statData.find((s: any) => s.label.toLowerCase().includes("exchange"));
         const foundMixers = statData.find((s: any) => s.label.toLowerCase().includes("mixer"));
@@ -106,14 +112,9 @@ export default function AboutPage() {
           businessExchanged: foundBusiness ? foundBusiness.value : "₹10Cr+",
           monthlyMixers: foundMixers ? foundMixers.value : "50+"
         });
-      } catch (e) {
-        console.error("Failed to load statistics for about page:", e);
-      }
 
-      try {
-        const settingsData = await fetchSettings();
         let loadedTeam = [];
-        if (settingsData.trustees) {
+        if (settingsData && settingsData.trustees) {
           loadedTeam = typeof settingsData.trustees === "string"
             ? JSON.parse(settingsData.trustees)
             : settingsData.trustees;
@@ -124,12 +125,25 @@ export default function AboutPage() {
           setTeam(fallbackTeam);
         }
       } catch (e) {
-        console.error("Failed to load settings/trustees for about page:", e);
+        console.error("Failed to load statistics for about page:", e);
         setTeam(fallbackTeam);
+      } finally {
+        setLoading(false);
       }
     }
     loadStats();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center font-outfit">
+        <div className="text-center space-y-3">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-medium text-muted">{t("loading") || "Loading..."}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background">

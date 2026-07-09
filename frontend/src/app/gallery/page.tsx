@@ -127,6 +127,17 @@ export default function GalleryPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-[75vh] items-center justify-center font-outfit">
+        <div className="text-center space-y-3">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+          <p className="text-sm font-medium text-muted">{t("gallery.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-background font-outfit min-h-screen">
       {/* Header */}
@@ -177,12 +188,6 @@ export default function GalleryPage() {
 
       {/* Main Gallery Section */}
       <section className="mx-auto max-w-7xl px-6 py-16 lg:py-10 space-y-10">
-        {loading ? (
-          <div className="py-20 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
-            <p className="mt-3 text-sm text-muted">{t("gallery.loading")}</p>
-          </div>
-        ) : (
           <>
             {/* 1. Event Folders Section */}
             <div className="space-y-3">
@@ -347,7 +352,6 @@ export default function GalleryPage() {
               )}
             </div>
           </>
-        )}
       </section>
 
       {/* Lightbox / Slider Popup Modal */}
