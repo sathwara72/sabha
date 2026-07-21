@@ -610,43 +610,65 @@ class SabhaController extends Controller
             $extension = strtolower($file->getClientOriginalExtension());
 
             if ($extension === 'zip') {
-                if (class_exists('\ZipArchive')) {
-                    $zip = new \ZipArchive();
-                    if ($zip->open($file->getRealPath()) === true) {
-                        $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'webm', 'mkv'];
-                        for ($i = 0; $i < $zip->numFiles; $i++) {
-                            $filename = $zip->getNameIndex($i);
-                            if (str_contains($filename, '__MACOSX') || str_starts_with(basename($filename), '.') || str_ends_with($filename, '/')) {
-                                continue;
-                            }
-                            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                            if (in_array($ext, $allowedExts)) {
-                                $fileStream = $zip->getStream($filename);
-                                if ($fileStream) {
-                                    $newFileName = time() . '_' . uniqid() . '.' . $ext;
-                                    $destinationDir = public_path('storage/gallery');
-                                    if (!file_exists($destinationDir)) {
-                                        mkdir($destinationDir, 0755, true);
-                                    }
-                                    file_put_contents($destinationDir . '/' . $newFileName, stream_get_contents($fileStream));
-                                    fclose($fileStream);
+                if (!class_exists('\ZipArchive')) {
+                    return response()->json([
+                        'message' => 'ZIP extraction is not supported on the server because the PHP "zip" extension (php-zip) is not enabled on hosting.'
+                    ], 400);
+                }
 
-                                    $imagePath = '/storage/gallery/' . $newFileName;
-                                    $galleryImage = GalleryImage::create([
-                                        'event_id' => $request->input('event_id'),
-                                        'image_path' => $imagePath,
-                                        'caption' => $request->input('caption'),
-                                    ]);
-                                    $createdImages[] = $galleryImage;
+                $zip = new \ZipArchive();
+                if ($zip->open($file->getRealPath()) === true) {
+                    $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'webm', 'mkv'];
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $filename = $zip->getNameIndex($i);
+                        if (str_contains($filename, '__MACOSX') || str_starts_with(basename($filename), '.') || str_ends_with($filename, '/')) {
+                            continue;
+                        }
+                        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                        if (in_array($ext, $allowedExts)) {
+                            $fileStream = $zip->getStream($filename);
+                            if ($fileStream) {
+                                $newFileName = time() . '_' . uniqid() . '.' . $ext;
+                                $destinationDir = public_path('storage/gallery');
+                                if (!file_exists($destinationDir)) {
+                                    mkdir($destinationDir, 0755, true);
                                 }
+
+                                $destFilePath = $destinationDir . '/' . $newFileName;
+                                $tempZipFilePath = sys_get_temp_dir() . '/' . uniqid('zip_img_') . '.' . $ext;
+
+                                file_put_contents($tempZipFilePath, stream_get_contents($fileStream));
+                                fclose($fileStream);
+
+                                $this->compressAndSaveImage($tempZipFilePath, $destFilePath, $ext);
+                                @unlink($tempZipFilePath);
+
+                                $imagePath = '/storage/gallery/' . $newFileName;
+                                $galleryImage = GalleryImage::create([
+                                    'event_id' => $request->input('event_id'),
+                                    'image_path' => $imagePath,
+                                    'caption' => $request->input('caption'),
+                                ]);
+                                $createdImages[] = $galleryImage;
                             }
                         }
-                        $zip->close();
                     }
+                    $zip->close();
+                } else {
+                    return response()->json([
+                        'message' => 'Failed to open or extract the ZIP file. Please ensure it is a valid zip archive.'
+                    ], 400);
                 }
             } else {
                 $newFileName = time() . '_' . uniqid() . '.' . $extension;
-                $file->storeAs('gallery', $newFileName, 'public');
+                $destinationDir = public_path('storage/gallery');
+                if (!file_exists($destinationDir)) {
+                    mkdir($destinationDir, 0755, true);
+                }
+                $destFilePath = $destinationDir . '/' . $newFileName;
+
+                $this->compressAndSaveImage($file->getRealPath(), $destFilePath, $extension);
+
                 $imagePath = '/storage/gallery/' . $newFileName;
 
                 $galleryImage = GalleryImage::create([
@@ -681,6 +703,73 @@ class SabhaController extends Controller
         $galleryImage->delete();
 
         return response()->json(['message' => 'Gallery media deleted successfully']);
+    }
+
+    private function compressAndSaveImage($sourcePath, $destPath, $ext)
+    {
+        $ext = strtolower($ext);
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+            copy($sourcePath, $destPath);
+            return;
+        }
+
+        if (!function_exists('imagecreatefromstring')) {
+            copy($sourcePath, $destPath);
+            return;
+        }
+
+        try {
+            $content = file_get_contents($sourcePath);
+            if (!$content) {
+                copy($sourcePath, $destPath);
+                return;
+            }
+
+            $srcImage = @imagecreatefromstring($content);
+            if (!$srcImage) {
+                copy($sourcePath, $destPath);
+                return;
+            }
+
+            $width = imagesx($srcImage);
+            $height = imagesy($srcImage);
+
+            // Maximum bounds (Full HD 1920px)
+            $maxDimension = 1920;
+            if ($width > $maxDimension || $height > $maxDimension) {
+                if ($width >= $height) {
+                    $newWidth = $maxDimension;
+                    $newHeight = (int) round(($height / $width) * $maxDimension);
+                } else {
+                    $newHeight = $maxDimension;
+                    $newWidth = (int) round(($width / $height) * $maxDimension);
+                }
+
+                $dstImage = imagecreatetruecolor($newWidth, $newHeight);
+
+                if ($ext === 'png' || $ext === 'webp') {
+                    imagealphablending($dstImage, false);
+                    imagesavealpha($dstImage, true);
+                }
+
+                imagecopyresampled($dstImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                imagedestroy($srcImage);
+                $srcImage = $dstImage;
+            }
+
+            // Save compressed (75% quality for JPEG/WebP, 7/9 for PNG)
+            if ($ext === 'png') {
+                imagepng($srcImage, $destPath, 7);
+            } elseif ($ext === 'webp') {
+                imagewebp($srcImage, $destPath, 75);
+            } else {
+                imagejpeg($srcImage, $destPath, 75);
+            }
+
+            imagedestroy($srcImage);
+        } catch (\Throwable $e) {
+            copy($sourcePath, $destPath);
+        }
     }
 
     public function updateStatistic(Request $request, $id)
