@@ -31,7 +31,7 @@ JSON;
         foreach ($membersData as $data) {
             // 1. Ensure Business Category exists
             $categoryName = $data['category'] ?: 'General';
-            BusinessCategory::firstOrCreate(
+            $category = BusinessCategory::firstOrCreate(
                 ['name' => $categoryName],
                 ['sort_order' => 0, 'is_active' => true]
             );
@@ -58,6 +58,7 @@ JSON;
                 ['name' => $data['business_name']],
                 [
                     'user_id' => $user->id,
+                    'business_category_id' => $category->id,
                     'category' => $categoryName,
                     'location' => $data['city'] ? $data['city'] . ', Gujarat' : 'Gujarat',
                     'description' => $data['bio'],
