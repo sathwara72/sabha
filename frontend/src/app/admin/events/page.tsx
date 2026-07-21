@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { createEventAdmin, updateEventAdmin, fetchEvents, getAllEventRegistrations } from "@/lib/api";
 import { assetUrl } from "@/lib/config";
 import {
@@ -242,14 +243,14 @@ export default function AdminEventsPage() {
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleViewMembers(evt)}
+                        <Link
+                          href={`/admin/events/${evt.id}`}
                           id={`view-members-${evt.id}`}
                           className="inline-flex items-center gap-1 rounded-lg bg-primary-soft hover:bg-primary hover:text-white px-2.5 py-1.5 text-[11px] font-bold text-primary transition-all cursor-pointer"
                         >
                           <Eye size={12} />
                           View
-                        </button>
+                        </Link>
                         <button
                           onClick={() => handleEditEvent(evt)}
                           id={`edit-event-${evt.id}`}

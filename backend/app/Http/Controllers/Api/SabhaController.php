@@ -591,30 +591,81 @@ class SabhaController extends Controller
 
     public function uploadGalleryImage(Request $request)
     {
-        $validated = $request->validate([
-            'event_id' => 'nullable|integer',
-            'image' => 'required|file|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,webm,mkv|max:51200', // support up to 50MB
-            'caption' => 'nullable|string',
-        ]);
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('gallery', $fileName, 'public');
-            $imagePath = '/storage/gallery/' . $fileName;
-        } else {
-            return response()->json(['message' => 'No file uploaded'], 400);
+        // Support both single file 'image' and multiple files array 'images' or 'images[]'
+        $files = [];
+        if ($request->hasFile('images')) {
+            $uploaded = $request->file('images');
+            $files = is_array($uploaded) ? $uploaded : [$uploaded];
+        } elseif ($request->hasFile('image')) {
+            $files = [$request->file('image')];
         }
 
-        $galleryImage = GalleryImage::create([
-            'event_id' => $validated['event_id'] ?? null,
-            'image_path' => $imagePath,
-            'caption' => $validated['caption'] ?? null,
-        ]);
+        if (empty($files)) {
+            return response()->json(['message' => 'No files uploaded'], 400);
+        }
+
+        $createdImages = [];
+
+        foreach ($files as $file) {
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if ($extension === 'zip') {
+                if (class_exists('\ZipArchive')) {
+                    $zip = new \ZipArchive();
+                    if ($zip->open($file->getRealPath()) === true) {
+                        $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'webm', 'mkv'];
+                        for ($i = 0; $i < $zip->numFiles; $i++) {
+                            $filename = $zip->getNameIndex($i);
+                            if (str_contains($filename, '__MACOSX') || str_starts_with(basename($filename), '.') || str_ends_with($filename, '/')) {
+                                continue;
+                            }
+                            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                            if (in_array($ext, $allowedExts)) {
+                                $fileStream = $zip->getStream($filename);
+                                if ($fileStream) {
+                                    $newFileName = time() . '_' . uniqid() . '.' . $ext;
+                                    $destinationDir = public_path('storage/gallery');
+                                    if (!file_exists($destinationDir)) {
+                                        mkdir($destinationDir, 0755, true);
+                                    }
+                                    file_put_contents($destinationDir . '/' . $newFileName, stream_get_contents($fileStream));
+                                    fclose($fileStream);
+
+                                    $imagePath = '/storage/gallery/' . $newFileName;
+                                    $galleryImage = GalleryImage::create([
+                                        'event_id' => $request->input('event_id'),
+                                        'image_path' => $imagePath,
+                                        'caption' => $request->input('caption'),
+                                    ]);
+                                    $createdImages[] = $galleryImage;
+                                }
+                            }
+                        }
+                        $zip->close();
+                    }
+                }
+            } else {
+                $newFileName = time() . '_' . uniqid() . '.' . $extension;
+                $file->storeAs('gallery', $newFileName, 'public');
+                $imagePath = '/storage/gallery/' . $newFileName;
+
+                $galleryImage = GalleryImage::create([
+                    'event_id' => $request->input('event_id'),
+                    'image_path' => $imagePath,
+                    'caption' => $request->input('caption'),
+                ]);
+                $createdImages[] = $galleryImage;
+            }
+        }
+
+        $count = count($createdImages);
+        if ($count === 0) {
+            return response()->json(['message' => 'No valid media files were uploaded.'], 400);
+        }
 
         return response()->json([
-            'message' => 'Gallery media uploaded successfully',
-            'gallery_image' => $galleryImage
+            'message' => "Successfully uploaded {$count} media items!",
+            'gallery_images' => $createdImages
         ]);
     }
 

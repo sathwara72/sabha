@@ -2,28 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { fetchEvents, fetchGallery, uploadGalleryImage, deleteGalleryImage } from "@/lib/api";
+import { fetchGallery, uploadGalleryImage, deleteGalleryImage } from "@/lib/api";
 import { API_ORIGIN } from "@/lib/config";
 import {
   Upload, Image, Film, Plus,
-  CheckCircle2, AlertCircle, Calendar,
+  CheckCircle2, AlertCircle,
   FileText, X, ZoomIn, ChevronLeft, ChevronRight,
   Trash2
 } from "lucide-react";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 
 export default function AdminGalleryPage() {
-  const [events, setEvents] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Upload modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState("");
-  const [caption, setCaption] = useState("");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   // Lightbox viewer state
@@ -56,12 +52,10 @@ export default function AdminGalleryPage() {
   async function loadData() {
     try {
       setLoading(true);
-      const [evtData, galData] = await Promise.all([
-        fetchEvents(),
-        fetchGallery(),
-      ]);
-      setEvents(evtData || []);
-      setGallery(galData || []);
+      const galData = await fetchGallery();
+      // Filter out event-specific gallery items
+      const commonMedia = (galData || []).filter((item: any) => !item.event_id);
+      setGallery(commonMedia);
     } catch (err) {
       console.error("Error loading gallery data:", err);
     } finally {
@@ -109,7 +103,7 @@ export default function AdminGalleryPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setMediaFile(e.target.files[0]);
+      setMediaFiles(Array.from(e.target.files));
       setError("");
     }
   };
@@ -128,31 +122,24 @@ export default function AdminGalleryPage() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mediaFile) {
-      setError("Please select an image or video file to upload.");
+    if (mediaFiles.length === 0) {
+      setError("Please select image(s), video(s), or ZIP file to upload.");
       return;
     }
     setUploading(true);
     setError("");
-    setSuccess(false);
     try {
       const formData = new FormData();
-      formData.append("image", mediaFile);
-      if (selectedEventId) formData.append("event_id", selectedEventId);
-      if (caption) formData.append("caption", caption);
+      mediaFiles.forEach((file) => {
+        formData.append("images[]", file);
+      });
 
       await uploadGalleryImage(formData);
-      setSuccess(true);
-      setCaption("");
-      setMediaFile(null);
-      setSelectedEventId("");
+      setMediaFiles([]);
       const fileInput = document.getElementById("gallery-file-input") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
+      setIsModalOpen(false);
       await loadData();
-      setTimeout(() => {
-        setSuccess(false);
-        setIsModalOpen(false);
-      }, 1500);
     } catch (err: any) {
       setError(err.message || "Failed to upload media.");
     } finally {
@@ -169,7 +156,7 @@ export default function AdminGalleryPage() {
           <p className="text-xs text-muted">Upload and manage images and videos for the community gallery</p>
         </div>
         <button
-          onClick={() => { setSuccess(false); setError(""); setIsModalOpen(true); }}
+          onClick={() => { setError(""); setIsModalOpen(true); }}
           className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] whitespace-nowrap self-start sm:self-auto"
         >
           <Plus size={14} /> Add Gallery
@@ -198,7 +185,6 @@ export default function AdminGalleryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {gallery.map((item, index) => {
               const isVideo = isVideoFile(item.image_path);
-              const matchedEvent = events.find(e => e.id === item.event_id);
               return (
                 <div
                   key={item.id}
@@ -247,15 +233,6 @@ export default function AdminGalleryPage() {
                   </div>
 
                   <div className="p-3 flex-1 flex flex-col gap-1">
-                    {matchedEvent ? (
-                      <span className="text-[10px] font-semibold text-primary bg-primary-soft px-2 py-0.5 rounded-md flex items-center gap-1 w-fit max-w-full truncate">
-                        <Calendar size={10} /> {matchedEvent.title}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-semibold text-muted bg-surface border border-border px-2 py-0.5 rounded-md flex items-center gap-1 w-fit">
-                        Common Folder
-                      </span>
-                    )}
                     <p className="text-xs text-foreground font-medium line-clamp-2">
                       {item.caption || "No caption added"}
                     </p>
@@ -323,16 +300,6 @@ export default function AdminGalleryPage() {
 
             {/* Caption bar */}
             <div className="flex flex-col items-center gap-1 text-center">
-              {(() => {
-                const matchedEvent = events.find(e => e.id === selectedMedia.event_id);
-                return matchedEvent ? (
-                  <span className="text-[11px] font-semibold text-white/60 flex items-center gap-1">
-                    <Calendar size={11} /> {matchedEvent.title}
-                  </span>
-                ) : (
-                  <span className="text-[11px] font-semibold text-white/40">Common Folder</span>
-                );
-              })()}
               {selectedMedia.caption && (
                 <p className="text-sm font-medium text-white/80 max-w-xl">{selectedMedia.caption}</p>
               )}
@@ -362,58 +329,30 @@ export default function AdminGalleryPage() {
                 <AlertCircle size={14} className="shrink-0" /><span>{error}</span>
               </div>
             )}
-            {success && (
-              <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs font-semibold text-emerald-600 flex items-center gap-2 justify-center mb-4">
-                <CheckCircle2 size={14} className="shrink-0" /><span>Uploaded successfully!</span>
-              </div>
-            )}
 
             <form onSubmit={handleUpload} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Select File (Image or Video)</label>
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>Select Files (Images, Videos or ZIP Archives)</span>
+                  <span className="text-[10px] text-primary font-bold bg-primary-soft px-1.5 py-0.5 rounded">Multi-Select Enabled</span>
+                </label>
                 <div className="relative border-2 border-dashed border-border rounded-xl p-6 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer flex flex-col items-center justify-center">
                   <input
                     id="gallery-file-input"
                     type="file"
-                    accept="image/*,video/*"
+                    multiple
+                    accept="image/*,video/*,.zip,application/zip,application/x-zip-compressed"
                     onChange={handleFileChange}
                     className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                     required
                   />
                   <Upload className="h-6 w-6 text-primary mb-2" />
                   <span className="text-xs font-semibold text-foreground text-center line-clamp-1 px-2">
-                    {mediaFile ? mediaFile.name : "Click to select image or video"}
+                    {mediaFiles.length > 0
+                      ? `${mediaFiles.length} file${mediaFiles.length > 1 ? "s" : ""} selected (${mediaFiles.map(f => f.name).join(", ")})`
+                      : "Click to select single or multiple files"}
                   </span>
-                  <span className="text-[10px] text-muted-foreground mt-1">Images or Videos up to 50MB</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Associate with Event</label>
-                <select
-                  value={selectedEventId}
-                  onChange={(e) => setSelectedEventId(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary font-medium"
-                >
-                  <option value="">Common / No Event Folder</option>
-                  {events.map((evt) => (
-                    <option key={evt.id} value={evt.id}>{evt.title} ({new Date(evt.date).getFullYear()})</option>
-                  ))}
-                </select>
-                <p className="text-[10px] text-muted-foreground">Associating with an event groups this media into an Event Folder.</p>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Caption (Optional)</label>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-3 h-3.5 w-3.5 text-muted-foreground" />
-                  <textarea
-                    rows={2}
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    placeholder="Enter caption..."
-                    className="w-full rounded-xl border border-border bg-white py-2 pl-9 pr-4 text-xs text-foreground outline-none focus:border-primary resize-none"
-                  />
+                  <span className="text-[10px] text-muted-foreground mt-1">Select multiple images/videos or ZIP archives (up to 100MB)</span>
                 </div>
               </div>
 
