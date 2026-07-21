@@ -913,25 +913,40 @@ export async function fetchUsersAdmin() {
 export async function uploadGalleryImage(formData: FormData) {
   const token = localStorage.getItem("sabha_token");
   
-  const response = await fetch(`${API_BASE_URL}/gallery/upload`, {
-    method: "POST",
-    headers: {
-      "Accept": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: formData
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/gallery/upload`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: formData
+    });
 
-  const resData = await response.json();
+    let resData: any = {};
+    try {
+      resData = await response.json();
+    } catch {
+      if (response.status === 413) {
+        throw new Error("File size is too large for the server. Try uploading a smaller ZIP file (under 10MB) or individual photos.");
+      }
+      throw new Error(`Server error (${response.status}). Please check PHP file upload limits.`);
+    }
 
-  if (!response.ok) {
-    throw new Error(resData.message || "Failed to upload gallery media");
+    if (!response.ok) {
+      throw new Error(resData.message || "Failed to upload gallery media");
+    }
+
+    return { 
+      success: true, 
+      image_url: resData.gallery_image?.image_path 
+    };
+  } catch (err: any) {
+    if (err.name === "TypeError" && (err.message === "Failed to fetch" || err.message?.includes("fetch"))) {
+      throw new Error("Failed to upload: The ZIP file size exceeds live server upload limit (Nginx/PHP limit) or network request timed out.");
+    }
+    throw err;
   }
-
-  return { 
-    success: true, 
-    image_url: resData.gallery_image?.image_path 
-  };
 }
 
 export async function updateStatistic(id: number, statData: { value: string; label: string }) {
