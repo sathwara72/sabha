@@ -73,6 +73,10 @@ export default function ProfilePage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
+  const [paymentPreview, setPaymentPreview] = useState<string>("");
+  const [logoPreview, setLogoPreview] = useState<string>("");
+  const [coverPreview, setCoverPreview] = useState<string>("");
+
   const [bizSubmitting, setBizSubmitting] = useState(false);
   const [bizSuccess, setBizSuccess] = useState("");
   const [bizError, setBizError] = useState("");
@@ -133,6 +137,8 @@ export default function ProfilePage() {
       if (biz) {
         setBizName(biz.name);
         setBizCategory(biz.category);
+        if (biz.logo) setLogoPreview(assetUrl(biz.logo));
+        if (biz.cover_image) setCoverPreview(assetUrl(biz.cover_image));
         setBizWebsite(biz.website || "");
         setBizDescription(biz.description || "");
         setBizTagline(biz.tagline || "");
@@ -632,15 +638,21 @@ export default function ProfilePage() {
                               type="file"
                               accept="image/*"
                               required
-                              onChange={(e) => setPaymentFile(e.target.files?.[0] || null)}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                setPaymentFile(file);
+                                if (file) setPaymentPreview(URL.createObjectURL(file));
+                              }}
                               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                             />
-                            {paymentFile ? (
-                              <>
-                                <CheckCircle2 className="h-10 w-10 text-emerald-500 mb-3" />
-                                <span className="text-sm font-bold text-foreground text-center">{paymentFile.name}</span>
-                                <span className="text-xs text-emerald-600 font-semibold mt-1">{t("profile.screenshot_selected")} ✓</span>
-                              </>
+                            {paymentFile && paymentPreview ? (
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="h-24 w-36 rounded-xl border border-border overflow-hidden bg-slate-900 shadow-sm">
+                                  <img src={paymentPreview} alt="Payment Preview" className="h-full w-full object-cover" />
+                                </div>
+                                <span className="text-sm font-bold text-foreground text-center truncate max-w-[220px]">{paymentFile.name}</span>
+                                <span className="text-xs text-emerald-600 font-semibold">{t("profile.screenshot_selected")} ✓</span>
+                              </div>
                             ) : (
                               <>
                                 <div className="h-14 w-14 rounded-2xl bg-primary-soft flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
@@ -669,6 +681,7 @@ export default function ProfilePage() {
                      ══════════════════════════════════════════════ */}
                   {business && business.status === "pending" && (
                     <div className="space-y-4">
+                      {/* Top status notice */}
                       <div className="rounded-xl bg-amber-50 border border-amber-100 p-5 flex items-start gap-3">
                         <Clock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                         <div>
@@ -677,26 +690,59 @@ export default function ProfilePage() {
                         </div>
                       </div>
 
-                      {/* Locked details notice */}
-                      <div className="rounded-2xl border border-dashed border-border bg-surface/40 p-8 flex flex-col items-center justify-center text-center gap-3">
-                        <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-                          <Briefcase size={22} className="text-muted-foreground/50" />
-                        </div>
-                        <p className="text-sm font-bold text-foreground">{t("profile.details_locked_title")}</p>
-                        <p className="text-xs text-muted font-medium max-w-xs">{t("profile.details_locked_desc")}</p>
-                      </div>
+                      {/* Single unified card: Left side image, Right side locked text */}
+                      <div className="glass-card p-5 rounded-2xl border border-border/80 shadow-xs">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                          {/* Left Side: Screenshot Image */}
+                          {business.payment_screenshot && (
+                            <div className="md:col-span-5 space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] uppercase font-bold text-muted tracking-wider">
+                                  {t("profile.submitted_screenshot")}
+                                </span>
+                                <a
+                                  href={assetUrl(business.payment_screenshot)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:opacity-85 transition-opacity"
+                                >
+                                  <Eye size={12} /> {t("profile.view_full")}
+                                </a>
+                              </div>
+                              <div className="relative rounded-xl border border-border overflow-hidden h-40 sm:h-44 w-full bg-slate-900 group shadow-sm">
+                                <img
+                                  src={assetUrl(business.payment_screenshot)}
+                                  alt="Payment Screenshot"
+                                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <a
+                                  href={assetUrl(business.payment_screenshot)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold gap-1.5 backdrop-blur-[2px]"
+                                >
+                                  <Eye size={16} /> {t("profile.view_full")}
+                                </a>
+                              </div>
+                            </div>
+                          )}
 
-                      {business.payment_screenshot && (
-                        <div>
-                          <span className="text-[10px] uppercase font-bold text-muted block mb-2">{t("profile.submitted_screenshot")}</span>
-                          <div className="relative rounded-xl border border-border overflow-hidden h-32 w-52 bg-slate-900 group">
-                            <img src={assetUrl(business.payment_screenshot)} alt="Payment Screenshot" className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
-                            <a href={assetUrl(business.payment_screenshot)} target="_blank" rel="noreferrer" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold gap-1">
-                              <Eye size={14} /> {t("profile.view_full")}
-                            </a>
+                          {/* Right Side: Business Details Locked Info */}
+                          <div className={business.payment_screenshot ? "md:col-span-7" : "md:col-span-12"}>
+                            <div className="rounded-xl border border-dashed border-border/80 bg-surface/30 p-6 flex flex-col items-center md:items-start text-center md:text-left gap-2.5">
+                              <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shadow-xs">
+                                <Briefcase size={20} />
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-bold text-foreground">{t("profile.details_locked_title")}</h3>
+                                <p className="text-xs text-muted font-medium mt-1 leading-relaxed max-w-sm">
+                                  {t("profile.details_locked_desc")}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   )}
 
@@ -751,32 +797,32 @@ export default function ProfilePage() {
                               <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl bg-white border border-border p-1.5 shadow-md flex items-center justify-center overflow-hidden shrink-0">
                                 {business.logo ? <img src={assetUrl(business.logo)} alt="Logo" className="h-full w-full object-contain" /> : <span className="text-2xl font-bold text-primary">{business.name?.[0] ?? "?"}</span>}
                               </div>
-                              <div className="text-white pb-1">
-                                <h3 className="text-lg sm:text-xl font-bold">{business.name || t("profile.your_business")}</h3>
-                                <p className="text-xs font-semibold text-white/80">{business.tagline || t("profile.verified_member")}</p>
+                              <div className="text-white pb-1 min-w-0 pr-4">
+                                <h3 className="text-lg sm:text-xl font-bold truncate">{business.name || t("profile.your_business")}</h3>
+                                <p className="text-xs font-semibold text-white/80 break-words [overflow-wrap:anywhere]">{business.tagline || t("profile.verified_member")}</p>
                               </div>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="glass-card p-4 flex flex-col gap-1 border border-border/60">
+                            <div className="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
                               <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><Briefcase size={12} className="text-primary" /> {t("profile.biz_category")}</span>
-                              <p className="text-xs font-extrabold text-foreground">{business.category || "—"}</p>
+                              <p className="text-xs font-extrabold text-foreground break-words">{business.category || "—"}</p>
                             </div>
-                            <div className="glass-card p-4 flex flex-col gap-1 border border-border/60">
+                            <div className="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
                               <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><MapPin size={12} className="text-primary" /> {t("profile.biz_location")}</span>
-                              <p className="text-xs font-extrabold text-foreground">{business.location || "—"}</p>
+                              <p className="text-xs font-extrabold text-foreground break-words">{business.location || "—"}</p>
                             </div>
-                            <div className="glass-card p-4 flex flex-col gap-1 border border-border/60">
+                            <div className="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
                               <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><Clock size={12} className="text-primary" /> {t("profile.biz_hours")}</span>
-                              <p className="text-xs font-extrabold text-foreground">{business.hours || "—"}</p>
+                              <p className="text-xs font-extrabold text-foreground break-words">{business.hours || "—"}</p>
                             </div>
                           </div>
 
                           {business.description && (
-                            <div>
+                            <div className="min-w-0">
                               <span className="text-[10px] uppercase font-bold text-muted">{t("profile.about_company")}</span>
-                              <p className="text-xs leading-relaxed text-muted mt-1 font-medium bg-surface/30 p-4 rounded-xl border border-border/60">{business.description}</p>
+                              <p className="text-xs leading-relaxed text-muted mt-1 font-medium bg-surface/30 p-4 rounded-xl border border-border/60 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{business.description}</p>
                             </div>
                           )}
 
@@ -978,22 +1024,71 @@ export default function ProfilePage() {
                           <div className="space-y-4 border-t border-border pt-4">
                             <h4 className="text-sm font-bold text-foreground">{t("profile.branding_photos")}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* Logo Upload */}
                               <div>
                                 <label className={labelClass}>{t("profile.biz_logo")}</label>
-                                <div className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative">
-                                  <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
-                                  <Upload className="h-6 w-6 text-primary mb-2" />
-                                  <span className="text-[11px] font-semibold text-foreground text-center">{logoFile ? logoFile.name : t("profile.choose_logo")}</span>
-                                  <span className="text-[9px] text-muted-foreground mt-1">{t("profile.logo_hint")}</span>
+                                <div className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[140px]">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0] || null;
+                                      setLogoFile(file);
+                                      if (file) setLogoPreview(URL.createObjectURL(file));
+                                    }}
+                                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                                  />
+                                  {logoPreview ? (
+                                    <div className="flex flex-col items-center gap-2">
+                                      <div className="h-16 w-16 rounded-xl border border-border overflow-hidden bg-white p-1 shadow-sm">
+                                        <img src={logoPreview} alt="Logo Preview" className="h-full w-full object-contain" />
+                                      </div>
+                                      <span className="text-[11px] font-semibold text-foreground text-center truncate max-w-[200px]">
+                                        {logoFile ? logoFile.name : (business?.logo?.split("/").pop() || t("profile.choose_logo"))}
+                                      </span>
+                                      <span className="text-[9px] font-bold text-primary">Click to change</span>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <Upload className="h-6 w-6 text-primary mb-2" />
+                                      <span className="text-[11px] font-semibold text-foreground text-center">{t("profile.choose_logo")}</span>
+                                      <span className="text-[9px] text-muted-foreground mt-1">{t("profile.logo_hint")}</span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
+
+                              {/* Cover Upload */}
                               <div>
                                 <label className={labelClass}>{t("profile.biz_cover")}</label>
-                                <div className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative">
-                                  <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
-                                  <Upload className="h-6 w-6 text-primary mb-2" />
-                                  <span className="text-[11px] font-semibold text-foreground text-center">{coverFile ? coverFile.name : t("profile.choose_cover")}</span>
-                                  <span className="text-[9px] text-muted-foreground mt-1">{t("profile.cover_hint")}</span>
+                                <div className="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[140px]">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0] || null;
+                                      setCoverFile(file);
+                                      if (file) setCoverPreview(URL.createObjectURL(file));
+                                    }}
+                                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                                  />
+                                  {coverPreview ? (
+                                    <div className="flex flex-col items-center gap-2 w-full">
+                                      <div className="h-20 w-full max-w-[240px] rounded-xl border border-border overflow-hidden bg-slate-900 shadow-sm">
+                                        <img src={coverPreview} alt="Cover Preview" className="h-full w-full object-cover" />
+                                      </div>
+                                      <span className="text-[11px] font-semibold text-foreground text-center truncate max-w-[200px]">
+                                        {coverFile ? coverFile.name : (business?.cover_image?.split("/").pop() || t("profile.choose_cover"))}
+                                      </span>
+                                      <span className="text-[9px] font-bold text-primary">Click to change</span>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <Upload className="h-6 w-6 text-primary mb-2" />
+                                      <span className="text-[11px] font-semibold text-foreground text-center">{t("profile.choose_cover")}</span>
+                                      <span className="text-[9px] text-muted-foreground mt-1">{t("profile.cover_hint")}</span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </div>

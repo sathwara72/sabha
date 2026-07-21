@@ -693,7 +693,7 @@ export default function BusinessDetailsPage() {
                   <span className="h-4 w-1 rounded-full bg-primary" />
                   <h2 className="text-base font-bold text-foreground">{t("businessDetail.about_company")}</h2>
                 </div>
-                <p className="text-xs leading-relaxed text-muted">
+                <p className="text-xs leading-relaxed text-muted break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
                   {business.about}
                 </p>
               </section>
