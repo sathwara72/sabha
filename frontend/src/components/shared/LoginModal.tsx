@@ -3,16 +3,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, ArrowRight, X, Sparkles } from "lucide-react";
+import { Mail, Lock, ArrowRight, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export default function LoginModal() {
-  const { isLoginOpen, closeLogin, login, demoLogin, openRegister } = useAuth();
+  const { isLoginOpen, closeLogin, login, openRegister } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,18 +25,6 @@ export default function LoginModal() {
       setError(err.message || "Failed to log in.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    setError("");
-    setDemoLoading(true);
-    try {
-      await demoLogin();
-    } catch (err: any) {
-      setError(err.message || "Could not start a demo session.");
-    } finally {
-      setDemoLoading(false);
     }
   };
 
@@ -132,25 +119,6 @@ export default function LoginModal() {
                 {!loading && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />}
               </button>
             </form>
-
-            <div className="my-3 flex items-center gap-3">
-              <span className="h-px flex-1 bg-border" />
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">or</span>
-              <span className="h-px flex-1 bg-border" />
-            </div>
-
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              disabled={demoLoading || loading}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-primary/40 bg-primary-soft px-4 py-2 text-xs font-semibold text-primary transition-all hover:bg-primary/10 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              {demoLoading ? "Starting demo..." : "Continue with a demo account"}
-            </button>
-            <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
-              Explore instantly — no signup or password needed.
-            </p>
 
             <p className="mt-4 text-center text-xs text-muted">
               Don&apos;t have an account?{" "}
