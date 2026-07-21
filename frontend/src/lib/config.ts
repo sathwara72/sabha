@@ -1,11 +1,13 @@
 // Origin of the Laravel backend (no trailing slash).
-// Override per-environment with NEXT_PUBLIC_API_ORIGIN (e.g. https://api.yourdomain.com).
+// Override per-environment with NEXT_PUBLIC_API_ORIGIN (e.g. http://localhost:8000).
 export const API_ORIGIN = (
   process.env.NEXT_PUBLIC_API_ORIGIN || "http://localhost:8000"
 ).replace(/\/$/, "");
 
 // Base URL for the JSON API.
-export const API_BASE_URL = `${API_ORIGIN}/api`;
+export const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL || `${API_ORIGIN}/api`
+).replace(/\/$/, "");
 
 // Build an absolute URL for a backend-served asset path like "/storage/avatars/x.png".
 // Returns "" for empty input and passes through already-absolute URLs untouched.
