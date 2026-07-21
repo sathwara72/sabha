@@ -8,6 +8,7 @@ class Business extends Model
 {
     protected $fillable = [
         'user_id',
+        'business_category_id',
         'name',
         'category',
         'tagline',
@@ -42,6 +43,11 @@ class Business extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function businessCategory()
+    {
+        return $this->belongsTo(BusinessCategory::class, 'business_category_id');
     }
 
     public function reviews()
