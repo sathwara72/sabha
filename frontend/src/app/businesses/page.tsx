@@ -253,13 +253,14 @@ export default function BusinessDirectory() {
                         business.name?.[0] ?? "?"
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-
-                      <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
-                        <Star size={14} className="fill-current" />
-                        {business.rating || "5.0"}
+                    {business.rating && Number(business.rating) > 0 ? (
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
+                          <Star size={14} className="fill-current" />
+                          {Number(business.rating).toFixed(1)}
+                        </div>
                       </div>
-                    </div>
+                    ) : null}
                   </div>
 
                   <div className="flex-1">

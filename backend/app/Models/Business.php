@@ -40,6 +40,27 @@ class Business extends Model
         'services' => 'array',
     ];
 
+    protected $appends = ['rating', 'reviews_count'];
+
+    public function getRatingAttribute()
+    {
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return $this->attributes['reviews_avg_rating'] !== null 
+                ? round((float) $this->attributes['reviews_avg_rating'], 1) 
+                : null;
+        }
+        $avg = $this->reviews()->avg('rating');
+        return $avg !== null ? round((float) $avg, 1) : null;
+    }
+
+    public function getReviewsCountAttribute()
+    {
+        if (array_key_exists('reviews_count', $this->attributes)) {
+            return (int) $this->attributes['reviews_count'];
+        }
+        return $this->reviews()->count();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -26,13 +26,25 @@ class SabhaController extends Controller
     public function getBusinesses()
     {
         // Only return approved businesses for the public frontend
-        return response()->json(Business::where('status', 'approved')->with(['user', 'businessCategory'])->get());
+        return response()->json(
+            Business::where('status', 'approved')
+                ->with(['user', 'businessCategory'])
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews')
+                ->get()
+        );
     }
 
     public function getAllBusinesses()
     {
         // Admin view: return all businesses
-        return response()->json(Business::with(['user', 'businessCategory'])->latest()->get());
+        return response()->json(
+            Business::with(['user', 'businessCategory'])
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews')
+                ->latest()
+                ->get()
+        );
     }
 
     public function getEvents()

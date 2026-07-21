@@ -86,6 +86,7 @@ Route::get('/migrate', function() {
             'database/migrations/2026_06_08_000007_create_reviews_table.php',
             'database/migrations/2026_06_08_000008_add_avatar_to_users_table.php',
             'database/migrations/2026_06_30_000000_create_event_registrations_table.php',
+            'database/migrations/2026_07_21_083000_add_business_category_id_to_businesses_table.php',
         ];
         
         $output = '';
@@ -105,10 +106,10 @@ Route::get('/migrate', function() {
 Route::get('/seed', function() {
     try {
         Artisan::call('db:seed', [
-            '--class' => 'SabhaSeeder',
+            '--class' => 'MembershipFormSeeder',
             '--force' => true
         ]);
-        return response()->json(['message' => 'Seeding ran successfully!', 'output' => Artisan::output()]);
+        return response()->json(['message' => 'MembershipFormSeeder ran successfully!', 'output' => Artisan::output()]);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()]);
     }

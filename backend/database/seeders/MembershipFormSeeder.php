@@ -17,8 +17,11 @@ class MembershipFormSeeder extends Seeder
      */
     public function run(): void
     {
-        // Drop temporary responses table if exists
-        Schema::dropIfExists('membership_form_responses');
+        // Reset categories for a clean standardized list
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('businesses')->update(['business_category_id' => null]);
+        BusinessCategory::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $hashedPassword = Hash::make('SABHA@123');
 
@@ -29,8 +32,9 @@ JSON;
         $membersData = json_decode($json, true);
 
         foreach ($membersData as $data) {
-            // 1. Ensure Business Category exists
-            $categoryName = $data['category'] ?: 'General';
+            // 1. Ensure Business Category exists with standardized name
+            $rawCategory = $data['category'] ?: 'General';
+            $categoryName = $this->getStandardCategory($rawCategory, $data['business_name'] ?? '', $data['bio'] ?? '');
             $category = BusinessCategory::firstOrCreate(
                 ['name' => $categoryName],
                 ['sort_order' => 0, 'is_active' => true]
@@ -71,5 +75,149 @@ JSON;
                 ]
             );
         }
+    }
+
+    private function getStandardCategory(string $raw, string $name = '', string $bio = ''): string
+    {
+        $search = strtoupper(trim($raw . ' ' . $name . ' ' . $bio));
+        $rawUpper = strtoupper(trim($raw));
+
+        if (
+            str_contains($rawUpper, 'IT') ||
+            str_contains($rawUpper, 'SOFTWARE') ||
+            str_contains($rawUpper, 'DIGITAL MARKETING') ||
+            str_contains($rawUpper, 'CYBER')
+        ) {
+            return 'IT & Software';
+        }
+
+        if (
+            str_contains($rawUpper, 'FINANCE') ||
+            str_contains($rawUpper, 'FINANCIAL') ||
+            str_contains($rawUpper, 'WEALTH') ||
+            str_contains($rawUpper, 'INSURANCE') ||
+            str_contains($rawUpper, 'TAX') ||
+            str_contains($rawUpper, 'ACCOUNT') ||
+            str_contains($rawUpper, 'AUDIT') ||
+            str_contains($rawUpper, 'CHARTERED') ||
+            str_contains($search, 'WEALTH') ||
+            str_contains($search, 'INSURANCE')
+        ) {
+            return 'Finance & Accounting';
+        }
+
+        if (
+            str_contains($rawUpper, 'REAL ESTATE') ||
+            str_contains($rawUpper, 'DEVELOPER') ||
+            str_contains($rawUpper, 'BUILDING CONTRACTOR') ||
+            str_contains($rawUpper, 'CIVIL WORK') ||
+            str_contains($rawUpper, 'INTERIOR DESIGNER')
+        ) {
+            return 'Construction & Real Estate';
+        }
+
+        if (
+            str_contains($rawUpper, 'BUILDING MATERIAL') ||
+            str_contains($rawUpper, 'CONSTRUCTION MATERIAL') ||
+            str_contains($rawUpper, 'CONSTRUCTION CHEMICAL') ||
+            str_contains($rawUpper, 'HARDWARE') ||
+            str_contains($rawUpper, 'PAINTS') ||
+            str_contains($rawUpper, 'GLASS') ||
+            str_contains($rawUpper, 'MARBLE') ||
+            str_contains($rawUpper, 'ELECTRICAL')
+        ) {
+            return 'Building Materials & Hardware';
+        }
+
+        if (
+            str_contains($rawUpper, 'PHARMA') ||
+            str_contains($rawUpper, 'HEALTH') ||
+            str_contains($rawUpper, 'MEDICINE') ||
+            str_contains($rawUpper, 'DENTAL') ||
+            str_contains($rawUpper, 'HOSPITAL') ||
+            str_contains($rawUpper, 'SONOGRAPHY') ||
+            str_contains($rawUpper, 'PERSONAL CARE')
+        ) {
+            return 'Healthcare & Pharma';
+        }
+
+        if (
+            str_contains($rawUpper, 'SOLAR') ||
+            str_contains($rawUpper, 'RENEW') ||
+            str_contains($search, 'SOLAR')
+        ) {
+            return 'Renewable Energy';
+        }
+
+        if (
+            str_contains($rawUpper, 'MANUFACTURING') ||
+            str_contains($rawUpper, 'MENUFECTURING') ||
+            str_contains($rawUpper, 'ENGINEERING') ||
+            str_contains($rawUpper, 'PACKAGING') ||
+            str_contains($rawUpper, 'AIR MOTOR') ||
+            str_contains($rawUpper, 'TOOLS') ||
+            str_contains($rawUpper, 'EQUIPMENT') ||
+            str_contains($rawUpper, 'LIFT') ||
+            str_contains($rawUpper, 'UTENSILES') ||
+            str_contains($rawUpper, 'AEROSPACE')
+        ) {
+            return 'Manufacturing & Engineering';
+        }
+
+        if (
+            str_contains($rawUpper, 'AUTOMOBILE') ||
+            str_contains($rawUpper, 'CAR') ||
+            str_contains($rawUpper, 'AIR CONDITION') ||
+            str_contains($rawUpper, 'AC SERVICE')
+        ) {
+            return 'Automobile & AC Services';
+        }
+
+        if (
+            str_contains($rawUpper, 'TRAVEL') ||
+            str_contains($rawUpper, 'EVENT')
+        ) {
+            return 'Travel & Events';
+        }
+
+        if (
+            str_contains($rawUpper, 'GARMENT') ||
+            str_contains($rawUpper, 'CLOTH') ||
+            str_contains($rawUpper, 'KITCHEN, TOYS') ||
+            str_contains($rawUpper, 'WHOLESALE') ||
+            str_contains($rawUpper, 'RETAIL')
+        ) {
+            return 'Garment, Retail & Trade';
+        }
+
+        if (str_contains($rawUpper, 'PRINT')) {
+            return 'Printing & Packaging';
+        }
+
+        if (
+            str_contains($rawUpper, 'IMPORT EXPORT') ||
+            str_contains($rawUpper, 'LOGISTICS') ||
+            str_contains($rawUpper, 'SUPPLY CHAIN')
+        ) {
+            return 'Import, Export & Logistics';
+        }
+
+        if (str_contains($rawUpper, 'COMMUNITY') || str_contains($rawUpper, 'ENTREPRENEURS')) {
+            return 'Community & Networking';
+        }
+
+        if (str_contains($rawUpper, 'LEGAL') || str_contains($rawUpper, 'ADVOCATE')) {
+            return 'Legal & Advisory';
+        }
+
+        if (str_contains($rawUpper, 'PG') || str_contains($rawUpper, 'HOME')) {
+            return 'Hospitality & Accommodation';
+        }
+
+        if (str_contains($rawUpper, 'CONSTRUCTION')) {
+            return 'Construction & Real Estate';
+        }
+
+        return 'General Services';
     }
 }

@@ -1,7 +1,7 @@
 // Origin of the Laravel backend (no trailing slash).
 // Override per-environment with NEXT_PUBLIC_API_ORIGIN (e.g. https://api.yourdomain.com).
 export const API_ORIGIN = (
-  process.env.NEXT_PUBLIC_API_ORIGIN || "https://themejagat.com/sabha/backend"
+  process.env.NEXT_PUBLIC_API_ORIGIN || "http://localhost:8000"
 ).replace(/\/$/, "");
 
 // Base URL for the JSON API.

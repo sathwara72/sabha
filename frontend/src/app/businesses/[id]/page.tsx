@@ -383,6 +383,12 @@ export default function BusinessDetailsPage() {
     return [...dbReviews, ...(business?.reviewsList || [])];
   }, [dbReviews, business?.reviewsList]);
 
+  const calculatedRating = useMemo(() => {
+    if (!allReviews || allReviews.length === 0) return null;
+    const sum = allReviews.reduce((acc: number, r: any) => acc + (Number(r.rating) || 0), 0);
+    return Number((sum / allReviews.length).toFixed(1));
+  }, [allReviews]);
+
   const hasUserReviewed = useMemo(() => {
     if (!isAuthenticated || !user) return false;
     return allReviews.some(
@@ -434,11 +440,6 @@ export default function BusinessDetailsPage() {
             }).filter((s: any) => s.title);
           }
 
-          // Fallback to detailed mock data if it aligns, for extra services/banners/reviews fallback
-          const mockDetail = detailedBusinesses.find(
-            b => b.name.toLowerCase() === matched.name.toLowerCase() || b.id.toString() === id
-          );
-
           const logoUrl = assetUrl(matched.logo);
           const coverUrl = assetUrl(matched.cover_image);
 
@@ -448,8 +449,8 @@ export default function BusinessDetailsPage() {
             name: matched.name,
             category: matched.category,
             location: matched.location || "",
-            rating: mockDetail ? mockDetail.rating : 5.0,
-            reviews: mockDetail ? mockDetail.reviews : 0,
+            rating: matched.rating || null,
+            reviews: matched.reviews_count || 0,
             verified: matched.is_verified,
             tagline: matched.tagline || "",
             about: matched.description || "",
@@ -469,7 +470,7 @@ export default function BusinessDetailsPage() {
             whatsapp: matched.whatsapp || "",
             bannerImage: getCoverImage(coverUrl, matched.category),
             logo: logoUrl || "",
-            reviewsList: mockDetail ? mockDetail.reviewsList : [],
+            reviewsList: [],
             member: matched.user ? {
               name: matched.user.name,
               role: `${matched.user.designation || 'SABHA Member'}, ${matched.user.company || 'Member Company'}`,
@@ -630,9 +631,11 @@ export default function BusinessDetailsPage() {
                       <ShieldCheck className="h-3 w-3" /> {t("businessDetail.verified")}
                     </span>
                   )}
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-400/20">
-                    <Star className="h-3 w-3 fill-current" /> {business.rating} ({allReviews.length})
-                  </span>
+                  {calculatedRating ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-400/20">
+                      <Star className="h-3 w-3 fill-current" /> {calculatedRating} ({allReviews.length})
+                    </span>
+                  ) : null}
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg">
                   {business.name}
