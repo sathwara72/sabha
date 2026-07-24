@@ -19,6 +19,10 @@ export default function AdminCategoriesPage() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [currentPage]);
+
+  useEffect(() => {
     loadCategories();
   }, []);
 

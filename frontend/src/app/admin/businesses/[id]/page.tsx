@@ -12,6 +12,7 @@ import {
   ArrowLeft, Receipt, X, Globe, MapPin, Phone,
   Mail, Calendar, Users, Clock, Briefcase, Link2
 } from "lucide-react";
+import { assetUrl } from "@/lib/config";
 
 interface Business {
   id: number;
@@ -43,9 +44,7 @@ interface Business {
 }
 
 function getMediaUrl(path?: string) {
-  if (!path) return "";
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return `${API_ORIGIN}${path}`;
+  return assetUrl(path);
 }
 
 interface ServiceItem {

@@ -42,6 +42,29 @@ export default function AdminEventsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
+  const handleCloseModal = () => {
+    setIsCreateModalOpen(false);
+    setEditingEventId(null);
+    setFormData({
+      title: "",
+      description: "",
+      date: "",
+      location: "",
+      type: "Mixer",
+      price_normal: "",
+      price_verified: "",
+    });
+    setAgenda([]);
+    setSpeakers([]);
+    setImageFile(null);
+    setImagePreview("");
+    setSuccess(false);
+  };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [currentPage]);
+
   const handleViewMembers = async (event: any) => {
     setSelectedEvent(event);
     setRegistrationsLoading(true);
@@ -129,26 +152,8 @@ export default function AdminEventsPage() {
         await createEventAdmin(payload);
       }
 
-      setSuccess(true);
-      setFormData({
-        title: "",
-        description: "",
-        date: "",
-        location: "",
-        type: "Mixer",
-        price_normal: "",
-        price_verified: "",
-      });
-      setAgenda([]);
-      setSpeakers([]);
-      setImageFile(null);
-      setImagePreview("");
-      setEditingEventId(null);
       loadEvents();
-      setTimeout(() => {
-        setSuccess(false);
-        setIsCreateModalOpen(false);
-      }, 1500);
+      handleCloseModal();
     } catch (error) {
       alert(editingEventId ? "Failed to update event." : "Failed to create event.");
     } finally {
@@ -160,7 +165,7 @@ export default function AdminEventsPage() {
   const labelClass = "text-xs font-semibold text-foreground";
 
   return (
-    <div className="space-y-3 max-w-6xl">
+    <div className="space-y-3 w-full">
       {/* Header section with Create Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -524,7 +529,7 @@ export default function AdminEventsPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
+                  onClick={handleCloseModal}
                   className="p-1 rounded-lg text-muted-foreground hover:bg-slate-100 hover:text-foreground transition-colors cursor-pointer"
                 >
                   <X size={16} />
@@ -798,7 +803,7 @@ export default function AdminEventsPage() {
                   <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
                     <button
                       type="button"
-                      onClick={() => setIsCreateModalOpen(false)}
+                      onClick={handleCloseModal}
                       className="w-1/2 sm:w-auto rounded-xl border border-border bg-white px-3 py-1.5 text-[11px] font-semibold text-foreground hover:bg-slate-50 transition-all cursor-pointer shadow-sm"
                     >
                       Cancel

@@ -46,6 +46,10 @@ export default function AdminUsersPage() {
   const itemsPerPage = 10;
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [currentPage]);
+
+  useEffect(() => {
     loadData();
   }, []);
 

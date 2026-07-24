@@ -41,6 +41,10 @@ export default function EventsPage() {
   }, [isAuthenticated]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [currentPage]);
+
+  useEffect(() => {
     async function loadEvents() {
       try {
         setLoading(true);

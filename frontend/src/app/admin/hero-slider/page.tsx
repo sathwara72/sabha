@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchHeroImages, uploadHeroImage, deleteHeroImage } from "@/lib/api";
-import { API_ORIGIN } from "@/lib/config";
+import { API_ORIGIN, assetUrl } from "@/lib/config";
 import {
   Upload, Image, Plus, Trash2,
   CheckCircle2, AlertCircle, X, ZoomIn
@@ -75,9 +75,7 @@ export default function AdminHeroSliderPage() {
   };
 
   const getMediaUrl = (path: string) => {
-    if (!path) return "";
-    if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    return `${API_ORIGIN}${path}`;
+    return assetUrl(path);
   };
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -99,10 +97,7 @@ export default function AdminHeroSliderPage() {
       const fileInput = document.getElementById("hero-file-input") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
       await loadData();
-      setTimeout(() => {
-        setSuccess(false);
-        setIsModalOpen(false);
-      }, 1500);
+      setIsModalOpen(false);
     } catch (err: any) {
       setError(err.message || "Failed to upload hero image.");
     } finally {

@@ -40,6 +40,10 @@ export default function AdminEventDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [currentPage]);
+
   // Action states for Registrations
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [rejectModalId, setRejectModalId] = useState<number | null>(null);
@@ -207,9 +211,7 @@ export default function AdminEventDetailPage() {
   };
 
   const getMediaUrl = (path: string) => {
-    if (!path) return "";
-    if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    return `${API_ORIGIN}${path}`;
+    return assetUrl(path);
   };
 
   const isVideoFile = (path?: string) => {
