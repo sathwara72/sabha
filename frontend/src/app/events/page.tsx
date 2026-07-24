@@ -17,7 +17,7 @@ export default function EventsPage() {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 6;
 
   const { isAuthenticated } = useAuth();
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
@@ -49,7 +49,7 @@ export default function EventsPage() {
           const eventDate = new Date(e.date);
           const now = new Date();
           let status = "current";
-          
+
           // Clear time component for accurate comparison
           const dateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
           const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -103,7 +103,7 @@ export default function EventsPage() {
     return events.filter(event => {
       const matchesFilter = filter === "all" || event.status === filter;
       const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            event.category.toLowerCase().includes(searchQuery.toLowerCase());
+        event.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     });
   }, [events, filter, searchQuery]);
@@ -202,140 +202,143 @@ export default function EventsPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {paginatedEvents.map((event) => (
-                <motion.div
-                   key={event.id}
-                   layout
-                   initial={{ opacity: 0, scale: 0.97 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   exit={{ opacity: 0, scale: 0.97 }}
-                   className="glass-card group flex h-full flex-col overflow-hidden p-0 hover:shadow-md transition-shadow"
+                <Link
+                  key={event.id}
+                  href={`/events/${event.id}`}
+                  className="block h-full cursor-pointer"
                 >
-                  <div className="relative h-32 w-full overflow-hidden">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
-                    <div className="absolute left-3 top-3">
-                      <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
-                        {event.category}
-                      </span>
-                    </div>
-                    {/* Event Name & Date Badge Overlay */}
-                    <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
-                      <span className="rounded bg-black/65 border border-white/10 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-extrabold text-white truncate max-w-[65%] shadow-sm">
-                        {event.title}
-                      </span>
-                      <span className="rounded bg-primary border border-primary/20 backdrop-blur-sm px-2 py-0.5 text-[9px] font-black text-white shrink-0 shadow-sm">
-                        {event.date}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-1 flex-col p-3">
-                    {(event.status === "upcoming" || event.status === "past") && (
-                      <div className="mb-2 flex items-center justify-between">
-                        {event.status === "upcoming" && (
-                          <span className="rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[9px] font-bold text-amber-700 uppercase tracking-wider">
-                            {t("events.upcoming")}
-                          </span>
-                        )}
-                        {event.status === "past" && (
-                          <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
-                            {t("events.past")}
-                          </span>
-                        )}
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    className="glass-card group flex h-full flex-col overflow-hidden p-0 hover:shadow-md transition-shadow"
+                  >
+                    <div className="relative h-32 w-full overflow-hidden">
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
+                      <div className="absolute left-3 top-3">
+                        <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                          {event.category}
+                        </span>
                       </div>
-                    )}
- 
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="line-clamp-2 text-xs leading-relaxed text-muted font-medium flex-1">
-                        {event.description}
-                      </p>
-                      <span className="inline-flex items-center gap-1 text-[11px] text-muted font-bold shrink-0 mt-0.5">
-                        <MapPin size={11} className="text-primary" /> {event.attendees} {t("events.going")}
-                      </span>
+                      {/* Event Name & Date Badge Overlay */}
+                      <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
+                        <span className="rounded bg-black/65 border border-white/10 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-extrabold text-white truncate max-w-[65%] shadow-sm">
+                          {event.title}
+                        </span>
+                        <span className="rounded bg-primary border border-primary/20 backdrop-blur-sm px-2 py-0.5 text-[9px] font-black text-white shrink-0 shadow-sm">
+                          {event.date}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="mt-2 border-t border-border pt-3">
-                      {(() => {
-                        const hasDiscount = event.price_verified && event.price_verified !== event.price_normal;
-                        const displayPrice = isVerifiedMember && hasDiscount ? event.price_verified : event.price_normal;
-                        const isFree = displayPrice.toLowerCase() === "free" || displayPrice === "₹0" || displayPrice === "0";
-                        return (
-                          <div className={cn(
-                            "mb-2.5 flex flex-col justify-center rounded-xl border p-2.5 transition-colors",
-                            isVerifiedMember && hasDiscount
-                              ? "border-emerald-200 bg-emerald-50/30"
-                              : "border-border bg-slate-50/50"
-                          )}>
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                                  {t("events.ticket_price")}
-                                </span>
-                                <div className="flex items-baseline gap-1">
-                                  {isVerifiedMember && hasDiscount && (
-                                    <span className="text-[10px] font-semibold text-muted-foreground line-through decoration-slate-400">
-                                      {event.price_normal}
-                                    </span>
-                                  )}
-                                  <span className={cn(
-                                    "text-sm font-black leading-none",
-                                    isFree ? "text-emerald-600 uppercase" : "text-primary"
-                                  )}>
-                                    {displayPrice}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {hasDiscount && (
-                                <div className="shrink-0">
-                                  {isVerifiedMember ? (
-                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold text-emerald-700 shadow-sm border border-emerald-100">
-                                      <ShieldCheck size={10} className="shrink-0 text-emerald-600" />
-                                      {t("events.verified_discount")}
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50/80 px-2 py-0.5 text-[9px] font-bold text-emerald-700 shadow-sm border border-emerald-100/60">
-                                      <ShieldCheck size={10} className="shrink-0 text-emerald-600" />
-                                      {t("events.verified")}: {event.price_verified}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })()}
-
-                      {event.status === "current" && (
-                        <Link
-                          href={`/events/${event.id}`}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
-                        >
-                          {t("events.book_ticket")} <ArrowRight size={16} />
-                        </Link>
-                      )}
-
-                      {event.status === "upcoming" && (
-                        <Link
-                          href={`/events/${event.id}`}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50/50 px-5 py-3 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-50 active:scale-[0.98]"
-                        >
-                          {t("events.booking_soon")} <ArrowRight size={16} />
-                        </Link>
-                      )}
-
-                      {event.status === "past" && (
-                        <div className="w-full text-center py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-semibold text-sm">
-                          {t("events.closed")}
+                    <div className="flex flex-1 flex-col p-3">
+                      {(event.status === "upcoming" || event.status === "past") && (
+                        <div className="mb-2 flex items-center justify-between">
+                          {event.status === "upcoming" && (
+                            <span className="rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[9px] font-bold text-amber-700 uppercase tracking-wider">
+                              {t("events.upcoming")}
+                            </span>
+                          )}
+                          {event.status === "past" && (
+                            <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                              {t("events.past")}
+                            </span>
+                          )}
                         </div>
                       )}
+
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="line-clamp-2 text-xs leading-relaxed text-muted font-medium flex-1">
+                          {event.description}
+                        </p>
+                        <span className="inline-flex items-center gap-1 text-[11px] text-muted font-bold shrink-0 mt-0.5">
+                          <MapPin size={11} className="text-primary" /> {event.attendees} {t("events.going")}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 border-t border-border pt-3">
+                        {(() => {
+                          const hasDiscount = event.price_verified && event.price_verified !== event.price_normal;
+                          const displayPrice = isVerifiedMember && hasDiscount ? event.price_verified : event.price_normal;
+                          const isFree = displayPrice.toLowerCase() === "free" || displayPrice === "₹0" || displayPrice === "0";
+                          return (
+                            <div className={cn(
+                              "mb-2.5 flex flex-col justify-center rounded-xl border p-2.5 transition-colors",
+                              isVerifiedMember && hasDiscount
+                                ? "border-emerald-200 bg-emerald-50/30"
+                                : "border-border bg-slate-50/50"
+                            )}>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                                    {t("events.ticket_price")}
+                                  </span>
+                                  <div className="flex items-baseline gap-1">
+                                    {isVerifiedMember && hasDiscount && (
+                                      <span className="text-[10px] font-semibold text-muted-foreground line-through decoration-slate-400">
+                                        {event.price_normal}
+                                      </span>
+                                    )}
+                                    <span className={cn(
+                                      "text-sm font-black leading-none",
+                                      isFree ? "text-emerald-600 uppercase" : "text-primary"
+                                    )}>
+                                      {displayPrice}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {hasDiscount && (
+                                  <div className="shrink-0">
+                                    {isVerifiedMember ? (
+                                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold text-emerald-700 shadow-sm border border-emerald-100">
+                                        <ShieldCheck size={10} className="shrink-0 text-emerald-600" />
+                                        {t("events.verified_discount")}
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50/80 px-2 py-0.5 text-[9px] font-bold text-emerald-700 shadow-sm border border-emerald-100/60">
+                                        <ShieldCheck size={10} className="shrink-0 text-emerald-600" />
+                                        {t("events.verified")}: {event.price_verified}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {event.status === "current" && (
+                          <div
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+                          >
+                            {t("events.book_ticket")} <ArrowRight size={16} />
+                          </div>
+                        )}
+
+                        {event.status === "upcoming" && (
+                          <div
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50/50 px-5 py-3 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-50 active:scale-[0.98]"
+                          >
+                            {t("events.booking_soon")} <ArrowRight size={16} />
+                          </div>
+                        )}
+
+                        {event.status === "past" && (
+                          <div className="w-full text-center py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-semibold text-sm">
+                            {t("events.closed")}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </Link>
               ))}
             </AnimatePresence>
           </div>
@@ -352,7 +355,7 @@ export default function EventsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-16 flex items-center justify-center gap-3">
+          <div className="mt-4 flex items-center justify-center gap-3">
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"

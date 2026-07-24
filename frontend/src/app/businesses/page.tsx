@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { fetchBusinesses, submitBusiness, fetchCategories } from "@/lib/api";
 import { useLanguage } from "@/lib/language";
+import { assetUrl } from "@/lib/config";
 
 export default function BusinessDirectory() {
   const { isAuthenticated, isReady, openLogin, openRegister } = useAuth();
@@ -233,56 +234,54 @@ export default function BusinessDirectory() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {paginatedBusinesses.map((business) => (
-                <motion.div
+                <Link
                   key={business.id}
-                  layout
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 16 }}
-                  className="glass-card group flex h-full flex-col p-6 hover:shadow-md transition-shadow"
+                  href={`/businesses/${business.id}`}
+                  className="block h-full cursor-pointer"
                 >
-                  <div className="mb-5 flex items-start justify-between">
-                    <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-primary-soft flex items-center justify-center text-primary text-xl font-bold">
-                      {business.logo ? (
-                        <img
-                          src={business.logo}
-                          alt={business.name}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        business.name?.[0] ?? "?"
-                      )}
-                    </div>
-                    {business.rating && Number(business.rating) > 0 ? (
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
-                          <Star size={14} className="fill-current" />
-                          {Number(business.rating).toFixed(1)}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-foreground transition-colors group-hover:text-primary">
-                      {business.name}
-                    </h3>
-                    <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
-                      <MapPin size={13} className="text-primary" />
-                      {business.location || "Mumbai"} • {business.category}
-                    </p>
-                    <p className="mt-3.5 text-xs leading-relaxed text-muted line-clamp-3">
-                      {business.description || "No description provided yet."}
-                    </p>
-                  </div>
-
-                  <Link
-                    href={`/businesses/${business.id}`}
-                    className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 16 }}
+                    className="glass-card group flex h-full flex-col p-6 hover:shadow-md transition-shadow"
                   >
-                    View profile
-                  </Link>
-                </motion.div>
+                    <div className="mb-5 flex items-start justify-between">
+                      <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-primary-soft flex items-center justify-center text-primary text-xl font-bold">
+                        {business.logo ? (
+                          <img
+                            src={assetUrl(business.logo)}
+                            alt={business.name}
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          business.name?.[0] ?? "?"
+                        )}
+                      </div>
+                      {business.rating && Number(business.rating) > 0 ? (
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
+                            <Star size={14} className="fill-current" />
+                            {Number(business.rating).toFixed(1)}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-foreground transition-colors group-hover:text-primary">
+                        {business.name}
+                      </h3>
+                      <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
+                        <MapPin size={13} className="text-primary" />
+                        {business.location || "Mumbai"} • {business.category}
+                      </p>
+                      <p className="mt-3.5 text-xs leading-relaxed text-muted line-clamp-3">
+                        {business.description || "No description provided yet."}
+                      </p>
+                    </div>
+                  </motion.div>
+                </Link>
               ))}
             </AnimatePresence>
           </div>
