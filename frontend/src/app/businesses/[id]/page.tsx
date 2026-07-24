@@ -610,14 +610,13 @@ export default function BusinessDetailsPage() {
             {t("businessDetail.back_to_directory")}
           </button>
         </div>
-
         {/* Profile Bar at bottom of cover */}
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <div className="mx-auto max-w-7xl px-6 pb-6">
             <div className="flex flex-col md:flex-row md:items-end gap-5">
-              <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-gradient-to-tr from-primary to-primary-dark text-white text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
+              <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-white text-primary text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
                 {business.logo ? (
-                  <img src={business.logo} alt={business.name} className="h-full w-full object-cover" />
+                   <img src={business.logo} alt={business.name} className="h-full w-full object-contain" />
                 ) : (
                   business.name?.[0] ?? "?"
                 )}

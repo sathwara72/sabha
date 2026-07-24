@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchUsersAdmin } from "@/lib/api";
+import { assetUrl } from "@/lib/config";
 import {
   Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X
 } from "lucide-react";
@@ -39,6 +40,10 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadData();
@@ -70,16 +75,29 @@ export default function AdminUsersPage() {
     };
   }, [selectedUser]);
 
+  // Reset page to 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filteredUsers = users.filter(u =>
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex flex-col">
-          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Members</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Members</h1>
+            <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary">
+              {users.length}
+            </span>
+          </div>
           <p className="text-xs text-muted">Manage community members</p>
         </div>
 
@@ -106,15 +124,15 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {filteredUsers.map((user) => (
+            {paginatedUsers.map((user) => (
               <tr key={user.id} className="transition-colors hover:bg-surface/50">
                 <td className="px-4 py-2.5">
                   <div className="flex items-center gap-2.5">
                     {user.avatar ? (
                       <img
-                        src={user.avatar}
+                        src={assetUrl(user.avatar)}
                         alt={user.name}
-                        className="h-8 w-8 rounded-lg object-cover shrink-0 border border-border"
+                        className="h-8 w-8 rounded-lg object-contain bg-white shrink-0 border border-border"
                       />
                     ) : (
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft font-semibold text-xs text-primary">
@@ -167,6 +185,46 @@ export default function AdminUsersPage() {
             <p className="text-sm text-muted">No members found.</p>
           </div>
         )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-border px-4 py-3 bg-surface/30">
+            <div className="text-xs text-muted-foreground">
+              Showing <span className="font-semibold text-foreground">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+              <span className="font-semibold text-foreground">{Math.min(currentPage * itemsPerPage, filteredUsers.length)}</span> of{" "}
+              <span className="font-semibold text-foreground">{filteredUsers.length}</span> members
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="rounded-lg border border-border bg-white px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`h-7 w-7 rounded-lg text-xs font-semibold border transition-all ${
+                    currentPage === page
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-white text-muted hover:bg-surface hover:text-foreground"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="rounded-lg border border-border bg-white px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
      
@@ -186,9 +244,9 @@ export default function AdminUsersPage() {
               <div className="flex items-center gap-3">
                 {selectedUser.avatar ? (
                   <img
-                    src={selectedUser.avatar}
+                    src={assetUrl(selectedUser.avatar)}
                     alt={selectedUser.name}
-                    className="h-12 w-12 rounded-xl object-cover border border-border"
+                    className="h-12 w-12 rounded-xl object-contain bg-white border border-border"
                   />
                 ) : (
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-base font-bold text-primary">
