@@ -20,7 +20,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import { fetchStatistics, fetchSettings } from "@/lib/api";
 import { useLanguage } from "@/lib/language";
 import { useAuth } from "@/lib/auth";
-import { API_ORIGIN } from "@/lib/config";
+import { API_ORIGIN, assetUrl } from "@/lib/config";
 
 const values = [
   {
@@ -309,7 +309,7 @@ export default function AboutPage() {
                 className="glass-card hover-card p-5 text-center flex flex-col items-center border border-border"
               >
                 <img
-                  src={member.avatar.startsWith("http") ? member.avatar : `${API_ORIGIN}${member.avatar}`}
+                  src={assetUrl(member.avatar)}
                   alt={name}
                   className="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
                 />

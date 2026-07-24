@@ -475,7 +475,7 @@ export default function BusinessDetailsPage() {
               name: matched.user.name,
               role: `${matched.user.designation || 'SABHA Member'}, ${matched.user.company || 'Member Company'}`,
               avatar: matched.user.avatar
-                ? (matched.user.avatar.startsWith("http") ? matched.user.avatar : assetUrl(matched.user.avatar))
+                ? assetUrl(matched.user.avatar)
                 : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop"
             } : null
           });

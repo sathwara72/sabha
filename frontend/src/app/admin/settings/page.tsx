@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchSettings, updateSettingsAdmin, uploadGalleryImage } from "@/lib/api";
-import { API_ORIGIN } from "@/lib/config";
+import { API_ORIGIN, assetUrl } from "@/lib/config";
 import {
   Settings as SettingsIcon, Save, CheckCircle2, AlertCircle,
   RefreshCw, Plus, Trash2, Mail, ShieldCheck, Users
@@ -298,7 +298,7 @@ export default function AdminSettingsPage() {
                       <div className="flex items-center gap-1 mb-0.5">
                         {trustee.avatar && (
                           <img
-                            src={trustee.avatar.startsWith("http") ? trustee.avatar : `${API_ORIGIN}${trustee.avatar}`}
+                            src={assetUrl(trustee.avatar)}
                             alt=""
                             className="h-3.5 w-3.5 rounded-full object-cover border border-border shrink-0"
                           />
