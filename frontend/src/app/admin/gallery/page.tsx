@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchGallery, uploadGalleryImage, deleteGalleryImage } from "@/lib/api";
-import { API_ORIGIN } from "@/lib/config";
+import { API_ORIGIN, assetUrl } from "@/lib/config";
 import {
   Upload, Image, Film, Plus,
   CheckCircle2, AlertCircle,
@@ -109,9 +109,7 @@ export default function AdminGalleryPage() {
   };
 
   const getMediaUrl = (path: string) => {
-    if (!path) return "";
-    if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    return `${API_ORIGIN}${path}`;
+    return assetUrl(path);
   };
 
   const isVideoFile = (path?: string) => {

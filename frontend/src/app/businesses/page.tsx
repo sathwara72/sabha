@@ -95,6 +95,10 @@ export default function BusinessDirectory() {
     fetchPageData();
   }, [currentPage, searchQuery, selectedCategory]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [currentPage]);
+
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handleCategoryChange = (cat: string) => {
@@ -133,10 +137,7 @@ export default function BusinessDirectory() {
       });
       // Reload business list (though newly added will be pending so it won't show yet)
       fetchPageData();
-      setTimeout(() => {
-        setIsSubmitOpen(false);
-        setFormSuccess("");
-      }, 3500);
+      setIsSubmitOpen(false);
     } catch (err: any) {
       setFormError(err.message || "Failed to submit business. Please try again.");
     } finally {
@@ -247,58 +248,52 @@ export default function BusinessDirectory() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <AnimatePresence mode="popLayout">
-              {businesses.map((business) => (
-                <Link
-                  key={business.id}
-                  href={`/businesses/${business.id}`}
-                  className="block h-full cursor-pointer"
+            {businesses.map((business) => (
+              <Link
+                key={business.id}
+                href={`/businesses/${business.id}`}
+                className="block h-full cursor-pointer"
+              >
+                <div
+                  className="glass-card group flex h-full flex-col p-6 hover:shadow-md transition-shadow"
                 >
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 16 }}
-                    className="glass-card group flex h-full flex-col p-6 hover:shadow-md transition-shadow"
-                  >
-                    <div className="mb-5 flex items-start justify-between">
-                       <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-white flex items-center justify-center text-primary text-xl font-bold">
-                        {business.logo ? (
-                          <img
-                            src={assetUrl(business.logo)}
-                            alt={business.name}
-                            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                          />
-                        ) : (
-                          business.name?.[0] ?? "?"
-                        )}
-                      </div>
-                      {business.rating && Number(business.rating) > 0 ? (
-                        <div className="flex flex-col items-end gap-2">
-                          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
-                            <Star size={14} className="fill-current" />
-                            {Number(business.rating).toFixed(1)}
-                          </div>
+                  <div className="mb-5 flex items-start justify-between">
+                     <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-white flex items-center justify-center text-primary text-xl font-bold">
+                      {business.logo ? (
+                        <img
+                          src={assetUrl(business.logo)}
+                          alt={business.name}
+                          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        business.name?.[0] ?? "?"
+                      )}
+                    </div>
+                    {business.rating && Number(business.rating) > 0 ? (
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-500">
+                          <Star size={14} className="fill-current" />
+                          {Number(business.rating).toFixed(1)}
                         </div>
-                      ) : null}
-                    </div>
+                      </div>
+                    ) : null}
+                  </div>
 
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-foreground transition-colors group-hover:text-primary">
-                        {business.name}
-                      </h3>
-                      <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
-                        <MapPin size={13} className="text-primary" />
-                        {business.location || "Mumbai"} • {business.category}
-                      </p>
-                      <p className="mt-3.5 text-xs leading-relaxed text-muted line-clamp-3">
-                        {business.description || "No description provided yet."}
-                      </p>
-                    </div>
-                  </motion.div>
-                </Link>
-              ))}
-            </AnimatePresence>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-foreground transition-colors group-hover:text-primary">
+                      {business.name}
+                    </h3>
+                    <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
+                      <MapPin size={13} className="text-primary" />
+                      {business.location || "Mumbai"} • {business.category}
+                    </p>
+                    <p className="mt-3.5 text-xs leading-relaxed text-muted line-clamp-3">
+                      {business.description || "No description provided yet."}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
 

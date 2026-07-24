@@ -106,11 +106,7 @@ export default function Home() {
         if (uniqueStats && uniqueStats.length > 0) setStats(uniqueStats);
 
         const dynamicHeroImages = (heroData || []).map((item: any) => {
-          const path = item.image_path;
-          if (path.startsWith("http://") || path.startsWith("https://")) {
-            return path;
-          }
-          return assetUrl(path);
+          return assetUrl(item.image_path);
         });
 
         if (dynamicHeroImages && dynamicHeroImages.length > 0) {
@@ -326,7 +322,7 @@ export default function Home() {
                   <div className="relative h-40 w-full overflow-hidden">
                     <img
                       src={
-                        event.image ||
+                        assetUrl(event.image) ||
                         "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=800&auto=format&fit=crop"
                       }
                       alt={event.title}
