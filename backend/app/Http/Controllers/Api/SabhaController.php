@@ -23,16 +23,36 @@ use App\Mail\OtpMail;
 
 class SabhaController extends Controller
 {
-    public function getBusinesses()
+    public function getBusinesses(Request $request)
     {
-        // Only return approved businesses for the public frontend
-        return response()->json(
-            Business::where('status', 'approved')
-                ->with(['user', 'businessCategory'])
-                ->withAvg('reviews', 'rating')
-                ->withCount('reviews')
-                ->get()
-        );
+        $query = Business::where('status', 'approved')
+            ->with(['user', 'businessCategory'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        // Apply category filter if provided
+        if ($request->filled('category') && $request->category !== 'All') {
+            $query->where('category', $request->category);
+        }
+
+        // Apply search query filter if provided
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Check if page parameter is passed to determine pagination
+        if ($request->filled('page')) {
+            $limit = $request->query('limit', 6);
+            $paginator = $query->paginate($limit);
+            return response()->json($paginator);
+        }
+
+        return response()->json($query->get());
     }
 
     public function getAllBusinesses()

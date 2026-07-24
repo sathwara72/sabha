@@ -20,8 +20,20 @@ const fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Resp
   return response;
 };
 
-export async function fetchBusinesses() {
-  const response = await fetch(`${API_BASE_URL}/businesses`, {
+export async function fetchBusinesses(params?: { page?: number; limit?: number; search?: string; category?: string }) {
+  let url = `${API_BASE_URL}/businesses`;
+  if (params) {
+    const queryParts: string[] = [];
+    if (params.page !== undefined) queryParts.push(`page=${params.page}`);
+    if (params.limit !== undefined) queryParts.push(`limit=${params.limit}`);
+    if (params.search !== undefined) queryParts.push(`search=${encodeURIComponent(params.search)}`);
+    if (params.category !== undefined) queryParts.push(`category=${encodeURIComponent(params.category)}`);
+    if (queryParts.length > 0) {
+      url += `?${queryParts.join("&")}`;
+    }
+  }
+
+  const response = await fetch(url, {
     method: "GET",
     headers: {
       "Accept": "application/json"
@@ -32,20 +44,30 @@ export async function fetchBusinesses() {
     throw new Error("Failed to fetch businesses");
   }
 
-  const data = await response.json();
+  const result = await response.json();
 
-  return data.map((b: any) => {
-    const resolveUrl = (path: string | null) => {
-      if (!path) return "";
-      if (/^https?:\/\//i.test(path)) return path;
-      return `${API_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`;
-    };
-    return {
-      ...b,
-      logo: resolveUrl(b.logo),
-      cover_image: resolveUrl(b.cover_image)
-    };
+  const resolveUrl = (path: string | null) => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    return `${API_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`;
+  };
+
+  const mapBusiness = (b: any) => ({
+    ...b,
+    logo: resolveUrl(b.logo),
+    cover_image: resolveUrl(b.cover_image)
   });
+
+  if (Array.isArray(result)) {
+    return result.map(mapBusiness);
+  } else if (result && Array.isArray(result.data)) {
+    return {
+      ...result,
+      data: result.data.map(mapBusiness)
+    };
+  }
+
+  return result;
 }
 
 export async function dummyFetchBusinesses() {

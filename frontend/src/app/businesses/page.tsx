@@ -35,52 +35,67 @@ export default function BusinessDirectory() {
 
   const [categories, setCategories] = useState<string[]>(["All"]);
 
+  const [totalItems, setTotalItems] = useState(0);
+
+  // Load categories once on mount
   useEffect(() => {
-    loadData();
+    async function loadCategories() {
+      try {
+        const catData = await fetchCategories().catch(() => []);
+        if (catData && catData.length > 0) {
+          setCategories(["All", ...catData]);
+          setFormData(prev => ({ ...prev, category: catData[0] }));
+        } else {
+          setCategories([
+            "All",
+            "Software Development",
+            "Supply Chain",
+            "Digital Marketing",
+            "Construction",
+            "Financial Services",
+            "Renewables",
+            "Creative Agency",
+            "Venture Capital"
+          ]);
+        }
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      }
+    }
+    loadCategories();
   }, []);
 
-  async function loadData() {
+  async function fetchPageData() {
     try {
       setLoading(true);
-      const [bizData, catData] = await Promise.all([
-        fetchBusinesses(),
-        fetchCategories().catch(() => [])
-      ]);
-      setBusinesses(bizData || []);
-      if (catData && catData.length > 0) {
-        setCategories(["All", ...catData]);
-        setFormData(prev => ({ ...prev, category: catData[0] }));
+      const result = await fetchBusinesses({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery,
+        category: selectedCategory === "All" ? undefined : selectedCategory
+      });
+      
+      if (result && result.data) {
+        setBusinesses(result.data);
+        setTotalItems(result.total || 0);
       } else {
-        setCategories([
-          "All",
-          "Software Development",
-          "Supply Chain",
-          "Digital Marketing",
-          "Construction",
-          "Financial Services",
-          "Renewables",
-          "Creative Agency",
-          "Venture Capital"
-        ]);
+        const arrayData = Array.isArray(result) ? result : [];
+        setBusinesses(arrayData);
+        setTotalItems(arrayData.length);
       }
     } catch (err) {
-      console.error("Failed to load directory data:", err);
+      console.error("Failed to fetch page data:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredBusinesses = useMemo(() => {
-    return businesses.filter(b => {
-      const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.category.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || b.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [businesses, searchQuery, selectedCategory]);
+  // Fetch businesses when page, search, or category changes
+  useEffect(() => {
+    fetchPageData();
+  }, [currentPage, searchQuery, selectedCategory]);
 
-  const totalPages = Math.ceil(filteredBusinesses.length / itemsPerPage);
-  const paginatedBusinesses = filteredBusinesses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handleCategoryChange = (cat: string) => {
     setSelectedCategory(cat);
@@ -117,7 +132,7 @@ export default function BusinessDirectory() {
         services: "",
       });
       // Reload business list (though newly added will be pending so it won't show yet)
-      loadData();
+      fetchPageData();
       setTimeout(() => {
         setIsSubmitOpen(false);
         setFormSuccess("");
@@ -182,7 +197,7 @@ export default function BusinessDirectory() {
           </div>
           <div className="flex items-center gap-4">
             <p className="text-sm font-medium text-muted">
-              {filteredBusinesses.length} {filteredBusinesses.length === 1 ? t("directory.business") : t("directory.showing")}
+              {totalItems} {totalItems === 1 ? t("directory.business") : t("directory.showing")}
             </p>
           </div>
         </div>
@@ -233,7 +248,7 @@ export default function BusinessDirectory() {
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
-              {paginatedBusinesses.map((business) => (
+              {businesses.map((business) => (
                 <Link
                   key={business.id}
                   href={`/businesses/${business.id}`}
@@ -247,12 +262,12 @@ export default function BusinessDirectory() {
                     className="glass-card group flex h-full flex-col p-6 hover:shadow-md transition-shadow"
                   >
                     <div className="mb-5 flex items-start justify-between">
-                      <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-primary-soft flex items-center justify-center text-primary text-xl font-bold">
+                       <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-white flex items-center justify-center text-primary text-xl font-bold">
                         {business.logo ? (
                           <img
                             src={assetUrl(business.logo)}
                             alt={business.name}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                           />
                         ) : (
                           business.name?.[0] ?? "?"
@@ -287,7 +302,7 @@ export default function BusinessDirectory() {
           </div>
         )}
 
-        {filteredBusinesses.length === 0 && !loading && (
+        {totalItems === 0 && !loading && (
           <div className="rounded-xl border border-dashed border-border py-20 text-center">
             <h3 className="text-lg font-semibold text-foreground">No businesses found</h3>
             <p className="mx-auto mt-2 max-w-xs text-sm text-muted">
