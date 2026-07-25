@@ -147,7 +147,7 @@ export default function EventGalleryDetailPage() {
       {/* Hero Banner */}
       <div className="relative h-52 sm:h-64 overflow-hidden">
         <img
-          src={event.image || "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=1400&auto=format&fit=crop"}
+          src={event.image ? getMediaUrl(event.image) : "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=1400&auto=format&fit=crop"}
           alt={event.title}
           className="h-full w-full object-cover"
         />
