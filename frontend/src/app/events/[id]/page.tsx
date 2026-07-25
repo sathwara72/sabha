@@ -413,19 +413,21 @@ export default function EventDetailsPage() {
                 {/* Verified Price */}
                 <div
                   onClick={() => {
-                    if (!isVerifiedMember) {
+                    if (!isVerifiedMember && event.status !== 'past') {
                       router.push("/profile?tab=business");
                     }
                   }}
-                  className={`py-1.5 px-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-colors ${isVerifiedMember
+                  className={`py-1.5 px-2.5 rounded-xl border flex items-center justify-between transition-colors ${isVerifiedMember
                       ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                      : "bg-white border-border hover:bg-emerald-50/20 hover:border-emerald-200 text-muted-foreground group"
+                      : event.status === 'past'
+                        ? "bg-slate-50 border-border text-muted-foreground"
+                        : "bg-white border-border hover:bg-emerald-50/20 hover:border-emerald-200 text-muted-foreground group cursor-pointer"
                     }`}
                 >
                   <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-0.5"><ShieldCheck size={11} /> {t("eventDetail.verified")}:</span>
                   <div className="text-right">
                     <span className="text-sm font-bold text-foreground">{event.price_verified}</span>
-                    {!isVerifiedMember && <span className="block text-[7px] font-semibold text-emerald-600">{t("eventDetail.click_to_get")} &rarr;</span>}
+                    {!isVerifiedMember && event.status !== 'past' && <span className="block text-[7px] font-semibold text-emerald-600">{t("eventDetail.click_to_get")} &rarr;</span>}
                   </div>
                 </div>
               </div>
