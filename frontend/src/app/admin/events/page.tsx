@@ -291,9 +291,9 @@ export default function AdminEventsPage() {
         {selectedEvent && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 0 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              exit={{ opacity: 0, scale: 0.95, y: 0 }}
               className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden border border-border shadow-2xl flex flex-col max-h-[85vh]"
             >
               {/* Modal Header */}
@@ -512,9 +512,9 @@ export default function AdminEventsPage() {
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 0 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              exit={{ opacity: 0, scale: 0.95, y: 0 }}
               className="bg-white rounded-2xl w-full max-w-xl overflow-hidden border border-border shadow-2xl flex flex-col max-h-[90vh]"
             >
               {/* Modal Header */}

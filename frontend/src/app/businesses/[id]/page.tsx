@@ -824,7 +824,7 @@ export default function BusinessDetailsPage() {
                       <AnimatePresence>
                         {reviewError && (
                           <motion.p
-                            initial={{ opacity: 0, y: -5 }}
+                            initial={{ opacity: 0, y: 0 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
                             className="text-xs text-red-600 font-semibold"
@@ -1074,7 +1074,7 @@ export default function BusinessDetailsPage() {
                 <AnimatePresence>
                   {formSubmitted && (
                     <motion.div
-                      initial={{ opacity: 0, y: 5 }}
+                      initial={{ opacity: 0, y: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       className="text-[10px] text-center text-green-600 font-semibold p-2 bg-green-50 rounded-lg border border-green-200/50"
@@ -1084,7 +1084,7 @@ export default function BusinessDetailsPage() {
                   )}
                   {formError && (
                     <motion.div
-                      initial={{ opacity: 0, y: 5 }}
+                      initial={{ opacity: 0, y: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       className="text-[10px] text-center text-red-600 font-semibold p-2 bg-red-50 rounded-lg border border-red-200/50"

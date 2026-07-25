@@ -33,9 +33,12 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::get('/businesses', [SabhaController::class, 'getAllBusinesses']);
     Route::post('/businesses/{id}/approve', [SabhaController::class, 'approveBusiness']);
     Route::post('/businesses/{id}/reject', [SabhaController::class, 'rejectBusiness']);
+    Route::delete('/businesses/{id}', [SabhaController::class, 'deleteBusiness']);
     Route::post('/events', [SabhaController::class, 'storeEvent']);
     Route::post('/events/{id}', [SabhaController::class, 'updateEvent']);
+    Route::delete('/events/{id}', [SabhaController::class, 'deleteEvent']);
     Route::get('/users', [SabhaController::class, 'getUsers']);
+    Route::post('/users/{id}/toggle-block', [SabhaController::class, 'toggleUserBlock']);
     Route::post('/gallery/upload', [SabhaController::class, 'uploadGalleryImage']);
     Route::delete('/gallery/{id}', [SabhaController::class, 'deleteGalleryImage']);
     Route::post('/statistics/{id}', [SabhaController::class, 'updateStatistic']);
@@ -55,11 +58,17 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     // Business Category Management
     Route::get('/categories', [SabhaController::class, 'getAllCategories']);
     Route::post('/categories', [SabhaController::class, 'storeCategory']);
+    Route::put('/categories/{id}', [SabhaController::class, 'updateCategory']);
     Route::delete('/categories/{id}', [SabhaController::class, 'deleteCategory']);
 });
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    if ($user && $user->is_blocked) {
+        $user->tokens()->delete();
+        return response()->json(['message' => 'you had blocked by admin please contact admin'], 403);
+    }
+    return $user;
 })->middleware('auth:sanctum');
 
 Route::get('/user/business', [SabhaController::class, 'getUserBusiness'])->middleware('auth:sanctum');

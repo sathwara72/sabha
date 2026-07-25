@@ -182,7 +182,7 @@ export default function BookingDetailPage() {
       <div className="mx-auto max-w-5xl px-6 py-10 space-y-8">
         {/* Hero Image */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative h-56 sm:h-72 rounded-2xl overflow-hidden border border-border shadow-lg"
         >
@@ -217,7 +217,7 @@ export default function BookingDetailPage() {
 
             {/* Status Banner */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 }}
               className={`flex items-start gap-3 rounded-xl border p-4 ${status.bg} ${status.border}`}
@@ -237,7 +237,7 @@ export default function BookingDetailPage() {
 
             {/* Event Info */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="glass-card p-6 space-y-4"
@@ -328,7 +328,7 @@ export default function BookingDetailPage() {
             {/* Agenda */}
             {event.agenda && event.agenda.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
                 className="glass-card p-6 space-y-4"
@@ -354,7 +354,7 @@ export default function BookingDetailPage() {
             {/* Notes */}
             {event.notes && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4"
@@ -515,7 +515,7 @@ export default function BookingDetailPage() {
 
             {/* View Event CTA */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >

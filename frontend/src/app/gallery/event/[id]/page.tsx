@@ -197,7 +197,7 @@ export default function EventGalleryDetailPage() {
             {filtered.map((photo, idx) => (
               <motion.div
                 key={photo.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 0 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: (idx % 8) * 0.05 }}

@@ -224,7 +224,7 @@ export default function AboutPage() {
             {values.map((v, i) => (
               <motion.div
                 key={v.tKey}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 0 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
@@ -302,7 +302,7 @@ export default function AboutPage() {
             return (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 0 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.05 }}
