@@ -612,9 +612,9 @@ export default function EventDetailsPage() {
               className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              initial={{ opacity: 0, scale: 0.95, y: 0 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              exit={{ opacity: 0, scale: 0.95, y: 0 }}
               className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white border border-border p-5 shadow-2xl z-10"
             >
               {/* Header */}

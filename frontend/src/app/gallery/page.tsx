@@ -298,7 +298,7 @@ export default function GalleryPage() {
                     return (
                       <motion.div
                         key={item.id}
-                        initial={{ opacity: 0, y: 15 }}
+                        initial={{ opacity: 0, y: 0 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         onClick={() => setSingleActiveMedia(item)}

@@ -43,9 +43,9 @@ export default function LoginModal() {
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            initial={{ opacity: 0, scale: 0.96, y: 0 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            exit={{ opacity: 0, scale: 0.96, y: 0 }}
             transition={{ duration: 0.2 }}
             className="relative w-full max-w-sm rounded-2xl border border-border bg-white p-5 shadow-xl"
           >

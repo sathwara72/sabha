@@ -74,7 +74,7 @@ export default function BusinessDirectory() {
         search: searchQuery,
         category: selectedCategory === "All" ? undefined : selectedCategory
       });
-      
+
       if (result && result.data) {
         setBusinesses(result.data);
         setTotalItems(result.total || 0);
@@ -258,7 +258,7 @@ export default function BusinessDirectory() {
                   className="glass-card group flex h-full flex-col p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="mb-5 flex items-start justify-between">
-                     <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-white flex items-center justify-center text-primary text-xl font-bold">
+                    <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-white flex items-center justify-center text-primary text-xl font-bold">
                       {business.logo ? (
                         <img
                           src={assetUrl(business.logo)}
@@ -308,7 +308,7 @@ export default function BusinessDirectory() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-12 flex items-center justify-center gap-2">
+          <div className="mt-6 flex items-center justify-center gap-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
@@ -358,9 +358,9 @@ export default function BusinessDirectory() {
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              initial={{ opacity: 0, scale: 0.96, y: 0 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              exit={{ opacity: 0, scale: 0.96, y: 0 }}
               transition={{ duration: 0.2 }}
               className="relative w-full max-w-lg rounded-2xl border border-border bg-white p-8 shadow-xl z-10"
             >

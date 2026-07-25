@@ -55,21 +55,72 @@ class SabhaController extends Controller
         return response()->json($query->get());
     }
 
-    public function getAllBusinesses()
+    public function getAllBusinesses(Request $request)
     {
-        // Admin view: return all businesses
-        return response()->json(
-            Business::with(['user', 'businessCategory'])
-                ->withAvg('reviews', 'rating')
-                ->withCount('reviews')
-                ->latest()
-                ->get()
-        );
+        $query = Business::with(['user', 'businessCategory'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->latest();
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('page')) {
+            $limit = $request->query('limit', 9);
+            $paginator = $query->paginate($limit);
+
+            $counts = [
+                'all' => Business::count(),
+                'pending' => Business::where('status', 'pending')->count(),
+                'approved' => Business::where('status', 'approved')->count(),
+                'rejected' => Business::where('status', 'rejected')->count(),
+            ];
+
+            return response()->json([
+                'paginator' => $paginator,
+                'counts' => $counts
+            ]);
+        }
+
+        return response()->json($query->get());
     }
 
-    public function getEvents()
+    public function getEvents(Request $request)
     {
-        return response()->json(Event::with(['galleryImages', 'approvedRegistrations.user'])->get());
+        $query = Event::with(['galleryImages', 'approvedRegistrations.user'])->orderBy('date', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%")
+                  ->orWhere('type', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('page')) {
+            $limit = $request->query('limit', 10);
+            return response()->json($query->paginate($limit));
+        }
+
+        return response()->json($query->get());
+    }
+
+    public function deleteEvent($id)
+    {
+        $event = Event::findOrFail($id);
+        $event->delete();
+        return response()->json(['message' => 'Event deleted successfully']);
     }
 
     public function getStatistics()
@@ -132,6 +183,13 @@ class SabhaController extends Controller
             'rejection_reason' => $validated['rejection_reason']
         ]);
         return response()->json(['message' => 'Business rejected successfully', 'business' => $business]);
+    }
+
+    public function deleteBusiness($id)
+    {
+        $business = Business::findOrFail($id);
+        $business->delete();
+        return response()->json(['message' => 'Business deleted successfully']);
     }
 
     public function storeEvent(Request $request)
@@ -250,9 +308,47 @@ class SabhaController extends Controller
         return response()->json(['message' => 'Event updated successfully', 'event' => $event]);
     }
 
-    public function getUsers()
+    public function getUsers(Request $request)
     {
-        return response()->json(User::with('business')->get());
+        $query = User::with('business');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('page')) {
+            $limit = $request->query('limit', 10);
+            $paginator = $query->paginate($limit);
+            return response()->json($paginator);
+        }
+
+        return response()->json($query->get());
+    }
+
+    public function toggleUserBlock($id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Cannot block admin users'], 400);
+        }
+
+        $user->is_blocked = !$user->is_blocked;
+        $user->save();
+
+        if ($user->is_blocked) {
+            // Revoke all tokens for this user so active sessions are terminated
+            $user->tokens()->delete();
+        }
+
+        return response()->json([
+            'message' => $user->is_blocked ? 'User blocked successfully' : 'User unblocked successfully',
+            'user' => $user,
+        ]);
     }
 
     public function registerSendOtp(Request $request)
@@ -379,6 +475,10 @@ class SabhaController extends Controller
 
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        if ($user->is_blocked) {
+            return response()->json(['message' => 'you had blocked by admin please contact admin'], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -1377,9 +1477,33 @@ class SabhaController extends Controller
         return response()->json($categories);
     }
 
-    public function getAllCategories()
+    public function getAllCategories(Request $request)
     {
-        $categories = BusinessCategory::orderBy('sort_order')->get();
+        $query = BusinessCategory::orderBy('sort_order');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($request->filled('page')) {
+            $limit = $request->query('limit', 9);
+            $paginator = $query->paginate($limit);
+
+            $paginator->getCollection()->transform(function ($cat) {
+                return [
+                    'id' => $cat->id,
+                    'name' => $cat->name,
+                    'sort_order' => $cat->sort_order,
+                    'is_active' => $cat->is_active,
+                    'businesses_count' => \App\Models\Business::where('category', $cat->name)->count(),
+                ];
+            });
+
+            return response()->json($paginator);
+        }
+
+        $categories = $query->get();
         $categoriesWithCounts = $categories->map(function ($cat) {
             return [
                 'id' => $cat->id,
@@ -1414,5 +1538,18 @@ class SabhaController extends Controller
         $category = BusinessCategory::findOrFail($id);
         $category->delete();
         return response()->json(['message' => 'Category deleted']);
+    }
+
+    public function updateCategory(Request $request, $id)
+    {
+        $category = BusinessCategory::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100|unique:business_categories,name,' . $id,
+        ]);
+
+        $category->update(['name' => $validated['name']]);
+
+        return response()->json($category);
     }
 }

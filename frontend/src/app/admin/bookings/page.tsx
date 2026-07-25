@@ -256,7 +256,7 @@ export default function AdminBookingsPage() {
                 <motion.div
                   key={reg.id}
                   layout
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 0 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="glass-card p-4 border border-border flex flex-col justify-between h-full bg-white rounded-2xl"

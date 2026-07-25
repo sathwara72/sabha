@@ -72,9 +72,9 @@ export default function RegisterModal() {
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={closeRegister} />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            initial={{ opacity: 0, scale: 0.96, y: 0 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            exit={{ opacity: 0, scale: 0.96, y: 0 }}
             transition={{ duration: 0.2 }}
             className="relative w-full max-w-md rounded-2xl border border-border bg-white p-5 shadow-xl z-10 font-outfit"
           >

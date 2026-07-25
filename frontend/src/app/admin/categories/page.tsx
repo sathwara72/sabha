@@ -86,7 +86,7 @@ export default function AdminCategoriesPage() {
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const itemsPerPage = 8;
+  const itemsPerPage = 9;
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCategories = filteredCategories.slice(startIndex, startIndex + itemsPerPage);
@@ -106,7 +106,7 @@ export default function AdminCategoriesPage() {
         {error && (
           <motion.div
             key="error-alert"
-            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 0 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             className="rounded-xl bg-red-50 border border-red-100 p-3 text-xs font-semibold text-red-600"
           >
             {error}
@@ -115,7 +115,7 @@ export default function AdminCategoriesPage() {
         {success && (
           <motion.div
             key="success-alert"
-            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 0 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             className="rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs font-semibold text-emerald-600 flex items-center gap-2"
           >
             <CheckCircle2 size={14} className="text-emerald-600" /> {success}
@@ -207,7 +207,7 @@ export default function AdminCategoriesPage() {
                     <motion.div
                       key={cat.id}
                       layout
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 0 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: idx * 0.02 }}

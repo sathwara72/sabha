@@ -89,7 +89,7 @@ export default function Home() {
           fetchStatistics(),
           fetchHeroImages().catch(() => []),
         ]);
-        
+
         // Defensive uniqueness filters
         const uniqueBiz = (bizData || []).filter(
           (v: any, i: number, a: any[]) => a.findIndex((t: any) => t.id === v.id) === i
@@ -141,16 +141,16 @@ export default function Home() {
     <div className="bg-background">
       {/* Hero */}
       <section className="hero-surface relative overflow-hidden border-b border-border">
-        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
+        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-8 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-start text-left space-y-6"
           >
             <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-4 py-1.5 text-xs sm:text-sm font-semibold text-primary">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                {t("hero.badge")}
-              </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              {t("hero.badge")}
+            </span>
 
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl uppercase">
               {t("hero.title")}
@@ -210,9 +210,8 @@ export default function Home() {
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    currentImageIndex === idx ? "bg-white w-6" : "bg-white/50 w-2"
-                  }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${currentImageIndex === idx ? "bg-white w-6" : "bg-white/50 w-2"
+                    }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
@@ -227,7 +226,7 @@ export default function Home() {
           {stats.slice(0, 3).map((stat, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 0 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
@@ -240,8 +239,8 @@ export default function Home() {
       </section>
 
       {/* Core Pillars */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24 border-b border-border">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+      <section className="mx-auto max-w-7xl px-6 py-9 lg:py-8 border-b border-border">
+        <div className="text-center max-w-3xl mx-auto mb-8">
           <p className="text-sm font-semibold text-primary uppercase tracking-wider">{t("home.pillars_label")}</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t("home.pillars_title")}
@@ -274,7 +273,7 @@ export default function Home() {
           ].map((pillar, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 0 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1, duration: 0.5 }}
@@ -292,8 +291,8 @@ export default function Home() {
 
       {/* Events */}
       <section className="border-y border-border bg-surface">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
-          <div className="mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div className="mx-auto max-w-7xl px-6 py-9 lg:py-8">
+          <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div className="max-w-2xl">
               <p className="text-sm font-semibold text-primary">{t("home.events_label")}</p>
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -312,7 +311,7 @@ export default function Home() {
             {events.slice(0, 3).map((event, i) => (
               <motion.div
                 key={event.id}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 0 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
@@ -383,8 +382,8 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
-        <div className="mb-14 max-w-2xl">
+      <section className="mx-auto max-w-7xl px-6 py-9 lg:py-8">
+        <div className="mb-6 max-w-2xl">
           <p className="text-sm font-semibold text-primary">{t("home.how_label")}</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t("home.how_title")}
@@ -411,7 +410,7 @@ export default function Home() {
           ].map((item, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 0 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.05 }}
@@ -428,8 +427,8 @@ export default function Home() {
       </section>
 
       {/* Interactive FAQ Section */}
-      <section className="mx-auto max-w-4xl px-6 py-20 border-t border-border">
-        <div className="text-center mb-12">
+      <section className="mx-auto max-w-4xl px-6 py-8 border-t border-border">
+        <div className="text-center mb-6">
           <p className="text-sm font-semibold text-primary uppercase tracking-wider">{t("home.faq_label")}</p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t("home.faq_title")}
