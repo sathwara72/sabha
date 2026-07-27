@@ -65,6 +65,11 @@ export default function EventsPage() {
             status = "past";
           }
 
+          const monthShort = eventDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+          const dayNum = String(eventDate.getDate()).padStart(2, '0');
+          const yearNum = eventDate.getFullYear();
+          const hasCustomImage = Boolean(e.image && e.image !== "");
+
           return {
             id: e.id,
             title: e.title,
@@ -75,10 +80,14 @@ export default function EventsPage() {
             type: e.type,
             status,
             category: e.type,
+            monthShort,
+            dayNum,
+            yearNum,
+            hasCustomImage,
             attendees: (e.approved_registrations || e.approvedRegistrations)?.length || 0,
             price_normal: e.price_normal || (e.type === "Workshop" ? "Free" : "₹1,499"),
             price_verified: e.price_verified || (e.type === "Workshop" ? "Free" : "₹1,499"),
-            image: assetUrl(e.image) || "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop"
+            image: assetUrl(e.image) || ""
           };
         });
 
@@ -219,24 +228,65 @@ export default function EventsPage() {
                     exit={{ opacity: 0, scale: 0.97 }}
                     className="glass-card group flex h-full flex-col overflow-hidden p-0 hover:shadow-md transition-shadow"
                   >
-                    <div className="relative h-32 w-full overflow-hidden">
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
-                      <div className="absolute left-3 top-3">
-                        <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                    <div className="relative h-36 sm:h-40 w-full overflow-hidden flex items-center justify-center">
+                      {event.hasCustomImage ? (
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-gradient-to-br from-red-600 via-rose-600 to-indigo-900 flex flex-col items-center justify-center p-3 relative overflow-hidden">
+                          {/* Background Grid Pattern */}
+                          <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+
+                          {/* Dynamic 3D Calendar Tear-Off Sheet Icon with Event Date */}
+                          <div className="relative z-10 flex flex-col items-center justify-center">
+                            <div className="w-16 h-16 rounded-2xl bg-white shadow-2xl overflow-hidden border border-white/50 flex flex-col items-center transform transition-transform duration-300 group-hover:scale-110">
+                              {/* Top Red Month Bar */}
+                              <div className="w-full bg-gradient-to-r from-red-600 to-rose-600 py-0.5 text-center shadow-xs">
+                                <span className="text-[10px] font-black tracking-widest text-white uppercase block leading-none">
+                                  {event.monthShort}
+                                </span>
+                              </div>
+                              {/* Center Day Number */}
+                              <div className="flex-1 flex flex-col items-center justify-center">
+                                <span className="text-xl font-black text-slate-800 leading-none">
+                                  {event.dayNum}
+                                </span>
+                                <span className="text-[7px] font-extrabold text-slate-400 mt-0.5">
+                                  {event.yearNum}
+                                </span>
+                              </div>
+                            </div>
+                            <span className="text-[9px] font-black tracking-wider uppercase text-white mt-1.5 bg-black/40 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/15">
+                              COMMUNITY EVENT
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+
+                      <div className="absolute left-3 top-3 z-10">
+                        <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold text-foreground backdrop-blur shadow-xs">
                           {event.category}
                         </span>
                       </div>
-                      {/* Event Name & Date Badge Overlay */}
+
+                      {/* Top Right Date Pill */}
+                      <div className="absolute right-3 top-3 z-10">
+                        <span className="rounded-full bg-black/70 border border-white/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-black text-white shadow-md">
+                          {event.monthShort} {event.dayNum}, {event.yearNum}
+                        </span>
+                      </div>
+
+                      {/* Event Name Overlay */}
                       <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
-                        <span className="rounded bg-black/65 border border-white/10 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-extrabold text-white truncate max-w-[65%] shadow-sm">
+                        <span className="rounded bg-black/75 border border-white/15 backdrop-blur-sm px-2.5 py-1 text-[11px] font-black text-white truncate max-w-[70%] shadow-md">
                           {event.title}
                         </span>
-                        <span className="rounded bg-primary border border-primary/20 backdrop-blur-sm px-2 py-0.5 text-[9px] font-black text-white shrink-0 shadow-sm">
+                        <span className="rounded bg-primary border border-primary/20 backdrop-blur-sm px-2 py-1 text-[9px] font-black text-white shrink-0 shadow-md">
                           {event.date}
                         </span>
                       </div>

@@ -603,30 +603,31 @@ export default function BusinessDetailsPage() {
   return (
     <div className="min-h-screen bg-background font-outfit">
       {/* Cover Banner with Profile Bar */}
-      <section className="relative h-72 sm:h-88 lg:h-[26rem] w-full overflow-hidden bg-slate-950 flex items-center justify-center">
-        {business.bannerImage && (
-          <img
-            src={business.bannerImage}
-            alt={`${business.name} workspace`}
-            className="h-full w-full object-cover object-center"
-          />
-        )}
-        {/* Shadow gradient at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+      <div className="mx-auto max-w-7xl sm:px-6 sm:pt-6">
+        <section className="relative w-full aspect-[3.2/1] sm:rounded-3xl overflow-hidden bg-slate-950 flex items-center justify-center shadow-lg border border-border/40">
+          {business.bannerImage && (
+            <img
+              src={business.bannerImage}
+              alt={`${business.name} workspace`}
+              className="h-full w-full object-cover object-center"
+            />
+          )}
+          {/* Shadow gradient at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
 
-        {/* Back button */}
-        <div className="absolute top-6 left-6 z-10">
-          <button
-            onClick={() => router.back()}
-            className="group inline-flex items-center gap-1.5 rounded-lg bg-black/30 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-black/50"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            {t("businessDetail.back_to_directory")}
-          </button>
-        </div>
-        {/* Profile Bar at bottom of cover */}
-        <div className="absolute bottom-0 left-0 right-0 z-10">
-          <div className="mx-auto max-w-7xl px-6 pb-6">
+          {/* Back button */}
+          <div className="absolute top-6 left-6 z-10">
+            <button
+              onClick={() => router.back()}
+              className="group inline-flex items-center gap-1.5 rounded-lg bg-black/30 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-black/50 cursor-pointer"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+              {t("businessDetail.back_to_directory")}
+            </button>
+          </div>
+          {/* Profile Bar at bottom of cover */}
+          <div className="absolute bottom-0 left-0 right-0 z-10">
+            <div className="px-6 pb-6">
             <div className="flex flex-col md:flex-row md:items-end gap-5">
               <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-white text-primary text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
                 {business.logo ? (
@@ -659,7 +660,11 @@ export default function BusinessDetailsPage() {
                   </p>
                 )}
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/60 font-medium">
-                  {business.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {business.location}</span>}
+                  {([business.area, business.city].filter(Boolean).join(", ") || business.location) && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" /> {[business.area, business.city].filter(Boolean).join(", ") || business.location}
+                    </span>
+                  )}
                   {business.category && <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" /> {business.category}</span>}
                   {business.hours && <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {t("businessDetail.open")} {business.hours.split(" (")[0]}</span>}
                 </div>
@@ -691,6 +696,7 @@ export default function BusinessDetailsPage() {
           </div>
         </div>
       </section>
+    </div>
 
       {/* Main Grid Content */}
       <div className="mx-auto max-w-7xl px-6 py-6">

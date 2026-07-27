@@ -27,6 +27,8 @@ interface Business {
   logo?: string;
   cover_image?: string;
   location?: string;
+  area?: string;
+  city?: string;
   phone?: string;
   tagline?: string;
   payment_screenshot?: string;
@@ -257,7 +259,9 @@ export default function AdminBusinessesPage() {
                       {/* Meta info */}
                       <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium">
                         <span className="flex items-center gap-1 text-primary font-semibold">{biz.category}</span>
-                        {biz.location && <span className="flex items-center gap-1"><MapPin size={11} className="text-primary" /> {biz.location}</span>}
+                        {([biz.area, biz.city].filter(Boolean).join(", ") || biz.location) && (
+                          <span className="flex items-center gap-1"><MapPin size={11} className="text-primary" /> {[biz.area, biz.city].filter(Boolean).join(", ") || biz.location}</span>
+                        )}
                         {biz.phone && <span className="flex items-center gap-1"><Phone size={11} className="text-primary" /> {biz.phone}</span>}
                         {biz.website && (
                           <a href={biz.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">

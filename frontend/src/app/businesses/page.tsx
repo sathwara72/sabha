@@ -284,8 +284,8 @@ export default function BusinessDirectory() {
                       {business.name}
                     </h3>
                     <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
-                      <MapPin size={13} className="text-primary" />
-                      {business.location || "Mumbai"} • {business.category}
+                      <MapPin size={13} className="text-primary shrink-0" />
+                      {[business.area, business.city].filter(Boolean).join(", ") || business.location || "Mumbai"} • {business.category}
                     </p>
                     <p className="mt-3.5 text-xs leading-relaxed text-muted line-clamp-3">
                       {business.description || "No description provided yet."}
