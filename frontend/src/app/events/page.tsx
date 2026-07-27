@@ -9,6 +9,7 @@ import { fetchEvents, getUserBusiness } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/language";
 import { assetUrl } from "@/lib/config";
+import Pagination from "@/components/shared/Pagination";
 
 export default function EventsPage() {
   const { t } = useLanguage();
@@ -358,38 +359,14 @@ export default function EventsPage() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <div className="flex gap-2">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={cn(
-                    "h-11 w-11 rounded-xl text-sm font-semibold transition-all cursor-pointer",
-                    currentPage === i + 1
-                      ? "bg-primary text-white shadow-sm"
-                      : "border border-border bg-white text-muted hover:bg-surface hover:text-foreground"
-                  )}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredEvents.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={(page) => setCurrentPage(page)}
+          itemLabel="events"
+        />
       </div>
     </div>
   );

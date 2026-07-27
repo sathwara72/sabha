@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/shared/PageHeader";
+import Pagination from "@/components/shared/Pagination";
 import { fetchEvents, fetchGallery, fetchStatistics } from "@/lib/api";
 import { API_ORIGIN } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
@@ -26,6 +27,8 @@ export default function GalleryPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [stats, setStats] = useState({
     members: "500+",
     cities: "12+"
@@ -291,64 +294,77 @@ export default function GalleryPage() {
               {groupedGallery.common.length === 0 ? (
                 <p className="text-sm text-muted italic">{t("gallery.no_common")}</p>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {groupedGallery.common.map((item) => {
-                    const isVideo = isVideoFile(item.image_path);
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {groupedGallery.common
+                      .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                      .map((item) => {
+                        const isVideo = isVideoFile(item.image_path);
 
-                    return (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 0 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        onClick={() => setSingleActiveMedia(item)}
-                        className={`group relative aspect-square overflow-hidden rounded-2xl border cursor-pointer ${
-                          isVideo 
-                            ? "border-accent/40 shadow-[0_0_15px_rgba(244,63,94,0.08)] bg-slate-950" 
-                            : "border-border bg-white shadow-sm"
-                        }`}
-                      >
-                        {isVideo ? (
-                          <div className="relative w-full h-full flex items-center justify-center bg-black">
-                            <video
-                              src={getMediaUrl(item.image_path)}
-                              className="w-full h-full object-cover opacity-80"
-                              muted
-                              preload="metadata"
-                            />
-                            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors" />
-                            {/* Play button overlay for video */}
-                            <div className="absolute h-10 w-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                              <Play size={18} className="ml-0.5" />
-                            </div>
-                            <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 text-[9px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
-                              <Film size={9} /> {t("gallery.video")}
-                            </span>
-                            {item.caption && (
-                              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end pt-8">
-                                <h3 className="text-[11px] font-semibold text-white line-clamp-2">{item.caption}</h3>
+                        return (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, y: 0 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            onClick={() => setSingleActiveMedia(item)}
+                            className={`group relative aspect-square overflow-hidden rounded-2xl border cursor-pointer ${
+                              isVideo 
+                                ? "border-accent/40 shadow-[0_0_15px_rgba(244,63,94,0.08)] bg-slate-950" 
+                                : "border-border bg-white shadow-sm"
+                            }`}
+                          >
+                            {isVideo ? (
+                              <div className="relative w-full h-full flex items-center justify-center bg-black">
+                                <video
+                                  src={getMediaUrl(item.image_path)}
+                                  className="w-full h-full object-cover opacity-80"
+                                  muted
+                                  preload="metadata"
+                                />
+                                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors" />
+                                {/* Play button overlay for video */}
+                                <div className="absolute h-10 w-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                  <Play size={18} className="ml-0.5" />
+                                </div>
+                                <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 text-[9px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
+                                  <Film size={9} /> {t("gallery.video")}
+                                </span>
+                                {item.caption && (
+                                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end pt-8">
+                                    <h3 className="text-[11px] font-semibold text-white line-clamp-2">{item.caption}</h3>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="relative w-full h-full">
+                                <img
+                                  src={getMediaUrl(item.image_path)}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                  alt={item.caption || "Gallery image"}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
+                                  <span className="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm uppercase">
+                                    {t("gallery.image")}
+                                  </span>
+                                  {item.caption && <h3 className="text-xs font-semibold text-white line-clamp-2">{item.caption}</h3>}
+                                </div>
                               </div>
                             )}
-                          </div>
-                        ) : (
-                          <div className="relative w-full h-full">
-                            <img
-                              src={getMediaUrl(item.image_path)}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              alt={item.caption || "Gallery image"}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
-                              <span className="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm uppercase">
-                                {t("gallery.image")}
-                              </span>
-                              {item.caption && <h3 className="text-xs font-semibold text-white line-clamp-2">{item.caption}</h3>}
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                          </motion.div>
+                        );
+                      })}
+                  </div>
+
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.ceil(groupedGallery.common.length / itemsPerPage)}
+                    totalItems={groupedGallery.common.length}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={(page) => setCurrentPage(page)}
+                    itemLabel="items"
+                  />
+                </>
               )}
             </div>
           </>

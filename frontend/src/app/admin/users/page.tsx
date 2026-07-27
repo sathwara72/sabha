@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { fetchUsersAdmin } from "@/lib/api";
+import { fetchUsersAdmin, toggleUserBlock } from "@/lib/api";
 import { assetUrl } from "@/lib/config";
 import {
-  Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X
+  Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X, Ban, UserCheck, ShieldAlert
 } from "lucide-react";
+import ConfirmModal from "@/components/shared/ConfirmModal";
+import Pagination from "@/components/shared/Pagination";
 
 interface Business {
   id: number;
@@ -32,6 +34,7 @@ interface User {
   company?: string;
   bio?: string;
   avatar?: string;
+  is_blocked?: boolean;
   business?: Business;
 }
 
@@ -40,6 +43,8 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [blockingUser, setBlockingUser] = useState<User | null>(null);
+  const [blockLoading, setBlockLoading] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,6 +66,32 @@ export default function AdminUsersPage() {
       console.error("Error loading users:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  function handleToggleBlock(user: User) {
+    if (user.role === "admin") {
+      alert("Cannot block admin users.");
+      return;
+    }
+    setBlockingUser(user);
+  }
+
+  async function handleConfirmToggleBlock() {
+    if (!blockingUser) return;
+    try {
+      setBlockLoading(true);
+      await toggleUserBlock(blockingUser.id);
+      const updatedBlocked = !blockingUser.is_blocked;
+      setUsers(prev => prev.map(u => u.id === blockingUser.id ? { ...u, is_blocked: updatedBlocked } : u));
+      if (selectedUser?.id === blockingUser.id) {
+        setSelectedUser(prev => prev ? { ...prev, is_blocked: updatedBlocked } : null);
+      }
+      setBlockingUser(null);
+    } catch (err: any) {
+      alert(err.message || "Failed to update block status");
+    } finally {
+      setBlockLoading(false);
     }
   }
 
@@ -99,7 +130,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Members</h1>
             <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary">
-              {users.length}
+              {loading ? "..." : users.length}
             </span>
           </div>
           <p className="text-xs text-muted">Manage community members</p>
@@ -117,119 +148,128 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      <div className="glass-card overflow-hidden p-0">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-surface border-b border-border">
-              <th className="px-4 py-2 text-xs font-bold text-muted uppercase tracking-wider">Member</th>
-              <th className="px-4 py-2 text-xs font-bold text-muted uppercase tracking-wider">Joined</th>
-              <th className="px-4 py-2 text-xs font-bold text-muted uppercase tracking-wider">Role</th>
-              <th className="px-4 py-2 text-xs font-bold text-muted uppercase tracking-wider text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {paginatedUsers.map((user) => (
-              <tr key={user.id} className="transition-colors hover:bg-surface/50">
-                <td className="px-4 py-2.5">
-                  <div className="flex items-center gap-2.5">
-                    {user.avatar ? (
-                      <img
-                        src={assetUrl(user.avatar)}
-                        alt={user.name}
-                        className="h-8 w-8 rounded-lg object-contain bg-white shrink-0 border border-border"
-                      />
-                    ) : (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft font-semibold text-xs text-primary">
-                        {user.name?.[0] ?? "?"}
+      {loading ? (
+        <div className="glass-card py-20 text-center rounded-2xl border border-border">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+          <p className="mt-3 text-sm font-medium text-muted">Loading community members...</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-border/80 shadow-xs overflow-hidden flex flex-col">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/90 border-b border-border/70 backdrop-blur-sm">
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Member</th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Joined</th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Role / Status</th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {paginatedUsers.map((user) => (
+                  <tr key={user.id} className="transition-colors hover:bg-slate-50/70">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        {user.avatar ? (
+                          <img
+                            src={assetUrl(user.avatar)}
+                            alt={user.name}
+                            className="h-9 w-9 rounded-xl object-contain bg-white shrink-0 border border-border/80 shadow-xs p-0.5"
+                          />
+                        ) : (
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft font-bold text-xs text-primary shadow-xs">
+                            {user.name?.[0] ?? "?"}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs font-extrabold text-slate-900 leading-tight">{user.name}</p>
+                          <p className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                            <Mail size={11} className="text-primary/70" /> {user.email}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    <div>
-                      <p className="text-xs font-bold text-foreground leading-tight">{user.name}</p>
-                      <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <Mail size={11} className="text-primary/70" /> {user.email}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-4 py-2.5">
-                  <div className="flex flex-col">
-                    <p className="text-xs font-medium text-foreground">
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </p>
-                    <p className="flex items-center gap-1 text-[10px] text-muted-foreground/80 mt-0.5">
-                      <Clock size={10} /> {new Date(user.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </td>
-                <td className="px-4 py-2.5">
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    user.role === "admin"
-                      ? "bg-primary-soft text-primary"
-                      : "bg-surface text-muted-foreground"
-                  }`}>
-                    <ShieldCheck size={11} />
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-4 py-2.5 text-right">
-                  <button
-                    onClick={() => setSelectedUser(user)}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-white text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:scale-95"
-                    title="View Member Details"
-                  >
-                    <ArrowUpRight size={14} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filteredUsers.length === 0 && !loading && (
-          <div className="py-20 text-center">
-            <p className="text-sm text-muted">No members found.</p>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex flex-col">
+                        <p className="text-xs font-semibold text-slate-800">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </p>
+                        <p className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
+                          <Clock size={10} /> {new Date(user.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                          user.role === "admin"
+                            ? "bg-primary-soft text-primary border border-primary/20"
+                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                        }`}>
+                          <ShieldCheck size={11} />
+                          {user.role}
+                        </span>
+                        {user.is_blocked && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-200">
+                            <Ban size={10} /> Blocked
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {user.role !== "admin" && (
+                          <button
+                            onClick={() => handleToggleBlock(user)}
+                            className={`inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold border transition-all active:scale-95 cursor-pointer shadow-xs ${
+                              user.is_blocked
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                : "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
+                            }`}
+                            title={user.is_blocked ? "Unblock Member" : "Block Member"}
+                          >
+                            {user.is_blocked ? (
+                              <>
+                                <UserCheck size={12} /> Unblock
+                              </>
+                            ) : (
+                              <>
+                                <Ban size={12} /> Block
+                              </>
+                            )}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setSelectedUser(user)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer shadow-xs"
+                          title="View Member Details"
+                        >
+                          <ArrowUpRight size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+          {filteredUsers.length === 0 && !loading && (
+            <div className="py-20 text-center">
+              <p className="text-sm text-slate-500">No members found.</p>
+            </div>
+          )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-border px-4 py-3 bg-surface/30">
-            <div className="text-xs text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-              <span className="font-semibold text-foreground">{Math.min(currentPage * itemsPerPage, filteredUsers.length)}</span> of{" "}
-              <span className="font-semibold text-foreground">{filteredUsers.length}</span> members
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="rounded-lg border border-border bg-white px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none"
-              >
-                Previous
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`h-7 w-7 rounded-lg text-xs font-semibold border transition-all ${
-                    currentPage === page
-                      ? "border-primary bg-primary text-white"
-                      : "border-border bg-white text-muted hover:bg-surface hover:text-foreground"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="rounded-lg border border-border bg-white px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredUsers.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={(page) => setCurrentPage(page)}
+            itemLabel="members"
+          />
+        </div>
+      )}
 
      
 
@@ -267,6 +307,11 @@ export default function AdminUsersPage() {
                     }`}>
                       {selectedUser.role}
                     </span>
+                    {selectedUser.is_blocked && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-200">
+                        <Ban size={10} /> Blocked
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{selectedUser.email}</p>
                 </div>
@@ -385,7 +430,29 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-2.5 border-t border-border pt-4 mt-4">
+            <div className="flex justify-between items-center border-t border-border pt-4 mt-4">
+              <div>
+                {selectedUser.role !== "admin" && (
+                  <button
+                    onClick={() => handleToggleBlock(selectedUser)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                      selectedUser.is_blocked
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                        : "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
+                    }`}
+                  >
+                    {selectedUser.is_blocked ? (
+                      <>
+                        <UserCheck size={14} /> Unblock User
+                      </>
+                    ) : (
+                      <>
+                        <Ban size={14} /> Block User
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
               <button
                 onClick={() => setSelectedUser(null)}
                 className="rounded-xl border border-border bg-white px-4 py-2 text-xs font-bold text-foreground transition-colors hover:bg-slate-50 active:scale-95"
@@ -397,6 +464,18 @@ export default function AdminUsersPage() {
         </div>,
         document.body
       )}
+
+      {/* Block User Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={Boolean(blockingUser)}
+        title={blockingUser?.is_blocked ? "Unblock Member" : "Block Member"}
+        message={blockingUser ? `Are you sure you want to ${blockingUser.is_blocked ? "unblock" : "block"} member "${blockingUser.name}"? ${blockingUser.is_blocked ? "They will regain access to the platform." : "Their session will be terminated immediately."}` : ""}
+        confirmLabel={blockingUser?.is_blocked ? "Unblock Member" : "Block Member"}
+        variant={blockingUser?.is_blocked ? "success" : "danger"}
+        isLoading={blockLoading}
+        onConfirm={handleConfirmToggleBlock}
+        onCancel={() => setBlockingUser(null)}
+      />
     </div>
   );
 }

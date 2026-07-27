@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
-  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness
+  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness, deleteBusiness
 } from "@/lib/api";
 import { API_ORIGIN, assetUrl } from "@/lib/config";
 import {
   ShieldCheck, XCircle, CheckCircle2,
   Globe, Info, Search, ChevronLeft, ChevronRight,
-  MapPin, Phone, Receipt, X, ZoomIn, Eye
+  MapPin, Phone, Receipt, X, ZoomIn, Eye, Trash2
 } from "lucide-react";
+import ConfirmModal from "@/components/shared/ConfirmModal";
+import PromptModal from "@/components/shared/PromptModal";
+import Pagination from "@/components/shared/Pagination";
 
 interface Business {
   id: number;
@@ -40,7 +43,19 @@ export default function AdminBusinessesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [counts, setCounts] = useState<{ all: number; pending: number; approved: number; rejected: number }>({
+    all: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
+
   const [paymentModalUrl, setPaymentModalUrl] = useState<string | null>(null);
+  const [rejectingBiz, setRejectingBiz] = useState<{ id: number; name: string } | null>(null);
+  const [deletingBiz, setDeletingBiz] = useState<{ id: number; name: string } | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const itemsPerPage = 9;
 
   useEffect(() => {
@@ -48,41 +63,41 @@ export default function AdminBusinessesPage() {
   }, [currentPage]);
 
   const getTabCount = (status: "all" | "pending" | "approved" | "rejected") => {
-    if (status === "all") return businesses.length;
-    return businesses.filter(b => b.status === status).length;
+    return counts[status] ?? 0;
   };
 
-  const filteredBusinesses = useMemo(() => {
-    return businesses.filter((biz) => {
-      const matchesSearch =
-        biz.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        biz.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (biz.description || "").toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "all" || biz.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [businesses, searchTerm, statusFilter]);
-
-  const paginatedBusinesses = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredBusinesses.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredBusinesses, currentPage]);
-
-  const totalPages = Math.ceil(filteredBusinesses.length / itemsPerPage);
-
-  useEffect(() => { setCurrentPage(1); }, [searchTerm, statusFilter]);
-  useEffect(() => { loadData(); }, []);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
+    setLoading(true);
     try {
-      const data = await fetchAllBusinessesAdmin();
-      setBusinesses(data);
+      const res = await fetchAllBusinessesAdmin({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm,
+        status: statusFilter,
+      });
+
+      if (res && res.paginator) {
+        setBusinesses(res.paginator.data || []);
+        setTotalItems(res.paginator.total || 0);
+        setTotalPages(res.paginator.last_page || 1);
+        if (res.counts) {
+          setCounts(res.counts);
+        }
+      } else if (Array.isArray(res)) {
+        setBusinesses(res);
+        setTotalItems(res.length);
+        setTotalPages(Math.ceil(res.length / itemsPerPage));
+      }
     } catch (error) {
       console.error("Error loading businesses:", error);
     } finally {
       setLoading(false);
     }
-  }
+  }, [currentPage, searchTerm, statusFilter]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   async function handleApprove(id: number) {
     try {
@@ -93,15 +108,31 @@ export default function AdminBusinessesPage() {
     }
   }
 
-  async function handleReject(id: number) {
-    const reason = prompt("Please enter the reason for rejection:");
-    if (reason === null) return;
-    if (!reason.trim()) { alert("Rejection reason is required."); return; }
+  async function handleConfirmReject(reason: string) {
+    if (!rejectingBiz) return;
     try {
-      await rejectBusiness(id, reason.trim());
+      setActionLoading(true);
+      await rejectBusiness(rejectingBiz.id, reason);
+      setRejectingBiz(null);
       loadData();
     } catch {
       alert("Rejection failed");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleConfirmDelete() {
+    if (!deletingBiz) return;
+    try {
+      setActionLoading(true);
+      await deleteBusiness(deletingBiz.id);
+      setDeletingBiz(null);
+      loadData();
+    } catch (err: any) {
+      alert(err.message || "Delete failed");
+    } finally {
+      setActionLoading(false);
     }
   }
 
@@ -172,13 +203,13 @@ export default function AdminBusinessesPage() {
           </div>
         ) : (
           <>
-            {filteredBusinesses.length === 0 ? (
+            {businesses.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border py-20 text-center text-muted">
-                {businesses.length === 0 ? "No businesses to review." : "No businesses match your search/filter."}
+                {searchTerm || statusFilter !== "all" ? "No businesses match your search/filter." : "No businesses to review."}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {paginatedBusinesses.map((biz) => (
+                {businesses.map((biz) => (
                   <div
                     key={biz.id}
                     className="glass-card p-0 flex flex-col rounded-2xl border border-border"
@@ -204,12 +235,12 @@ export default function AdminBusinessesPage() {
                     <div className="px-4 pb-4 flex flex-col gap-2.5 flex-1">
                       {/* Logo + Name */}
                       <div className="flex items-center gap-3 -mt-7">
-                        <div className="relative z-10 shrink-0 h-14 w-14 rounded-xl border-2 border-white shadow-lg bg-white overflow-hidden flex items-center justify-center">
+                        <div className="relative z-10 shrink-0 h-14 w-14 rounded-xl border-2 border-white shadow-lg bg-white overflow-hidden flex items-center justify-center p-1">
                           {biz.logo ? (
                             <img
                               src={getMediaUrl(biz.logo)}
                               alt={biz.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                             />
                           ) : (
                             <span className="text-xl font-bold text-primary">{biz.name?.[0] ?? "?"}</span>
@@ -250,13 +281,22 @@ export default function AdminBusinessesPage() {
                         </button>
                       )}
 
-                      {/* View Details Button */}
-                      <button
-                        onClick={() => router.push(`/admin/businesses/${biz.id}`)}
-                        className={`flex items-center gap-1.5 text-[10px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 hover:bg-slate-100 transition-colors w-full justify-center cursor-pointer ${!biz.payment_screenshot ? "mt-auto" : ""}`}
-                      >
-                        <Eye size={12} /> View Details
-                      </button>
+                      {/* Action buttons: View Details + Delete */}
+                      <div className={`flex items-center gap-2 ${!biz.payment_screenshot ? "mt-auto" : ""}`}>
+                        <button
+                          onClick={() => router.push(`/admin/businesses/${biz.id}`)}
+                          className="flex-1 flex items-center gap-1.5 text-[10px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 hover:bg-slate-100 transition-colors justify-center cursor-pointer"
+                        >
+                          <Eye size={12} /> View Details
+                        </button>
+                        <button
+                          onClick={() => setDeletingBiz({ id: biz.id, name: biz.name })}
+                          className="flex items-center gap-1.5 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1.5 hover:bg-rose-100 transition-colors justify-center cursor-pointer"
+                          title="Delete Business"
+                        >
+                          <Trash2 size={12} /> Delete
+                        </button>
+                      </div>
 
                       {/* Action buttons — only for pending */}
                       {biz.status === "pending" && (
@@ -268,7 +308,7 @@ export default function AdminBusinessesPage() {
                             <CheckCircle2 size={13} /> Approve
                           </button>
                           <button
-                            onClick={() => handleReject(biz.id)}
+                            onClick={() => setRejectingBiz({ id: biz.id, name: biz.name })}
                             className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-[11px] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98]"
                           >
                             <XCircle size={13} /> Reject
@@ -282,35 +322,41 @@ export default function AdminBusinessesPage() {
             )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
-                <p className="text-xs text-muted font-medium">
-                  Showing <span className="font-semibold">{Math.min((currentPage - 1) * itemsPerPage + 1, filteredBusinesses.length)}</span> to{" "}
-                  <span className="font-semibold">{Math.min(currentPage * itemsPerPage, filteredBusinesses.length)}</span> of{" "}
-                  <span className="font-semibold">{filteredBusinesses.length}</span> businesses
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-muted hover:bg-surface disabled:opacity-50 transition-colors"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <span className="text-xs font-bold text-foreground px-2">Page {currentPage} of {totalPages}</span>
-                  <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-muted hover:bg-surface disabled:opacity-50 transition-colors"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              itemLabel="businesses"
+            />
           </>
         )}
       </div>
+
+      {/* Rejection Custom Prompt Modal */}
+      <PromptModal
+        isOpen={Boolean(rejectingBiz)}
+        title="Reject Business Submission"
+        message={rejectingBiz ? `Please enter the reason for rejecting "${rejectingBiz.name}":` : ""}
+        placeholder="Enter details reason for rejection..."
+        confirmLabel="Reject Business"
+        isLoading={actionLoading}
+        onConfirm={handleConfirmReject}
+        onCancel={() => setRejectingBiz(null)}
+      />
+
+      {/* Delete Business Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deletingBiz)}
+        title="Delete Business Profile"
+        message={deletingBiz ? `Are you sure you want to delete business "${deletingBiz.name}"? This action cannot be undone.` : ""}
+        confirmLabel="Delete Business"
+        variant="danger"
+        isLoading={actionLoading}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletingBiz(null)}
+      />
 
       {/* Payment Screenshot Lightbox Modal */}
       {typeof window !== "undefined" && paymentModalUrl && createPortal(
