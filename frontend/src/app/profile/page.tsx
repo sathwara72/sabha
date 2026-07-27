@@ -277,7 +277,8 @@ export default function ProfilePage() {
       formData.append("website", bizWebsite);
       formData.append("description", bizDescription);
       formData.append("tagline", bizTagline);
-      formData.append("location", bizLocation);
+      const computedLocation = [bizArea, bizCity].filter(Boolean).join(", ");
+      formData.append("location", computedLocation || bizLocation);
       formData.append("address", bizAddress);
       formData.append("area", bizArea);
       formData.append("city", bizCity);
@@ -818,7 +819,7 @@ export default function ProfilePage() {
                       {!isEditingBusiness ? (
                         /* ── View mode ── */
                         <div className="space-y-8">
-                          <div className="relative rounded-2xl overflow-hidden border border-border h-48 sm:h-60 bg-slate-900 shadow-sm">
+                          <div className="relative rounded-2xl overflow-hidden border border-border aspect-[3.2/1] max-h-[320px] min-h-[160px] bg-slate-900 shadow-sm">
                             <img src={business.cover_image ? assetUrl(business.cover_image) : "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"} alt="Business Cover" className="h-full w-full object-cover opacity-85" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                             <div className="absolute bottom-4 left-6 flex items-end gap-4">
@@ -839,7 +840,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
                               <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><MapPin size={12} className="text-primary" /> {t("profile.biz_location")}</span>
-                              <p className="text-xs font-extrabold text-foreground break-words">{business.location || "—"}</p>
+                              <p className="text-xs font-extrabold text-foreground break-words">{[business.area, business.city].filter(Boolean).join(", ") || business.location || "—"}</p>
                             </div>
                             <div className="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
                               <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><Clock size={12} className="text-primary" /> {t("profile.biz_hours")}</span>
@@ -890,15 +891,9 @@ export default function ProfilePage() {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                              <label className={labelClass}>{t("profile.biz_tagline")}</label>
-                              <input type="text" value={bizTagline} onChange={(e) => setBizTagline(e.target.value)} placeholder="E.g. Enterprise Cloud Architecture" className={inputClass} />
-                            </div>
-                            <div>
-                              <label className={labelClass}>{t("profile.biz_location")}</label>
-                              <input type="text" value={bizLocation} onChange={(e) => setBizLocation(e.target.value)} placeholder="E.g. Mumbai, Maharashtra" className={inputClass} />
-                            </div>
+                          <div>
+                            <label className={labelClass}>{t("profile.biz_tagline")}</label>
+                            <input type="text" value={bizTagline} onChange={(e) => setBizTagline(e.target.value)} placeholder="E.g. Enterprise Cloud Architecture" className={inputClass} />
                           </div>
 
                           {/* Address & Google Maps Location */}
@@ -1150,9 +1145,13 @@ export default function ProfilePage() {
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) => {
-                                      const file = e.target.files?.[0] || null;
-                                      setLogoFile(file);
-                                      if (file) setLogoPreview(URL.createObjectURL(file));
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        setCropTarget("logo");
+                                        setRawCropImage(URL.createObjectURL(file));
+                                        setCropperOpen(true);
+                                        e.target.value = "";
+                                      }
                                     }}
                                     className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                                   />
@@ -1328,16 +1327,21 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Interactive Image Cropper Modal (For Banner Cover Image Only) */}
+      {/* Interactive Image Cropper Modal */}
       <ImageCropperModal
         isOpen={cropperOpen}
         imageSrc={rawCropImage}
-        aspectRatio={3.2 / 1}
-        title="Crop Cover Banner Portion"
+        aspectRatio={cropTarget === "cover" ? 3.2 / 1 : 1 / 1}
+        title={cropTarget === "cover" ? "Crop Cover Banner Image" : "Crop Logo Image"}
         onClose={() => setCropperOpen(false)}
         onCropComplete={(croppedFile, previewUrl) => {
-          setCoverFile(croppedFile);
-          setCoverPreview(previewUrl);
+          if (cropTarget === "cover") {
+            setCoverFile(croppedFile);
+            setCoverPreview(previewUrl);
+          } else {
+            setLogoFile(croppedFile);
+            setLogoPreview(previewUrl);
+          }
         }}
       />
     </div>

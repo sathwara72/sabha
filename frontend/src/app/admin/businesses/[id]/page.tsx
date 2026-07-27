@@ -268,7 +268,7 @@ export default function AdminBusinessDetailPage() {
         <div className="lg:col-span-2 space-y-4">
           {/* Cover & Brand card */}
           <div className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="relative h-44 sm:h-60 w-full bg-slate-950 flex items-center justify-center overflow-hidden">
+            <div className="relative w-full aspect-[3.2/1] max-h-[320px] min-h-[180px] bg-slate-950 flex items-center justify-center overflow-hidden">
               {business.cover_image ? (
                 <img
                   src={getMediaUrl(business.cover_image)}
