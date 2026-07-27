@@ -33,3 +33,22 @@ export function assetUrl(path?: string | null): string {
   }
   return `${API_ORIGIN}${path}`;
 }
+
+export function parseGoogleMapsIframeSrc(input?: string | null): string | null {
+  if (!input) return null;
+  const str = input.trim();
+  if (!str) return null;
+
+  // If user pasted full <iframe ... src="https://www.google.com/maps/embed?..." ...></iframe>
+  const srcMatch = str.match(/src=["']([^"']+)["']/i);
+  if (srcMatch && srcMatch[1]) {
+    return srcMatch[1];
+  }
+
+  // If user pasted direct URL
+  if (/^https?:\/\//i.test(str)) {
+    return str;
+  }
+
+  return null;
+}

@@ -12,7 +12,7 @@ import {
   ArrowLeft, Receipt, X, Globe, MapPin, Phone,
   Mail, Calendar, Users, Clock, Briefcase, Link2, Trash2, Ban, UserCheck
 } from "lucide-react";
-import { assetUrl } from "@/lib/config";
+import { assetUrl, parseGoogleMapsIframeSrc } from "@/lib/config";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import PromptModal from "@/components/shared/PromptModal";
 
@@ -26,9 +26,15 @@ interface Business {
   is_verified: boolean;
   logo?: string;
   cover_image?: string;
-  location?: string;
-  phone?: string;
   tagline?: string;
+  location?: string;
+  address?: string;
+  area?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  map_iframe?: string;
+  phone?: string;
   payment_screenshot?: string;
   email?: string;
   linkedin?: string;
@@ -262,7 +268,7 @@ export default function AdminBusinessDetailPage() {
         <div className="lg:col-span-2 space-y-4">
           {/* Cover & Brand card */}
           <div className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="relative h-40 sm:h-52 w-full bg-slate-900">
+            <div className="relative h-44 sm:h-60 w-full bg-slate-950 flex items-center justify-center overflow-hidden">
               {business.cover_image ? (
                 <img
                   src={getMediaUrl(business.cover_image)}
@@ -272,7 +278,7 @@ export default function AdminBusinessDetailPage() {
               ) : (
                 <div className="w-full h-full bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/20 to-transparent pointer-events-none" />
               
               {/* Floating badges on cover image */}
               <div className="absolute top-3 right-3 flex items-center gap-2">
@@ -316,14 +322,20 @@ export default function AdminBusinessDetailPage() {
                     </div>
                   </div>
 
-                  {business.location && (
-                    <div className="flex items-center gap-2 bg-slate-50/50 p-1.5 rounded-xl border border-slate-100/30">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                  {(business.address || business.area || business.city || business.state || business.pincode || business.location) && (
+                    <div className="flex items-start gap-2 bg-slate-50/50 p-2 rounded-xl border border-slate-100/30">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0 mt-0.5">
                         <MapPin size={12} />
                       </div>
                       <div className="text-[11px]">
-                        <p className="text-[9px] text-slate-400 font-semibold uppercase leading-none">Location</p>
-                        <p className="font-bold text-slate-700 mt-0.5">{business.location}</p>
+                        <p className="text-[9px] text-slate-400 font-semibold uppercase leading-none">Address & Location</p>
+                        <p className="font-bold text-slate-800 mt-0.5 leading-snug">
+                          {[business.address, business.area, business.city, business.state].filter(Boolean).join(", ")}
+                          {business.pincode ? ` - ${business.pincode}` : ""}
+                        </p>
+                        {business.location && (
+                          <p className="text-[10px] text-slate-500 font-medium mt-0.5">{business.location}</p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -369,6 +381,21 @@ export default function AdminBusinessDetailPage() {
                   )}
                 </div>
               </div>
+              {parseGoogleMapsIframeSrc(business.map_iframe) && (
+                <div className="pt-3 border-t border-slate-100 space-y-2">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <MapPin size={12} className="text-indigo-600" /> Embedded Location Map
+                  </p>
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-52 w-full bg-slate-900">
+                    <iframe
+                      src={parseGoogleMapsIframeSrc(business.map_iframe)!}
+                      className="w-full h-full border-0"
+                      allowFullScreen
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

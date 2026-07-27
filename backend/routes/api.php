@@ -85,28 +85,27 @@ Route::middleware('auth:sanctum')->group(function () {
 // Programmatic Migration & Seeding Runners (to bypass terminal command permissions)
 Route::get('/migrate', function() {
     try {
-        $migrations = [
-            'database/migrations/2026_06_08_000001_add_prices_to_events_table.php',
-            'database/migrations/2026_06_08_000002_add_details_to_businesses_table.php',
-            'database/migrations/2026_06_08_000003_add_map_link_to_events_table.php',
-            'database/migrations/2026_06_08_000004_add_profile_details_to_users_table.php',
-            'database/migrations/2026_06_08_000005_create_settings_table.php',
-            'database/migrations/2026_06_08_000006_add_social_and_covers_to_businesses_table.php',
-            'database/migrations/2026_06_08_000007_create_reviews_table.php',
-            'database/migrations/2026_06_08_000008_add_avatar_to_users_table.php',
-            'database/migrations/2026_06_30_000000_create_event_registrations_table.php',
-            'database/migrations/2026_07_21_083000_add_business_category_id_to_businesses_table.php',
-        ];
-        
-        $output = '';
-        foreach ($migrations as $path) {
-            Artisan::call('migrate', [
-                '--path' => $path,
-                '--force' => true
-            ]);
-            $output .= Artisan::output() . "\n";
-        }
-        return response()->json(['message' => 'All migrations ran successfully!', 'output' => $output]);
+        Schema::table('businesses', function (Illuminate\Database\Schema\Blueprint $table) {
+            if (!Schema::hasColumn('businesses', 'address')) {
+                $table->text('address')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'area')) {
+                $table->string('area')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'city')) {
+                $table->string('city')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'state')) {
+                $table->string('state')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'pincode')) {
+                $table->string('pincode')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'map_iframe')) {
+                $table->text('map_iframe')->nullable();
+            }
+        });
+        return response()->json(['message' => 'Business address & map_iframe columns added successfully!']);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()]);
     }
