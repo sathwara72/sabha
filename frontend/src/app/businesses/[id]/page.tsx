@@ -12,7 +12,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useMemo } from "react";
 import { fetchBusinesses, fetchReviews, submitReview, submitBusinessInquiry } from "@/lib/api";
-import { assetUrl } from "@/lib/config";
+import { assetUrl, parseGoogleMapsIframeSrc } from "@/lib/config";
 import { useAuth } from "@/lib/auth";
 import { getCoverImage } from "@/lib/categoryCover";
 import { useLanguage } from "@/lib/language";
@@ -59,6 +59,12 @@ interface BusinessDetail {
   reviewsList: Review[];
   member?: Member | null;
   logo?: string;
+  address?: string;
+  area?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  mapIframe?: string;
   instagram?: string;
   youtube?: string;
   twitter?: string;
@@ -449,6 +455,12 @@ export default function BusinessDetailsPage() {
             name: matched.name,
             category: matched.category,
             location: matched.location || "",
+            address: matched.address || "",
+            area: matched.area || "",
+            city: matched.city || "",
+            state: matched.state || "",
+            pincode: matched.pincode || "",
+            mapIframe: matched.map_iframe || "",
             rating: matched.rating || null,
             reviews: matched.reviews_count || 0,
             verified: matched.is_verified,
@@ -591,14 +603,16 @@ export default function BusinessDetailsPage() {
   return (
     <div className="min-h-screen bg-background font-outfit">
       {/* Cover Banner with Profile Bar */}
-      <section className="relative h-80 sm:h-96 lg:h-[28rem] w-full overflow-hidden bg-slate-900">
-        <img
-          src={business.bannerImage}
-          alt={`${business.name} workspace`}
-          className="h-full w-full object-cover"
-        />
+      <section className="relative h-72 sm:h-88 lg:h-[26rem] w-full overflow-hidden bg-slate-950 flex items-center justify-center">
+        {business.bannerImage && (
+          <img
+            src={business.bannerImage}
+            alt={`${business.name} workspace`}
+            className="h-full w-full object-cover object-center"
+          />
+        )}
         {/* Shadow gradient at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
         {/* Back button */}
         <div className="absolute top-6 left-6 z-10">
@@ -1006,18 +1020,42 @@ export default function BusinessDetailsPage() {
                 )}
 
                 {/* Coordinates Map Preview */}
-                <div className="mt-6 border-t border-border pt-5">
-                  <p className="text-[10px] font-semibold text-muted mb-2.5">{t("businessDetail.geographic_location")}</p>
-                  <div className="h-28 w-full rounded-xl bg-slate-100 border border-border overflow-hidden relative flex items-center justify-center select-none">
-                    {/* Subtle Grid dots */}
-                    <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-                    <div className="flex flex-col items-center z-10 text-center p-4">
-                      <MapPin className="h-5 w-5 text-primary animate-bounce mb-1" />
-                      <span className="text-[10px] font-bold text-foreground truncate max-w-full">{business.location}, India</span>
-                      <span className="text-[8px] text-muted-foreground mt-0.5">{t("businessDetail.vetted_office")}</span>
-                    </div>
+                {(business.address || business.area || business.city || business.state || parseGoogleMapsIframeSrc(business.mapIframe) || business.location) && (
+                  <div className="mt-6 border-t border-border pt-5 space-y-2.5">
+                    <p className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5 text-primary" /> {t("businessDetail.geographic_location")}
+                    </p>
+                    
+                    {(business.address || business.area || business.city || business.state || business.pincode) && (
+                      <p className="text-xs font-semibold text-foreground leading-snug">
+                        {[business.address, business.area, business.city, business.state].filter(Boolean).join(", ")}
+                        {business.pincode ? ` - ${business.pincode}` : ""}
+                      </p>
+                    )}
+
+                    {parseGoogleMapsIframeSrc(business.mapIframe) ? (
+                      <div className="h-44 w-full rounded-xl border border-border overflow-hidden relative shadow-sm bg-slate-900">
+                        <iframe
+                          src={parseGoogleMapsIframeSrc(business.mapIframe)!}
+                          className="w-full h-full border-0"
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-28 w-full rounded-xl bg-slate-100 border border-border overflow-hidden relative flex items-center justify-center select-none">
+                        {/* Subtle Grid dots */}
+                        <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+                        <div className="flex flex-col items-center z-10 text-center p-4">
+                          <MapPin className="h-5 w-5 text-primary animate-bounce mb-1" />
+                          <span className="text-[10px] font-bold text-foreground truncate max-w-full">{business.location || "Ahmedabad, India"}</span>
+                          <span className="text-[8px] text-muted-foreground mt-0.5">{t("businessDetail.vetted_office")}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
             )}
 

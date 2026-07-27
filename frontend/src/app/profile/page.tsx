@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import Pagination from "@/components/shared/Pagination";
+import ConfirmModal from "@/components/shared/ConfirmModal";
+import ImageCropperModal from "@/components/shared/ImageCropperModal";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -12,7 +15,7 @@ import {
 } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from "@/components/SocialIcons";
 import { getUserBusiness, submitBusiness, updateProfile, getUserRegistrations, fetchCategories } from "@/lib/api";
-import { assetUrl } from "@/lib/config";
+import { assetUrl, parseGoogleMapsIframeSrc } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 
 export default function ProfilePage() {
@@ -56,6 +59,12 @@ export default function ProfilePage() {
   const [bizDescription, setBizDescription] = useState("");
   const [bizTagline, setBizTagline] = useState("");
   const [bizLocation, setBizLocation] = useState("");
+  const [bizAddress, setBizAddress] = useState("");
+  const [bizArea, setBizArea] = useState("");
+  const [bizCity, setBizCity] = useState("");
+  const [bizState, setBizState] = useState("");
+  const [bizPincode, setBizPincode] = useState("");
+  const [bizMapIframe, setBizMapIframe] = useState("");
   const [bizHours, setBizHours] = useState("");
   const [bizFounded, setBizFounded] = useState("");
   const [bizTeamSize, setBizTeamSize] = useState("");
@@ -74,6 +83,11 @@ export default function ProfilePage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [paymentPreview, setPaymentPreview] = useState<string>("");
+  
+  // Image cropper state
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [rawCropImage, setRawCropImage] = useState<string>("");
+  const [cropTarget, setCropTarget] = useState<"cover" | "logo">("cover");
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [coverPreview, setCoverPreview] = useState<string>("");
 
@@ -143,6 +157,12 @@ export default function ProfilePage() {
         setBizDescription(biz.description || "");
         setBizTagline(biz.tagline || "");
         setBizLocation(biz.location || "");
+        setBizAddress(biz.address || "");
+        setBizArea(biz.area || "");
+        setBizCity(biz.city || "");
+        setBizState(biz.state || "");
+        setBizPincode(biz.pincode || "");
+        setBizMapIframe(biz.map_iframe || "");
         setBizHours(biz.hours || "");
         setBizFounded(biz.founded || "");
         setBizTeamSize(biz.team_size || "");
@@ -258,6 +278,12 @@ export default function ProfilePage() {
       formData.append("description", bizDescription);
       formData.append("tagline", bizTagline);
       formData.append("location", bizLocation);
+      formData.append("address", bizAddress);
+      formData.append("area", bizArea);
+      formData.append("city", bizCity);
+      formData.append("state", bizState);
+      formData.append("pincode", bizPincode);
+      formData.append("map_iframe", bizMapIframe);
       formData.append("hours", bizHours);
       formData.append("founded", bizFounded);
       formData.append("team_size", bizTeamSize);
@@ -573,26 +599,26 @@ export default function ProfilePage() {
                     <div className="flex flex-col items-center flex-1">
                       <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors ${
                         business?.status === "approved"
-                          ? "bg-primary border-primary text-white"
+                          ? "bg-emerald-500 border-emerald-500 text-white"
                           : business
                           ? "bg-amber-400 border-amber-400 text-white"
                           : "bg-white border-border text-muted-foreground"
                       }`}>
-                        {business?.status === "approved" ? "2" : <Clock size={14} />}
+                        {business?.status === "approved" ? <CheckCircle2 size={16} /> : <Clock size={14} />}
                       </div>
                       <p className={`text-[10px] font-bold text-center mt-1 leading-tight ${business?.status === "approved" ? "text-foreground" : "text-muted"}`}>{t("profile.step_approval")}</p>
                     </div>
-                    <div className={`flex-1 h-0.5 -mt-4 mx-1 rounded ${business?.status === "approved" ? "bg-primary/40" : "bg-border"}`} />
+                    <div className={`flex-1 h-0.5 -mt-4 mx-1 rounded ${business?.status === "approved" ? "bg-emerald-400" : "bg-border"}`} />
                     {/* Step 3 */}
                     <div className="flex flex-col items-center flex-1">
                       <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors ${
-                        business?.status === "approved" && isEditingBusiness
-                          ? "bg-primary border-primary text-white"
-                          : business?.status === "approved"
+                        business?.status === "approved" && (business?.description || business?.location || !isEditingBusiness)
                           ? "bg-emerald-500 border-emerald-500 text-white"
+                          : business?.status === "approved"
+                          ? "bg-primary border-primary text-white"
                           : "bg-white border-border text-muted-foreground"
                       }`}>
-                        {business?.status === "approved" && !isEditingBusiness ? <CheckCircle2 size={16} /> : "3"}
+                        {business?.status === "approved" && (business?.description || business?.location || !isEditingBusiness) ? <CheckCircle2 size={16} /> : "3"}
                       </div>
                       <p className={`text-[10px] font-bold text-center mt-1 leading-tight ${business?.status === "approved" ? "text-foreground" : "text-muted"}`}>{t("profile.step_details")}</p>
                     </div>
@@ -778,14 +804,16 @@ export default function ProfilePage() {
                      ══════════════════════════════════════════════ */}
                   {business && business.status === "approved" && (
                     <div className="space-y-6">
-                      {/* Approved banner */}
-                      <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 flex items-start gap-3">
-                        <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-bold text-emerald-800">{t("profile.approved_title")}</p>
-                          <p className="font-medium text-xs mt-1 text-emerald-700">{t("profile.approved_desc")}</p>
+                      {/* Approved banner — only show if business details haven't been filled out yet */}
+                      {(!business?.description && !business?.location) && (
+                        <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 flex items-start gap-3">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-bold text-emerald-800">{t("profile.approved_title")}</p>
+                            <p className="font-medium text-xs mt-1 text-emerald-700">{t("profile.approved_desc")}</p>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {!isEditingBusiness ? (
                         /* ── View mode ── */
@@ -870,6 +898,96 @@ export default function ProfilePage() {
                             <div>
                               <label className={labelClass}>{t("profile.biz_location")}</label>
                               <input type="text" value={bizLocation} onChange={(e) => setBizLocation(e.target.value)} placeholder="E.g. Mumbai, Maharashtra" className={inputClass} />
+                            </div>
+                          </div>
+
+                          {/* Address & Google Maps Location */}
+                          <div className="space-y-4 border-t border-border pt-4">
+                            <h4 className="text-xs font-extrabold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5 text-primary" /> Address & Location Details
+                            </h4>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className={labelClass}>Street / Building Address</label>
+                                <input
+                                  type="text"
+                                  value={bizAddress}
+                                  onChange={(e) => setBizAddress(e.target.value)}
+                                  placeholder="e.g. 402, Wall Street Business Park"
+                                  className={inputClass}
+                                />
+                              </div>
+                              <div>
+                                <label className={labelClass}>Area / Landmark</label>
+                                <input
+                                  type="text"
+                                  value={bizArea}
+                                  onChange={(e) => setBizArea(e.target.value)}
+                                  placeholder="e.g. Near University, Navrangpura"
+                                  className={inputClass}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div>
+                                <label className={labelClass}>City</label>
+                                <input
+                                  type="text"
+                                  value={bizCity}
+                                  onChange={(e) => setBizCity(e.target.value)}
+                                  placeholder="e.g. Ahmedabad"
+                                  className={inputClass}
+                                />
+                              </div>
+                              <div>
+                                <label className={labelClass}>State</label>
+                                <input
+                                  type="text"
+                                  value={bizState}
+                                  onChange={(e) => setBizState(e.target.value)}
+                                  placeholder="e.g. Gujarat"
+                                  className={inputClass}
+                                />
+                              </div>
+                              <div>
+                                <label className={labelClass}>Pincode</label>
+                                <input
+                                  type="text"
+                                  value={bizPincode}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                                    setBizPincode(val);
+                                  }}
+                                  placeholder="e.g. 380009"
+                                  className={inputClass}
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>Google Maps Embed Iframe Code or Map URL</label>
+                              <textarea
+                                rows={3}
+                                value={bizMapIframe}
+                                onChange={(e) => setBizMapIframe(e.target.value)}
+                                placeholder='Paste Google Maps Embed HTML iframe code (e.g. <iframe src="https://www.google.com/maps/embed?pb=..." ...></iframe>) or map URL'
+                                className={`${inputClass} resize-none font-mono text-[11px]`}
+                              />
+                              <p className="text-[10px] text-muted-foreground mt-1 font-medium">
+                                💡 Tip: Open Google Maps &gt; Search your location &gt; Share &gt; Embed a map &gt; Copy HTML and paste it here!
+                              </p>
+                              {parseGoogleMapsIframeSrc(bizMapIframe) && (
+                                <div className="mt-2.5 rounded-xl border border-border overflow-hidden bg-slate-900 h-44 w-full shadow-sm">
+                                  <iframe
+                                    src={parseGoogleMapsIframeSrc(bizMapIframe)!}
+                                    className="w-full h-full border-0"
+                                    allowFullScreen
+                                    loading="lazy"
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -1066,9 +1184,13 @@ export default function ProfilePage() {
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) => {
-                                      const file = e.target.files?.[0] || null;
-                                      setCoverFile(file);
-                                      if (file) setCoverPreview(URL.createObjectURL(file));
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        setCropTarget("cover");
+                                        setRawCropImage(URL.createObjectURL(file));
+                                        setCropperOpen(true);
+                                        e.target.value = "";
+                                      }
                                     }}
                                     className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                                   />
@@ -1080,7 +1202,7 @@ export default function ProfilePage() {
                                       <span className="text-[11px] font-semibold text-foreground text-center truncate max-w-[200px]">
                                         {coverFile ? coverFile.name : (business?.cover_image?.split("/").pop() || t("profile.choose_cover"))}
                                       </span>
-                                      <span className="text-[9px] font-bold text-primary">Click to change</span>
+                                      <span className="text-[9px] font-bold text-primary">Click to crop & change</span>
                                     </div>
                                   ) : (
                                     <>
@@ -1205,6 +1327,19 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Interactive Image Cropper Modal (For Banner Cover Image Only) */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={rawCropImage}
+        aspectRatio={3.2 / 1}
+        title="Crop Cover Banner Portion"
+        onClose={() => setCropperOpen(false)}
+        onCropComplete={(croppedFile, previewUrl) => {
+          setCoverFile(croppedFile);
+          setCoverPreview(previewUrl);
+        }}
+      />
     </div>
   );
 }
