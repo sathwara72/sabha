@@ -795,10 +795,19 @@ export async function getUserBusiness() {
   return await response.json();
 }
 
-export async function fetchAllBusinessesAdmin() {
+export async function fetchAllBusinessesAdmin(params?: { page?: number; limit?: number; search?: string; status?: string }) {
   const token = localStorage.getItem("sabha_token");
   
-  const response = await fetch(`${API_BASE_URL}/admin/businesses`, {
+  const query = new URLSearchParams();
+  if (params?.page) query.append("page", params.page.toString());
+  if (params?.limit) query.append("limit", params.limit.toString());
+  if (params?.search) query.append("search", params.search);
+  if (params?.status && params.status !== "all") query.append("status", params.status);
+
+  const queryString = query.toString();
+  const url = `${API_BASE_URL}/admin/businesses${queryString ? `?${queryString}` : ""}`;
+
+  const response = await fetch(url, {
     method: "GET",
     headers: {
       "Accept": "application/json",
@@ -855,6 +864,47 @@ export async function rejectBusiness(id: number, rejectionReason: string) {
   return { success: true };
 }
 
+export async function deleteBusiness(id: number) {
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/admin/businesses/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to delete business");
+  }
+
+  return { success: true };
+}
+
+export async function toggleUserBlock(id: number) {
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/admin/users/${id}/toggle-block`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to update block status");
+  }
+
+  return resData;
+}
+
+
 export async function createEventAdmin(eventData: any) {
   const token = localStorage.getItem("sabha_token");
 
@@ -908,6 +958,27 @@ export async function updateEventAdmin(id: number | string, eventData: any) {
 
   if (!response.ok) {
     throw new Error(resData.message || "Failed to update event");
+  }
+
+  return { success: true };
+}
+
+export async function deleteEvent(id: number) {
+  const token = localStorage.getItem("sabha_token");
+  if (!token) throw new Error("Authentication required");
+
+  const response = await fetch(`${API_BASE_URL}/admin/events/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to delete event");
   }
 
   return { success: true };
@@ -1311,5 +1382,21 @@ export async function deleteCategory(id: number): Promise<any> {
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Failed to delete category");
+  return data;
+}
+
+export async function updateCategory(id: number, name: string): Promise<any> {
+  const token = localStorage.getItem("sabha_token");
+  const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+    method: "PUT",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` })
+    },
+    body: JSON.stringify({ name })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to update category");
   return data;
 }

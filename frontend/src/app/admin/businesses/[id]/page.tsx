@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
-  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness
+  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness, deleteBusiness, toggleUserBlock
 } from "@/lib/api";
 import { API_ORIGIN } from "@/lib/config";
 import {
   ShieldCheck, XCircle, CheckCircle2,
   ArrowLeft, Receipt, X, Globe, MapPin, Phone,
-  Mail, Calendar, Users, Clock, Briefcase, Link2
+  Mail, Calendar, Users, Clock, Briefcase, Link2, Trash2, Ban, UserCheck
 } from "lucide-react";
 import { assetUrl } from "@/lib/config";
+import ConfirmModal from "@/components/shared/ConfirmModal";
+import PromptModal from "@/components/shared/PromptModal";
 
 interface Business {
   id: number;
@@ -90,6 +92,10 @@ export default function AdminBusinessDetailPage() {
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [paymentModalUrl, setPaymentModalUrl] = useState<string | null>(null);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [blockOwnerModalOpen, setBlockOwnerModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -120,19 +126,49 @@ export default function AdminBusinessDetailPage() {
     }
   }
 
-  async function handleReject() {
+  async function handleConfirmReject(reason: string) {
     if (!business) return;
-    const reason = prompt("Please enter the reason for rejection:");
-    if (reason === null) return;
-    if (!reason.trim()) {
-      alert("Rejection reason is required.");
-      return;
-    }
     try {
-      await rejectBusiness(business.id, reason.trim());
+      setActionLoading(true);
+      await rejectBusiness(business.id, reason);
+      setRejectModalOpen(false);
       loadBusiness();
     } catch {
       alert("Rejection failed");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleConfirmDelete() {
+    if (!business) return;
+    try {
+      setActionLoading(true);
+      await deleteBusiness(business.id);
+      setDeleteModalOpen(false);
+      router.push("/admin/businesses");
+    } catch {
+      alert("Delete failed");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleConfirmToggleBlockOwner() {
+    if (!business?.user) return;
+    if (business.user.role === "admin") {
+      alert("Cannot block admin users.");
+      return;
+    }
+    try {
+      setActionLoading(true);
+      await toggleUserBlock(business.user.id);
+      setBlockOwnerModalOpen(false);
+      loadBusiness();
+    } catch (err: any) {
+      alert(err.message || "Failed to update block status");
+    } finally {
+      setActionLoading(false);
     }
   }
 
@@ -195,7 +231,7 @@ export default function AdminBusinessDetailPage() {
                 <CheckCircle2 size={13} /> Approve Submission
               </button>
               <button
-                onClick={handleReject}
+                onClick={() => setRejectModalOpen(true)}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-600 transition-all hover:bg-rose-100 active:scale-[0.98] cursor-pointer"
               >
                 <XCircle size={13} /> Reject Submission
@@ -210,6 +246,13 @@ export default function AdminBusinessDetailPage() {
               <Receipt size={13} /> View Payment Receipt
             </button>
           )}
+          <button
+            onClick={() => setDeleteModalOpen(true)}
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-600 transition-all hover:bg-rose-100 active:scale-[0.98] cursor-pointer"
+            title="Delete this business"
+          >
+            <Trash2 size={13} /> Delete Business
+          </button>
         </div>
       </div>
 
@@ -239,12 +282,12 @@ export default function AdminBusinessDetailPage() {
               </div>
 
               {/* Float Logo */}
-              <div className="absolute -bottom-8 left-6 h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border-4 border-white shadow-xl bg-white overflow-hidden flex items-center justify-center">
+              <div className="absolute -bottom-8 left-6 h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border-4 border-white shadow-xl bg-white overflow-hidden flex items-center justify-center p-1.5">
                 {business.logo ? (
                   <img
                     src={getMediaUrl(business.logo)}
                     alt={business.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 ) : (
                   <span className="text-3xl font-black text-indigo-600">{business.name?.[0] ?? "?"}</span>
@@ -415,16 +458,47 @@ export default function AdminBusinessDetailPage() {
             
             {business.user ? (
               <div className="space-y-3 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-base font-bold text-white border border-white/10 shadow-inner">
-                    {business.user.name?.[0] ?? "?"}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-base font-bold text-white border border-white/10 shadow-inner">
+                      {business.user.name?.[0] ?? "?"}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-black text-white leading-tight">{business.user.name}</h4>
+                        {business.user.is_blocked && (
+                          <span className="rounded-md bg-rose-500/30 border border-rose-400/30 px-2 py-0.5 text-[9px] font-bold text-rose-300 uppercase tracking-wider">
+                            Blocked
+                          </span>
+                        )}
+                      </div>
+                      <span className="inline-block rounded-md bg-indigo-500/20 border border-indigo-400/20 px-2 py-0.5 text-[9px] font-bold text-indigo-300 mt-1 uppercase tracking-wider">
+                        {business.user.role || "Member"}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-black text-white leading-tight">{business.user.name}</h4>
-                    <span className="inline-block rounded-md bg-indigo-500/20 border border-indigo-400/20 px-2 py-0.5 text-[9px] font-bold text-indigo-300 mt-1 uppercase tracking-wider">
-                      {business.user.role || "Member"}
-                    </span>
-                  </div>
+
+                  {business.user.role !== "admin" && (
+                    <button
+                      onClick={() => setBlockOwnerModalOpen(true)}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer border ${
+                        business.user.is_blocked
+                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30"
+                          : "bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/30"
+                      }`}
+                      title={business.user.is_blocked ? "Unblock Owner User" : "Block Owner User"}
+                    >
+                      {business.user.is_blocked ? (
+                        <>
+                          <UserCheck size={12} /> Unblock Owner
+                        </>
+                      ) : (
+                        <>
+                          <Ban size={12} /> Block Owner
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-2 text-xs pt-3 border-t border-white/10 text-indigo-200/80">
@@ -511,6 +585,44 @@ export default function AdminBusinessDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Rejection Custom Prompt Modal */}
+      <PromptModal
+        isOpen={rejectModalOpen}
+        title="Reject Business Submission"
+        message={`Please enter the reason for rejecting "${business.name}":`}
+        placeholder="Enter details reason for rejection..."
+        confirmLabel="Reject Business"
+        isLoading={actionLoading}
+        onConfirm={handleConfirmReject}
+        onCancel={() => setRejectModalOpen(false)}
+      />
+
+      {/* Delete Business Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        title="Delete Business Profile"
+        message={`Are you sure you want to delete business "${business.name}"? This action cannot be undone.`}
+        confirmLabel="Delete Business"
+        variant="danger"
+        isLoading={actionLoading}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteModalOpen(false)}
+      />
+
+      {/* Block/Unblock Owner Custom Confirm Modal */}
+      {business.user && (
+        <ConfirmModal
+          isOpen={blockOwnerModalOpen}
+          title={business.user.is_blocked ? "Unblock Owner User" : "Block Owner User"}
+          message={`Are you sure you want to ${business.user.is_blocked ? "unblock" : "block"} owner "${business.user.name}"?`}
+          confirmLabel={business.user.is_blocked ? "Unblock Owner" : "Block Owner"}
+          variant={business.user.is_blocked ? "success" : "danger"}
+          isLoading={actionLoading}
+          onConfirm={handleConfirmToggleBlockOwner}
+          onCancel={() => setBlockOwnerModalOpen(false)}
+        />
+      )}
 
       {/* Payment Screenshot Lightbox Modal */}
       {typeof window !== "undefined" && paymentModalUrl && createPortal(

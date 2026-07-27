@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { createEventAdmin, updateEventAdmin, fetchEvents, getAllEventRegistrations } from "@/lib/api";
+import { createEventAdmin, updateEventAdmin, deleteEvent, fetchEvents, getAllEventRegistrations } from "@/lib/api";
 import { assetUrl } from "@/lib/config";
 import {
-  Calendar, Info, PlusCircle, CheckCircle2, Eye, Pencil, X, Search, Mail, ChevronLeft, ChevronRight, Upload
+  Calendar, Info, PlusCircle, CheckCircle2, Eye, Pencil, Trash2, X, Search, Mail, ChevronLeft, ChevronRight, Upload
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ConfirmModal from "@/components/shared/ConfirmModal";
+import Pagination from "@/components/shared/Pagination";
 
 export default function AdminEventsPage() {
   const [formData, setFormData] = useState({
@@ -26,6 +28,24 @@ export default function AdminEventsPage() {
 
   const [events, setEvents] = useState<any[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventListPage, setEventListPage] = useState(1);
+  const eventsPerPage = 6;
+  const [deletingEvent, setDeletingEvent] = useState<{ id: number; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleConfirmDeleteEvent() {
+    if (!deletingEvent) return;
+    setIsDeleting(true);
+    try {
+      await deleteEvent(deletingEvent.id);
+      setDeletingEvent(null);
+      loadEvents();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete event");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -224,7 +244,9 @@ export default function AdminEventsPage() {
                   </td>
                 </tr>
               ) : (
-                events.map((evt) => (
+                events
+                  .slice((eventListPage - 1) * eventsPerPage, eventListPage * eventsPerPage)
+                  .map((evt) => (
                   <tr key={evt.id} className="transition-colors hover:bg-surface/50">
                     <td className="px-4 py-2.5">
                       <div>
@@ -247,22 +269,30 @@ export default function AdminEventsPage() {
                       {evt.price_verified || "N/A"}
                     </td>
                     <td className="px-4 py-2.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
                         <Link
                           href={`/admin/events/${evt.id}`}
                           id={`view-members-${evt.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg bg-primary-soft hover:bg-primary hover:text-white px-2.5 py-1.5 text-[11px] font-bold text-primary transition-all cursor-pointer"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary-soft text-primary hover:bg-primary hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+                          title="View Event Details & Members"
                         >
-                          <Eye size={12} />
-                          View
+                          <Eye size={14} />
                         </Link>
                         <button
                           onClick={() => handleEditEvent(evt)}
                           id={`edit-event-${evt.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg bg-amber-50 hover:bg-amber-500 hover:text-white px-2.5 py-1.5 text-[11px] font-bold text-amber-700 transition-all cursor-pointer border border-amber-200/50"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 border border-amber-200/60 text-amber-700 hover:bg-amber-500 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+                          title="Edit Event"
                         >
-                          <Pencil size={12} />
-                          Edit
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => setDeletingEvent({ id: evt.id, title: evt.title })}
+                          id={`delete-event-${evt.id}`}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-rose-50 border border-rose-200/60 text-rose-600 hover:bg-rose-600 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+                          title="Delete Event"
+                        >
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
@@ -272,6 +302,16 @@ export default function AdminEventsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={eventListPage}
+          totalPages={Math.ceil(events.length / eventsPerPage)}
+          totalItems={events.length}
+          itemsPerPage={eventsPerPage}
+          onPageChange={(page) => setEventListPage(page)}
+          itemLabel="events"
+        />
       </div>
 
       {/* <div className="glass-card p-6 flex items-start gap-4">
@@ -830,6 +870,18 @@ export default function AdminEventsPage() {
           </div>
         )}
       </AnimatePresence>
+      {/* Confirm Delete Event Modal */}
+      <ConfirmModal
+        isOpen={deletingEvent !== null}
+        title="Delete Event Profile"
+        message={`Are you sure you want to delete event "${deletingEvent?.title}"? All associated data will be permanently removed.`}
+        confirmLabel="Delete Event"
+        cancelLabel="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDeleteEvent}
+        onCancel={() => setDeletingEvent(null)}
+      />
     </div>
   );
 }

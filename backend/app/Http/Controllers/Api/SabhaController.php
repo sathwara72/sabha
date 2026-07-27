@@ -505,6 +505,10 @@ class SabhaController extends Controller
             ]
         );
 
+        if ($user->is_blocked) {
+            return response()->json(['message' => 'you had blocked by admin please contact admin'], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

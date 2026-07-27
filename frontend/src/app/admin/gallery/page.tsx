@@ -11,10 +11,13 @@ import {
   Trash2
 } from "lucide-react";
 import ConfirmModal from "@/components/shared/ConfirmModal";
+import Pagination from "@/components/shared/Pagination";
 
 export default function AdminGalleryPage() {
   const [gallery, setGallery] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   // Upload modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -180,65 +183,72 @@ export default function AdminGalleryPage() {
             No gallery media uploaded yet. Click the "Add Gallery" button above to upload your first file.
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {gallery.map((item, index) => {
-              const isVideo = isVideoFile(item.image_path);
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => openLightbox(item, index)}
-                  className="glass-card p-0 overflow-hidden flex flex-col group relative cursor-pointer"
-                >
-                  <div className="relative h-40 w-full bg-slate-900 overflow-hidden">
-                    {isVideo ? (
-                      <video
-                        src={getMediaUrl(item.image_path)}
-                        className="h-full w-full object-cover"
-                        muted preload="metadata"
-                      />
-                    ) : (
-                      <img
-                        src={getMediaUrl(item.image_path)}
-                        alt={item.caption || "Gallery image"}
-                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    )}
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {gallery.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item, index) => {
+                const globalIndex = (currentPage - 1) * itemsPerPage + index;
+                const isVideo = isVideoFile(item.image_path);
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => openLightbox(item, globalIndex)}
+                    className="glass-card p-0 overflow-hidden group relative cursor-pointer rounded-2xl border border-border hover:shadow-md transition-all"
+                  >
+                    <div className="relative h-48 w-full bg-slate-900 overflow-hidden">
+                      {isVideo ? (
+                        <video
+                          src={getMediaUrl(item.image_path)}
+                          className="h-full w-full object-cover"
+                          muted preload="metadata"
+                        />
+                      ) : (
+                        <img
+                          src={getMediaUrl(item.image_path)}
+                          alt={item.caption || "Gallery image"}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      )}
 
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                      <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" size={28} />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                        <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" size={28} />
+                      </div>
+
+                      {/* Badge */}
+                      <div className="absolute top-2 left-2 z-10">
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                          {isVideo ? <><Film size={10} className="text-accent" /> Video</> : <><Image size={10} className="text-primary-soft" /> Image</>}
+                        </span>
+                      </div>
+
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteId(item.id);
+                        }}
+                        className="absolute top-2 right-2 z-20 rounded-xl bg-red-50/90 border border-red-100 p-2 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200"
+                        title="Delete media"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
-
-                    {/* Badge */}
-                    <div className="absolute top-2 left-2 z-10">
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                        {isVideo ? <><Film size={10} className="text-accent" /> Video</> : <><Image size={10} className="text-primary-soft" /> Image</>}
-                      </span>
-                    </div>
-
-                    {/* Delete button */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteId(item.id);
-                      }}
-                      className="absolute top-2 right-2 z-20 rounded-xl bg-red-50/90 border border-red-100 p-2 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200"
-                      title="Delete media"
-                    >
-                      <Trash2 size={13} />
-                    </button>
                   </div>
+                );
+              })}
+            </div>
 
-                  <div className="p-3 flex-1 flex flex-col gap-1">
-                    <p className="text-xs text-foreground font-medium line-clamp-2">
-                      {item.caption || "No caption added"}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(gallery.length / itemsPerPage)}
+              totalItems={gallery.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              itemLabel="items"
+            />
+          </>
         )}
       </div>
 
