@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchGallery, uploadGalleryImage, deleteGalleryImage } from "@/lib/api";
-import { API_ORIGIN, assetUrl } from "@/lib/config";
+import { API_ORIGIN, assetUrl, hasMediaFile } from "@/lib/config";
 import {
   Upload, Image, Film, Plus,
   CheckCircle2, AlertCircle,
@@ -195,18 +195,20 @@ export default function AdminGalleryPage() {
                     className="glass-card p-0 overflow-hidden group relative cursor-pointer rounded-2xl border border-border hover:shadow-md transition-all"
                   >
                     <div className="relative h-48 w-full bg-slate-900 overflow-hidden">
-                      {isVideo ? (
-                        <video
-                          src={getMediaUrl(item.image_path)}
-                          className="h-full w-full object-cover"
-                          muted preload="metadata"
-                        />
-                      ) : (
-                        <img
-                          src={getMediaUrl(item.image_path)}
-                          alt={item.caption || "Gallery image"}
-                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                      {hasMediaFile(item.image_path) && (
+                        isVideo ? (
+                          <video
+                            src={getMediaUrl(item.image_path)}
+                            className="h-full w-full object-cover"
+                            muted preload="metadata"
+                          />
+                        ) : (
+                          <img
+                            src={getMediaUrl(item.image_path)}
+                            alt={item.caption || "Gallery image"}
+                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        )
                       )}
 
                       {/* Hover overlay */}
@@ -216,8 +218,13 @@ export default function AdminGalleryPage() {
 
                       {/* Badge */}
                       <div className="absolute top-2 left-2 z-10">
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                          {isVideo ? <><Film size={10} className="text-accent" /> Video</> : <><Image size={10} className="text-primary-soft" /> Image</>}
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border ${
+                          isVideo
+                            ? "bg-white/92 text-amber-700 border-amber-200/80"
+                            : "bg-white/92 text-primary border-primary/20"
+                        }`}>
+                          {isVideo ? <Film size={9.5} className="text-amber-500" /> : <Image size={9.5} className="text-primary" />}
+                          {isVideo ? "Video" : "Image"}
                         </span>
                       </div>
 
@@ -228,7 +235,7 @@ export default function AdminGalleryPage() {
                           e.stopPropagation();
                           setDeleteId(item.id);
                         }}
-                        className="absolute top-2 right-2 z-20 rounded-xl bg-red-50/90 border border-red-100 p-2 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200"
+                        className="absolute top-2.5 right-2.5 z-20 rounded-xl bg-red-50/90 border border-red-100 p-2 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200"
                         title="Delete media"
                       >
                         <Trash2 size={13} />

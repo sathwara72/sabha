@@ -15,7 +15,7 @@ import {
   FileText, X, ExternalLink, RefreshCw, QrCode
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { assetUrl } from "@/lib/config";
+import { assetUrl, hasMediaFile } from "@/lib/config";
 
 interface EventRegistration {
   id: number;
@@ -296,7 +296,7 @@ export default function AdminBookingsPage() {
                         </div>
 
                         {/* Payment Screenshot Proof */}
-                        {reg.payment_screenshot ? (
+                        {hasMediaFile(reg.payment_screenshot) ? (
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => setPreviewImage(assetUrl(reg.payment_screenshot!))}

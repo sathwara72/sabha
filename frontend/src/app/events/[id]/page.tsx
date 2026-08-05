@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
 import { fetchEvents, getUserBusiness, reserveEventSeat } from "@/lib/api";
-import { API_ORIGIN } from "@/lib/config";
+import { API_ORIGIN, hasMediaFile } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 import Link from "next/link";
 
@@ -55,6 +55,7 @@ export default function EventDetailsPage() {
   const [event, setEvent] = useState<EventItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   // Reservation states
   const [isReserving, setIsReserving] = useState(false);
@@ -123,6 +124,7 @@ export default function EventDetailsPage() {
     async function loadEvent() {
       try {
         setLoading(true);
+        setImgError(false);
         const list = await fetchEvents();
         const matched = list.find((e: any) => e.id.toString() === id) as any;
         if (matched) {
@@ -171,7 +173,7 @@ export default function EventDetailsPage() {
             members: membersAttending,
             status,
             gallery_images: matched.gallery_images || [],
-            image: matched.image ? getMediaUrl(matched.image) : "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop",
+            image: hasMediaFile(matched.image) ? getMediaUrl(matched.image) : "",
           });
         } else {
           setEvent(null);
@@ -183,6 +185,7 @@ export default function EventDetailsPage() {
       }
     }
     if (id) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       loadEvent();
     }
   }, [id]);
@@ -218,11 +221,12 @@ export default function EventDetailsPage() {
       {/* Hero Section with Background Image */}
       <section className="relative overflow-hidden bg-slate-950 py-6 lg:py-6 text-white min-h-[260px] flex items-center border-b border-border">
         {/* Background Image with overlay */}
-        {event.image && (
+        {!imgError && hasMediaFile(event.image) && (
           <div className="absolute inset-0 z-0">
             <img
               src={event.image}
               alt=""
+              onError={() => setImgError(true)}
               className="h-full w-full object-cover opacity-35"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-900/30" />

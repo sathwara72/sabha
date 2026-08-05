@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchHeroImages, uploadHeroImage, deleteHeroImage } from "@/lib/api";
-import { API_ORIGIN, assetUrl } from "@/lib/config";
+import { API_ORIGIN, assetUrl, hasMediaFile } from "@/lib/config";
 import {
   Upload, Image, Plus, Trash2,
   CheckCircle2, AlertCircle, X, ZoomIn
@@ -166,11 +166,13 @@ export default function AdminHeroSliderPage() {
                 className="glass-card p-0 overflow-hidden flex flex-col group relative"
               >
                 <div className="relative h-40 w-full bg-slate-900 overflow-hidden">
-                  <img
-                    src={getMediaUrl(item.image_path)}
-                    alt={item.title || "Hero banner"}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  {hasMediaFile(item.image_path) && (
+                    <img
+                      src={getMediaUrl(item.image_path)}
+                      alt={item.title || "Hero banner"}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  )}
 
                   {/* Hover Actions */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">

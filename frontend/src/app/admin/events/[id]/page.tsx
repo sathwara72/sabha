@@ -22,6 +22,7 @@ import {
   ZoomIn, Trash2, X, ChevronRight, Check, FileText
 } from "lucide-react";
 import ConfirmModal from "@/components/shared/ConfirmModal";
+import Pagination from "@/components/shared/Pagination";
 
 export default function AdminEventDetailPage() {
   const params = useParams();
@@ -52,6 +53,8 @@ export default function AdminEventDetailPage() {
   // Gallery State
   const [gallery, setGallery] = useState<any[]>([]);
   const [galleryLoading, setGalleryLoading] = useState(false);
+  const [galleryPage, setGalleryPage] = useState(1);
+  const galleryItemsPerPage = 8;
 
   // Gallery Upload Modal State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -598,64 +601,85 @@ export default function AdminEventDetailPage() {
               No media uploaded for this event yet. Click "Add Event Media" button to upload photos, videos, or ZIP archives!
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {gallery.map((item, index) => {
-                const isVideo = isVideoFile(item.image_path);
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => { setSelectedMedia(item); setLightboxIndex(index); }}
-                    className="glass-card p-0 overflow-hidden flex flex-col group relative cursor-pointer border border-border hover:border-primary/50 transition-all rounded-xl shadow-sm"
-                  >
-                    <div className="relative h-40 w-full bg-slate-900 overflow-hidden">
-                      {isVideo ? (
-                        <video
-                          src={getMediaUrl(item.image_path)}
-                          className="h-full w-full object-cover"
-                          muted preload="metadata"
-                        />
-                      ) : (
-                        <img
-                          src={getMediaUrl(item.image_path)}
-                          alt={item.caption || "Event photo"}
-                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      )}
-
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                        <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" size={28} />
-                      </div>
-
-                      {/* Format Badge */}
-                      <div className="absolute top-2 left-2 z-10">
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                          {isVideo ? <><Film size={10} className="text-amber-400" /> Video</> : <><ImageIcon size={10} className="text-primary-soft" /> Image</>}
-                        </span>
-                      </div>
-
-                      {/* Delete Button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteMediaId(item.id);
-                        }}
-                        className="absolute top-2 right-2 z-20 rounded-xl bg-red-50/90 border border-red-100 p-2 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200"
-                        title="Delete media"
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {gallery
+                  .slice((galleryPage - 1) * galleryItemsPerPage, galleryPage * galleryItemsPerPage)
+                  .map((item, index) => {
+                    const actualIndex = (galleryPage - 1) * galleryItemsPerPage + index;
+                    const isVideo = isVideoFile(item.image_path);
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => { setSelectedMedia(item); setLightboxIndex(actualIndex); }}
+                        className="glass-card p-0 overflow-hidden flex flex-col group relative cursor-pointer border border-border hover:border-primary/50 transition-all rounded-xl shadow-sm"
                       >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
+                        <div className="relative h-40 w-full bg-slate-900 overflow-hidden">
+                          {isVideo ? (
+                            <video
+                              src={getMediaUrl(item.image_path)}
+                              className="h-full w-full object-cover"
+                              muted preload="metadata"
+                            />
+                          ) : (
+                            <img
+                              src={getMediaUrl(item.image_path)}
+                              alt={item.caption || "Event photo"}
+                              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          )}
 
-                    <div className="p-3 flex-1 flex flex-col gap-1">
-                      <p className="text-xs text-foreground font-medium line-clamp-2">
-                        {item.caption || "No caption added"}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                          {/* Hover Overlay */}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                            <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" size={28} />
+                          </div>
+
+                          {/* Format Badge */}
+                          <div className="absolute top-2 left-2 z-10">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border ${
+                              isVideo
+                                ? "bg-white/92 text-amber-700 border-amber-200/80"
+                                : "bg-white/92 text-primary border-primary/20"
+                            }`}>
+                              {isVideo ? <Film size={9.5} className="text-amber-500" /> : <ImageIcon size={9.5} className="text-primary" />}
+                              {isVideo ? "Video" : "Image"}
+                            </span>
+                          </div>
+
+                          {/* Delete Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteMediaId(item.id);
+                            }}
+                            className="absolute top-2.5 right-2.5 z-20 rounded-xl bg-red-50/90 border border-red-100 p-2 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200"
+                            title="Delete media"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+
+                        {item.caption && (
+                          <div className="p-3 border-t border-border/60 bg-surface/30">
+                            <p className="text-xs text-foreground font-medium line-clamp-2 leading-snug">
+                              {item.caption}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* Pagination */}
+              <Pagination
+                currentPage={galleryPage}
+                totalPages={Math.ceil(gallery.length / galleryItemsPerPage)}
+                totalItems={gallery.length}
+                itemsPerPage={galleryItemsPerPage}
+                onPageChange={(page) => setGalleryPage(page)}
+              />
             </div>
           )}
         </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchUsersAdmin, toggleUserBlock } from "@/lib/api";
-import { assetUrl } from "@/lib/config";
+import { assetUrl, hasMediaFile } from "@/lib/config";
 import {
   Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X, Ban, UserCheck, ShieldAlert
 } from "lucide-react";
@@ -170,7 +170,7 @@ export default function AdminUsersPage() {
                   <tr key={user.id} className="transition-colors hover:bg-slate-50/70">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        {user.avatar ? (
+                        {hasMediaFile(user.avatar) ? (
                           <img
                             src={assetUrl(user.avatar)}
                             alt={user.name}
@@ -286,7 +286,7 @@ export default function AdminUsersPage() {
             {/* Header */}
             <div className="flex items-start justify-between border-b border-border pb-4 mb-4">
               <div className="flex items-center gap-3">
-                {selectedUser.avatar ? (
+                {hasMediaFile(selectedUser.avatar) ? (
                   <img
                     src={assetUrl(selectedUser.avatar)}
                     alt={selectedUser.name}

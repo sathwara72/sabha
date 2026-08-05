@@ -12,10 +12,11 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useMemo } from "react";
 import { fetchBusinesses, fetchReviews, submitReview, submitBusinessInquiry } from "@/lib/api";
-import { assetUrl, parseGoogleMapsIframeSrc } from "@/lib/config";
+import { assetUrl, hasMediaFile, parseGoogleMapsIframeSrc } from "@/lib/config";
 import { useAuth } from "@/lib/auth";
 import { getCoverImage } from "@/lib/categoryCover";
 import { useLanguage } from "@/lib/language";
+import SafeImage from "@/components/shared/SafeImage";
 
 interface ServiceItem {
   title: string;
@@ -501,6 +502,7 @@ export default function BusinessDetailsPage() {
       }
     }
     if (id) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       loadBusiness();
     }
   }, [id]);
@@ -605,13 +607,13 @@ export default function BusinessDetailsPage() {
       {/* Cover Banner with Profile Bar */}
       <div className="mx-auto max-w-7xl sm:px-6 sm:pt-6">
         <section className="relative w-full aspect-[3.2/1] sm:rounded-3xl overflow-hidden bg-slate-950 flex items-center justify-center shadow-lg border border-border/40">
-          {business.bannerImage && (
-            <img
-              src={business.bannerImage}
-              alt={`${business.name} workspace`}
-              className="h-full w-full object-cover object-center"
-            />
-          )}
+          <SafeImage
+            src={business.bannerImage}
+            alt={`${business.name} workspace`}
+            title={business.name}
+            fallbackType="banner"
+            className="h-full w-full object-cover object-center"
+          />
           {/* Shadow gradient at bottom */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
 
@@ -630,11 +632,13 @@ export default function BusinessDetailsPage() {
             <div className="px-6 pb-6">
             <div className="flex flex-col md:flex-row md:items-end gap-5">
               <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-white text-primary text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
-                {business.logo ? (
-                   <img src={business.logo} alt={business.name} className="h-full w-full object-contain" />
-                ) : (
-                  business.name?.[0] ?? "?"
-                )}
+                <SafeImage
+                  src={business.logo}
+                  alt={business.name}
+                  title={business.name}
+                  fallbackType="business"
+                  className="h-full w-full object-contain"
+                />
               </div>
 
               {/* Name & Details */}

@@ -9,7 +9,7 @@ import {
   X, Download, ZoomIn, Image as ImageIcon, Search, Grid3X3
 } from "lucide-react";
 import { fetchEvents, fetchGallery } from "@/lib/api";
-import { API_ORIGIN } from "@/lib/config";
+import { API_ORIGIN, assetUrl, hasMediaFile } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 
 interface GalleryItem {
@@ -38,12 +38,9 @@ export default function EventGalleryDetailPage() {
   const [photos, setPhotos] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
 
-  const getMediaUrl = (path: string) => {
-    if (!path) return "";
-    if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    return `${API_ORIGIN}${path}`;
+  const getMediaUrl = (path?: string | null) => {
+    return assetUrl(path);
   };
 
   useEffect(() => {
@@ -61,6 +58,7 @@ export default function EventGalleryDetailPage() {
         setLoading(false);
       }
     }
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     load();
   }, [id]);
 
@@ -95,9 +93,7 @@ export default function EventGalleryDetailPage() {
     }
   };
 
-  const filtered = photos.filter(p =>
-    !search || (p.caption && p.caption.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = photos;
 
   if (loading) {
     return (
@@ -147,7 +143,7 @@ export default function EventGalleryDetailPage() {
       {/* Hero Banner */}
       <div className="relative h-52 sm:h-64 overflow-hidden">
         <img
-          src={event.image ? getMediaUrl(event.image) : "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=1400&auto=format&fit=crop"}
+          src={hasMediaFile(event.image) ? getMediaUrl(event.image) : "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=1400&auto=format&fit=crop"}
           alt={event.title}
           className="h-full w-full object-cover"
         />
@@ -166,22 +162,12 @@ export default function EventGalleryDetailPage() {
         </div>
       </div>
 
-      {/* Search + Count Bar */}
+      {/* Count Bar */}
       <div className="border-b border-border bg-surface">
-        <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
           <p className="text-sm font-semibold text-muted">
-            {t("gallery.showing")} <span className="text-foreground font-bold">{filtered.length}</span> {t("gallery.of")} <span className="text-foreground font-bold">{photos.length}</span> {t("gallery.photos")}
+            {t("gallery.showing")} <span className="text-foreground font-bold">{photos.length}</span> {t("gallery.photos")}
           </p>
-          <div className="relative w-full sm:w-64">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={t("gallery.search_placeholder")}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-border bg-white pl-9 pr-4 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground font-medium"
-            />
-          </div>
         </div>
       </div>
 
@@ -190,7 +176,7 @@ export default function EventGalleryDetailPage() {
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
             <ImageIcon size={40} className="text-muted-foreground/30" />
-            <p className="text-sm text-muted font-medium">{search ? t("gallery.no_photos_match") : t("gallery.no_photos_folder")}</p>
+            <p className="text-sm text-muted font-medium">{t("gallery.no_photos_folder")}</p>
           </div>
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">

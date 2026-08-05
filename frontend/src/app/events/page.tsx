@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/language";
 import { assetUrl } from "@/lib/config";
 import Pagination from "@/components/shared/Pagination";
+import SafeImage from "@/components/shared/SafeImage";
 
 export default function EventsPage() {
   const { t } = useLanguage();
@@ -61,6 +62,8 @@ export default function EventsPage() {
 
           if (dateOnly.getTime() === todayOnly.getTime()) {
             status = "current";
+          } else if (dateOnly > todayOnly) {
+            status = "upcoming";
           } else if (dateOnly < todayOnly) {
             status = "past";
           }
@@ -115,7 +118,16 @@ export default function EventsPage() {
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
-      const matchesFilter = filter === "all" || event.status === filter;
+      let matchesFilter = false;
+      if (filter === "all") {
+        matchesFilter = true;
+      } else if (filter === "current") {
+        matchesFilter = event.status === "current" || event.status === "upcoming";
+      } else if (filter === "upcoming") {
+        matchesFilter = event.status === "upcoming";
+      } else if (filter === "past") {
+        matchesFilter = event.status === "past";
+      }
       const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
@@ -229,42 +241,14 @@ export default function EventsPage() {
                     className="glass-card group flex h-full flex-col overflow-hidden p-0 hover:shadow-md transition-shadow"
                   >
                     <div className="relative h-36 sm:h-40 w-full overflow-hidden flex items-center justify-center">
-                      {event.hasCustomImage ? (
-                        <img
-                          src={event.image}
-                          alt={event.title}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-gradient-to-br from-red-600 via-rose-600 to-indigo-900 flex flex-col items-center justify-center p-3 relative overflow-hidden">
-                          {/* Background Grid Pattern */}
-                          <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-
-                          {/* Dynamic 3D Calendar Tear-Off Sheet Icon with Event Date */}
-                          <div className="relative z-10 flex flex-col items-center justify-center">
-                            <div className="w-16 h-16 rounded-2xl bg-white shadow-2xl overflow-hidden border border-white/50 flex flex-col items-center transform transition-transform duration-300 group-hover:scale-110">
-                              {/* Top Red Month Bar */}
-                              <div className="w-full bg-gradient-to-r from-red-600 to-rose-600 py-0.5 text-center shadow-xs">
-                                <span className="text-[10px] font-black tracking-widest text-white uppercase block leading-none">
-                                  {event.monthShort}
-                                </span>
-                              </div>
-                              {/* Center Day Number */}
-                              <div className="flex-1 flex flex-col items-center justify-center">
-                                <span className="text-xl font-black text-slate-800 leading-none">
-                                  {event.dayNum}
-                                </span>
-                                <span className="text-[7px] font-extrabold text-slate-400 mt-0.5">
-                                  {event.yearNum}
-                                </span>
-                              </div>
-                            </div>
-                            <span className="text-[9px] font-black tracking-wider uppercase text-white mt-1.5 bg-black/40 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/15">
-                              COMMUNITY EVENT
-                            </span>
-                          </div>
-                        </div>
-                      )}
+                      <SafeImage
+                        src={event.image}
+                        alt={event.title}
+                        title={event.title}
+                        date={event.date}
+                        fallbackType="event"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
 
@@ -369,19 +353,11 @@ export default function EventsPage() {
                           );
                         })()}
 
-                        {event.status === "current" && (
+                        {(event.status === "current" || event.status === "upcoming") && (
                           <div
                             className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
                           >
                             {t("events.book_ticket")} <ArrowRight size={16} />
-                          </div>
-                        )}
-
-                        {event.status === "upcoming" && (
-                          <div
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50/50 px-5 py-3 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-50 active:scale-[0.98]"
-                          >
-                            {t("events.booking_soon")} <ArrowRight size={16} />
                           </div>
                         )}
 

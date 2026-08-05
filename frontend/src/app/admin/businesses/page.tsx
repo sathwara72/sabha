@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import {
   fetchAllBusinessesAdmin, approveBusiness, rejectBusiness, deleteBusiness
 } from "@/lib/api";
-import { API_ORIGIN, assetUrl } from "@/lib/config";
+import { API_ORIGIN, assetUrl, hasMediaFile } from "@/lib/config";
 import {
   ShieldCheck, XCircle, CheckCircle2,
   Globe, Info, Search, ChevronLeft, ChevronRight,
@@ -218,7 +218,7 @@ export default function AdminBusinessesPage() {
                   >
                     {/* Cover Image */}
                     <div className="relative h-28 w-full overflow-hidden rounded-t-2xl shrink-0">
-                      {biz.cover_image ? (
+                      {hasMediaFile(biz.cover_image) ? (
                         <img
                           src={getMediaUrl(biz.cover_image)}
                           alt={biz.name}
@@ -238,7 +238,7 @@ export default function AdminBusinessesPage() {
                       {/* Logo + Name */}
                       <div className="flex items-center gap-3 -mt-7">
                         <div className="relative z-10 shrink-0 h-14 w-14 rounded-xl border-2 border-white shadow-lg bg-white overflow-hidden flex items-center justify-center p-1">
-                          {biz.logo ? (
+                          {hasMediaFile(biz.logo) ? (
                             <img
                               src={getMediaUrl(biz.logo)}
                               alt={biz.name}
@@ -276,7 +276,7 @@ export default function AdminBusinessesPage() {
                       </p>
 
                       {/* Payment Screenshot Button */}
-                      {biz.payment_screenshot && (
+                      {hasMediaFile(biz.payment_screenshot) && (
                         <button
                           onClick={() => setPaymentModalUrl(getMediaUrl(biz.payment_screenshot))}
                           className="flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 hover:bg-amber-100 transition-colors w-full justify-center"
@@ -286,7 +286,7 @@ export default function AdminBusinessesPage() {
                       )}
 
                       {/* Action buttons: View Details + Delete */}
-                      <div className={`flex items-center gap-2 ${!biz.payment_screenshot ? "mt-auto" : ""}`}>
+                      <div className={`flex items-center gap-2 ${!hasMediaFile(biz.payment_screenshot) ? "mt-auto" : ""}`}>
                         <button
                           onClick={() => router.push(`/admin/businesses/${biz.id}`)}
                           className="flex-1 flex items-center gap-1.5 text-[10px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 hover:bg-slate-100 transition-colors justify-center cursor-pointer"
