@@ -9,29 +9,50 @@ export const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_BASE_URL || `${API_ORIGIN}/api`
 ).replace(/\/$/, "");
 
+export function hasMediaFile(path?: string | null): boolean {
+  if (!path) return false;
+  const str = String(path).trim().toLowerCase();
+  if (
+    !str ||
+    str === "null" ||
+    str === "undefined" ||
+    str === "none" ||
+    str === "n/a" ||
+    str === "false" ||
+    str === "0" ||
+    str.includes("drive.google.com") ||
+    str.includes("docs.google.com")
+  ) {
+    return false;
+  }
+  if (str.endsWith("/") || str.endsWith("\\")) return false;
+  return true;
+}
+
 // Build an absolute URL for a backend-served asset path like "/storage/avatars/x.png".
 // Returns "" for empty input and passes through already-absolute URLs untouched.
 export function assetUrl(path?: string | null): string {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) {
+  if (!hasMediaFile(path)) return "";
+  const str = String(path).trim();
+  if (/^https?:\/\//i.test(str)) {
     // If it's a Google Drive URL, convert it to a direct image link
-    if (path.includes("drive.google.com") || path.includes("docs.google.com")) {
-      const idMatchQuery = path.match(/[?&]id=([^&]+)/);
+    if (str.includes("drive.google.com") || str.includes("docs.google.com")) {
+      const idMatchQuery = str.match(/[?&]id=([^&]+)/);
       if (idMatchQuery && idMatchQuery[1]) {
         return `https://lh3.googleusercontent.com/d/${idMatchQuery[1]}`;
       }
-      const idMatchPath = path.match(/\/file\/d\/([^/]+)/);
+      const idMatchPath = str.match(/\/file\/d\/([^/]+)/);
       if (idMatchPath && idMatchPath[1]) {
         return `https://lh3.googleusercontent.com/d/${idMatchPath[1]}`;
       }
-      const idMatchD = path.match(/\/d\/([^/]+)/);
+      const idMatchD = str.match(/\/d\/([^/]+)/);
       if (idMatchD && idMatchD[1]) {
         return `https://lh3.googleusercontent.com/d/${idMatchD[1]}`;
       }
     }
-    return path;
+    return str;
   }
-  return `${API_ORIGIN}${path}`;
+  return `${API_ORIGIN}${str.startsWith("/") ? "" : "/"}${str}`;
 }
 
 export function parseGoogleMapsIframeSrc(input?: string | null): string | null {

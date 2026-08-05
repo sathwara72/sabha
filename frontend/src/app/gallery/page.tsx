@@ -11,8 +11,9 @@ import Link from "next/link";
 import PageHeader from "@/components/shared/PageHeader";
 import Pagination from "@/components/shared/Pagination";
 import { fetchEvents, fetchGallery, fetchStatistics } from "@/lib/api";
-import { API_ORIGIN } from "@/lib/config";
+import { API_ORIGIN, hasMediaFile } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
+import SafeImage from "@/components/shared/SafeImage";
 
 interface GalleryItem {
   id: number;
@@ -226,7 +227,7 @@ export default function GalleryPage() {
                         <div className="glass-card p-0 overflow-hidden relative border border-border bg-white rounded-2xl shadow-sm z-10 flex flex-col h-80">
                           {/* Event Cover Image / Video Preview */}
                           <div className="relative h-48 w-full bg-slate-900 overflow-hidden">
-                            {firstItem ? (
+                            {firstItem && hasMediaFile(firstItem.image_path) ? (
                               isVideo ? (
                                 <video
                                   src={getMediaUrl(firstItem.image_path)}
@@ -235,11 +236,13 @@ export default function GalleryPage() {
                                   preload="metadata"
                                 />
                               ) : (
-                                <img
-                                  src={getMediaUrl(firstItem.image_path)}
-                                  alt={folder.title}
-                                  className="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
-                                />
+                                <SafeImage
+                                   src={getMediaUrl(firstItem.image_path)}
+                                   alt={folder.title}
+                                   title={folder.title}
+                                   fallbackType="gallery"
+                                   className="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                                 />
                               )
                             ) : (
                               <div className="h-full w-full bg-slate-200 flex items-center justify-center text-muted">
@@ -338,10 +341,12 @@ export default function GalleryPage() {
                               </div>
                             ) : (
                               <div className="relative w-full h-full">
-                                <img
+                                <SafeImage
                                   src={getMediaUrl(item.image_path)}
                                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   alt={item.caption || "Gallery image"}
+                                  title={item.caption || "Gallery image"}
+                                  fallbackType="gallery"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
                                   <span className="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm uppercase">

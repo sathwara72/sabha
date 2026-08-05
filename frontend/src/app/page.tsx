@@ -16,6 +16,7 @@ import { fetchBusinesses, fetchEvents, fetchStatistics, fetchHeroImages } from "
 import { assetUrl } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 import { useAuth } from "@/lib/auth";
+import SafeImage from "@/components/shared/SafeImage";
 
 interface Business {
   id: number;
@@ -319,12 +320,12 @@ export default function Home() {
               >
                 <Link href={`/events/${event.id}`} className="block">
                   <div className="relative h-40 w-full overflow-hidden">
-                    <img
-                      src={
-                        assetUrl(event.image) ||
-                        "https://images.unsplash.com/photo-1540575861501-7ad0582373f3?q=80&w=800&auto=format&fit=crop"
-                      }
+                    <SafeImage
+                      src={assetUrl(event.image)}
                       alt={event.title}
+                      title={event.title}
+                      date={event.date}
+                      fallbackType="event"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>

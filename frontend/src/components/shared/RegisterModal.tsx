@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Lock, Phone, ArrowRight, X, Key, ShieldCheck } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowRight, X, Key, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export default function RegisterModal() {
@@ -13,11 +13,39 @@ export default function RegisterModal() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otp, setOtp] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [otpSentEmail, setOtpSentEmail] = useState("");
+
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setPhone("");
+    setPassword("");
+    setConfirmPassword("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setOtp("");
+    setError("");
+    setLoading(false);
+    setOtpSentEmail("");
+    setStep(1);
+  };
+
+  useEffect(() => {
+    if (!isRegisterOpen) {
+      resetForm();
+    }
+  }, [isRegisterOpen]);
+
+  const handleClose = () => {
+    resetForm();
+    closeRegister();
+  };
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +76,7 @@ export default function RegisterModal() {
     setLoading(true);
     try {
       await registerConfirm(email, otp);
-      setName(""); setEmail(""); setPhone(""); setPassword(""); setConfirmPassword(""); setOtp(""); setOtpSentEmail(""); setStep(1);
+      resetForm();
     } catch (err: any) {
       setError(err.message || "Invalid or expired OTP. Please try again.");
     } finally {
@@ -69,7 +97,7 @@ export default function RegisterModal() {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto"
         >
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={closeRegister} />
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={handleClose} />
 
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 0 }}
@@ -79,7 +107,7 @@ export default function RegisterModal() {
             className="relative w-full max-w-md rounded-2xl border border-border bg-white p-5 shadow-xl z-10 font-outfit"
           >
             <button
-              onClick={closeRegister}
+              onClick={handleClose}
               className="absolute right-3 top-3 rounded-lg p-1 text-muted transition-colors hover:bg-surface hover:text-foreground"
               aria-label="Close"
             >
@@ -152,14 +180,46 @@ export default function RegisterModal() {
                     <label className={labelClass}>Password</label>
                     <div className="group relative">
                       <Lock className={iconClass} />
-                      <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" className={inputClass} />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Create a password"
+                        className={`${inputClass} pr-8`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                        tabIndex={-1}
+                        title={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className={labelClass}>Confirm password</label>
                     <div className="group relative">
                       <Lock className={iconClass} />
-                      <input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={inputClass} />
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Re-enter password"
+                        className={`${inputClass} pr-8`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                        tabIndex={-1}
+                        title={showConfirmPassword ? "Hide password" : "Show password"}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
                     </div>
                   </div>
                 </div>

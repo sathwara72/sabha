@@ -1,17 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, ArrowRight, X } from "lucide-react";
+import { Mail, Lock, ArrowRight, X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export default function LoginModal() {
   const { isLoginOpen, closeLogin, login, openRegister } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isLoginOpen) {
+      setEmail("");
+      setPassword("");
+      setShowPassword(false);
+      setError("");
+      setLoading(false);
+    }
+  }, [isLoginOpen]);
+
+  const handleClose = () => {
+    setEmail("");
+    setPassword("");
+    setShowPassword(false);
+    setError("");
+    setLoading(false);
+    closeLogin();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +41,7 @@ export default function LoginModal() {
       await login(email, password);
       setEmail("");
       setPassword("");
+      setShowPassword(false);
     } catch (err: any) {
       setError(err.message || "Failed to log in.");
     } finally {
@@ -39,7 +60,7 @@ export default function LoginModal() {
         >
           <div
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            onClick={closeLogin}
+            onClick={handleClose}
           />
 
           <motion.div
@@ -50,7 +71,7 @@ export default function LoginModal() {
             className="relative w-full max-w-sm rounded-2xl border border-border bg-white p-5 shadow-xl"
           >
             <button
-              onClick={closeLogin}
+              onClick={handleClose}
               className="absolute right-3 top-3 rounded-lg p-1 text-muted transition-colors hover:bg-surface hover:text-foreground"
               aria-label="Close"
             >
@@ -100,13 +121,22 @@ export default function LoginModal() {
                 <div className="group relative">
                   <Lock className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full rounded-xl border border-border bg-white py-2 pl-9 pr-3 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                    className="w-full rounded-xl border border-border bg-white py-2 pl-9 pr-9 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+                    tabIndex={-1}
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
                 </div>
               </div>
 

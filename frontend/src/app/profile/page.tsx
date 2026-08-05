@@ -15,8 +15,9 @@ import {
 } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from "@/components/SocialIcons";
 import { getUserBusiness, submitBusiness, updateProfile, getUserRegistrations, fetchCategories } from "@/lib/api";
-import { assetUrl, parseGoogleMapsIframeSrc } from "@/lib/config";
+import { assetUrl, hasMediaFile, parseGoogleMapsIframeSrc } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
+import SafeImage from "@/components/shared/SafeImage";
 
 export default function ProfilePage() {
   const { isAuthenticated, isReady, user, updateLocalUser, openLogin, logout } = useAuth();
@@ -97,6 +98,12 @@ export default function ProfilePage() {
 
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
 
+  const scrollToTop = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const [categories, setCategories] = useState<string[]>(["Software Development"]);
 
   useEffect(() => {
@@ -151,8 +158,8 @@ export default function ProfilePage() {
       if (biz) {
         setBizName(biz.name);
         setBizCategory(biz.category);
-        if (biz.logo) setLogoPreview(assetUrl(biz.logo));
-        if (biz.cover_image) setCoverPreview(assetUrl(biz.cover_image));
+        if (hasMediaFile(biz.logo)) setLogoPreview(assetUrl(biz.logo));
+        if (hasMediaFile(biz.cover_image)) setCoverPreview(assetUrl(biz.cover_image));
         setBizWebsite(biz.website || "");
         setBizDescription(biz.description || "");
         setBizTagline(biz.tagline || "");
@@ -311,6 +318,7 @@ export default function ProfilePage() {
       await submitBusiness(formData);
       setBizSuccess(t("profile.biz_success"));
       setIsEditingBusiness(false);
+      scrollToTop();
       setPaymentFile(null);
       setLogoFile(null);
       setCoverFile(null);
@@ -384,7 +392,7 @@ export default function ProfilePage() {
             <nav className="glass-card p-1.5 space-y-0.5">
               <button
                 type="button"
-                onClick={() => setActiveTab("profile")}
+                onClick={() => { setActiveTab("profile"); scrollToTop(); }}
                 className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   activeTab === "profile"
                     ? "bg-primary text-white shadow-sm"
@@ -398,7 +406,7 @@ export default function ProfilePage() {
 
               <button
                 type="button"
-                onClick={() => setActiveTab("business")}
+                onClick={() => { setActiveTab("business"); scrollToTop(); }}
                 className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   activeTab === "business"
                     ? "bg-primary text-white shadow-sm"
@@ -424,7 +432,7 @@ export default function ProfilePage() {
 
               <button
                 type="button"
-                onClick={() => setActiveTab("events")}
+                onClick={() => { setActiveTab("events"); scrollToTop(); }}
                 className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                   activeTab === "events"
                     ? "bg-primary text-white shadow-sm"
@@ -721,7 +729,7 @@ export default function ProfilePage() {
                       <div className="glass-card p-5 rounded-2xl border border-border/80 shadow-xs">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
                           {/* Left Side: Screenshot Image */}
-                          {business.payment_screenshot && (
+                          {hasMediaFile(business.payment_screenshot) && (
                             <div className="md:col-span-5 space-y-1.5">
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] uppercase font-bold text-muted tracking-wider">
@@ -755,7 +763,7 @@ export default function ProfilePage() {
                           )}
 
                           {/* Right Side: Business Details Locked Info */}
-                          <div className={business.payment_screenshot ? "md:col-span-7" : "md:col-span-12"}>
+                          <div className={hasMediaFile(business.payment_screenshot) ? "md:col-span-7" : "md:col-span-12"}>
                             <div className="rounded-xl border border-dashed border-border/80 bg-surface/30 p-6 flex flex-col items-center md:items-start text-center md:text-left gap-2.5">
                               <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shadow-xs">
                                 <Briefcase size={20} />
@@ -820,11 +828,11 @@ export default function ProfilePage() {
                         /* ── View mode ── */
                         <div className="space-y-8">
                           <div className="relative rounded-2xl overflow-hidden border border-border aspect-[3.2/1] max-h-[320px] min-h-[160px] bg-slate-900 shadow-sm">
-                            <img src={business.cover_image ? assetUrl(business.cover_image) : "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"} alt="Business Cover" className="h-full w-full object-cover opacity-85" />
+                            <SafeImage src={assetUrl(business.cover_image)} alt="Business Cover" title={business.name} fallbackType="banner" className="h-full w-full object-cover opacity-85" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                             <div className="absolute bottom-4 left-6 flex items-end gap-4">
                               <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl bg-white border border-border p-1.5 shadow-md flex items-center justify-center overflow-hidden shrink-0">
-                                {business.logo ? <img src={assetUrl(business.logo)} alt="Logo" className="h-full w-full object-contain" /> : <span className="text-2xl font-bold text-primary">{business.name?.[0] ?? "?"}</span>}
+                                <SafeImage src={assetUrl(business.logo)} alt="Logo" title={business.name} fallbackType="business" className="h-full w-full object-contain" />
                               </div>
                               <div className="text-white pb-1 min-w-0 pr-4">
                                 <h3 className="text-lg sm:text-xl font-bold truncate">{business.name || t("profile.your_business")}</h3>
@@ -870,7 +878,7 @@ export default function ProfilePage() {
                           )}
 
                           <div className="pt-4 border-t border-border">
-                            <button type="button" onClick={() => setIsEditingBusiness(true)} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 cursor-pointer">
+                            <button type="button" onClick={() => { setIsEditingBusiness(true); scrollToTop(); }} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 cursor-pointer">
                               {t("profile.biz_edit")}
                             </button>
                           </div>
@@ -1216,7 +1224,7 @@ export default function ProfilePage() {
                           </div>
 
                           <div className="flex gap-4 pt-4 border-t border-border">
-                            <button type="button" onClick={() => setIsEditingBusiness(false)} className="flex-1 rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer">
+                            <button type="button" onClick={() => { setIsEditingBusiness(false); scrollToTop(); }} className="flex-1 rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer">
                               {t("profile.biz_cancel")}
                             </button>
                             <button type="submit" disabled={bizSubmitting} className="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer">
@@ -1280,7 +1288,7 @@ export default function ProfilePage() {
                           className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-white hover:shadow-sm hover:border-primary/20 transition-all group"
                         >
                           <div className="h-16 w-28 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-border">
-                            <img src={coverImg} alt={eventDetails.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <SafeImage src={coverImg} alt={eventDetails.title} title={eventDetails.title} date={eventDate} fallbackType="event" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <h4 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{eventDetails.title}</h4>

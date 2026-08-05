@@ -8,7 +8,9 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { fetchBusinesses, submitBusiness, fetchCategories } from "@/lib/api";
 import { useLanguage } from "@/lib/language";
-import { assetUrl } from "@/lib/config";
+import { assetUrl, hasMediaFile } from "@/lib/config";
+import Pagination from "@/components/shared/Pagination";
+import SafeImage from "@/components/shared/SafeImage";
 
 export default function BusinessDirectory() {
   const { isAuthenticated, isReady, openLogin, openRegister } = useAuth();
@@ -259,15 +261,13 @@ export default function BusinessDirectory() {
                 >
                   <div className="mb-5 flex items-start justify-between">
                     <div className="h-16 w-16 overflow-hidden rounded-xl border border-border bg-white flex items-center justify-center text-primary text-xl font-bold">
-                      {business.logo ? (
-                        <img
-                          src={assetUrl(business.logo)}
-                          alt={business.name}
-                          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        business.name?.[0] ?? "?"
-                      )}
+                      <SafeImage
+                        src={assetUrl(business.logo)}
+                        alt={business.name}
+                        title={business.name}
+                        fallbackType="business"
+                        className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                      />
                     </div>
                     {business.rating && Number(business.rating) > 0 ? (
                       <div className="flex flex-col items-end gap-2">
@@ -307,40 +307,19 @@ export default function BusinessDirectory() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-center gap-2">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
-              aria-label="Previous page"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <div className="flex gap-2">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={cn(
-                    "h-10 w-10 rounded-xl text-sm font-semibold transition-colors cursor-pointer",
-                    currentPage === i + 1
-                      ? "bg-primary text-white"
-                      : "border border-border bg-white text-muted hover:bg-surface hover:text-foreground"
-                  )}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-foreground transition-colors hover:bg-surface cursor-pointer"
-              aria-label="Next page"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
+        <div className="mt-8">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 0, behavior: "instant" });
+            }}
+            itemLabel="businesses"
+          />
+        </div>
       </div>
 
       {/* Submit Business Modal */}

@@ -12,7 +12,7 @@ import {
   ArrowLeft, Receipt, X, Globe, MapPin, Phone,
   Mail, Calendar, Users, Clock, Briefcase, Link2, Trash2, Ban, UserCheck
 } from "lucide-react";
-import { assetUrl, parseGoogleMapsIframeSrc } from "@/lib/config";
+import { assetUrl, hasMediaFile, parseGoogleMapsIframeSrc } from "@/lib/config";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import PromptModal from "@/components/shared/PromptModal";
 
@@ -244,7 +244,7 @@ export default function AdminBusinessDetailPage() {
               </button>
             </>
           )}
-          {business.payment_screenshot && (
+          {hasMediaFile(business.payment_screenshot) && (
             <button
               onClick={() => setPaymentModalUrl(getMediaUrl(business.payment_screenshot))}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200/80 rounded-xl px-3.5 py-2 hover:bg-amber-100 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
@@ -269,7 +269,7 @@ export default function AdminBusinessDetailPage() {
           {/* Cover & Brand card */}
           <div className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             <div className="relative w-full aspect-[3.2/1] max-h-[320px] min-h-[180px] bg-slate-950 flex items-center justify-center overflow-hidden">
-              {business.cover_image ? (
+              {hasMediaFile(business.cover_image) ? (
                 <img
                   src={getMediaUrl(business.cover_image)}
                   alt={business.name}
@@ -289,7 +289,7 @@ export default function AdminBusinessDetailPage() {
 
               {/* Float Logo */}
               <div className="absolute -bottom-8 left-6 h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border-4 border-white shadow-xl bg-white overflow-hidden flex items-center justify-center p-1.5">
-                {business.logo ? (
+                {hasMediaFile(business.logo) ? (
                   <img
                     src={getMediaUrl(business.logo)}
                     alt={business.name}
