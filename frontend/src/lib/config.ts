@@ -19,9 +19,7 @@ export function hasMediaFile(path?: string | null): boolean {
     str === "none" ||
     str === "n/a" ||
     str === "false" ||
-    str === "0" ||
-    str.includes("drive.google.com") ||
-    str.includes("docs.google.com")
+    str === "0"
   ) {
     return false;
   }
