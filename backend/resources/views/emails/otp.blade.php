@@ -25,7 +25,11 @@
                         <td style="padding:36px 40px 32px;">
                             <p style="margin:0 0 8px;font-size:20px;font-weight:700;color:#0f172a;">Hello, {{ $userName }}!</p>
                             <p style="margin:0 0 24px;font-size:15px;color:#475569;line-height:1.6;">
-                                You requested to create a Sabha account. Use the verification code below to complete your registration.
+                                @if(isset($type) && $type === 'reset_password')
+                                    You requested to reset your Sabha account password. Use the verification code below to reset your password.
+                                @else
+                                    You requested to create a Sabha account. Use the verification code below to complete your registration.
+                                @endif
                             </p>
 
                             {{-- OTP Box --}}

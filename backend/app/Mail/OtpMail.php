@@ -14,17 +14,23 @@ class OtpMail extends Mailable
 
     public string $otp;
     public string $userName;
+    public string $type;
 
-    public function __construct(string $otp, string $userName)
+    public function __construct(string $otp, string $userName, string $type = 'registration')
     {
         $this->otp = $otp;
         $this->userName = $userName;
+        $this->type = $type;
     }
 
     public function envelope(): Envelope
     {
+        $subject = $this->type === 'reset_password'
+            ? 'Your Sabha Password Reset Code'
+            : 'Your Sabha Account Verification Code';
+
         return new Envelope(
-            subject: 'Your Sabha Account Verification Code',
+            subject: $subject,
         );
     }
 
