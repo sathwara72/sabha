@@ -416,7 +416,7 @@ class SabhaController extends Controller
         ]);
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPasswordSendOtp(Request $request)
     {
         $validated = $request->validate([
             'email' => 'required|email',
@@ -425,19 +425,65 @@ class SabhaController extends Controller
         $user = User::where('email', $validated['email'])->first();
 
         if (!$user) {
-            return response()->json(['message' => 'We could not find a user with that email address.'], 404);
+            return response()->json(['message' => 'We could not find an account with that email address.'], 404);
         }
 
-        $resetCode = (string) mt_rand(100000, 999999);
-        Log::info("SABHA Password Reset OTP for {$validated['email']}: {$resetCode}");
+        $otp = (string) mt_rand(100000, 999999);
 
-        $user->password = Hash::make('password123');
-        $user->save();
+        Cache::put('reset_otp_' . $validated['email'], [
+            'email' => $validated['email'],
+            'otp' => $otp
+        ], 900);
+
+        try {
+            Mail::to($validated['email'])->send(new OtpMail($otp, $user->name, 'reset_password'));
+            Log::info("SABHA Password Reset OTP email sent to {$validated['email']}: {$otp}");
+        } catch (\Exception $e) {
+            Log::error("SABHA Password Reset OTP email failed for {$validated['email']}: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Could not send verification email. Please check your email configuration and try again.',
+            ], 500);
+        }
 
         return response()->json([
-            'message' => 'We have sent password reset instructions to your email. For simulation, your password has been reset to "password123". Please log in and change it in your profile.',
-            'reset_code' => $resetCode
+            'message' => 'Password reset verification code has been sent to your email.',
+            'email' => $validated['email'],
         ]);
+    }
+
+    public function forgotPasswordReset(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $cached = Cache::get('reset_otp_' . $validated['email']);
+
+        if (!$cached || $cached['otp'] !== $validated['otp']) {
+            return response()->json(['message' => 'Invalid or expired OTP verification code.'], 400);
+        }
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User account not found.'], 404);
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        Cache::forget('reset_otp_' . $validated['email']);
+
+        return response()->json([
+            'message' => 'Your password has been reset successfully. Please log in with your new password.',
+        ]);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        return $this->forgotPasswordSendOtp($request);
     }
 
     public function register(Request $request)

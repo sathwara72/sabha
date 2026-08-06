@@ -729,9 +729,76 @@ export async function submitBusiness(formData: FormData) {
   return { success: true, message: resData.message || "Business submitted successfully" };
 }
 
+export async function forgotPasswordSendOtp(email: string) {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/forgot-password/send-otp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+  } catch {
+    throw new Error("Cannot connect to server. Please make sure the backend is running.");
+  }
+
+  let data: any = {};
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Unexpected server response. Please try again.");
+  }
+
+  if (!response.ok) {
+    if (data.errors) {
+      const firstField = Object.keys(data.errors)[0];
+      const firstMsg = data.errors[firstField]?.[0];
+      throw new Error(firstMsg || data.message || "Failed to send reset code.");
+    }
+    throw new Error(data.message || "Failed to send reset code.");
+  }
+
+  return { message: data.message, email: data.email };
+}
+
+export async function forgotPasswordReset(email: string, otp: string, password: string) {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/forgot-password/reset`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ email, otp, password }),
+    });
+  } catch {
+    throw new Error("Cannot connect to server. Please make sure the backend is running.");
+  }
+
+  let data: any = {};
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Unexpected server response. Please try again.");
+  }
+
+  if (!response.ok) {
+    if (data.errors) {
+      const firstField = Object.keys(data.errors)[0];
+      const firstMsg = data.errors[firstField]?.[0];
+      throw new Error(firstMsg || data.message || "Password reset failed.");
+    }
+    throw new Error(data.message || "Failed to reset password.");
+  }
+
+  return { message: data.message };
+}
+
 export async function forgotPassword(email: string) {
-  await delay(1000);
-  return { success: true, message: "Password reset link sent to your email" };
+  return forgotPasswordSendOtp(email);
 }
 
 export async function registerSendOtp(data: any) {

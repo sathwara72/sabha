@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  const { registerSendOtp, registerConfirm } = useAuth();
+  const { registerSendOtp, registerConfirm, openLogin } = useAuth();
   const router = useRouter();
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -255,9 +255,13 @@ export default function RegisterPage() {
 
           <p className="mt-8 text-center text-sm text-muted">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-primary hover:opacity-80 transition-opacity">
+            <button
+              type="button"
+              onClick={() => { router.push('/'); openLogin(); }}
+              className="font-semibold text-primary hover:opacity-80 transition-opacity cursor-pointer"
+            >
               Log in
-            </Link>
+            </button>
           </p>
         </div>
 
