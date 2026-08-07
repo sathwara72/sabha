@@ -71,7 +71,6 @@ export default function Home() {
       "verified members": "stats.verified_members",
       "business exchanged": "stats.business_exchanged",
       "monthly mixers": "stats.monthly_mixers",
-      "cities covered": "stats.cities_covered",
       "members": "stats.members",
     };
     const key = map[label.toLowerCase().trim()];
