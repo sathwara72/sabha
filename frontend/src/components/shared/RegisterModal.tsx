@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Mail, Lock, Phone, ArrowRight, X, Key, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/language";
 
 export default function RegisterModal() {
   const { isRegisterOpen, closeRegister, openLogin, registerSendOtp, registerConfirm } = useAuth();
+  const { t } = useLanguage();
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -51,11 +53,11 @@ export default function RegisterModal() {
     e.preventDefault();
     setError("");
     if (password !== confirmPassword) {
-      setError("Passwords do not match!");
+      setError(t("auth.passwords_no_match"));
       return;
     }
     if (phone.length !== 10) {
-      setError("Please enter a valid 10-digit mobile number.");
+      setError(t("auth.invalid_phone"));
       return;
     }
     setLoading(true);
@@ -64,7 +66,7 @@ export default function RegisterModal() {
       setOtpSentEmail(res.email || email);
       setStep(2);
     } catch (err: any) {
-      setError(err.message || "Registration validation failed. Try again.");
+      setError(err.message || t("auth.reg_failed"));
     } finally {
       setLoading(false);
     }
@@ -78,7 +80,7 @@ export default function RegisterModal() {
       await registerConfirm(email, otp);
       resetForm();
     } catch (err: any) {
-      setError(err.message || "Invalid or expired OTP. Please try again.");
+      setError(err.message || t("auth.otp_failed"));
     } finally {
       setLoading(false);
     }
@@ -118,10 +120,10 @@ export default function RegisterModal() {
             <div className="mb-4 text-center">
               <img src="/logo.png" alt="SABHA" className="mx-auto h-9 w-9 rounded-full object-contain mb-2" />
               <h2 className="text-base font-bold text-foreground">
-                {step === 1 ? "Create your account" : "Verify your email"}
+                {step === 1 ? t("auth.register_title") : t("auth.verify_title")}
               </h2>
               <p className="mt-0.5 text-xs text-muted">
-                {step === 1 ? "Join the community and list your business" : `Enter the code sent to ${email}`}
+                {step === 1 ? t("auth.register_subtitle") : `${t("auth.verify_subtitle")} ${email}`}
               </p>
             </div>
 
@@ -134,30 +136,30 @@ export default function RegisterModal() {
             {step === 2 && otpSentEmail && (
               <div className="mb-3 rounded-xl bg-green-50 border border-green-100 p-2.5 text-xs font-semibold text-green-700 flex items-center gap-2">
                 <ShieldCheck className="h-3.5 w-3.5 text-green-600 shrink-0" />
-                <span>A 6-digit OTP has been sent to <strong>{otpSentEmail}</strong>. Please check your inbox.</span>
+                <span>{t("auth.otp_sent")} <strong>{otpSentEmail}</strong>. {t("auth.otp_inbox")}</span>
               </div>
             )}
 
             {step === 1 ? (
               <form className="space-y-3" onSubmit={handleSendOtp}>
                 <div className="space-y-1">
-                  <label className={labelClass}>Full name or business name</label>
+                  <label className={labelClass}>{t("auth.full_name")}</label>
                   <div className="group relative">
                     <User className={iconClass} />
-                    <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="E.g. John Doe / Acme Corp" className={inputClass} />
+                    <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder={t("auth.full_name_placeholder")} className={inputClass} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <label className={labelClass}>Email</label>
+                    <label className={labelClass}>{t("auth.email")}</label>
                     <div className="group relative">
                       <Mail className={iconClass} />
                       <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" className={inputClass} />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className={labelClass}>Phone</label>
+                    <label className={labelClass}>{t("auth.phone")}</label>
                     <div className="group relative">
                       <Phone className={iconClass} />
                       <input
@@ -168,7 +170,7 @@ export default function RegisterModal() {
                           const val = e.target.value.replace(/\D/g, "").slice(0, 10);
                           setPhone(val);
                         }}
-                        placeholder="10-digit mobile number"
+                        placeholder={t("auth.phone_placeholder")}
                         className={inputClass}
                       />
                     </div>
@@ -177,7 +179,7 @@ export default function RegisterModal() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <label className={labelClass}>Password</label>
+                    <label className={labelClass}>{t("auth.password")}</label>
                     <div className="group relative">
                       <Lock className={iconClass} />
                       <input
@@ -185,7 +187,7 @@ export default function RegisterModal() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Create a password"
+                        placeholder={t("auth.create_password_placeholder")}
                         className={`${inputClass} pr-8`}
                       />
                       <button
@@ -193,14 +195,14 @@ export default function RegisterModal() {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
                         tabIndex={-1}
-                        title={showPassword ? "Hide password" : "Show password"}
+                        title={showPassword ? t("auth.hide_password") : t("auth.show_password")}
                       >
                         {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </button>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className={labelClass}>Confirm password</label>
+                    <label className={labelClass}>{t("auth.confirm_password")}</label>
                     <div className="group relative">
                       <Lock className={iconClass} />
                       <input
@@ -208,7 +210,7 @@ export default function RegisterModal() {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Re-enter password"
+                        placeholder={t("auth.confirm_password_placeholder")}
                         className={`${inputClass} pr-8`}
                       />
                       <button
@@ -216,7 +218,7 @@ export default function RegisterModal() {
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
                         tabIndex={-1}
-                        title={showConfirmPassword ? "Hide password" : "Show password"}
+                        title={showConfirmPassword ? t("auth.hide_password") : t("auth.show_password")}
                       >
                         {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </button>
@@ -229,14 +231,14 @@ export default function RegisterModal() {
                   disabled={loading}
                   className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
                 >
-                  {loading ? "Sending verification code..." : "Create account"}
+                  {loading ? t("auth.sending_otp") : t("auth.send_otp_btn")}
                   {!loading && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />}
                 </button>
               </form>
             ) : (
               <form className="space-y-3" onSubmit={handleVerifyOtp}>
                 <div className="space-y-1">
-                  <label className={labelClass}>Verification Code (OTP)</label>
+                  <label className={labelClass}>{t("auth.otp_label")}</label>
                   <div className="group relative">
                     <Key className={iconClass} />
                     <input
@@ -244,7 +246,7 @@ export default function RegisterModal() {
                       required
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      placeholder="Enter the 6-digit OTP code"
+                      placeholder={t("auth.otp_placeholder")}
                       className="w-full rounded-xl border border-border bg-white py-2 pl-9 pr-3 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary tracking-[0.2em] font-mono text-center"
                       maxLength={6}
                     />
@@ -257,28 +259,26 @@ export default function RegisterModal() {
                     onClick={() => setStep(1)}
                     className="flex-1 rounded-xl border border-border bg-white px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer text-center"
                   >
-                    Back
+                    {t("auth.back_btn")}
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
                     className="flex-[2] inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
                   >
-                    {loading ? "Verifying..." : "Verify & Register"}
+                    {loading ? t("auth.verifying") : t("auth.verify_register")}
                   </button>
                 </div>
               </form>
             )}
 
-
-
             <p className="mt-4 text-center text-xs text-muted">
-              Already have an account?{" "}
+              {t("auth.have_account")}{" "}
               <button
                 onClick={() => { closeRegister(); openLogin(); }}
                 className="font-semibold text-primary hover:opacity-80 transition-opacity"
               >
-                Log in
+                {t("auth.log_in")}
               </button>
             </p>
           </motion.div>

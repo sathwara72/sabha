@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, ArrowRight, X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/language";
 
 export default function LoginModal() {
   const { isLoginOpen, closeLogin, login, openRegister } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +45,7 @@ export default function LoginModal() {
       setPassword("");
       setShowPassword(false);
     } catch (err: any) {
-      setError(err.message || "Failed to log in.");
+      setError(err.message || t("auth.login_btn"));
     } finally {
       setLoading(false);
     }
@@ -81,8 +83,8 @@ export default function LoginModal() {
             {/* Header */}
             <div className="mb-4 text-center">
               <img src="/logo.png" alt="SABHA" className="mx-auto h-9 w-9 rounded-full object-contain mb-2.5" />
-              <h2 className="text-base font-bold text-foreground">Log in to continue</h2>
-              <p className="mt-0.5 text-xs text-muted">Please log in to view this content.</p>
+              <h2 className="text-base font-bold text-foreground">{t("auth.login_title")}</h2>
+              <p className="mt-0.5 text-xs text-muted">{t("auth.login_subtitle")}</p>
             </div>
 
             {error && (
@@ -93,7 +95,7 @@ export default function LoginModal() {
 
             <form className="space-y-3" onSubmit={handleSubmit}>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-foreground">Email</label>
+                <label className="text-xs font-semibold text-foreground">{t("auth.email")}</label>
                 <div className="group relative">
                   <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                   <input
@@ -101,7 +103,7 @@ export default function LoginModal() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder={t("auth.email_placeholder")}
                     className="w-full rounded-xl border border-border bg-white py-2 pl-9 pr-3 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
                   />
                 </div>
@@ -109,13 +111,13 @@ export default function LoginModal() {
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-foreground">Password</label>
+                  <label className="text-xs font-semibold text-foreground">{t("auth.password")}</label>
                   <Link
                     href="/forgot-password"
                     onClick={closeLogin}
                     className="text-[11px] font-semibold text-primary hover:opacity-80 transition-opacity"
                   >
-                    Forgot password?
+                    {t("auth.forgot_password")}
                   </Link>
                 </div>
                 <div className="group relative">
@@ -125,7 +127,7 @@ export default function LoginModal() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={t("auth.password_placeholder")}
                     className="w-full rounded-xl border border-border bg-white py-2 pl-9 pr-9 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
                   />
                   <button
@@ -133,7 +135,7 @@ export default function LoginModal() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
                     tabIndex={-1}
-                    title={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? t("auth.hide_password") : t("auth.show_password")}
                   >
                     {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
@@ -145,18 +147,18 @@ export default function LoginModal() {
                 disabled={loading}
                 className="group inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
               >
-                {loading ? "Logging in..." : "Log in"}
+                {loading ? t("auth.logging_in") : t("auth.login_btn")}
                 {!loading && <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />}
               </button>
             </form>
 
             <p className="mt-4 text-center text-xs text-muted">
-              Don&apos;t have an account?{" "}
+              {t("auth.no_account")}{" "}
               <button
                 onClick={() => { closeLogin(); openRegister(); }}
                 className="font-semibold text-primary hover:opacity-80 transition-opacity"
               >
-                Create one
+                {t("auth.create_one")}
               </button>
             </p>
           </motion.div>
