@@ -5,7 +5,7 @@ import { fetchSettings, updateSettingsAdmin, uploadGalleryImage } from "@/lib/ap
 import { API_ORIGIN, assetUrl } from "@/lib/config";
 import {
   Settings as SettingsIcon, Save, CheckCircle2, AlertCircle,
-  RefreshCw, Plus, Trash2, Mail, ShieldCheck, Users
+  RefreshCw, Plus, Trash2, Mail, ShieldCheck, Users, Share2
 } from "lucide-react";
 
 interface Coordinator {
@@ -30,6 +30,9 @@ export default function AdminSettingsPage() {
 
   const [contactEmail, setContactEmail] = useState("");
   const [responseTime, setResponseTime] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [whatsappUrl, setWhatsappUrl] = useState("");
+  const [facebookUrl, setFacebookUrl] = useState("");
   const [coordinators, setCoordinators] = useState<Coordinator[]>([]);
   const [trustees, setTrustees] = useState<Trustee[]>([]);
 
@@ -42,6 +45,9 @@ export default function AdminSettingsPage() {
       const data = await fetchSettings();
       setContactEmail(data.contact_email || "hello@sabha.global");
       setResponseTime(data.response_time || "Within 1 Business Day");
+      setInstagramUrl(data.instagram_url || "");
+      setWhatsappUrl(data.whatsapp_url || "");
+      setFacebookUrl(data.facebook_url || "");
       
       let coords: Coordinator[] = [];
       if (data.coordinators) {
@@ -109,7 +115,10 @@ export default function AdminSettingsPage() {
     try {
       await updateSettingsAdmin({ 
         contact_email: contactEmail, 
-        response_time: responseTime, 
+        response_time: responseTime,
+        instagram_url: instagramUrl,
+        whatsapp_url: whatsappUrl,
+        facebook_url: facebookUrl, 
         coordinators, 
         trustees 
       });
@@ -132,7 +141,7 @@ export default function AdminSettingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex flex-col">
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Site Settings</h1>
-          <p className="text-xs text-muted">Manage website contact details and coordinator roster</p>
+          <p className="text-xs text-muted">Manage website contact details, social media links, and coordinator roster</p>
         </div>
         <button
           onClick={loadData}
@@ -188,6 +197,45 @@ export default function AdminSettingsPage() {
                   onChange={(e) => setResponseTime(e.target.value)}
                   className={inputClass}
                   placeholder="e.g. Within 1 Business Day"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className="glass-card p-4 space-y-3">
+            <h3 className="text-xs font-bold text-foreground border-b border-border pb-2 flex items-center gap-1.5">
+              <Share2 size={14} className="text-primary" /> Footer Social Media Links
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label className={labelClass}>Instagram URL</label>
+                <input
+                  type="text"
+                  value={instagramUrl}
+                  onChange={(e) => setInstagramUrl(e.target.value)}
+                  className={inputClass}
+                  placeholder="https://instagram.com/yourpage"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>WhatsApp Number / Link</label>
+                <input
+                  type="text"
+                  value={whatsappUrl}
+                  onChange={(e) => setWhatsappUrl(e.target.value)}
+                  className={inputClass}
+                  placeholder="https://wa.me/919876543210"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Facebook URL</label>
+                <input
+                  type="text"
+                  value={facebookUrl}
+                  onChange={(e) => setFacebookUrl(e.target.value)}
+                  className={inputClass}
+                  placeholder="https://facebook.com/yourpage"
                 />
               </div>
             </div>

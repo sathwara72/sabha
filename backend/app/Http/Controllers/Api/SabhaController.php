@@ -139,20 +139,11 @@ class SabhaController extends Controller
             if ($eventCount > 0) {
                 Statistic::where('label', 'like', '%Event%')
                     ->update(['value' => $eventCount . '+']);
-                Statistic::where('label', 'like', '%Mixer%')
-                    ->update(['value' => $eventCount . '+']);
             }
 
-            // Count unique business locations/cities
-            $cityCount = Business::whereNotNull('location')
-                ->where('location', '!=', '')
-                ->distinct('location')
-                ->count('location');
-            
-            if ($cityCount > 0) {
-                Statistic::where('label', 'like', '%Cit%')
-                    ->update(['value' => $cityCount . '+']);
-            }
+            // Ensure any city or mixer-related stat is removed from database
+            Statistic::where('label', 'like', '%Cit%')->delete();
+            Statistic::where('label', 'like', '%Mixer%')->delete();
         } catch (\Exception $e) {
             Log::error("Failed to dynamically update statistics: " . $e->getMessage());
         }

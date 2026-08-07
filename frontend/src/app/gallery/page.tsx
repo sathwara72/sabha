@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Camera, Users, Target, Folder, Image, Film,
+  Camera, Users, Folder, Image, Film,
   Play, X, ChevronLeft, ChevronRight, Maximize2,
   Calendar, Eye
 } from "lucide-react";
@@ -31,8 +31,7 @@ export default function GalleryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [stats, setStats] = useState({
-    members: "500+",
-    cities: "12+"
+    members: "500+"
   });
 
   // Lightbox / Slider popup states
@@ -61,11 +60,9 @@ export default function GalleryPage() {
         setGallery(galData || []);
 
         const foundMembers = statData.find((s: any) => s.label.toLowerCase().includes("member") || s.label.toLowerCase().includes("professional"));
-        const foundCities = statData.find((s: any) => s.label.toLowerCase().includes("city") || s.label.toLowerCase().includes("cities"));
 
         setStats({
-          members: foundMembers ? foundMembers.value : "500+",
-          cities: foundCities ? foundCities.value : "12+"
+          members: foundMembers ? foundMembers.value : "500+"
         });
       } catch (err) {
         console.error("Failed to load gallery:", err);
@@ -154,7 +151,7 @@ export default function GalleryPage() {
       {/* Stats Section */}
       <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div className="glass-card flex items-start gap-4 p-5 md:col-span-2">
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                 <Camera size={20} />
@@ -174,16 +171,6 @@ export default function GalleryPage() {
               <div>
                 <p className="text-3xl font-bold text-foreground leading-none">{stats.members}</p>
                 <p className="mt-1.5 text-xs font-medium text-muted">{t("gallery.members")}</p>
-              </div>
-            </div>
-
-            <div className="glass-card flex items-center gap-4 p-5">
-              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Target size={20} />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-foreground leading-none">{stats.cities}</p>
-                <p className="mt-1.5 text-xs font-medium text-muted">{t("gallery.cities")}</p>
               </div>
             </div>
           </div>

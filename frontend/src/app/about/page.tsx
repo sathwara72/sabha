@@ -89,8 +89,7 @@ export default function AboutPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     members: "500+",
-    businessExchanged: "₹10Cr+",
-    monthlyMixers: "50+"
+    businessExchanged: "₹10Cr+"
   });
   const [team, setTeam] = useState<any[]>([]);
 
@@ -105,12 +104,10 @@ export default function AboutPage() {
 
         const foundMembers = statData.find((s: any) => s.label.toLowerCase().includes("member") || s.label.toLowerCase().includes("professional"));
         const foundBusiness = statData.find((s: any) => s.label.toLowerCase().includes("exchange"));
-        const foundMixers = statData.find((s: any) => s.label.toLowerCase().includes("mixer"));
 
         setStats({
           members: foundMembers ? foundMembers.value : "500+",
-          businessExchanged: foundBusiness ? foundBusiness.value : "₹10Cr+",
-          monthlyMixers: foundMixers ? foundMixers.value : "50+"
+          businessExchanged: foundBusiness ? foundBusiness.value : "₹10Cr+"
         });
 
         let loadedTeam = [];
@@ -192,18 +189,25 @@ export default function AboutPage() {
               {t("about.mission_desc")}
             </p>
 
-            <div className="grid grid-cols-3 gap-6 pt-4 border-t border-border/80">
-              <div className="space-y-1">
-                <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.members}</p>
-                <p className="text-[11px] font-bold text-muted uppercase">{t("about.verified_members")}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border/80">
+              <div className="glass-card flex items-center gap-4 p-5 rounded-2xl border border-border bg-surface/50 shadow-sm transition-all hover:border-primary/20">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <Users className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-extrabold text-foreground sm:text-3xl leading-none">{stats.members}</p>
+                  <p className="mt-1.5 text-xs font-bold text-muted uppercase tracking-wider">{t("about.verified_members")}</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.businessExchanged}</p>
-                <p className="text-[11px] font-bold text-muted uppercase">{t("about.business_exchanged")}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-3xl font-extrabold text-foreground sm:text-4xl">{stats.monthlyMixers}</p>
-                <p className="text-[11px] font-bold text-muted uppercase">{t("about.monthly_mixers")}</p>
+
+              <div className="glass-card flex items-center gap-4 p-5 rounded-2xl border border-border bg-surface/50 shadow-sm transition-all hover:border-primary/20">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <TrendingUp className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-extrabold text-foreground sm:text-3xl leading-none">{stats.businessExchanged}</p>
+                  <p className="mt-1.5 text-xs font-bold text-muted uppercase tracking-wider">{t("about.business_exchanged")}</p>
+                </div>
               </div>
             </div>
           </motion.div>

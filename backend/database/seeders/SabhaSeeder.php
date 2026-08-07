@@ -119,14 +119,6 @@ class SabhaSeeder extends Seeder
              ['label' => 'Business Exchanged'],
              ['value' => '₹10Cr+']
          );
-         \App\Models\Statistic::updateOrCreate(
-             ['label' => 'Monthly Mixers'],
-             ['value' => '50+']
-         );
-         \App\Models\Statistic::updateOrCreate(
-             ['label' => 'Cities Covered'],
-             ['value' => '12+']
-         );
 
          // Settings
          \App\Models\Setting::updateOrCreate(
