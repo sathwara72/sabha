@@ -29,6 +29,8 @@ export default function AdminSettingsPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactAddress, setContactAddress] = useState("");
   const [responseTime, setResponseTime] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [whatsappUrl, setWhatsappUrl] = useState("");
@@ -44,6 +46,8 @@ export default function AdminSettingsPage() {
       setErrorMsg("");
       const data = await fetchSettings();
       setContactEmail(data.contact_email || "hello@sabha.global");
+      setContactPhone(data.contact_phone || "+91 95377 33567");
+      setContactAddress(data.contact_address || "Ahmedabad, Gujarat, India");
       setResponseTime(data.response_time || "Within 1 Business Day");
       setInstagramUrl(data.instagram_url || "");
       setWhatsappUrl(data.whatsapp_url || "");
@@ -115,6 +119,8 @@ export default function AdminSettingsPage() {
     try {
       await updateSettingsAdmin({ 
         contact_email: contactEmail, 
+        contact_phone: contactPhone,
+        contact_address: contactAddress,
         response_time: responseTime,
         instagram_url: instagramUrl,
         whatsapp_url: whatsappUrl,
@@ -180,13 +186,34 @@ export default function AdminSettingsPage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className={labelClass}>General Contact Email</label>
+                <label className={labelClass}>Footer Contact Email</label>
                 <input
                   type="email"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                   className={inputClass}
                   placeholder="e.g. hello@sabha.global"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Footer Mobile / Phone Number</label>
+                <input
+                  type="text"
+                  maxLength={10}
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                  className={inputClass}
+                  placeholder="10-digit mobile number"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Footer Contact Address</label>
+                <input
+                  type="text"
+                  value={contactAddress}
+                  onChange={(e) => setContactAddress(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Ahmedabad, Gujarat, India"
                 />
               </div>
               <div>
@@ -286,6 +313,7 @@ export default function AdminSettingsPage() {
                       <label className={labelClass}>Phone Number</label>
                       <input
                         type="text"
+                        maxLength={10}
                         value={coordinator.phone}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, "").slice(0, 10);

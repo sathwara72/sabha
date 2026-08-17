@@ -630,85 +630,85 @@ export default function BusinessDetailsPage() {
           {/* Profile Bar at bottom of cover */}
           <div className="absolute bottom-0 left-0 right-0 z-10">
             <div className="px-6 pb-6">
-            <div className="flex flex-col md:flex-row md:items-end gap-5">
-              <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-white text-primary text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
-                <SafeImage
-                  src={business.logo}
-                  alt={business.name}
-                  title={business.name}
-                  fallbackType="business"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-
-              {/* Name & Details */}
-              <div className="flex-1 space-y-1.5 md:pb-1">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  {business.verified && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-white border border-white/20">
-                      <ShieldCheck className="h-3 w-3" /> {t("businessDetail.verified")}
-                    </span>
-                  )}
-                  {calculatedRating ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-400/20">
-                      <Star className="h-3 w-3 fill-current" /> {calculatedRating} ({allReviews.length})
-                    </span>
-                  ) : null}
+              <div className="flex flex-col md:flex-row md:items-end gap-5">
+                <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-white text-primary text-4xl sm:text-5xl font-extrabold flex items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm">
+                  <SafeImage
+                    src={business.logo}
+                    alt={business.name}
+                    title={business.name}
+                    fallbackType="business"
+                    className="h-full w-full object-contain"
+                  />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg">
-                  {business.name}
-                </h1>
-                {business.tagline && (
-                  <p className="text-sm font-semibold text-white/70">
-                    {business.tagline}
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/60 font-medium">
-                  {([business.area, business.city].filter(Boolean).join(", ") || business.location) && (
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> {[business.area, business.city].filter(Boolean).join(", ") || business.location}
-                    </span>
-                  )}
-                  {business.category && <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" /> {business.category}</span>}
-                  {business.hours && <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {t("businessDetail.open")} {business.hours.split(" (")[0]}</span>}
-                </div>
-              </div>
 
-              {/* Connection Actions */}
-              <div className="flex gap-2 shrink-0 md:pb-1">
-                {business.phone && (
-                  <a
-                    href={`tel:${business.phone}`}
-                    className="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-3 text-xs font-bold text-slate-900 shadow-lg transition-all hover:bg-primary hover:text-white active:scale-[0.98]"
-                  >
-                    <Phone className="h-3.5 w-3.5" />
-                    {t("businessDetail.connect_now")}
-                  </a>
-                )}
-                {business.email && (
-                  <a
-                    href={`mailto:${business.email}`}
-                    className="flex items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-3.5 py-3 text-white transition-colors hover:bg-white/25 shadow-sm"
-                    aria-label="Email"
-                    title="Send Email"
-                  >
-                    <Mail size={16} />
-                  </a>
-                )}
+                {/* Name & Details */}
+                <div className="flex-1 space-y-1.5 md:pb-1">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {business.verified && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-white border border-white/20">
+                        <ShieldCheck className="h-3 w-3" /> {t("businessDetail.verified")}
+                      </span>
+                    )}
+                    {calculatedRating ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-amber-400/20">
+                        <Star className="h-3 w-3 fill-current" /> {calculatedRating} ({allReviews.length})
+                      </span>
+                    ) : null}
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg">
+                    {business.name}
+                  </h1>
+                  {business.tagline && (
+                    <p className="text-sm font-semibold text-white/70">
+                      {business.tagline}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/60 font-medium">
+                    {([business.area, business.city].filter(Boolean).join(", ") || business.location) && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {[business.area, business.city].filter(Boolean).join(", ") || business.location}
+                      </span>
+                    )}
+                    {business.category && <span className="inline-flex items-center gap-1"><Briefcase className="h-3 w-3" /> {business.category}</span>}
+                    {business.hours && <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {t("businessDetail.open")} {business.hours.split(" (")[0]}</span>}
+                  </div>
+                </div>
+
+                {/* Connection Actions */}
+                <div className="flex gap-2 shrink-0 md:pb-1">
+                  {business.phone && (
+                    <a
+                      href={`tel:${business.phone}`}
+                      className="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-3 text-xs font-bold text-slate-900 shadow-lg transition-all hover:bg-primary hover:text-white active:scale-[0.98]"
+                    >
+                      <Phone className="h-3.5 w-3.5" />
+                      {t("businessDetail.connect_now")}
+                    </a>
+                  )}
+                  {business.email && (
+                    <a
+                      href={`mailto:${business.email}`}
+                      className="flex items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-3.5 py-3 text-white transition-colors hover:bg-white/25 shadow-sm"
+                      aria-label="Email"
+                      title="Send Email"
+                    >
+                      <Mail size={16} />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
 
       {/* Main Grid Content */}
       <div className="mx-auto max-w-7xl px-6 py-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          
+
           {/* Main Column */}
           <div className="space-y-6 lg:col-span-2">
-            
+
             {/* About Section */}
             {business.about && (
               <section className="space-y-2">
@@ -879,21 +879,21 @@ export default function BusinessDetailsPage() {
                             <span className="text-[10px] text-muted leading-none mt-0.5 inline-block">{reviewerRole}</span>
                           </div>
                         </div>
-                      <div className="flex gap-0.5 text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/30">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3 w-3 ${i < rev.rating ? "fill-current" : "text-amber-200"}`}
-                          />
-                        ))}
+                        <div className="flex gap-0.5 text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/30">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${i < rev.rating ? "fill-current" : "text-amber-200"}`}
+                            />
+                          ))}
+                        </div>
                       </div>
+                      <p className="text-xs text-muted leading-relaxed font-medium bg-surface/40 p-3 rounded-lg">
+                        "{rev.content}"
+                      </p>
                     </div>
-                    <p className="text-xs text-muted leading-relaxed font-medium bg-surface/40 p-3 rounded-lg">
-                      "{rev.content}"
-                    </p>
-                  </div>
-                );
-              })}
+                  );
+                })}
               </div>
             </section>
           </div>
@@ -1029,120 +1029,63 @@ export default function BusinessDetailsPage() {
                   </div>
                 )}
 
-                {/* Coordinates Map Preview */}
-                {(business.address || business.area || business.city || business.state || parseGoogleMapsIframeSrc(business.mapIframe) || business.location) && (
-                  <div className="mt-6 border-t border-border pt-5 space-y-2.5">
-                    <p className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5 text-primary" /> {t("businessDetail.geographic_location")}
-                    </p>
-                    
-                    {(business.address || business.area || business.city || business.state || business.pincode) && (
-                      <p className="text-xs font-semibold text-foreground leading-snug">
-                        {[business.address, business.area, business.city, business.state].filter(Boolean).join(", ")}
-                        {business.pincode ? ` - ${business.pincode}` : ""}
-                      </p>
-                    )}
+                {/* Coordinates Map Preview & Full Address */}
+                {(() => {
+                  const hasAddressDetails = Boolean(
+                    (business.address && business.address.trim()) ||
+                    (business.area && business.area.trim()) ||
+                    (business.city && business.city.trim()) ||
+                    (business.state && business.state.trim()) ||
+                    (business.pincode && business.pincode.trim()) ||
+                    parseGoogleMapsIframeSrc(business.mapIframe)
+                  );
 
-                    {parseGoogleMapsIframeSrc(business.mapIframe) ? (
-                      <div className="h-44 w-full rounded-xl border border-border overflow-hidden relative shadow-sm bg-slate-900">
-                        <iframe
-                          src={parseGoogleMapsIframeSrc(business.mapIframe)!}
-                          className="w-full h-full border-0"
-                          allowFullScreen
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-28 w-full rounded-xl bg-slate-100 border border-border overflow-hidden relative flex items-center justify-center select-none">
-                        {/* Subtle Grid dots */}
-                        <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-                        <div className="flex flex-col items-center z-10 text-center p-4">
-                          <MapPin className="h-5 w-5 text-primary animate-bounce mb-1" />
-                          <span className="text-[10px] font-bold text-foreground truncate max-w-full">{business.location || "Ahmedabad, India"}</span>
-                          <span className="text-[8px] text-muted-foreground mt-0.5">{t("businessDetail.vetted_office")}</span>
+                  if (!hasAddressDetails) return null;
+
+                  const parts = [business.address, business.area, business.city, business.state].filter(Boolean);
+                  const fullAddr = parts.length > 0
+                    ? parts.join(", ") + (business.pincode ? ` - ${business.pincode}` : "")
+                    : business.location;
+
+                  const mapSrc = parseGoogleMapsIframeSrc(business.mapIframe);
+
+                  return (
+                    <div className="mt-6 border-t border-border pt-5 space-y-3">
+                      <p className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5 text-primary" /> {t("businessDetail.geographic_location")}
+                      </p>
+
+                      {/* Full Address Card */}
+                      {fullAddr && (
+                        <div className="flex items-start gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+                          <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-extrabold text-slate-900 leading-snug">
+                              {fullAddr}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+
+                      {/* Map Iframe / Embed Preview */}
+                      {mapSrc && (
+                        <div className="h-52 w-full rounded-xl border border-border overflow-hidden relative shadow-sm bg-slate-900">
+                          <iframe
+                            src={mapSrc}
+                            className="w-full h-full border-0"
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
-            {/* Direct Inquiry Message Form */}
-            <div className="glass-card p-5 space-y-4">
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">{t("businessDetail.send_inquiry_title")}</h3>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{t("businessDetail.response_time")}</p>
-              </div>
-              <form onSubmit={handleSendMessage} className="space-y-2.5">
-                <input
-                  type="text"
-                  required
-                  disabled={formSubmitting}
-                  placeholder={t("businessDetail.ph_name")}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary disabled:opacity-50"
-                />
-                <input
-                  type="email"
-                  required
-                  disabled={formSubmitting}
-                  placeholder={t("businessDetail.ph_email")}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary disabled:opacity-50"
-                />
-                <input
-                  type="text"
-                  required
-                  disabled={formSubmitting}
-                  placeholder={t("businessDetail.ph_subject")}
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary disabled:opacity-50"
-                />
-                <textarea
-                  required
-                  rows={3}
-                  disabled={formSubmitting}
-                  placeholder={t("businessDetail.ph_message")}
-                  value={msg}
-                  onChange={(e) => setMsg(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none disabled:opacity-50"
-                />
-                <button
-                  type="submit"
-                  disabled={formSubmitting}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-                >
-                  {formSubmitting ? t("common.loading") : t("businessDetail.send_inquiry")}
-                </button>
-                <AnimatePresence>
-                  {formSubmitted && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 0 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="text-[10px] text-center text-green-600 font-semibold p-2 bg-green-50 rounded-lg border border-green-200/50"
-                    >
-                      {t("businessDetail.inquiry_sent")}
-                    </motion.div>
-                  )}
-                  {formError && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 0 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="text-[10px] text-center text-red-600 font-semibold p-2 bg-red-50 rounded-lg border border-red-200/50"
-                    >
-                      {formError}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </form>
-            </div>
+
 
             {/* Vetted member Trust badge */}
             <div className="rounded-2xl border border-border bg-primary p-5 text-white space-y-3.5">

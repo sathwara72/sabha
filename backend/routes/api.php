@@ -42,6 +42,7 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::delete('/events/{id}', [SabhaController::class, 'deleteEvent']);
     Route::get('/users', [SabhaController::class, 'getUsers']);
     Route::post('/users/{id}/toggle-block', [SabhaController::class, 'toggleUserBlock']);
+    Route::delete('/users/{id}', [SabhaController::class, 'deleteUser']);
     Route::post('/gallery/upload', [SabhaController::class, 'uploadGalleryImage']);
     Route::delete('/gallery/{id}', [SabhaController::class, 'deleteGalleryImage']);
     Route::post('/statistics/{id}', [SabhaController::class, 'updateStatistic']);

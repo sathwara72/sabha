@@ -50,7 +50,9 @@ export default function Footer() {
     { name: "Facebook", url: "https://facebook.com", icon: FacebookIcon, hoverColor: "hover:text-blue-600 hover:border-blue-500" },
   ];
 
-  const contactEmail = settings.contact_email || "hello@sabha.com";
+  const contactEmail = settings.contact_email || "hello@sabha.global";
+  const contactPhone = settings.contact_phone || "+91 95377 33567";
+  const contactAddress = settings.contact_address || "Ahmedabad, Gujarat, India";
 
   return (
     <footer className="border-t border-border bg-white font-outfit">
@@ -116,12 +118,12 @@ export default function Footer() {
             <h3 className="text-sm font-semibold text-foreground">{t("footer.contact")}</h3>
             <ul className="space-y-3 text-sm text-muted">
               <li className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 shrink-0 text-primary" />
-                <span>Level 4, Business Park, Phase 2, Mumbai</span>
+                <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+                <span>{contactAddress}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 shrink-0 text-primary" />
-                <span>+91 91234 56789</span>
+                <a href={`tel:${contactPhone.replace(/[^0-9+]/g, '')}`} className="hover:text-primary transition-colors">{contactPhone}</a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-4 w-4 shrink-0 text-primary" />

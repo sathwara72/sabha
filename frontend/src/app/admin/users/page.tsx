@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { fetchUsersAdmin, toggleUserBlock } from "@/lib/api";
+import { fetchUsersAdmin, toggleUserBlock, deleteUserAdmin } from "@/lib/api";
 import { assetUrl, hasMediaFile } from "@/lib/config";
 import {
-  Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X, Ban, UserCheck, ShieldAlert
+  Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X, Ban, UserCheck, ShieldAlert, Trash2
 } from "lucide-react";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import Pagination from "@/components/shared/Pagination";
@@ -45,23 +45,43 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [blockingUser, setBlockingUser] = useState<User | null>(null);
   const [blockLoading, setBlockLoading] = useState(false);
-  
-  // Pagination state
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Server-side Pagination state
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }, [currentPage]);
-
-  useEffect(() => {
     loadData();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   async function loadData() {
     try {
-      const data = await fetchUsersAdmin();
-      setUsers(data);
+      setLoading(true);
+      const res = await fetchUsersAdmin(currentPage, itemsPerPage, searchTerm);
+      
+      let userList: User[] = [];
+      if (res && res.data && Array.isArray(res.data)) {
+        userList = res.data;
+        setTotalPages(res.last_page || 1);
+        setTotalItems(res.total || res.data.length);
+      } else if (Array.isArray(res)) {
+        userList = res;
+        setTotalPages(1);
+        setTotalItems(res.length);
+      }
+      
+      // Sort latest first
+      const sortedData = [...userList].sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        if (dateB !== dateA) return dateB - dateA;
+        return (b.id || 0) - (a.id || 0);
+      });
+      setUsers(sortedData);
     } catch (error) {
       console.error("Error loading users:", error);
     } finally {
@@ -95,6 +115,37 @@ export default function AdminUsersPage() {
     }
   }
 
+  function handleDeleteUser(user: User) {
+    if (user.role === "admin") {
+      alert("Cannot delete admin users.");
+      return;
+    }
+    setDeletingUser(user);
+  }
+
+  async function handleConfirmDeleteUser() {
+    if (!deletingUser) return;
+    try {
+      setDeleteLoading(true);
+      await deleteUserAdmin(deletingUser.id);
+      setUsers(prev => prev.filter(u => u.id !== deletingUser.id));
+      if (selectedUser?.id === deletingUser.id) {
+        setSelectedUser(null);
+      }
+      setDeletingUser(null);
+      // Reload current page if table is empty
+      if (users.length === 1 && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      } else {
+        loadData();
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to delete member");
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (selectedUser) {
@@ -110,19 +161,6 @@ export default function AdminUsersPage() {
     };
   }, [selectedUser]);
 
-  // Reset page to 1 when search query changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
-
-  const filteredUsers = users.filter(u =>
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -130,7 +168,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Members</h1>
             <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary">
-              {loading ? "..." : users.length}
+              {loading ? "..." : totalItems}
             </span>
           </div>
           <p className="text-xs text-muted">Manage community members</p>
@@ -140,10 +178,13 @@ export default function AdminUsersPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search members..."
+            placeholder="Search by name, email..."
             className="w-full rounded-xl border border-border bg-white py-1.5 pl-9 pr-4 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
       </div>
@@ -166,7 +207,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {paginatedUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="transition-colors hover:bg-slate-50/70">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
@@ -219,25 +260,34 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {user.role !== "admin" && (
-                          <button
-                            onClick={() => handleToggleBlock(user)}
-                            className={`inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold border transition-all active:scale-95 cursor-pointer shadow-xs ${
-                              user.is_blocked
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                                : "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
-                            }`}
-                            title={user.is_blocked ? "Unblock Member" : "Block Member"}
-                          >
-                            {user.is_blocked ? (
-                              <>
-                                <UserCheck size={12} /> Unblock
-                              </>
-                            ) : (
-                              <>
-                                <Ban size={12} /> Block
-                              </>
-                            )}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleToggleBlock(user)}
+                              className={`inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold border transition-all active:scale-95 cursor-pointer shadow-xs ${
+                                user.is_blocked
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                  : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                              }`}
+                              title={user.is_blocked ? "Unblock Member" : "Block Member"}
+                            >
+                              {user.is_blocked ? (
+                                <>
+                                  <UserCheck size={12} /> Unblock
+                                </>
+                              ) : (
+                                <>
+                                  <Ban size={12} /> Block
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition-all hover:bg-rose-100 hover:text-rose-700 active:scale-95 cursor-pointer shadow-xs"
+                              title="Delete Member"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </>
                         )}
                         <button
                           onClick={() => setSelectedUser(user)}
@@ -253,25 +303,26 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
-          {filteredUsers.length === 0 && !loading && (
+          {users.length === 0 && !loading && (
             <div className="py-20 text-center">
               <p className="text-sm text-slate-500">No members found.</p>
             </div>
           )}
 
-          {/* Pagination */}
+          {/* API Driven Pagination */}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={filteredUsers.length}
+            totalItems={totalItems}
             itemsPerPage={itemsPerPage}
-            onPageChange={(page) => setCurrentPage(page)}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
             itemLabel="members"
           />
         </div>
       )}
-
-     
 
       {selectedUser && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -431,26 +482,34 @@ export default function AdminUsersPage() {
 
             {/* Footer */}
             <div className="flex justify-between items-center border-t border-border pt-4 mt-4">
-              <div>
+              <div className="flex items-center gap-2">
                 {selectedUser.role !== "admin" && (
-                  <button
-                    onClick={() => handleToggleBlock(selectedUser)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                      selectedUser.is_blocked
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                        : "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
-                    }`}
-                  >
-                    {selectedUser.is_blocked ? (
-                      <>
-                        <UserCheck size={14} /> Unblock User
-                      </>
-                    ) : (
-                      <>
-                        <Ban size={14} /> Block User
-                      </>
-                    )}
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleToggleBlock(selectedUser)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                        selectedUser.is_blocked
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                          : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                      }`}
+                    >
+                      {selectedUser.is_blocked ? (
+                        <>
+                          <UserCheck size={14} /> Unblock User
+                        </>
+                      ) : (
+                        <>
+                          <Ban size={14} /> Block User
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUser(selectedUser)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
+                    >
+                      <Trash2 size={14} /> Delete Member
+                    </button>
+                  </>
                 )}
               </div>
               <button
@@ -471,10 +530,22 @@ export default function AdminUsersPage() {
         title={blockingUser?.is_blocked ? "Unblock Member" : "Block Member"}
         message={blockingUser ? `Are you sure you want to ${blockingUser.is_blocked ? "unblock" : "block"} member "${blockingUser.name}"? ${blockingUser.is_blocked ? "They will regain access to the platform." : "Their session will be terminated immediately."}` : ""}
         confirmLabel={blockingUser?.is_blocked ? "Unblock Member" : "Block Member"}
-        variant={blockingUser?.is_blocked ? "success" : "danger"}
+        variant={blockingUser?.is_blocked ? "success" : "warning"}
         isLoading={blockLoading}
         onConfirm={handleConfirmToggleBlock}
         onCancel={() => setBlockingUser(null)}
+      />
+
+      {/* Delete User Custom Confirm Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deletingUser)}
+        title="Delete Member"
+        message={deletingUser ? `Are you sure you want to permanently delete member "${deletingUser.name}" (${deletingUser.email})? This action cannot be undone.` : ""}
+        confirmLabel="Delete Member"
+        variant="danger"
+        isLoading={deleteLoading}
+        onConfirm={handleConfirmDeleteUser}
+        onCancel={() => setDeletingUser(null)}
       />
     </div>
   );
