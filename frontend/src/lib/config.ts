@@ -58,15 +58,18 @@ export function parseGoogleMapsIframeSrc(input?: string | null): string | null {
   const str = input.trim();
   if (!str) return null;
 
-  // If user pasted full <iframe ... src="https://www.google.com/maps/embed?..." ...></iframe>
+  // 1. If user pasted full <iframe ... src="https://www.google.com/maps/embed?..." ...></iframe>
   const srcMatch = str.match(/src=["']([^"']+)["']/i);
   if (srcMatch && srcMatch[1]) {
     return srcMatch[1];
   }
 
-  // If user pasted direct URL
+  // 2. If user pasted direct URL
   if (/^https?:\/\//i.test(str)) {
-    return str;
+    if (str.includes("/embed") || str.includes("output=embed")) {
+      return str;
+    }
+    return `https://maps.google.com/maps?q=${encodeURIComponent(str)}&output=embed`;
   }
 
   return null;

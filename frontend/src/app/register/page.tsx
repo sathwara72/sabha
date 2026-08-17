@@ -144,6 +144,7 @@ export default function RegisterPage() {
                   <input
                     type="tel"
                     required
+                    maxLength={10}
                     value={phone}
                     onChange={(e) => {
                       const val = e.target.value.replace(/\D/g, "").slice(0, 10);

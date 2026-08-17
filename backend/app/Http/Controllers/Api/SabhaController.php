@@ -301,13 +301,14 @@ class SabhaController extends Controller
 
     public function getUsers(Request $request)
     {
-        $query = User::with('business');
+        $query = User::with('business')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
@@ -339,6 +340,26 @@ class SabhaController extends Controller
         return response()->json([
             'message' => $user->is_blocked ? 'User blocked successfully' : 'User unblocked successfully',
             'user' => $user,
+        ]);
+    }
+
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Cannot delete admin users'], 400);
+        }
+
+        if ($user->business) {
+            $user->business()->delete();
+        }
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Member deleted successfully',
         ]);
     }
 
@@ -628,11 +649,21 @@ class SabhaController extends Controller
             $servicesArray = $servicesInput;
         }
 
+        $fullLocationParts = array_filter([
+            $validated['address'] ?? null,
+            $validated['area'] ?? null,
+            $validated['city'] ?? null,
+            $validated['state'] ?? null,
+        ]);
+        $constructedLocation = count($fullLocationParts) > 0 
+            ? implode(', ', $fullLocationParts) . (!empty($validated['pincode']) ? ' - ' . $validated['pincode'] : '')
+            : ($validated['location'] ?? null);
+
         $businessData = [
             'name' => $name,
             'category' => $category,
             'tagline' => $validated['tagline'] ?? null,
-            'location' => $validated['location'] ?? null,
+            'location' => $constructedLocation ?: ($validated['location'] ?? null),
             'address' => $validated['address'] ?? null,
             'area' => $validated['area'] ?? null,
             'city' => $validated['city'] ?? null,

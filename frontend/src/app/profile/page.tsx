@@ -512,6 +512,7 @@ export default function ProfilePage() {
                     <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <input
                       type="text"
+                      maxLength={10}
                       value={profilePhone}
                       onChange={(e) => {
                         const val = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -1106,6 +1107,7 @@ export default function ProfilePage() {
                                 <label className={labelClass}>{t("profile.biz_phone")}</label>
                                 <input
                                   type="text"
+                                  maxLength={10}
                                   value={bizPhone}
                                   onChange={(e) => {
                                     const val = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -1137,7 +1139,7 @@ export default function ProfilePage() {
                               </div>
                               <div>
                                 <label className={labelClass}>{t("profile.biz_whatsapp")}</label>
-                                <div className="relative"><MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="text" value={bizWhatsapp} onChange={(e) => setBizWhatsapp(e.target.value)} placeholder="e.g. +919820012345" className={`${inputClass} pl-10`} /></div>
+                                <div className="relative"><MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="text" maxLength={10} value={bizWhatsapp} onChange={(e) => setBizWhatsapp(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit WhatsApp number" className={`${inputClass} pl-10`} /></div>
                               </div>
                             </div>
                           </div>

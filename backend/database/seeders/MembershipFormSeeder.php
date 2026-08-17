@@ -1711,20 +1711,30 @@ JSON;
             );
 
             // 3. Create or Update Business
+            $fullAddressParts = array_filter([
+                $data['address'] ?? null,
+                $data['city'] ?? null,
+                'Gujarat'
+            ]);
+            $fullLocation = count($fullAddressParts) > 0 ? implode(', ', $fullAddressParts) : 'Gujarat';
+
             Business::updateOrCreate(
                 ['name' => $data['business_name']],
                 [
                     'user_id' => $user->id,
                     'business_category_id' => $category->id,
                     'category' => $categoryName,
-                    'location' => $data['city'] ? $data['city'] . ', Gujarat' : 'Gujarat',
+                    'location' => $fullLocation,
+                    'address' => $data['address'] ?? null,
+                    'city' => $data['city'] ?? null,
+                    'state' => 'Gujarat',
                     'description' => $data['bio'],
                     'logo' => $data['logo'],
                     'phone' => $data['mobile'],
                     'email' => $data['email'],
                     'status' => 'approved',
                     'is_verified' => true,
-                    'payment_screenshot' => $data['payment_ss'],
+                    'payment_screenshot' => $data['payment_ss'] ?? null,
                 ]
             );
         }

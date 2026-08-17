@@ -971,6 +971,26 @@ export async function toggleUserBlock(id: number) {
   return resData;
 }
 
+export async function deleteUserAdmin(id: number) {
+  const token = localStorage.getItem("sabha_token");
+  
+  const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const resData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(resData.message || "Failed to delete member");
+  }
+
+  return resData;
+}
+
 
 export async function createEventAdmin(eventData: any) {
   const token = localStorage.getItem("sabha_token");
@@ -1051,11 +1071,23 @@ export async function deleteEvent(id: number) {
   return { success: true };
 }
 
-export async function fetchUsersAdmin() {
+export async function fetchUsersAdmin(page?: number, limit: number = 10, search: string = "") {
   const token = localStorage.getItem("sabha_token");
   if (!token) throw new Error("Authentication required");
 
-  const response = await fetch(`${API_BASE_URL}/admin/users`, {
+  const params = new URLSearchParams();
+  if (page !== undefined && page !== null) {
+    params.append("page", page.toString());
+    params.append("limit", limit.toString());
+  }
+  if (search) {
+    params.append("search", search);
+  }
+
+  const queryString = params.toString();
+  const url = `${API_BASE_URL}/admin/users${queryString ? `?${queryString}` : ""}`;
+
+  const response = await fetch(url, {
     method: "GET",
     headers: {
       "Accept": "application/json",
