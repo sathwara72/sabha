@@ -4,13 +4,13 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
-  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness, deleteBusiness
+  fetchAllBusinessesAdmin, approveBusiness, rejectBusiness, deleteBusiness, fetchCategories
 } from "@/lib/api";
 import { API_ORIGIN, assetUrl, hasMediaFile } from "@/lib/config";
 import {
   ShieldCheck, XCircle, CheckCircle2,
   Globe, Info, Search, ChevronLeft, ChevronRight,
-  MapPin, Phone, Receipt, X, ZoomIn, Eye, Trash2
+  MapPin, Phone, Receipt, X, ZoomIn, Eye, Trash2, ChevronDown
 } from "lucide-react";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import PromptModal from "@/components/shared/PromptModal";
@@ -44,6 +44,8 @@ export default function AdminBusinessesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -58,7 +60,21 @@ export default function AdminBusinessesPage() {
   const [rejectingBiz, setRejectingBiz] = useState<{ id: number; name: string } | null>(null);
   const [deletingBiz, setDeletingBiz] = useState<{ id: number; name: string } | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const itemsPerPage = 9;
+  const [itemsPerPage, setItemsPerPage] = useState(50);
+
+  useEffect(() => {
+    async function loadCategoryList() {
+      try {
+        const catList = await fetchCategories();
+        if (Array.isArray(catList) && catList.length > 0) {
+          setCategories(catList);
+        }
+      } catch (e) {
+        console.error("Failed to load categories:", e);
+      }
+    }
+    loadCategoryList();
+  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -76,26 +92,45 @@ export default function AdminBusinessesPage() {
         limit: itemsPerPage,
         search: searchTerm,
         status: statusFilter,
+        category: categoryFilter,
       });
 
       if (res && res.paginator) {
-        setBusinesses(res.paginator.data || []);
-        setTotalItems(res.paginator.total || 0);
+        let list = res.paginator.data || [];
+        if (categoryFilter !== "all") {
+          list = list.filter((b: any) => b.category?.toLowerCase() === categoryFilter.toLowerCase());
+        }
+        setBusinesses(list);
+        setTotalItems(res.paginator.total || list.length);
         setTotalPages(res.paginator.last_page || 1);
         if (res.counts) {
           setCounts(res.counts);
         }
       } else if (Array.isArray(res)) {
-        setBusinesses(res);
-        setTotalItems(res.length);
-        setTotalPages(Math.ceil(res.length / itemsPerPage));
+        let filtered = res;
+        if (categoryFilter !== "all") {
+          filtered = filtered.filter(
+            (b: any) => b.category?.toLowerCase() === categoryFilter.toLowerCase()
+          );
+        }
+        setBusinesses(filtered);
+        setTotalItems(filtered.length);
+        setTotalPages(Math.ceil(filtered.length / itemsPerPage));
       }
     } catch (error) {
       console.error("Error loading businesses:", error);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, statusFilter]);
+  }, [currentPage, itemsPerPage, searchTerm, statusFilter, categoryFilter]);
+
+  const allCategoryOptions = useMemo(() => {
+    const listSet = new Set<string>(categories);
+    businesses.forEach((b) => {
+      if (b.category) listSet.add(b.category);
+    });
+    return Array.from(listSet).sort();
+  }, [categories, businesses]);
 
   useEffect(() => {
     loadData();
@@ -148,30 +183,57 @@ export default function AdminBusinessesPage() {
     <>
       <div className="space-y-4">
         {/* Page Header */}
-        <div className="flex flex-col">
+        {/* <div className="flex flex-col">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Business Approvals</h1>
           <p className="text-sm text-muted">Review and approve member businesses</p>
-        </div>
+        </div> */}
 
-        <div className="flex items-center gap-3 rounded-xl bg-primary-soft p-3">
+        {/* <div className="flex items-center gap-3 rounded-xl bg-primary-soft p-3">
           <Info className="h-5 w-5 shrink-0 text-primary" />
           <p className="text-sm font-semibold text-foreground">
             Review each business carefully before approving it for the community.
           </p>
-        </div>
+        </div> */}
 
         {/* Search + Filter */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search by name, category, or description..."
-              className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-2 flex-1 max-w-xl w-full">
+            {/* Search Input */}
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search by business name, phone, category..."
+                className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+
+            {/* Category Dropdown Filter */}
+            <div className="relative w-full sm:w-auto shrink-0">
+              <select
+                value={categoryFilter}
+                onChange={(e) => {
+                  setCategoryFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full sm:w-auto appearance-none rounded-xl border border-border bg-white py-2 pl-3.5 pr-8 text-xs font-bold text-foreground shadow-xs outline-none transition-colors hover:border-primary focus:border-primary cursor-pointer"
+              >
+                <option value="all">All Categories</option>
+                {allCategoryOptions.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            </div>
           </div>
+
           <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border self-start sm:self-auto justify-center">
             {(["all", "pending", "approved", "rejected"] as const).map((status) => (
               <button
@@ -325,15 +387,35 @@ export default function AdminBusinessesPage() {
               </div>
             )}
 
-            {/* Pagination */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              itemsPerPage={itemsPerPage}
-              onPageChange={(page) => setCurrentPage(page)}
-              itemLabel="businesses"
-            />
+            {/* Pagination + Per Page Selector */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
+                <span>Per page:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="rounded-xl border border-border bg-white py-1 px-2.5 text-xs font-bold text-foreground outline-none cursor-pointer shadow-xs hover:border-primary"
+                >
+                  <option value={12}>12 per page</option>
+                  <option value={24}>24 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value={100}>100 per page</option>
+                  <option value={500}>Show All ({totalItems})</option>
+                </select>
+              </div>
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={(page) => setCurrentPage(page)}
+                itemLabel="businesses"
+              />
+            </div>
           </>
         )}
       </div>

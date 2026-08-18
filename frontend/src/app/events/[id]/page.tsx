@@ -9,7 +9,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
-import { fetchEvents, getUserBusiness, reserveEventSeat } from "@/lib/api";
+import { fetchEvents, getUserBusiness, getUserRegistrations, reserveEventSeat } from "@/lib/api";
 import { API_ORIGIN, hasMediaFile } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 import Link from "next/link";
@@ -56,6 +56,7 @@ export default function EventDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [userRegistration, setUserRegistration] = useState<any | null>(null);
 
   // Reservation states
   const [isReserving, setIsReserving] = useState(false);
@@ -119,6 +120,26 @@ export default function EventDetailsPage() {
     }
     checkVerification();
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    async function checkUserRegistration() {
+      if (isAuthenticated && id) {
+        try {
+          const regs = await getUserRegistrations();
+          const matched = (regs || []).find((r: any) =>
+            (r.event_id && r.event_id.toString() === id.toString()) ||
+            (r.event?.id && r.event.id.toString() === id.toString())
+          );
+          setUserRegistration(matched || null);
+        } catch (e) {
+          console.error("Failed to check user event registration:", e);
+        }
+      } else {
+        setUserRegistration(null);
+      }
+    }
+    checkUserRegistration();
+  }, [isAuthenticated, id]);
 
   useEffect(() => {
     async function loadEvent() {
@@ -438,12 +459,27 @@ export default function EventDetailsPage() {
 
               {/* Booking Status display */}
               <div className="mt-2.5 border-t border-border pt-2.5 w-full text-center space-y-2">
-                {event.status === "upcoming" && (
+                {userRegistration?.status === "pending" && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-700 border border-amber-500/20 uppercase tracking-wide w-full justify-center">
+                    <Clock size={13} className="text-amber-600 animate-pulse" />
+                    {t("eventDetail.pending_approval")}
+                  </span>
+                )}
+                {userRegistration?.status === "approved" && (
+                  <Link
+                    href="/profile"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 text-xs font-bold text-emerald-700 border border-emerald-500/20 uppercase tracking-wide w-full justify-center transition-colors"
+                  >
+                    <CheckCircle2 size={13} className="text-emerald-600" />
+                    {t("eventDetail.seat_approved")}
+                  </Link>
+                )}
+                {!userRegistration && event.status === "upcoming" && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-100 uppercase tracking-wide w-full justify-center">
                     {t("eventDetail.booking_soon")}
                   </span>
                 )}
-                {event.status === "current" && (
+                {!userRegistration && event.status === "current" && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-100 uppercase tracking-wide w-full justify-center">
                     {t("eventDetail.booking_available")}
                   </span>
@@ -454,7 +490,7 @@ export default function EventDetailsPage() {
                   </span>
                 )}
 
-                {event.status === "current" && (
+                {!userRegistration && event.status === "current" && (
                   <button
                     onClick={() => {
                       if (!isAuthenticated) {
@@ -470,7 +506,28 @@ export default function EventDetailsPage() {
                   </button>
                 )}
 
-                {event.status === "upcoming" && (
+                {userRegistration?.status === "rejected" && event.status === "current" && (
+                  <div className="space-y-2">
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-2 text-center text-[11px] font-medium text-red-700">
+                      Previous request was rejected. You can re-apply below.
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          openLogin();
+                        } else {
+                          setIsReserving(true);
+                        }
+                      }}
+                      className="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] w-full cursor-pointer"
+                    >
+                      {t("eventDetail.reserve_seat")}
+                      <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </button>
+                  </div>
+                )}
+
+                {!userRegistration && event.status === "upcoming" && (
                   <button disabled className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50/50 px-4 py-2 text-xs font-semibold text-amber-700 w-full opacity-80">
                     {t("eventDetail.booking_soon")}
                   </button>
@@ -676,6 +733,7 @@ export default function EventDetailsPage() {
                       const amountPaid = priceStr.toLowerCase() === "free" ? "0" : priceStr.replace(/[^0-9]/g, "");
                       data.append("amount_paid", amountPaid);
                       await reserveEventSeat(event.id, data);
+                      setUserRegistration({ status: "pending", event_id: event.id });
                       setReserveSuccess(true);
                       setPaymentFile(null);
                       setPaymentPreview("");

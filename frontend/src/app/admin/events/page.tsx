@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { createEventAdmin, updateEventAdmin, deleteEvent, fetchEvents, getAllEventRegistrations } from "@/lib/api";
@@ -28,6 +28,8 @@ export default function AdminEventsPage() {
 
   const [events, setEvents] = useState<any[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventRegCounts, setEventRegCounts] = useState<Record<number, number>>({});
+  const [searchTerm, setSearchTerm] = useState("");
   const [eventListPage, setEventListPage] = useState(1);
   const eventsPerPage = 6;
   const [deletingEvent, setDeletingEvent] = useState<{ id: number; title: string } | null>(null);
@@ -106,14 +108,40 @@ export default function AdminEventsPage() {
   const loadEvents = async () => {
     try {
       setEventsLoading(true);
-      const data = await fetchEvents();
+      const [data, regData] = await Promise.all([
+        fetchEvents(),
+        getAllEventRegistrations().catch(() => [])
+      ]);
       setEvents(data || []);
+
+      const countMap: Record<number, number> = {};
+      if (Array.isArray(regData)) {
+        regData.forEach((r: any) => {
+          if (r.event_id) {
+            countMap[r.event_id] = (countMap[r.event_id] || 0) + 1;
+          }
+        });
+      }
+      setEventRegCounts(countMap);
     } catch (error) {
       console.error("Failed to load events", error);
     } finally {
       setEventsLoading(false);
     }
   };
+
+  const filteredEvents = useMemo(() => {
+    if (!searchTerm.trim()) return events;
+    const q = searchTerm.toLowerCase().trim();
+    return events.filter(
+      (evt) =>
+        (evt.title && evt.title.toLowerCase().includes(q)) ||
+        (evt.location && evt.location.toLowerCase().includes(q)) ||
+        (evt.description && evt.description.toLowerCase().includes(q)) ||
+        (evt.price_normal && evt.price_normal.toLowerCase().includes(q)) ||
+        (evt.price_verified && evt.price_verified.toLowerCase().includes(q))
+    );
+  }, [events, searchTerm]);
 
   useEffect(() => {
     loadEvents();
@@ -186,12 +214,22 @@ export default function AdminEventsPage() {
 
   return (
     <div className="space-y-3 w-full">
-      {/* Header section with Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Events</h1>
-          <p className="text-xs text-muted">Manage and monitor community events</p>
+      {/* Header section with Search & Create Button */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="relative flex-1 max-w-md w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search events by title, location, or description..."
+            className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setEventListPage(1);
+            }}
+          />
         </div>
+
         <button
           onClick={() => {
             setEditingEventId(null);
@@ -210,7 +248,7 @@ export default function AdminEventsPage() {
             setImagePreview("");
             setIsCreateModalOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
+          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shrink-0 self-start sm:self-auto"
         >
           <PlusCircle size={16} />
           Create Event
@@ -224,6 +262,7 @@ export default function AdminEventsPage() {
               <tr className="bg-surface border-b border-border">
                 <th className="px-4 py-2.5 text-xs font-bold text-muted">Event Details</th>
                 <th className="px-4 py-2.5 text-xs font-bold text-muted">Date & Location</th>
+                <th className="px-4 py-2.5 text-xs font-bold text-muted">Registrations</th>
                 <th className="px-4 py-2.5 text-xs font-bold text-muted">Normal Price</th>
                 <th className="px-4 py-2.5 text-xs font-bold text-muted">Verified Price</th>
                 <th className="px-4 py-2.5 text-xs font-bold text-muted text-right">Actions</th>
@@ -232,28 +271,25 @@ export default function AdminEventsPage() {
             <tbody className="divide-y divide-border">
               {eventsLoading ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-xs text-muted font-medium">
+                  <td colSpan={6} className="py-8 text-center text-xs text-muted font-medium">
                     <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent mr-2" />
                     Loading registered events...
                   </td>
                 </tr>
-              ) : events.length === 0 ? (
+              ) : filteredEvents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-xs text-muted font-medium">
-                    No registered events found. Create one above to get started.
+                  <td colSpan={6} className="py-10 text-center text-xs text-muted font-medium">
+                    {searchTerm ? "No registered events found matching your search." : "No registered events found. Create one above to get started."}
                   </td>
                 </tr>
               ) : (
-                events
+                filteredEvents
                   .slice((eventListPage - 1) * eventsPerPage, eventListPage * eventsPerPage)
                   .map((evt) => (
                   <tr key={evt.id} className="transition-colors hover:bg-surface/50">
                     <td className="px-4 py-2.5">
                       <div>
                         <p className="text-xs font-bold text-foreground">{evt.title}</p>
-                        <span className="inline-block rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary mt-0.5">
-                          {evt.type}
-                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-2.5">
@@ -261,6 +297,11 @@ export default function AdminEventsPage() {
                         {new Date(evt.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">{evt.location}</p>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-primary-soft text-primary">
+                        {eventRegCounts[evt.id] || 0} Total
+                      </span>
                     </td>
                     <td className="px-4 py-2.5 font-bold text-xs text-foreground">
                       {evt.price_normal || "N/A"}
@@ -306,8 +347,8 @@ export default function AdminEventsPage() {
         {/* Pagination */}
         <Pagination
           currentPage={eventListPage}
-          totalPages={Math.ceil(events.length / eventsPerPage)}
-          totalItems={events.length}
+          totalPages={Math.ceil(filteredEvents.length / eventsPerPage)}
+          totalItems={filteredEvents.length}
           itemsPerPage={eventsPerPage}
           onPageChange={(page) => setEventListPage(page)}
           itemLabel="events"
@@ -612,18 +653,6 @@ export default function AdminEventsPage() {
                         value={formData.date}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       />
-                    </div>
-                    <div className="space-y-1">
-                      <label className={labelClass}>Category</label>
-                      <select
-                        className={inputClass}
-                        value={formData.type}
-                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      >
-                        <option value="Mixer">Mixer</option>
-                        <option value="Workshop">Workshop</option>
-                        <option value="Summit">Summit</option>
-                      </select>
                     </div>
 
                     <div className="space-y-1">

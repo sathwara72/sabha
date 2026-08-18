@@ -154,6 +154,13 @@ export default function AdminEventDetailPage() {
     setActionLoadingId(id);
     try {
       await toggleAttendance(id);
+      setRegistrations((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? { ...r, is_attended: !Boolean(r.is_attended || r.attended), attended: !Boolean(r.is_attended || r.attended) }
+            : r
+        )
+      );
       await loadRegistrations();
     } catch (err) {
       console.error("Failed to toggle attendance:", err);
@@ -445,6 +452,7 @@ export default function AdminEventDetailPage() {
                       const isPending = reg.status === "pending";
                       const isApproved = reg.status === "approved";
                       const isRejected = reg.status === "rejected";
+                      const isAttended = Boolean(reg.is_attended || reg.attended);
 
                       return (
                         <tr key={reg.id} className="hover:bg-slate-50/60 transition-colors">
@@ -493,12 +501,12 @@ export default function AdminEventDetailPage() {
                               onClick={() => handleToggleAttendance(reg.id)}
                               disabled={actionLoadingId === reg.id || !isApproved}
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                                reg.attended
+                                isAttended
                                   ? "bg-emerald-600 text-white"
                                   : "bg-slate-100 text-muted hover:bg-slate-200"
                               } ${!isApproved ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                             >
-                              {reg.attended ? <><Check size={11} /> Attended</> : "Mark Present"}
+                              {isAttended ? <><Check size={11} /> Attended</> : "Mark Present"}
                             </button>
                           </td>
 

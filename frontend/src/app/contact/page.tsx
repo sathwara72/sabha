@@ -42,32 +42,7 @@ export default function ContactPage() {
 
   const [contactEmail, setContactEmail] = useState("hello@sabha.global");
   const [responseTime, setResponseTime] = useState("Within 1 Business Day");
-  const [coordinators, setCoordinators] = useState<Coordinator[]>([
-    {
-      city: "Mumbai Coordinator",
-      contact: "Ravi Sharma",
-      phone: "+91 98200 12345",
-      email: "mumbai@sabha.global",
-      bg: "bg-blue-50/50",
-      border: "border-blue-100"
-    },
-    {
-      city: "Pune Coordinator",
-      contact: "Pooja Verma",
-      phone: "+91 96110 54321",
-      email: "pune@sabha.global",
-      bg: "bg-emerald-50/50",
-      border: "border-emerald-100"
-    },
-    {
-      city: "Ahmedabad Coordinator",
-      contact: "Dev Patel",
-      phone: "+91 94260 98765",
-      email: "ahmedabad@sabha.global",
-      bg: "bg-amber-50/50",
-      border: "border-amber-100"
-    }
-  ]);
+  const [coordinators, setCoordinators] = useState<Coordinator[]>([]);
 
   useEffect(() => {
     async function loadSettings() {
@@ -92,9 +67,12 @@ export default function ContactPage() {
             };
           });
           setCoordinators(styledCoords);
+        } else {
+          setCoordinators([]);
         }
       } catch (err) {
         console.error("Failed to load settings:", err);
+        setCoordinators([]);
       }
     }
     loadSettings();
@@ -116,7 +94,7 @@ export default function ContactPage() {
         email: formData.email,
         subject: formData.subject || "Contact Page Inquiry",
         message: formData.message,
-        category: inquiryType,
+        category: "General Inquiry",
       });
 
       setFormSubmitted(true);
@@ -181,34 +159,36 @@ export default function ContactPage() {
             </div>
 
             {/* Chapter Coordinators */}
-            <div className="space-y-3 pt-4 border-t border-border/80">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">{t("contact.regional_contacts")}</h3>
-              <div className="grid grid-cols-1 gap-2.5">
-                {coordinators.map((ch, idx) => (
-                  <div key={idx} className={`rounded-xl border ${ch.border || "border-border"} ${ch.bg || "bg-white"} p-3 space-y-1.5`}>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-extrabold text-foreground">
-                        {(() => {
-                          const translationKey = `contact.${ch.city.toLowerCase().replace(/ /g, "_")}`;
-                          const translated = t(translationKey);
-                          return translated === translationKey ? ch.city : translated;
-                        })()}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[8px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
-                        {t("contact.coordinator")}
-                      </span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-extrabold text-slate-900">{ch.contact}</p>
-                      <div className="flex flex-wrap gap-x-3 text-[11px] text-muted font-medium">
-                        <span className="flex items-center gap-1"><Phone size={11} className="text-primary" /> {ch.phone}</span>
-                        <span className="flex items-center gap-1"><Mail size={11} className="text-primary" /> {ch.email}</span>
+            {coordinators && coordinators.length > 0 && (
+              <div className="space-y-3 pt-4 border-t border-border/80">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">{t("contact.regional_contacts")}</h3>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {coordinators.map((ch, idx) => (
+                    <div key={idx} className={`rounded-xl border ${ch.border || "border-border"} ${ch.bg || "bg-white"} p-3 space-y-1.5`}>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-extrabold text-foreground">
+                          {(() => {
+                            const translationKey = `contact.${ch.city.toLowerCase().replace(/ /g, "_")}`;
+                            const translated = t(translationKey);
+                            return translated === translationKey ? ch.city : translated;
+                          })()}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[8px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
+                          {t("contact.coordinator")}
+                        </span>
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-extrabold text-slate-900">{ch.contact}</p>
+                        <div className="flex flex-wrap gap-x-3 text-[11px] text-muted font-medium">
+                          <span className="flex items-center gap-1"><Phone size={11} className="text-primary" /> {ch.phone}</span>
+                          <span className="flex items-center gap-1"><Mail size={11} className="text-primary" /> {ch.email}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Contact form */}
@@ -219,31 +199,7 @@ export default function ContactPage() {
               
               <form onSubmit={handleSubmit} className="mt-4 space-y-3">
                 
-                {/* Inquiry Type Radio/Tabs */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted">{t("contact.inquiry_category")}</label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      { value: "Membership", tKey: "contact.inquiry_membership" },
-                      { value: "Sponsorship", tKey: "contact.inquiry_sponsorship" },
-                      { value: "Event hosting", tKey: "contact.inquiry_event" },
-                      { value: "Technical Support", tKey: "contact.inquiry_support" },
-                    ].map(({ value, tKey }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setInquiryType(value)}
-                        className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
-                          inquiryType === value
-                            ? "border-primary bg-primary text-white shadow-sm"
-                            : "border-border bg-white text-muted hover:bg-surface hover:text-foreground"
-                        }`}
-                      >
-                        {t(tKey)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="space-y-1">

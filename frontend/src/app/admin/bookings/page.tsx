@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   getAllEventRegistrations,
@@ -12,7 +12,7 @@ import {
 import {
   ShieldCheck, XCircle, CheckCircle2,
   Info, Calendar, MapPin, User, Mail,
-  FileText, X, ExternalLink, RefreshCw, QrCode
+  FileText, X, ExternalLink, RefreshCw, QrCode, Search
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { assetUrl, hasMediaFile } from "@/lib/config";
@@ -47,6 +47,7 @@ interface EventRegistration {
 export default function AdminBookingsPage() {
   const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Scanner modal state variables
@@ -190,27 +191,60 @@ export default function AdminBookingsPage() {
   const approved = registrations.filter(r => r.status === "approved" || r.status === "confirmed").length;
   const rejected = registrations.filter(r => r.status === "rejected").length;
 
+  const filteredRegistrations = useMemo(() => {
+    if (!searchTerm.trim()) return registrations;
+    const q = searchTerm.toLowerCase().trim();
+    return registrations.filter((reg) => {
+      const userName = reg.user?.name || "";
+      const userEmail = reg.user?.email || "";
+      const userPhone = (reg.user as any)?.phone || "";
+      const ticketNo = reg.ticket_number || "";
+      const eventTitle = reg.event?.title || "";
+      const eventLocation = reg.event?.location || "";
+      const status = reg.status || "";
+
+      return (
+        userName.toLowerCase().includes(q) ||
+        userEmail.toLowerCase().includes(q) ||
+        userPhone.toLowerCase().includes(q) ||
+        ticketNo.toLowerCase().includes(q) ||
+        eventTitle.toLowerCase().includes(q) ||
+        eventLocation.toLowerCase().includes(q) ||
+        status.toLowerCase().includes(q)
+      );
+    });
+  }, [registrations, searchTerm]);
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">Event bookings</h1>
-          <p className="text-sm text-muted">Review, verify payments, and approve event seat registrations</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Search Bar Input */}
+        <div className="relative flex-1 max-w-md w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search bookings by attendee, phone, email, ticket, or event..."
+            className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Buttons */}
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
           <button
             onClick={() => setIsScannerOpen(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
           >
-            <QrCode size={16} />
+            <QrCode size={15} />
             Scan Ticket QR
           </button>
           <button
             onClick={loadData}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface cursor-pointer disabled:opacity-60 transition-all"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-3.5 py-2 text-xs font-bold text-foreground hover:bg-surface cursor-pointer disabled:opacity-60 transition-all"
           >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
             Refresh
           </button>
         </div>
@@ -245,14 +279,14 @@ export default function AdminBookingsPage() {
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent mr-2" />
             Loading booking requests...
           </div>
-        ) : registrations.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border py-20 text-center text-muted">
-            No event booking requests found.
+        ) : filteredRegistrations.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border py-20 text-center text-muted text-xs font-medium">
+            {searchTerm ? "No event booking requests match your search." : "No event booking requests found."}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
-              {registrations.map((reg) => (
+              {filteredRegistrations.map((reg) => (
                 <motion.div
                   key={reg.id}
                   layout
