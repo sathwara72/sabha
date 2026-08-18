@@ -18,9 +18,10 @@ interface UserProfile {
   role: string;
   phone?: string;
   city?: string;
-  designation?: string;
-  company?: string;
-  bio?: string;
+  native_city?: string;
+  birth_date?: string;
+  anniversary_date?: string;
+  residence_address?: string;
   avatar?: string;
 }
 
@@ -92,9 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: data.user.role || "user",
       phone: data.user.phone || "",
       city: data.user.city || "",
-      designation: data.user.designation || "",
-      company: data.user.company || "",
-      bio: data.user.bio || "",
+      native_city: data.user.native_city || "",
+      birth_date: data.user.birth_date || "",
+      anniversary_date: data.user.anniversary_date || "",
+      residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
     };
 
@@ -128,9 +130,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: data.user.role || "user",
       phone: data.user.phone || "",
       city: data.user.city || "",
-      designation: data.user.designation || "",
-      company: data.user.company || "",
-      bio: data.user.bio || "",
+      native_city: data.user.native_city || "",
+      birth_date: data.user.birth_date || "",
+      anniversary_date: data.user.anniversary_date || "",
+      residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop",
     };
 
@@ -167,9 +170,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: data.user.role || "user",
       phone: data.user.phone || "",
       city: data.user.city || "",
-      designation: data.user.designation || "",
-      company: data.user.company || "",
-      bio: data.user.bio || "",
+      native_city: data.user.native_city || "",
+      birth_date: data.user.birth_date || "",
+      anniversary_date: data.user.anniversary_date || "",
+      residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop",
     };
 
@@ -240,9 +244,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: data.user.role || "user",
       phone: data.user.phone || "",
       city: data.user.city || "",
-      designation: data.user.designation || "",
-      company: data.user.company || "",
-      bio: data.user.bio || "",
+      native_city: data.user.native_city || "",
+      birth_date: data.user.birth_date || "",
+      anniversary_date: data.user.anniversary_date || "",
+      residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop",
     };
 

@@ -26,9 +26,10 @@ class User extends Authenticatable
         'role',
         'phone',
         'city',
-        'designation',
-        'company',
-        'bio',
+        'native_city',
+        'birth_date',
+        'anniversary_date',
+        'residence_address',
         'avatar',
         'email_verified_at',
         'is_blocked',
@@ -55,6 +56,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_blocked' => 'boolean',
+            'birth_date' => 'date',
+            'anniversary_date' => 'date',
         ];
     }
 

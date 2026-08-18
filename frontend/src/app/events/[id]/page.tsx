@@ -147,9 +147,7 @@ export default function EventDetailsPage() {
             .filter((reg: any) => reg.user)
             .map((reg: any) => {
               const u = reg.user;
-              const role = u.designation
-                ? (u.company ? `${u.designation} @ ${u.company}` : u.designation)
-                : "SABHA Member";
+              const role = "SABHA Member";
               return {
                 name: u.name,
                 role: role

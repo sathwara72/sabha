@@ -41,9 +41,10 @@ export default function ProfilePage() {
   const [profilePassword, setProfilePassword] = useState("");
   const [profilePhone, setProfilePhone] = useState("");
   const [profileCity, setProfileCity] = useState("");
-  const [profileDesignation, setProfileDesignation] = useState("");
-  const [profileCompany, setProfileCompany] = useState("");
-  const [profileBio, setProfileBio] = useState("");
+  const [profileNativeCity, setProfileNativeCity] = useState("");
+  const [profileBirthDate, setProfileBirthDate] = useState("");
+  const [profileAnniversaryDate, setProfileAnniversaryDate] = useState("");
+  const [profileResidenceAddress, setProfileResidenceAddress] = useState("");
   
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState("");
@@ -55,14 +56,13 @@ export default function ProfilePage() {
 
   // Business Submission fields
   const [bizName, setBizName] = useState("");
+  const [bizDesignation, setBizDesignation] = useState("");
   const [bizCategory, setBizCategory] = useState("Software Development");
   const [bizWebsite, setBizWebsite] = useState("");
   const [bizDescription, setBizDescription] = useState("");
   const [bizTagline, setBizTagline] = useState("");
-  const [bizLocation, setBizLocation] = useState("");
   const [bizAddress, setBizAddress] = useState("");
   const [bizArea, setBizArea] = useState("");
-  const [bizCity, setBizCity] = useState("");
   const [bizState, setBizState] = useState("");
   const [bizPincode, setBizPincode] = useState("");
   const [bizMapIframe, setBizMapIframe] = useState("");
@@ -134,12 +134,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       setProfileName(user.name);
-      setProfileEmail(user.email);
+      setProfileEmail(user.email || "");
       setProfilePhone(user.phone || "");
       setProfileCity(user.city || "");
-      setProfileDesignation(user.designation || "");
-      setProfileCompany(user.company || "");
-      setProfileBio(user.bio || "");
+      setProfileNativeCity(user.native_city || "");
+      setProfileBirthDate(user.birth_date || "");
+      setProfileAnniversaryDate(user.anniversary_date || "");
+      setProfileResidenceAddress(user.residence_address || "");
     }
   }, [user]);
 
@@ -157,16 +158,15 @@ export default function ProfilePage() {
       setBusiness(biz);
       if (biz) {
         setBizName(biz.name);
+        setBizDesignation(biz.designation || "");
         setBizCategory(biz.category);
         if (hasMediaFile(biz.logo)) setLogoPreview(assetUrl(biz.logo));
         if (hasMediaFile(biz.cover_image)) setCoverPreview(assetUrl(biz.cover_image));
         setBizWebsite(biz.website || "");
         setBizDescription(biz.description || "");
         setBizTagline(biz.tagline || "");
-        setBizLocation(biz.location || "");
         setBizAddress(biz.address || "");
         setBizArea(biz.area || "");
-        setBizCity(biz.city || "");
         setBizState(biz.state || "");
         setBizPincode(biz.pincode || "");
         setBizMapIframe(biz.map_iframe || "");
@@ -174,13 +174,13 @@ export default function ProfilePage() {
         setBizFounded(biz.founded || "");
         setBizTeamSize(biz.team_size || "");
         setBizProjects(biz.projects || "");
-        setBizPhone(biz.phone || "");
-        setBizEmail(biz.email || "");
+        setBizPhone(biz.business_phone || biz.phone || user?.phone || "");
+        setBizEmail(biz.business_email || biz.email || user?.email || "");
         setBizLinkedin(biz.linkedin || "");
         setBizInstagram(biz.instagram || "");
         setBizYoutube(biz.youtube || "");
         setBizTwitter(biz.twitter || "");
-        setBizWhatsapp(biz.whatsapp || "");
+        setBizWhatsapp(biz.whatsapp || biz.business_phone || biz.phone || user?.phone || "");
         let servicesParsed: { title: string; desc: string; }[] = [];
         if (biz.services) {
           let sData: any = [];
@@ -236,9 +236,10 @@ export default function ProfilePage() {
       if (profilePassword) formData.append("password", profilePassword);
       formData.append("phone", profilePhone);
       formData.append("city", profileCity);
-      formData.append("designation", profileDesignation);
-      formData.append("company", profileCompany);
-      formData.append("bio", profileBio);
+      formData.append("native_city", profileNativeCity);
+      formData.append("birth_date", profileBirthDate);
+      formData.append("anniversary_date", profileAnniversaryDate);
+      formData.append("residence_address", profileResidenceAddress);
       if (avatarFile) formData.append("avatar", avatarFile);
 
       const res = await updateProfile(formData);
@@ -248,9 +249,10 @@ export default function ProfilePage() {
         role: res.user.role,
         phone: res.user.phone,
         city: res.user.city,
-        designation: res.user.designation,
-        company: res.user.company,
-        bio: res.user.bio,
+        native_city: res.user.native_city,
+        birth_date: res.user.birth_date,
+        anniversary_date: res.user.anniversary_date,
+        residence_address: res.user.residence_address,
         avatar: res.user.avatar
       });
       setAvatarFile(null);
@@ -280,15 +282,13 @@ export default function ProfilePage() {
     try {
       const formData = new FormData();
       formData.append("name", bizName);
+      formData.append("designation", bizDesignation);
       formData.append("category", bizCategory);
       formData.append("website", bizWebsite);
       formData.append("description", bizDescription);
       formData.append("tagline", bizTagline);
-      const computedLocation = [bizArea, bizCity].filter(Boolean).join(", ");
-      formData.append("location", computedLocation || bizLocation);
       formData.append("address", bizAddress);
       formData.append("area", bizArea);
-      formData.append("city", bizCity);
       formData.append("state", bizState);
       formData.append("pincode", bizPincode);
       formData.append("map_iframe", bizMapIframe);
@@ -296,13 +296,13 @@ export default function ProfilePage() {
       formData.append("founded", bizFounded);
       formData.append("team_size", bizTeamSize);
       formData.append("projects", bizProjects);
-      formData.append("phone", bizPhone);
-      formData.append("email", bizEmail);
+      formData.append("business_phone", bizPhone || user?.phone || "");
+      formData.append("business_email", bizEmail || user?.email || "");
       formData.append("linkedin", bizLinkedin);
       formData.append("instagram", bizInstagram);
       formData.append("youtube", bizYoutube);
       formData.append("twitter", bizTwitter);
-      formData.append("whatsapp", bizWhatsapp);
+      formData.append("whatsapp", bizWhatsapp || bizPhone || user?.phone || "");
       formData.append("services", JSON.stringify(bizServices));
 
       if (paymentFile) {
@@ -531,18 +531,21 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <label className={labelClass}>{t("profile.designation")}</label>
-                  <input type="text" value={profileDesignation} onChange={(e) => setProfileDesignation(e.target.value)} placeholder="e.g. Co-Founder" className={inputClass} />
+                  <label className={labelClass}>Native City (વતન)</label>
+                  <input type="text" value={profileNativeCity} onChange={(e) => setProfileNativeCity(e.target.value)} placeholder="e.g. Surendranagar" className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>{t("profile.company")}</label>
-                  <input type="text" value={profileCompany} onChange={(e) => setProfileCompany(e.target.value)} placeholder="e.g. TechCorp" className={inputClass} />
+                  <label className={labelClass}>Birth Date (જન્મ તારીખ)</label>
+                  <input type="date" value={profileBirthDate} onChange={(e) => setProfileBirthDate(e.target.value)} className={inputClass} />
                 </div>
-              </div>
-
-              <div>
-                <label className={labelClass}>{t("profile.bio")}</label>
-                <textarea rows={2} value={profileBio} onChange={(e) => setProfileBio(e.target.value)} placeholder="Tell us about your professional background..." className={`${inputClass} resize-none`} />
+                <div>
+                  <label className={labelClass}>Marriage / Anniversary Date</label>
+                  <input type="date" value={profileAnniversaryDate} onChange={(e) => setProfileAnniversaryDate(e.target.value)} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Residence Address Area / Location</label>
+                  <input type="text" value={profileResidenceAddress} onChange={(e) => setProfileResidenceAddress(e.target.value)} placeholder="e.g. Nikol, Ahmedabad" className={inputClass} />
+                </div>
               </div>
 
               <div>
@@ -893,16 +896,22 @@ export default function ProfilePage() {
                               <input type="text" required value={bizName} onChange={(e) => setBizName(e.target.value)} placeholder="E.g. Vertex Solutions" className={inputClass} />
                             </div>
                             <div>
+                              <label className={labelClass}>Designation in Business</label>
+                              <input type="text" value={bizDesignation} onChange={(e) => setBizDesignation(e.target.value)} placeholder="E.g. Managing Director / Owner" className={inputClass} />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
                               <label className={labelClass}>{t("profile.biz_category")}</label>
                               <select value={bizCategory} onChange={(e) => setBizCategory(e.target.value)} className={inputClass}>
                                 {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                               </select>
                             </div>
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>{t("profile.biz_tagline")}</label>
-                            <input type="text" value={bizTagline} onChange={(e) => setBizTagline(e.target.value)} placeholder="E.g. Enterprise Cloud Architecture" className={inputClass} />
+                            <div>
+                              <label className={labelClass}>{t("profile.biz_tagline")}</label>
+                              <input type="text" value={bizTagline} onChange={(e) => setBizTagline(e.target.value)} placeholder="E.g. Enterprise Cloud Architecture" className={inputClass} />
+                            </div>
                           </div>
 
                           {/* Address & Google Maps Location */}
@@ -934,17 +943,7 @@ export default function ProfilePage() {
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div>
-                                <label className={labelClass}>City</label>
-                                <input
-                                  type="text"
-                                  value={bizCity}
-                                  onChange={(e) => setBizCity(e.target.value)}
-                                  placeholder="e.g. Ahmedabad"
-                                  className={inputClass}
-                                />
-                              </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
                                 <label className={labelClass}>State</label>
                                 <input
@@ -1100,11 +1099,11 @@ export default function ProfilePage() {
                             <h4 className="text-sm font-bold text-foreground">{t("profile.contact_channels")}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
-                                <label className={labelClass}>{t("profile.biz_email")}</label>
-                                <input type="email" value={bizEmail} onChange={(e) => setBizEmail(e.target.value)} placeholder="e.g. contact@vertex.solutions" className={inputClass} />
+                                <label className={labelClass}>Business Email</label>
+                                <input type="email" value={bizEmail} onChange={(e) => setBizEmail(e.target.value)} placeholder={user?.email || "e.g. contact@vertex.solutions"} className={inputClass} />
                               </div>
                               <div>
-                                <label className={labelClass}>{t("profile.biz_phone")}</label>
+                                <label className={labelClass}>Business Phone</label>
                                 <input
                                   type="text"
                                   maxLength={10}
@@ -1112,8 +1111,11 @@ export default function ProfilePage() {
                                   onChange={(e) => {
                                     const val = e.target.value.replace(/\D/g, "").slice(0, 10);
                                     setBizPhone(val);
+                                    if (!bizWhatsapp || bizWhatsapp === bizPhone) {
+                                      setBizWhatsapp(val);
+                                    }
                                   }}
-                                  placeholder="10-digit mobile number"
+                                  placeholder={user?.phone || "10-digit mobile number"}
                                   className={inputClass}
                                 />
                               </div>
@@ -1138,7 +1140,7 @@ export default function ProfilePage() {
                                 <div className="relative"><LinkedinIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><input type="url" value={bizLinkedin} onChange={(e) => setBizLinkedin(e.target.value)} placeholder="https://linkedin.com/company/name" className={`${inputClass} pl-10`} /></div>
                               </div>
                               <div>
-                                <label className={labelClass}>{t("profile.biz_whatsapp")}</label>
+                                <label className={labelClass}>WhatsApp Number</label>
                                 <div className="relative"><MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="text" maxLength={10} value={bizWhatsapp} onChange={(e) => setBizWhatsapp(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="10-digit WhatsApp number" className={`${inputClass} pl-10`} /></div>
                               </div>
                             </div>

@@ -541,16 +541,10 @@ export default function AdminBusinessDetailPage() {
                       <a href={`tel:${business.user.phone}`} className="text-white hover:underline">{business.user.phone}</a>
                     </div>
                   )}
-                  {business.user.company && (
+                  {business.user.native_city && (
                     <div className="flex items-start gap-2">
-                      <span className="font-bold text-indigo-300 w-16 shrink-0">Company:</span>
-                      <span className="text-slate-200">{business.user.company}</span>
-                    </div>
-                  )}
-                  {business.user.designation && (
-                    <div className="flex items-start gap-2">
-                      <span className="font-bold text-indigo-300 w-16 shrink-0">Role:</span>
-                      <span className="text-slate-200">{business.user.designation}</span>
+                      <span className="font-bold text-indigo-300 w-16 shrink-0">Native:</span>
+                      <span className="text-slate-200">{business.user.native_city}</span>
                     </div>
                   )}
                   {business.user.city && (
