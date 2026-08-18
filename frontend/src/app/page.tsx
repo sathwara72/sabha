@@ -50,9 +50,9 @@ export default function Home() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [stats, setStats] = useState<Stat[]>([
-    { label: "Active Members", value: "5000+" },
-    { label: "Businesses Registered", value: "1200+" },
-    { label: "Events Hosted", value: "150+" },
+    { label: "Active Members", value: "0+" },
+    { label: "Businesses Registered", value: "0+" },
+    { label: "Events Hosted", value: "0+" },
   ]);
   const [heroImages, setHeroImages] = useState<string[]>([
     "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop",
@@ -86,7 +86,7 @@ export default function Home() {
         const [bizData, eventData, statData, heroData] = await Promise.all([
           fetchBusinesses(),
           fetchEvents(),
-          fetchStatistics(),
+          fetchStatistics().catch(() => []),
           fetchHeroImages().catch(() => []),
         ]);
 
@@ -103,7 +103,15 @@ export default function Home() {
 
         setBusinesses(uniqueBiz);
         setEvents(uniqueEvents);
-        if (uniqueStats && uniqueStats.length > 0) setStats(uniqueStats);
+        if (uniqueStats && uniqueStats.length > 0) {
+          setStats(uniqueStats);
+        } else {
+          setStats([
+            { label: "Active Members", value: "0+" },
+            { label: "Businesses Registered", value: `${uniqueBiz.length}+` },
+            { label: "Events Hosted", value: `${uniqueEvents.length}+` },
+          ]);
+        }
 
         const dynamicHeroImages = (heroData || []).map((item: any) => {
           return assetUrl(item.image_path);

@@ -132,29 +132,44 @@ class SabhaController extends Controller
     public function getStatistics()
     {
         try {
-            // Count registered users
+            // Count registered users, businesses, and events directly from database
             $userCount = User::count();
-            if ($userCount > 0) {
-                Statistic::where('label', 'like', '%Professional%')
-                    ->orWhere('label', 'like', '%Member%')
-                    ->update(['value' => $userCount . '+']);
-            }
-
-            // Count events
+            $businessCount = Business::count();
             $eventCount = Event::count();
-            if ($eventCount > 0) {
-                Statistic::where('label', 'like', '%Event%')
-                    ->update(['value' => $eventCount . '+']);
-            }
 
-            // Ensure any city or mixer-related stat is removed from database
+            // Clean up any legacy or non-standard stat labels
+            Statistic::whereIn('label', ['Active Professionals', 'Strategic Events', 'Success Stories', 'Business Exchanged'])->delete();
             Statistic::where('label', 'like', '%Cit%')->delete();
             Statistic::where('label', 'like', '%Mixer%')->delete();
+
+            // Dynamically update or create core website statistics
+            Statistic::updateOrCreate(
+                ['label' => 'Active Members'],
+                ['value' => $userCount > 0 ? $userCount . '+' : '0+']
+            );
+
+            Statistic::updateOrCreate(
+                ['label' => 'Businesses Registered'],
+                ['value' => $businessCount > 0 ? $businessCount . '+' : '0+']
+            );
+
+            Statistic::updateOrCreate(
+                ['label' => 'Events Hosted'],
+                ['value' => $eventCount > 0 ? $eventCount . '+' : '0+']
+            );
         } catch (\Exception $e) {
             Log::error("Failed to dynamically update statistics: " . $e->getMessage());
         }
 
-        return response()->json(Statistic::all());
+        $orderedLabels = ['Active Members', 'Businesses Registered', 'Events Hosted'];
+        $allStats = Statistic::all();
+
+        $sortedStats = $allStats->sortBy(function ($stat) use ($orderedLabels) {
+            $index = array_search($stat->label, $orderedLabels);
+            return $index !== false ? $index : 99;
+        })->values();
+
+        return response()->json($sortedStats);
     }
 
     public function approveBusiness($id)

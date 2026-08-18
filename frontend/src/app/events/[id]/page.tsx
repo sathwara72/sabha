@@ -264,9 +264,11 @@ export default function EventDetailsPage() {
 
           <div className="max-w-3xl space-y-3.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-white px-3 py-0.5 text-xs font-semibold text-primary shadow-sm">
-                {event.category}
-              </span>
+              {event.category && event.category !== "Mixer" && event.category !== "Event" && (
+                <span className="rounded-full bg-white px-3 py-0.5 text-xs font-semibold text-primary shadow-sm">
+                  {event.category}
+                </span>
+              )}
               <span className="inline-flex items-center gap-1.5 text-xs text-slate-900 bg-white px-2.5 py-0.5 rounded-full shadow-sm font-medium">
                 <Users className="h-3.5 w-3.5 text-primary animate-pulse" /> {event.attendees} {t("eventDetail.registered")}
               </span>
