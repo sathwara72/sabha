@@ -12,6 +12,15 @@ import LoginModal from "@/components/shared/LoginModal";
 import RegisterModal from "@/components/shared/RegisterModal";
 import { API_BASE_URL } from "@/lib/config";
 
+function formatDateForInput(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  const str = String(dateStr).trim();
+  if (!str || str === "null" || str === "undefined") return "";
+  const match = str.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+  return "";
+}
+
 interface UserProfile {
   name: string;
   email: string;
@@ -67,9 +76,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsReady(true);
   }, []);
 
-  const updateLocalUser = useCallback((newProfile: UserProfile) => {
-    localStorage.setItem("sabha_user", JSON.stringify(newProfile));
-    setUser(newProfile);
+  const updateLocalUser = useCallback((updates: Partial<UserProfile>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        ...updates,
+        birth_date: updates.birth_date !== undefined ? formatDateForInput(updates.birth_date) : prev.birth_date,
+        anniversary_date: updates.anniversary_date !== undefined ? formatDateForInput(updates.anniversary_date) : prev.anniversary_date,
+      };
+      try {
+        localStorage.setItem("sabha_user", JSON.stringify(updated));
+      } catch {
+        /* ignore */
+      }
+      return updated;
+    });
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -94,8 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       phone: data.user.phone || "",
       city: data.user.city || "",
       native_city: data.user.native_city || "",
-      birth_date: data.user.birth_date || "",
-      anniversary_date: data.user.anniversary_date || "",
+      birth_date: formatDateForInput(data.user.birth_date),
+      anniversary_date: formatDateForInput(data.user.anniversary_date),
       residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop",
     };
@@ -131,8 +153,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       phone: data.user.phone || "",
       city: data.user.city || "",
       native_city: data.user.native_city || "",
-      birth_date: data.user.birth_date || "",
-      anniversary_date: data.user.anniversary_date || "",
+      birth_date: formatDateForInput(data.user.birth_date),
+      anniversary_date: formatDateForInput(data.user.anniversary_date),
       residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop",
     };
@@ -147,8 +169,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsRegisterOpen(false);
   }, []);
 
-  // Backwards compatibility register helper (falls back to sending OTP and confirming automatically if wanted, 
-  // but we will use the two step send and confirm functions in UI)
   const register = useCallback(async (name: string, email: string, password: string) => {
     const response = await fetch(`${API_BASE_URL}/register`, {
       method: "POST",
@@ -171,8 +191,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       phone: data.user.phone || "",
       city: data.user.city || "",
       native_city: data.user.native_city || "",
-      birth_date: data.user.birth_date || "",
-      anniversary_date: data.user.anniversary_date || "",
+      birth_date: formatDateForInput(data.user.birth_date),
+      anniversary_date: formatDateForInput(data.user.anniversary_date),
       residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop",
     };
@@ -210,7 +230,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (!response.ok) {
-      // Extract Laravel validation errors (e.g. duplicate email)
       if (data.errors) {
         const firstField = Object.keys(data.errors)[0];
         const firstMsg = data.errors[firstField]?.[0];
@@ -219,7 +238,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(data.message || "Failed to send verification code.");
     }
 
-    // Do NOT return otp — users must check their email
     return { message: data.message, email: data.email };
   }, []);
 
@@ -245,8 +263,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       phone: data.user.phone || "",
       city: data.user.city || "",
       native_city: data.user.native_city || "",
-      birth_date: data.user.birth_date || "",
-      anniversary_date: data.user.anniversary_date || "",
+      birth_date: formatDateForInput(data.user.birth_date),
+      anniversary_date: formatDateForInput(data.user.anniversary_date),
       residence_address: data.user.residence_address || "",
       avatar: data.user.avatar || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop",
     };

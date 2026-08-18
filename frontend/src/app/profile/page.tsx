@@ -19,6 +19,15 @@ import { assetUrl, hasMediaFile, parseGoogleMapsIframeSrc } from "@/lib/config";
 import { useLanguage } from "@/lib/language";
 import SafeImage from "@/components/shared/SafeImage";
 
+function formatDateForInput(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  const str = String(dateStr).trim();
+  if (!str || str === "null" || str === "undefined") return "";
+  const match = str.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+  return "";
+}
+
 export default function ProfilePage() {
   const { isAuthenticated, isReady, user, updateLocalUser, openLogin, logout } = useAuth();
   const { t } = useLanguage();
@@ -138,8 +147,8 @@ export default function ProfilePage() {
       setProfilePhone(user.phone || "");
       setProfileCity(user.city || "");
       setProfileNativeCity(user.native_city || "");
-      setProfileBirthDate(user.birth_date || "");
-      setProfileAnniversaryDate(user.anniversary_date || "");
+      setProfileBirthDate(formatDateForInput(user.birth_date));
+      setProfileAnniversaryDate(formatDateForInput(user.anniversary_date));
       setProfileResidenceAddress(user.residence_address || "");
     }
   }, [user]);
