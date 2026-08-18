@@ -40,6 +40,14 @@ export default function AdminStatisticsPage() {
     }
   }
 
+  const visibleStats = stats.filter(
+    (stat) =>
+      stat.id !== 1 &&
+      stat.id !== 2 &&
+      !stat.label.toLowerCase().includes("active professional") &&
+      !stat.label.toLowerCase().includes("strategic event")
+  );
+
   const handleInputChange = (id: number, field: "label" | "value", text: string) => {
     setEditValues((prev) => ({ ...prev, [id]: { ...prev[id], [field]: text } }));
   };
@@ -70,7 +78,7 @@ export default function AdminStatisticsPage() {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex flex-col">
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Website statistics</h1>
           <p className="text-xs text-muted">Manage numbers and labels displayed across the website</p>
@@ -82,7 +90,7 @@ export default function AdminStatisticsPage() {
         >
           <RefreshCw size={14} />
         </button>
-      </div>
+      </div> */}
 
       {/* Alerts */}
       {successMsg && (
@@ -104,13 +112,13 @@ export default function AdminStatisticsPage() {
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
           <p className="mt-3 text-sm text-muted">Loading website stats...</p>
         </div>
-      ) : stats.length === 0 ? (
+      ) : visibleStats.length === 0 ? (
         <div className="glass-card py-20 text-center text-muted border border-dashed border-border rounded-xl text-xs">
-          No statistics found. Run the database seeder to populate default values.
+          No statistics available.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {stats.map((stat) => {
+          {visibleStats.map((stat) => {
             const currentEdit = editValues[stat.id] || { label: "", value: "" };
             const isUpdating = updatingId === stat.id;
 

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, MapPin, Search, Tag, ArrowRight, Info, Filter, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
+import { Calendar, MapPin, Search, Tag, ArrowRight, Info, Filter, ChevronLeft, ChevronRight, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { fetchEvents, getUserBusiness } from "@/lib/api";
+import { fetchEvents, getUserBusiness, getUserRegistrations } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/language";
 import { assetUrl } from "@/lib/config";
@@ -23,6 +23,30 @@ export default function EventsPage() {
 
   const { isAuthenticated } = useAuth();
   const [isVerifiedMember, setIsVerifiedMember] = useState(false);
+  const [userRegMap, setUserRegMap] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    async function loadUserRegs() {
+      if (isAuthenticated) {
+        try {
+          const regs = await getUserRegistrations();
+          const map: Record<number, string> = {};
+          (regs || []).forEach((r: any) => {
+            const eId = r.event_id || r.event?.id;
+            if (eId) {
+              map[eId] = r.status;
+            }
+          });
+          setUserRegMap(map);
+        } catch (e) {
+          console.error("Failed to load user registrations:", e);
+        }
+      } else {
+        setUserRegMap({});
+      }
+    }
+    loadUserRegs();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     async function checkVerification() {
@@ -353,19 +377,38 @@ export default function EventsPage() {
                           );
                         })()}
 
-                        {(event.status === "current" || event.status === "upcoming") && (
-                          <div
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]"
-                          >
-                            {t("events.book_ticket")} <ArrowRight size={16} />
-                          </div>
-                        )}
-
-                        {event.status === "past" && (
-                          <div className="w-full text-center py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-semibold text-sm">
-                            {t("events.closed")}
-                          </div>
-                        )}
+                        {(() => {
+                          const regStatus = userRegMap[event.id];
+                          if (regStatus === "pending") {
+                            return (
+                              <div className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-50 border border-amber-200 px-5 py-2.5 text-xs font-bold text-amber-800 shadow-xs">
+                                <Clock size={14} className="text-amber-600 animate-pulse" /> Pending Approval
+                              </div>
+                            );
+                          }
+                          if (regStatus === "approved") {
+                            return (
+                              <div className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-2.5 text-xs font-bold text-emerald-800 shadow-xs">
+                                <CheckCircle2 size={14} className="text-emerald-600" /> Seat Reserved
+                              </div>
+                            );
+                          }
+                          if (event.status === "current" || event.status === "upcoming") {
+                            return (
+                              <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98]">
+                                {t("events.book_ticket")} <ArrowRight size={16} />
+                              </div>
+                            );
+                          }
+                          if (event.status === "past") {
+                            return (
+                              <div className="w-full text-center py-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 font-semibold text-sm">
+                                {t("events.closed")}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
                   </motion.div>

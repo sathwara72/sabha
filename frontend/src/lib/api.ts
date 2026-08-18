@@ -862,7 +862,7 @@ export async function getUserBusiness() {
   return await response.json();
 }
 
-export async function fetchAllBusinessesAdmin(params?: { page?: number; limit?: number; search?: string; status?: string }) {
+export async function fetchAllBusinessesAdmin(params?: { page?: number; limit?: number; search?: string; status?: string; category?: string }) {
   const token = localStorage.getItem("sabha_token");
   
   const query = new URLSearchParams();
@@ -870,6 +870,7 @@ export async function fetchAllBusinessesAdmin(params?: { page?: number; limit?: 
   if (params?.limit) query.append("limit", params.limit.toString());
   if (params?.search) query.append("search", params.search);
   if (params?.status && params.status !== "all") query.append("status", params.status);
+  if (params?.category && params.category !== "all") query.append("category", params.category);
 
   const queryString = query.toString();
   const url = `${API_BASE_URL}/admin/businesses${queryString ? `?${queryString}` : ""}`;
@@ -1071,7 +1072,7 @@ export async function deleteEvent(id: number) {
   return { success: true };
 }
 
-export async function fetchUsersAdmin(page?: number, limit: number = 10, search: string = "") {
+export async function fetchUsersAdmin(page?: number, limit: number = 9, search: string = "", businessFilter: string = "all") {
   const token = localStorage.getItem("sabha_token");
   if (!token) throw new Error("Authentication required");
 
@@ -1082,6 +1083,9 @@ export async function fetchUsersAdmin(page?: number, limit: number = 10, search:
   }
   if (search) {
     params.append("search", search);
+  }
+  if (businessFilter && businessFilter !== "all") {
+    params.append("business_filter", businessFilter);
   }
 
   const queryString = params.toString();
@@ -1131,7 +1135,7 @@ export async function uploadGalleryImage(formData: FormData) {
 
     return { 
       success: true, 
-      image_url: resData.gallery_image?.image_path 
+      image_url: resData.gallery_image?.image_path || resData.gallery_images?.[0]?.image_path || resData.image_url || resData.url 
     };
   } catch (err: any) {
     if (err.name === "TypeError" && (err.message === "Failed to fetch" || err.message?.includes("fetch"))) {

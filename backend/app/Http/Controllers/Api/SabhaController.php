@@ -71,7 +71,13 @@ class SabhaController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('category', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($u) use ($search) {
+                      $u->where('phone', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -312,10 +318,28 @@ class SabhaController extends Controller
             });
         }
 
+        if ($request->filled('business_filter')) {
+            if ($request->business_filter === 'with_business') {
+                $query->has('business');
+            } elseif ($request->business_filter === 'without_business') {
+                $query->doesntHave('business');
+            }
+        }
+
         if ($request->filled('page')) {
-            $limit = $request->query('limit', 10);
+            $limit = $request->query('limit', 9);
             $paginator = $query->paginate($limit);
-            return response()->json($paginator);
+
+            $counts = [
+                'all' => User::count(),
+                'with_business' => User::has('business')->count(),
+                'without_business' => User::doesntHave('business')->count(),
+            ];
+
+            return response()->json([
+                'paginator' => $paginator,
+                'counts' => $counts
+            ]);
         }
 
         return response()->json($query->get());

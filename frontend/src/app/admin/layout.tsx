@@ -54,15 +54,27 @@ export default function AdminLayout({
   const menuItems = [
     { name: "Overview", icon: LayoutDashboard, href: "/admin" },
     { name: "Businesses", icon: Briefcase, href: "/admin/businesses" },
+    { name: "Business Categories", icon: Tag, href: "/admin/categories" },
     { name: "Events", icon: Calendar, href: "/admin/events" },
     { name: "Bookings", icon: ShieldCheck, href: "/admin/bookings" },
     { name: "Users", icon: Users, href: "/admin/users" },
     { name: "Gallery", icon: Image, href: "/admin/gallery" },
     { name: "Hero Slider", icon: Sliders, href: "/admin/hero-slider" },
-    { name: "Categories", icon: Tag, href: "/admin/categories" },
-    { name: "Statistics", icon: BarChart3, href: "/admin/statistics" },
     { name: "Site Settings", icon: Settings, href: "/admin/settings" },
   ];
+
+  const getPageTitle = () => {
+    if (pathname === "/admin") return "Dashboard";
+    const matched = menuItems.find((item) => item.href === pathname);
+    if (matched) return matched.name;
+
+    if (pathname.startsWith("/admin/businesses/")) return "Business Details";
+    if (pathname.startsWith("/admin/events/")) return "Event Details";
+
+    const seg = pathname.replace("/admin/", "").split("/")[0] || "";
+    if (!seg) return "Dashboard";
+    return seg.charAt(0).toUpperCase() + seg.slice(1).replace("-", " ");
+  };
 
   const handleLogout = () => {
     logout();
@@ -161,10 +173,9 @@ export default function AdminLayout({
               <Menu size={16} />
             </button>
 
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-              <ShieldCheck size={13} />
-              <span>Admin</span>
-            </div>
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              {getPageTitle()}
+            </h1>
           </div>
 
           <div className="flex items-center gap-2.5">

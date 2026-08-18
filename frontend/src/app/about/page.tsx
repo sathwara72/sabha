@@ -68,18 +68,21 @@ const fallbackTeam = [
   }
 ];
 
-const milestones = [
+const fallbackMilestones = [
   {
     year: "2024",
-    tKey: "milestone_1"
+    title: "Foundation & Vision",
+    description: "SABHA was conceptualized by community visionaries to create a unified ecosystem that fosters trust, business referrals, and professional advancement."
   },
   {
     year: "2025",
-    tKey: "milestone_2"
+    title: "Directory & Chapters Launch",
+    description: "Introduced our digital business directory platform and registered 200+ local enterprises. Launched regional chapters across Mumbai, Pune, and Delhi."
   },
   {
     year: "2026",
-    tKey: "milestone_3"
+    title: "Harmony Mixers & Scale",
+    description: "Grown to 500+ active verified businesses. Hosted 50+ corporate networking meets, generating millions in business referrals and mutual trade."
   }
 ];
 
@@ -92,6 +95,7 @@ export default function AboutPage() {
     businessExchanged: "₹10Cr+"
   });
   const [team, setTeam] = useState<any[]>([]);
+  const [milestonesList, setMilestonesList] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadStats() {
@@ -112,18 +116,39 @@ export default function AboutPage() {
 
         let loadedTeam = [];
         if (settingsData && settingsData.trustees) {
-          loadedTeam = typeof settingsData.trustees === "string"
-            ? JSON.parse(settingsData.trustees)
-            : settingsData.trustees;
+          try {
+            loadedTeam = typeof settingsData.trustees === "string"
+              ? JSON.parse(settingsData.trustees)
+              : settingsData.trustees;
+          } catch (err) {
+            console.error("Failed to parse trustees JSON", err);
+          }
         }
-        if (loadedTeam && loadedTeam.length > 0) {
+        if (loadedTeam && Array.isArray(loadedTeam) && loadedTeam.length > 0) {
           setTeam(loadedTeam);
         } else {
-          setTeam(fallbackTeam);
+          setTeam([]);
+        }
+
+        let loadedMilestones = [];
+        if (settingsData && settingsData.milestones !== undefined && settingsData.milestones !== null) {
+          try {
+            loadedMilestones = typeof settingsData.milestones === "string"
+              ? JSON.parse(settingsData.milestones)
+              : settingsData.milestones;
+          } catch (err) {
+            console.error("Failed to parse milestones JSON", err);
+          }
+          setMilestonesList(Array.isArray(loadedMilestones) ? loadedMilestones : []);
+        } else if (settingsData) {
+          setMilestonesList([]);
+        } else {
+          setMilestonesList(fallbackMilestones);
         }
       } catch (e) {
         console.error("Failed to load statistics for about page:", e);
-        setTeam(fallbackTeam);
+        setTeam([]);
+        setMilestonesList(fallbackMilestones);
       } finally {
         setLoading(false);
       }
@@ -248,86 +273,92 @@ export default function AboutPage() {
       </section>
 
       {/* Evolution Timeline */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-5 border-b border-border">
-        <div className="mb-3 text-center max-w-2xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.timeline_label")}</span>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            {t("about.timeline_title")}
-          </h2>
-        </div>
+      {milestonesList && milestonesList.length > 0 && (
+        <section className="mx-auto max-w-7xl px-6 py-20 lg:py-5 border-b border-border">
+          <div className="mb-3 text-center max-w-2xl mx-auto">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.timeline_label")}</span>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              {t("about.timeline_title")}
+            </h2>
+          </div>
 
-        <div className="relative border-l border-primary/25 ml-4 md:ml-32 space-y-12">
-          {milestones.map((m, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="relative pl-8 md:pl-10"
-            >
-              {/* Year badge left-aligned on desktop */}
-              <div className="hidden md:flex absolute right-full mr-10 top-0.5 text-right flex-col">
-                <span className="text-2xl font-extrabold text-primary">{m.year}</span>
-                <span className="text-[10px] font-bold text-muted uppercase">{t("about.milestone")}</span>
-              </div>
+          <div className="relative border-l border-primary/25 ml-4 md:ml-32 space-y-12">
+            {milestonesList.map((m, idx) => {
+              const title = m.tKey ? t(`about.${m.tKey}_title`) : m.title;
+              const desc = m.tKey ? t(`about.${m.tKey}_desc`) : m.description;
 
-              {/* Dot indicator */}
-              <div className="absolute -left-1.5 top-2.5 h-3.5 w-3.5 rounded-full border-2 border-primary bg-white z-10" />
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="relative pl-8 md:pl-10"
+                >
+                  {/* Year badge left-aligned on desktop */}
+                  <div className="hidden md:flex absolute right-full mr-10 top-0.5 text-right flex-col">
+                    <span className="text-2xl font-extrabold text-primary">{m.year}</span>
+                    <span className="text-[10px] font-bold text-muted uppercase">{t("about.milestone")}</span>
+                  </div>
 
-              <div>
-                <span className="inline-block md:hidden text-lg font-extrabold text-primary mb-1">{m.year}</span>
-                <h3 className="text-base font-bold text-foreground">{t(`about.${m.tKey}_title`)}</h3>
-                <p className="mt-2 text-xs leading-relaxed text-muted font-medium max-w-3xl">{t(`about.${m.tKey}_desc`)}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+                  {/* Dot indicator */}
+                  <div className="absolute -left-1.5 top-2.5 h-3.5 w-3.5 rounded-full border-2 border-primary bg-white z-10" />
+
+                  <div>
+                    <span className="inline-block md:hidden text-lg font-extrabold text-primary mb-1">{m.year}</span>
+                    <h3 className="text-base font-bold text-foreground">{title}</h3>
+                    <p className="mt-2 text-xs leading-relaxed text-muted font-medium max-w-3xl">{desc}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Leadership Board */}
-      <section className="mx-auto max-w-7xl px-6 py-20 lg:py-5">
-        <div className="mb-3 text-center max-w-2xl mx-auto">
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.leadership_label")}</span>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            {t("about.leadership_title")}
-          </h2>
-          <p className="mt-4 text-xs text-muted font-medium">
-            {t("about.leadership_subtitle")}
-          </p>
-        </div>
+      {team && team.length > 0 && (
+        <section className="mx-auto max-w-7xl px-6 py-20 lg:py-5">
+          <div className="mb-3 text-center max-w-2xl mx-auto">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">{t("about.leadership_label")}</span>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              {t("about.leadership_title")}
+            </h2>
+            <p className="mt-4 text-xs text-muted font-medium">
+              {t("about.leadership_subtitle")}
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {team.map((member, idx) => {
-            const name = member.tKey ? t(`about.${member.tKey}_name`) : member.name;
-            const role = member.tKey ? t(`about.${member.tKey}_role`) : member.role;
-            const company = member.tKey ? t(`about.${member.tKey}_org`) : (member.company || member.org);
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {team.map((member, idx) => {
+              const name = member.tKey ? t(`about.${member.tKey}_name`) : member.name;
+              const role = member.tKey ? t(`about.${member.tKey}_role`) : member.role;
+              const company = member.tKey ? t(`about.${member.tKey}_org`) : (member.company || member.org);
 
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.05 }}
-                className="glass-card hover-card p-5 text-center flex flex-col items-center border border-border"
-              >
-                <img
-                  src={assetUrl(member.avatar)}
-                  alt={name}
-                  className="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
-                />
-                {/* <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full mb-2 border border-emerald-100">
-                  {t("about.verified_trustee")}
-                </span> */}
-                <h3 className="text-sm font-extrabold text-foreground">{name}</h3>
-                <p className="text-[11px] font-bold text-primary mt-0.5">{role}</p>
-                <p className="text-[10px] text-muted font-semibold mt-1 truncate max-w-full">{company}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 0 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="glass-card hover-card p-5 text-center flex flex-col items-center border border-border"
+                >
+                  <img
+                    src={assetUrl(member.avatar)}
+                    alt={name}
+                    className="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
+                  />
+                  <h3 className="text-sm font-extrabold text-foreground">{name}</h3>
+                  {role && <p className="text-xs font-bold text-primary mt-1">{role}</p>}
+                  {company && <p className="text-[11px] text-muted mt-0.5">{company}</p>}
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-6 pb-5">

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { fetchUsersAdmin, toggleUserBlock, deleteUserAdmin } from "@/lib/api";
 import { assetUrl, hasMediaFile } from "@/lib/config";
 import {
-  Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X, Ban, UserCheck, ShieldAlert, Trash2
+  Mail, ShieldCheck, Clock, ArrowUpRight, Search, Zap, X, Ban, UserCheck, ShieldAlert, Trash2, Briefcase, LayoutGrid, List
 } from "lucide-react";
 import ConfirmModal from "@/components/shared/ConfirmModal";
 import Pagination from "@/components/shared/Pagination";
@@ -40,9 +41,12 @@ interface User {
 }
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [businessFilter, setBusinessFilter] = useState<"all" | "with_business" | "without_business">("all");
+  const [viewMode, setViewMode] = useState<"card" | "table">("card");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [blockingUser, setBlockingUser] = useState<User | null>(null);
   const [blockLoading, setBlockLoading] = useState(false);
@@ -53,19 +57,31 @@ export default function AdminUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const [counts, setCounts] = useState<{ all: number; with_business: number; without_business: number }>({
+    all: 0,
+    with_business: 0,
+    without_business: 0,
+  });
+  const itemsPerPage = 9;
 
   useEffect(() => {
     loadData();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, businessFilter]);
 
   async function loadData() {
     try {
       setLoading(true);
-      const res = await fetchUsersAdmin(currentPage, itemsPerPage, searchTerm);
+      const res = await fetchUsersAdmin(currentPage, itemsPerPage, searchTerm, businessFilter);
       
       let userList: User[] = [];
-      if (res && res.data && Array.isArray(res.data)) {
+      if (res && res.paginator) {
+        userList = res.paginator.data || [];
+        setTotalPages(res.paginator.last_page || 1);
+        setTotalItems(res.paginator.total || userList.length);
+        if (res.counts) {
+          setCounts(res.counts);
+        }
+      } else if (res && res.data && Array.isArray(res.data)) {
         userList = res.data;
         setTotalPages(res.last_page || 1);
         setTotalItems(res.total || res.data.length);
@@ -89,6 +105,8 @@ export default function AdminUsersPage() {
       setLoading(false);
     }
   }
+
+  const displayUsers = users;
 
   function handleToggleBlock(user: User) {
     if (user.role === "admin") {
@@ -165,22 +183,13 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Members</h1>
-            <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary">
-              {loading ? "..." : totalItems}
-            </span>
-          </div>
-          <p className="text-xs text-muted">Manage community members</p>
-        </div>
-
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        {/* Search Bar */}
+        <div className="relative flex-1 max-w-md w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by name, email..."
-            className="w-full rounded-xl border border-border bg-white py-1.5 pl-9 pr-4 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+            placeholder="Search by name, email, phone number..."
+            className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -188,14 +197,288 @@ export default function AdminUsersPage() {
             }}
           />
         </div>
-      </div>
 
+        {/* Business Filter Tabs + View Mode Toggle */}
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border">
+            <button
+              type="button"
+              onClick={() => {
+                setBusinessFilter("all");
+                setCurrentPage(1);
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                businessFilter === "all"
+                  ? "bg-white text-foreground shadow-xs"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              All
+              <span className="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-slate-200/60 text-slate-600">
+                {counts.all || totalItems}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setBusinessFilter("with_business");
+                setCurrentPage(1);
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                businessFilter === "with_business"
+                  ? "bg-white text-emerald-700 shadow-xs"
+                  : "text-muted hover:text-foreground"
+              }`}
+              title="Members who have registered a business profile"
+            >
+              💼 Business Members
+              <span className="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                {counts.with_business}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setBusinessFilter("without_business");
+                setCurrentPage(1);
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                businessFilter === "without_business"
+                  ? "bg-white text-foreground shadow-xs"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              👤 No Business
+              <span className="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-slate-200/60 text-slate-600">
+                {counts.without_business}
+              </span>
+            </button>
+          </div>
+
+          {/* Card / Table View Toggle */}
+          <div className="flex items-center gap-0.5 bg-surface p-1 rounded-xl border border-border">
+            <button
+              type="button"
+              onClick={() => setViewMode("card")}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === "card"
+                  ? "bg-white text-primary shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Card View"
+            >
+              <LayoutGrid size={15} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("table")}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === "table"
+                  ? "bg-white text-primary shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Table View"
+            >
+              <List size={15} />
+            </button>
+          </div>
+        </div>
+      </div>
       {loading ? (
         <div className="glass-card py-20 text-center rounded-2xl border border-border">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
           <p className="mt-3 text-sm font-medium text-muted">Loading community members...</p>
         </div>
+      ) : displayUsers.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border py-20 text-center text-muted text-xs font-medium bg-white">
+          No members match the selected filter criteria.
+        </div>
+      ) : viewMode === "card" ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {displayUsers.map((user) => (
+              <div
+                key={user.id}
+                onClick={() => {
+                  if (user.business?.id) {
+                    router.push(`/admin/businesses/${user.business.id}`);
+                  } else {
+                    setSelectedUser(user);
+                  }
+                }}
+                className={`glass-card p-4.5 rounded-2xl border border-border flex flex-col justify-between bg-white shadow-xs transition-all hover:shadow-md gap-4 cursor-pointer hover:border-primary/50 ${
+                  user.business?.id ? "hover:bg-slate-50/50" : ""
+                }`}
+              >
+                {/* Top Section */}
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {hasMediaFile(user.avatar) ? (
+                        <img
+                          src={assetUrl(user.avatar)}
+                          alt={user.name}
+                          className="h-11 w-11 rounded-2xl object-cover bg-white shrink-0 border border-border/80 shadow-xs p-0.5"
+                        />
+                      ) : (
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-soft font-bold text-sm text-primary shadow-xs">
+                          {user.name?.[0] ?? "?"}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-extrabold text-slate-900 leading-tight truncate">{user.name}</h4>
+                        <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-slate-500 truncate">
+                          <Mail size={12} className="text-primary/70 shrink-0" /> <span className="truncate">{user.email}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                        user.role === "admin"
+                          ? "bg-primary-soft text-primary border border-primary/20"
+                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                      }`}>
+                        <ShieldCheck size={11} />
+                        {user.role}
+                      </span>
+                      {user.is_blocked && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-200">
+                          <Ban size={10} /> Blocked
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Business Status Card Box */}
+                  <div
+                    onClick={(e) => {
+                      if (user.business?.id) {
+                        e.stopPropagation();
+                        router.push(`/admin/businesses/${user.business.id}`);
+                      }
+                    }}
+                    className={`rounded-xl p-2.5 border flex items-center justify-between gap-2 transition-colors ${
+                      user.business?.id
+                        ? "bg-emerald-50/40 border-emerald-200/80 hover:bg-emerald-50 hover:border-emerald-300 cursor-pointer"
+                        : "bg-surface border-border/70"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Business Status</p>
+                      {user.business?.name ? (
+                        <p className="text-xs font-bold text-emerald-800 truncate mt-0.5 flex items-center gap-1">
+                          <Briefcase size={12} className="text-emerald-600 shrink-0" />
+                          <span className="truncate">{user.business.name}</span>
+                          <ArrowUpRight size={11} className="text-emerald-600 shrink-0" />
+                        </p>
+                      ) : (
+                        <p className="text-xs font-medium text-slate-400 mt-0.5">No business profile</p>
+                      )}
+                    </div>
+                    {user.business?.name ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100/80 text-emerald-700 border border-emerald-200 shrink-0">
+                        Registered
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200 shrink-0">
+                        None
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Joined Date */}
+                  <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                    <span className="text-[11px] font-medium text-muted flex items-center gap-1">
+                      <Clock size={11} /> Joined {new Date(user.created_at).toLocaleDateString()}
+                    </span>
+                    {user.phone && (
+                      <span className="text-[11px] font-semibold text-slate-600">
+                        📞 {user.phone}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Card Footer Actions */}
+                <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    {user.role !== "admin" && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleBlock(user);
+                          }}
+                          className={`inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1 text-xs font-bold border transition-all active:scale-95 cursor-pointer shadow-xs ${
+                            user.is_blocked
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                              : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                          }`}
+                          title={user.is_blocked ? "Unblock Member" : "Block Member"}
+                        >
+                          {user.is_blocked ? (
+                            <>
+                              <UserCheck size={12} /> Unblock
+                            </>
+                          ) : (
+                            <>
+                              <Ban size={12} /> Block
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteUser(user);
+                          }}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition-all hover:bg-rose-100 hover:text-rose-700 active:scale-95 cursor-pointer shadow-xs"
+                          title="Delete Member"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedUser(user);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer shadow-xs ml-auto"
+                  >
+                    <span>View Profile</span>
+                    <ArrowUpRight size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* API Driven Pagination for Card View */}
+          <div className="pt-2">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              itemLabel="members"
+            />
+          </div>
+        </div>
       ) : (
+        /* Table Layout Option */
         <div className="bg-white rounded-2xl border border-border/80 shadow-xs overflow-hidden flex flex-col">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -208,8 +491,18 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {users.map((user) => (
-                  <tr key={user.id} className="transition-colors hover:bg-slate-50/70">
+                {displayUsers.map((user) => (
+                  <tr
+                    key={user.id}
+                    onClick={() => {
+                      if (user.business?.id) {
+                        router.push(`/admin/businesses/${user.business.id}`);
+                      } else {
+                        setSelectedUser(user);
+                      }
+                    }}
+                    className={`transition-colors hover:bg-slate-50/70 ${user.business?.id ? "cursor-pointer" : ""}`}
+                  >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         {hasMediaFile(user.avatar) ? (
@@ -228,6 +521,11 @@ export default function AdminUsersPage() {
                           <p className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500">
                             <Mail size={11} className="text-primary/70" /> {user.email}
                           </p>
+                          {user.business?.name && (
+                            <span className="mt-1 inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200/70">
+                              <Briefcase size={10} /> {user.business.name}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -263,7 +561,10 @@ export default function AdminUsersPage() {
                         {user.role !== "admin" && (
                           <>
                             <button
-                              onClick={() => handleToggleBlock(user)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleBlock(user);
+                              }}
                               className={`inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold border transition-all active:scale-95 cursor-pointer shadow-xs ${
                                 user.is_blocked
                                   ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
@@ -282,7 +583,10 @@ export default function AdminUsersPage() {
                               )}
                             </button>
                             <button
-                              onClick={() => handleDeleteUser(user)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteUser(user);
+                              }}
                               className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition-all hover:bg-rose-100 hover:text-rose-700 active:scale-95 cursor-pointer shadow-xs"
                               title="Delete Member"
                             >
@@ -291,7 +595,10 @@ export default function AdminUsersPage() {
                           </>
                         )}
                         <button
-                          onClick={() => setSelectedUser(user)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedUser(user);
+                          }}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer shadow-xs"
                           title="View Member Details"
                         >
@@ -304,24 +611,20 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
-          {users.length === 0 && !loading && (
-            <div className="py-20 text-center">
-              <p className="text-sm text-slate-500">No members found.</p>
-            </div>
-          )}
-
-          {/* API Driven Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPageChange={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            itemLabel="members"
-          />
+          {/* API Driven Pagination for Table View */}
+          <div className="p-4 bg-white border-t border-border rounded-b-2xl">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              itemLabel="members"
+            />
+          </div>
         </div>
       )}
 
