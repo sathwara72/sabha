@@ -104,20 +104,16 @@ class SabhaSeeder extends Seeder
 
          // Stats
          \App\Models\Statistic::updateOrCreate(
-             ['label' => 'Active Professionals'],
-             ['value' => '500+']
+             ['label' => 'Active Members'],
+             ['value' => \App\Models\User::count() > 0 ? \App\Models\User::count() . '+' : '0+']
          );
          \App\Models\Statistic::updateOrCreate(
-             ['label' => 'Strategic Events'],
-             ['value' => '120+']
+             ['label' => 'Businesses Registered'],
+             ['value' => \App\Models\Business::count() > 0 ? \App\Models\Business::count() . '+' : '0+']
          );
          \App\Models\Statistic::updateOrCreate(
-             ['label' => 'Success Stories'],
-             ['value' => '2500+']
-         );
-         \App\Models\Statistic::updateOrCreate(
-             ['label' => 'Business Exchanged'],
-             ['value' => '₹10Cr+']
+             ['label' => 'Events Hosted'],
+             ['value' => \App\Models\Event::count() > 0 ? \App\Models\Event::count() . '+' : '0+']
          );
 
          // Settings

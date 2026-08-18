@@ -122,13 +122,7 @@ export default function AdminSettingsPage() {
 
       // Load Statistics
       const statData = await fetchStatistics().catch(() => []);
-      const visibleStats = (statData || []).filter(
-        (stat: any) =>
-          stat.id !== 1 &&
-          stat.id !== 2 &&
-          !stat.label?.toLowerCase().includes("active professional") &&
-          !stat.label?.toLowerCase().includes("strategic event")
-      );
+      const visibleStats = statData || [];
       setStats(visibleStats);
       const initialStatEdits: Record<number, { label: string; value: string }> = {};
       visibleStats.forEach((item: any) => {

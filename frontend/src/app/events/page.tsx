@@ -276,11 +276,13 @@ export default function EventsPage() {
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
 
-                      <div className="absolute left-3 top-3 z-10">
-                        <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold text-foreground backdrop-blur shadow-xs">
-                          {event.category}
-                        </span>
-                      </div>
+                      {event.category && event.category !== "Mixer" && event.category !== "Event" && (
+                        <div className="absolute left-3 top-3 z-10">
+                          <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold text-foreground backdrop-blur shadow-xs">
+                            {event.category}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Top Right Date Pill */}
                       <div className="absolute right-3 top-3 z-10">

@@ -40,13 +40,7 @@ export default function AdminStatisticsPage() {
     }
   }
 
-  const visibleStats = stats.filter(
-    (stat) =>
-      stat.id !== 1 &&
-      stat.id !== 2 &&
-      !stat.label.toLowerCase().includes("active professional") &&
-      !stat.label.toLowerCase().includes("strategic event")
-  );
+  const visibleStats = stats;
 
   const handleInputChange = (id: number, field: "label" | "value", text: string) => {
     setEditValues((prev) => ({ ...prev, [id]: { ...prev[id], [field]: text } }));

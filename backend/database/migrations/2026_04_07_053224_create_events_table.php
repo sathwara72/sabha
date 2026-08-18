@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->dateTime('date');
             $table->string('location');
-            $table->string('type')->default('Mixer');
+            $table->string('type')->default('Event');
             $table->string('image')->nullable();
             $table->timestamps();
         });

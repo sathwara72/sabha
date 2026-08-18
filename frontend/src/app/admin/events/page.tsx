@@ -18,7 +18,7 @@ export default function AdminEventsPage() {
     description: "",
     date: "",
     location: "",
-    type: "Mixer",
+    type: "Event",
     price_normal: "",
     price_verified: "",
   });
@@ -72,7 +72,7 @@ export default function AdminEventsPage() {
       description: "",
       date: "",
       location: "",
-      type: "Mixer",
+      type: "Event",
       price_normal: "",
       price_verified: "",
     });
@@ -163,7 +163,7 @@ export default function AdminEventsPage() {
       description: evt.description || "",
       date: formattedDate,
       location: evt.location || "",
-      type: evt.type || "Mixer",
+      type: evt.type || "Event",
       price_normal: evt.price_normal || "",
       price_verified: evt.price_verified || "",
     });
@@ -238,7 +238,7 @@ export default function AdminEventsPage() {
               description: "",
               date: "",
               location: "",
-              type: "Mixer",
+              type: "Event",
               price_normal: "",
               price_verified: "",
             });
