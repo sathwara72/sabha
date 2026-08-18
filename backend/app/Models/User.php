@@ -56,8 +56,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_blocked' => 'boolean',
-            'birth_date' => 'date',
-            'anniversary_date' => 'date',
+            'birth_date' => 'date:Y-m-d',
+            'anniversary_date' => 'date:Y-m-d',
         ];
     }
 
