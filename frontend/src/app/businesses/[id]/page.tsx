@@ -486,7 +486,7 @@ export default function BusinessDetailsPage() {
             reviewsList: [],
             member: matched.user ? {
               name: matched.user.name,
-              role: `${matched.user.designation || 'SABHA Member'}, ${matched.user.company || 'Member Company'}`,
+              role: 'SABHA Member',
               avatar: matched.user.avatar
                 ? assetUrl(matched.user.avatar)
                 : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop"

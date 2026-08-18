@@ -604,18 +604,19 @@ class SabhaController extends Controller
     {
         $validated = $request->validate([
             'name' => 'nullable|string',
+            'designation' => 'nullable|string',
             'category' => 'nullable|string',
             'tagline' => 'nullable|string',
-            'location' => 'nullable|string',
             'address' => 'nullable|string',
             'area' => 'nullable|string',
-            'city' => 'nullable|string',
             'state' => 'nullable|string',
             'pincode' => 'nullable|string',
             'map_iframe' => 'nullable|string',
             'description' => 'nullable|string',
             'website' => 'nullable|string',
-            'phone' => 'nullable|string|max:10',
+            'business_phone' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'business_email' => 'nullable|string',
             'email' => 'nullable|string',
             'linkedin' => 'nullable|string',
             'instagram' => 'nullable|string',
@@ -673,36 +674,29 @@ class SabhaController extends Controller
             $servicesArray = $servicesInput;
         }
 
-        $fullLocationParts = array_filter([
-            $validated['address'] ?? null,
-            $validated['area'] ?? null,
-            $validated['city'] ?? null,
-            $validated['state'] ?? null,
-        ]);
-        $constructedLocation = count($fullLocationParts) > 0 
-            ? implode(', ', $fullLocationParts) . (!empty($validated['pincode']) ? ' - ' . $validated['pincode'] : '')
-            : ($validated['location'] ?? null);
+        $bizPhone = $validated['business_phone'] ?? ($validated['phone'] ?? ($user ? $user->phone : null));
+        $bizEmail = $validated['business_email'] ?? ($validated['email'] ?? ($user ? $user->email : null));
+        $whatsappNum = $validated['whatsapp'] ?? $bizPhone;
 
         $businessData = [
             'name' => $name,
+            'designation' => $validated['designation'] ?? null,
             'category' => $category,
             'tagline' => $validated['tagline'] ?? null,
-            'location' => $constructedLocation ?: ($validated['location'] ?? null),
             'address' => $validated['address'] ?? null,
             'area' => $validated['area'] ?? null,
-            'city' => $validated['city'] ?? null,
             'state' => $validated['state'] ?? null,
             'pincode' => $validated['pincode'] ?? null,
             'map_iframe' => $validated['map_iframe'] ?? null,
             'description' => $validated['description'] ?? null,
             'website' => $validated['website'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'email' => $validated['email'] ?? null,
+            'business_phone' => $bizPhone,
+            'business_email' => $bizEmail,
             'linkedin' => $validated['linkedin'] ?? null,
             'instagram' => $validated['instagram'] ?? null,
             'youtube' => $validated['youtube'] ?? null,
             'twitter' => $validated['twitter'] ?? null,
-            'whatsapp' => $validated['whatsapp'] ?? null,
+            'whatsapp' => $whatsappNum,
             'hours' => $validated['hours'] ?? null,
             'founded' => $validated['founded'] ?? null,
             'team_size' => $validated['team_size'] ?? null,
@@ -778,9 +772,10 @@ class SabhaController extends Controller
             'password' => 'nullable|string|min:6',
             'phone' => 'nullable|string|max:10',
             'city' => 'nullable|string',
-            'designation' => 'nullable|string',
-            'company' => 'nullable|string',
-            'bio' => 'nullable|string',
+            'native_city' => 'nullable|string',
+            'birth_date' => 'nullable|date',
+            'anniversary_date' => 'nullable|date',
+            'residence_address' => 'nullable|string',
             'avatar' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
@@ -791,9 +786,10 @@ class SabhaController extends Controller
         }
         $user->phone = $validated['phone'] ?? null;
         $user->city = $validated['city'] ?? null;
-        $user->designation = $validated['designation'] ?? null;
-        $user->company = $validated['company'] ?? null;
-        $user->bio = $validated['bio'] ?? null;
+        $user->native_city = $validated['native_city'] ?? null;
+        $user->birth_date = $validated['birth_date'] ?? null;
+        $user->anniversary_date = $validated['anniversary_date'] ?? null;
+        $user->residence_address = $validated['residence_address'] ?? null;
 
         // Handle avatar upload
         if ($request->hasFile('avatar')) {

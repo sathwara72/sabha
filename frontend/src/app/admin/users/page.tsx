@@ -31,9 +31,10 @@ interface User {
   created_at: string;
   phone?: string;
   city?: string;
-  designation?: string;
-  company?: string;
-  bio?: string;
+  native_city?: string;
+  birth_date?: string;
+  anniversary_date?: string;
+  residence_address?: string;
   avatar?: string;
   is_blocked?: boolean;
   business?: Business;
@@ -687,22 +688,33 @@ export default function AdminUsersPage() {
                 
                 <div className="space-y-2 text-xs">
                   <div>
-                    <span className="text-muted-foreground block mb-0.5">Designation & Company</span>
-                    <span className="font-semibold text-foreground">
-                      {selectedUser.designation || selectedUser.company
-                        ? `${selectedUser.designation || "Member"} at ${selectedUser.company || "Sabha"}`
-                        : "Not specified"}
-                    </span>
-                  </div>
-
-                  <div>
                     <span className="text-muted-foreground block mb-0.5">Phone Number</span>
                     <span className="font-semibold text-foreground">{selectedUser.phone || "Not specified"}</span>
                   </div>
 
                   <div>
-                    <span className="text-muted-foreground block mb-0.5">City / Location</span>
+                    <span className="text-muted-foreground block mb-0.5">City</span>
                     <span className="font-semibold text-foreground">{selectedUser.city || "Not specified"}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-foreground block mb-0.5">Native City (વતન)</span>
+                    <span className="font-semibold text-foreground">{selectedUser.native_city || "Not specified"}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-foreground block mb-0.5">Birth Date (જન્મ તારીખ)</span>
+                    <span className="font-semibold text-foreground">{selectedUser.birth_date || "Not specified"}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-foreground block mb-0.5">Marriage / Anniversary Date</span>
+                    <span className="font-semibold text-foreground">{selectedUser.anniversary_date || "Not specified"}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-muted-foreground block mb-0.5">Residence Address</span>
+                    <span className="font-semibold text-foreground">{selectedUser.residence_address || "Not specified"}</span>
                   </div>
 
                   <div>
@@ -710,13 +722,6 @@ export default function AdminUsersPage() {
                     <span className="font-semibold text-foreground">
                       {new Date(selectedUser.created_at).toLocaleDateString()} {new Date(selectedUser.created_at).toLocaleTimeString()}
                     </span>
-                  </div>
-
-                  <div>
-                    <span className="text-muted-foreground block mb-0.5">Bio</span>
-                    <p className="text-foreground leading-relaxed italic bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                      {selectedUser.bio || "No bio written yet."}
-                    </p>
                   </div>
                 </div>
               </div>

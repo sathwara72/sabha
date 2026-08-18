@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class MembershipFormSeeder extends Seeder
 {
@@ -17,13 +16,26 @@ class MembershipFormSeeder extends Seeder
      */
     public function run(): void
     {
-        // Reset categories for a clean standardized list
+        // 1. Wipe all existing tables for a 100% clean dataset with no duplicates
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('businesses')->update(['business_category_id' => null]);
+        DB::table('reviews')->truncate();
+        DB::table('event_registrations')->truncate();
+        Business::truncate();
+        User::truncate();
         BusinessCategory::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $hashedPassword = Hash::make('SABHA@123');
+
+        // Re-create Admin User
+        User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@sabha.com',
+            'phone' => '9999999999',
+            'password' => $hashedPassword,
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
 
         $json = <<<'JSON'
 [
@@ -39,7 +51,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "I AM CERTIFIED FINANCIAL GOAL PLANNER FROM AMERICAN ACADEMY OF FINANCIAL PLANNING, MDRT USA. \n\nEXPERTS IN FINANCIAL PLANNING OF CHILD EDUCATION, \nCHILD MARRIAGE FINANCIAL PLANNING, \nRETIREMENT FINANCIAL PLANNING, \nPENSION PLANNING. \n\nYour A to Z Financial planning at one point of contact and one stop solution for your all future financial Responsibility.",
         "avatar": "https://drive.google.com/open?id=1OdFKjwYQ9F905XgkjtL3sANS2-tpqzBR",
         "logo": "https://drive.google.com/open?id=11jQyLJSbwTVwaXv16hqvOh46ivAH9Zh6",
-        "payment_ss": "https://drive.google.com/open?id=128ffCJ3YEta4eIAQ_LWlpx5VD9EXWf7A"
+        "payment_ss": "https://drive.google.com/open?id=128ffCJ3YEta4eIAQ_LWlpx5VD9EXWf7A",
+        "timestamp": "2025-10-12 10:50:24",
+        "birth_date": "1998-07-04",
+        "anniversary_date": "2025-02-07",
+        "native_city": "SURENDRANAGAR",
+        "residence_address": "34, Shri Hari Bungalow, Bavla, Ahmedabad"
     },
     {
         "full_name": "TARBUNDIYA JAYDEEP RAMESHBHAI",
@@ -53,7 +70,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Solar panel installation \nResidential \nCommercial \nIndustrial",
         "avatar": "https://drive.google.com/open?id=1yfYY-d9mEX1cohWT0x0F0dJuycSQ5LeX",
         "logo": "https://drive.google.com/open?id=1XYJqEVb_mJZrpb6rOGoU1sZPQmFxdPcV",
-        "payment_ss": "https://drive.google.com/open?id=1fW8c43smqhnF74qoeMxZdGH5D5Oc2j5o"
+        "payment_ss": "https://drive.google.com/open?id=1fW8c43smqhnF74qoeMxZdGH5D5Oc2j5o",
+        "timestamp": "2025-10-12 10:53:04",
+        "birth_date": "2002-06-14",
+        "anniversary_date": null,
+        "native_city": "Bavla"
     },
     {
         "full_name": "Harmish Lakum",
@@ -67,7 +88,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Working at Torrent Pharma as assistant manager in international operations department looking after US and Europe business.",
         "avatar": "https://drive.google.com/open?id=1r-BCtfHZ_iOkvP8EeOTbGrmvragHqzbM",
         "logo": "https://drive.google.com/open?id=1mfEqgGIoyxCFEp56iP7pcV2PMbv-kUkq",
-        "payment_ss": "https://drive.google.com/open?id=1yGhtTnhAmXoWx9sIrFdMYRh7vXg96uW-"
+        "payment_ss": "https://drive.google.com/open?id=1yGhtTnhAmXoWx9sIrFdMYRh7vXg96uW-",
+        "timestamp": "2025-10-12 11:09:27",
+        "birth_date": "1986-09-26",
+        "anniversary_date": "2012-12-06",
+        "native_city": "Ahmedabad"
     },
     {
         "full_name": "Kaushik Mansukhbhai Chavada",
@@ -81,7 +106,10 @@ class MembershipFormSeeder extends Seeder
         "bio": "Fernweh Vacations is an IATA approved travel agency since 2007 head office at Ahmedabad. We are specialize in Domestic & International Air ticket booking, Tour Packages, Visa & Passport formality, Car Rental and Hotel booking around the world.  As well as we do organized Corporate Events and destinations weddings too.",
         "avatar": "https://drive.google.com/open?id=1A5ZbRU9nu4w8eXQqQgjZkwlruWv975eu",
         "logo": "https://drive.google.com/open?id=17Lq2CjaQfOUxRtTs_nLLC2M2y4AvVfF-",
-        "payment_ss": "https://drive.google.com/open?id=1e9v07a35imo524ObYgSNYQ9tQ3LUbnL3"
+        "payment_ss": "https://drive.google.com/open?id=1e9v07a35imo524ObYgSNYQ9tQ3LUbnL3",
+        "timestamp": "2025-10-12 11:29:34",
+        "birth_date": "1987-05-08",
+        "anniversary_date": "2021-11-21"
     },
     {
         "full_name": "Mayurkumar Himmatlal Chavda",
@@ -95,7 +123,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "WAN (Wide Area Network) optimization is about improving the performance, reliability, and efficiency of data communication across geographically dispersed sites (e.g. branch offices, clouds, DCs)",
         "avatar": "https://drive.google.com/open?id=1QuFCFhxf0iSgLiGKXsmEoZ6dUZl0p6xc",
         "logo": "https://drive.google.com/open?id=1Ka5Ic4GnibrstduL2Yn0dnDuG6LxN9im",
-        "payment_ss": "https://drive.google.com/open?id=1QrwvU3SCPoKNid-VcOAtxY_X533VapoZ"
+        "payment_ss": "https://drive.google.com/open?id=1QrwvU3SCPoKNid-VcOAtxY_X533VapoZ",
+        "timestamp": "2025-10-12 11:39:22",
+        "birth_date": "1992-06-16",
+        "anniversary_date": "1992-06-16",
+        "native_city": "Whitefield, Bangalore",
+        "residence_address": "Interior Designer and Contractor"
     },
     {
         "full_name": "Dharmesh Kumar Chavda",
@@ -106,10 +139,14 @@ class MembershipFormSeeder extends Seeder
         "email": "chavdadharmesh16@gmail.com",
         "address": "A-701, Devam, Behind Global International School, Nr. Godrej Garden City,",
         "city": "Ahmedabad",
-        "bio": "We are a Turnkey Interior Contracting team dedicated to transforming houses into dream homes. From concept to completion — we handle everything with precision, quality, and care.\nLet’s build spaces that speak style, comfort & elegance.",
+        "bio": "We are a Turnkey Interior Contracting team dedicated to transforming houses into dream homes. From concept to completion \u2014 we handle everything with precision, quality, and care.\nLet\u2019s build spaces that speak style, comfort & elegance.",
         "avatar": "https://drive.google.com/open?id=1uBLFxx2M7_NrVvATfge75Qniv8WAqE_U",
         "logo": "https://drive.google.com/open?id=15jc1I1M_w2bt_C1UlZacc6r6LseXGPfr",
-        "payment_ss": "https://drive.google.com/open?id=1wT4bHS2pTlvlK2OHe65MXNmThlCpIgva"
+        "payment_ss": "https://drive.google.com/open?id=1wT4bHS2pTlvlK2OHe65MXNmThlCpIgva",
+        "timestamp": "2025-10-12 12:26:38",
+        "birth_date": "1983-11-22",
+        "anniversary_date": "2009-12-10",
+        "residence_address": "Bharvi electricals"
     },
     {
         "full_name": "Dalvadi Vipul karamahibhai",
@@ -123,7 +160,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "We are taking the turnkey project and supply of electricals goods and services of all electrical works.",
         "avatar": "https://drive.google.com/open?id=1k7u8Z6V6Ml4uI3SEoX6J62iN92-8qcHV",
         "logo": "https://drive.google.com/open?id=1CihxzSK05GiMTQXpDcTPAOAFKyNvBK8k",
-        "payment_ss": "https://drive.google.com/open?id=107scd25a9faHQ7UC8EyOU8v7h1Ez0Oni"
+        "payment_ss": "https://drive.google.com/open?id=107scd25a9faHQ7UC8EyOU8v7h1Ez0Oni",
+        "timestamp": "2025-10-12 12:30:21",
+        "birth_date": "2000-02-07",
+        "anniversary_date": null,
+        "residence_address": "Menufecturing of led lights"
     },
     {
         "full_name": "KANZAREEYA SONAK KANTILAL",
@@ -137,7 +178,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Manufacturing plant of all type led lights indoor nd outdoor also sell raw material of led lights",
         "avatar": "https://drive.google.com/open?id=17bXhikYs_TEHBR5War6VaPPwHjjLK-Gn",
         "logo": "https://drive.google.com/open?id=1-7eSYRpb8gyyU9Cun-MGZTydSlRZD8Ll",
-        "payment_ss": "https://drive.google.com/open?id=1MhM9HXWIsVnTHPbTSnhN658IsUMeGi-Y"
+        "payment_ss": "https://drive.google.com/open?id=1MhM9HXWIsVnTHPbTSnhN658IsUMeGi-Y",
+        "timestamp": "2025-10-12 12:54:26",
+        "birth_date": "1978-06-14",
+        "anniversary_date": "2001-05-19",
+        "native_city": "Bakrol bujarang",
+        "residence_address": "Mfg. of Air Motor"
     },
     {
         "full_name": "Pankajkumar K Parmar",
@@ -151,7 +197,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Mfg. of Air Motor, Gear Box, Air compressor Parts.",
         "avatar": "https://drive.google.com/open?id=1yjkFA40rj7i4L-8q-rtPz-M7bms_jhPp",
         "logo": "https://drive.google.com/open?id=1yLX7vWdvuZ_UwKRI_UO-VEXB0HIf-9MJ",
-        "payment_ss": "https://drive.google.com/open?id=186AV_Ko8hXDiWqplUJx1UtdZ_uFX-9AB"
+        "payment_ss": "https://drive.google.com/open?id=186AV_Ko8hXDiWqplUJx1UtdZ_uFX-9AB",
+        "timestamp": "2025-10-12 13:34:15",
+        "birth_date": "1994-06-10",
+        "anniversary_date": "2022-01-26",
+        "residence_address": "Owner"
     },
     {
         "full_name": "Kavan Dabhi",
@@ -165,7 +215,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "We, Marketyfy, are a digital marketing company situated in Ahmedabad with another branch in Vadodara. \nWe provide all type of digital marketing services like Google Ads, Meta Ads, Social Media Marketing, SEO, Website development, D2C and SAAS Marketing.",
         "avatar": "https://drive.google.com/open?id=1DYqa44zK91Kxckp2wtYtI61kVA7cJk56",
         "logo": "https://drive.google.com/open?id=1YIAhNYq-hf1jEpss9sngwCOcSbNlUVNJ",
-        "payment_ss": "https://drive.google.com/open?id=1HgSprgY5u22cZBG-0YTlnh-wHa_DQD7H"
+        "payment_ss": "https://drive.google.com/open?id=1HgSprgY5u22cZBG-0YTlnh-wHa_DQD7H",
+        "timestamp": "2025-10-12 14:45:52",
+        "birth_date": "1997-05-25",
+        "anniversary_date": "2024-01-28",
+        "native_city": "Digital Marketing",
+        "residence_address": "Managing Director"
     },
     {
         "full_name": "Bhavesh Sathwara",
@@ -179,7 +234,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "We are Working on Mobile and Web app Development",
         "avatar": "https://drive.google.com/open?id=18BtWk-22RX5Ucr0fYnwnZAuNmA8it0JT",
         "logo": "https://drive.google.com/open?id=1aw6uNiYQcYKnEPYYm8C7G-L4Nan9lb7r",
-        "payment_ss": "https://drive.google.com/open?id=1TBYNfFwRCwbQMdPopHxIkGIItWEFld9V"
+        "payment_ss": "https://drive.google.com/open?id=1TBYNfFwRCwbQMdPopHxIkGIItWEFld9V",
+        "timestamp": "2025-10-12 16:07:13",
+        "birth_date": "1980-12-07",
+        "anniversary_date": "2007-01-21",
+        "native_city": "IT",
+        "residence_address": "CEO & Founder"
     },
     {
         "full_name": "Naresh K Satvara",
@@ -190,10 +250,14 @@ class MembershipFormSeeder extends Seeder
         "email": "naresh.vinayak07@gmail.com",
         "address": "Shree Vinayaka Associate   A-524 Fifth Floor, Rosevill Sky Complex , Opp. Croma, Nr. Sukan cross road, Nikol, Ahmedabad - 382350",
         "city": "Ahmedabad",
-        "bio": "About S V Group\n\nS V Group is a leading financial services and advisory firm, headed by the accomplished and experienced Mr. Naresh K Satvara. With over a decade of expertise in the financial industry — including six years with HDFC Bank Ltd — Mr. Satvara brings in-depth knowledge in structured finance, portfolio management, retail lending, and wholesale real estate debt origination.\n\nAt S V Group, we provide a comprehensive range of financial solutions, including debt and equity syndication and strategic financial advisory services. Our team of seasoned professionals, with strong backgrounds in banking, finance, corporate consultancy, and real estate, work collaboratively to deliver innovative financing structures and customized financial models.\n\nWe specialize in project appraisal and funding for real estate and infrastructure projects, offering clients tailored solutions to meet their unique financial needs.\n\nOur fully automated and technology-driven operations ensure efficiency, accuracy, and transparency — enabling us to deliver results that consistently exceed client expectations.\n\nAt S V Group, our mission is to empower clients with innovative, reliable, and result-oriented financial solutions that support sustainable growth and long-term success.\n________________________________________\nFinancial Services Offered\n\n•\tReal Estate Project Construction Finance (Mixed Projects)\n•\tProject Inventory Funding (Mixed Projects)\n•\tRedevelopment Project Funding\n•\tRaising Equity from PE Funds & AIFs\n•\tExternal Commercial Borrowing (ECB)\n•\tLease Rental Discounting (LRD)\n•\tLoan Against Property (LAP) & Working Capital Loans\n•\tProject APF & Home Loans\n________________________________________\nTypes of Projects Handled\n\nReal Estate Projects\n•\tResidential Developments\n•\tCommercial Complexes\n•\tRedevelopment Projects\n•\tMalls & Multiplexes\n•\tWarehousing Facilities\n•\tHospitals, Hotels & Resorts\n•\tEducational Institutes (Schools & Colleges)\n\nMiscellaneous Projects\n•\tIron & Steel Plants\n•\tPharmaceutical Units\n•\tPaper Mills & Windmills\n•\tRetail Businesses\n________________________________________\n\nS.V. Group’s Core Service Areas\n\nDebt Syndication by Way of:\n•\tProject Construction Finance\n•\tProject Inventory Funding\n•\tExternal Commercial Borrowing (ECB)\n•\tRaising Equity from PE Funds (Structured Finance)\n•\tLease Rental Discounting (LRD)\n•\tLoan Against Property (LAP) & Working Capital Loans",
+        "bio": "About S V Group\n\nS V Group is a leading financial services and advisory firm, headed by the accomplished and experienced Mr. Naresh K Satvara. With over a decade of expertise in the financial industry \u2014 including six years with HDFC Bank Ltd \u2014 Mr. Satvara brings in-depth knowledge in structured finance, portfolio management, retail lending, and wholesale real estate debt origination.\n\nAt S V Group, we provide a comprehensive range of financial solutions, including debt and equity syndication and strategic financial advisory services. Our team of seasoned professionals, with strong backgrounds in banking, finance, corporate consultancy, and real estate, work collaboratively to deliver innovative financing structures and customized financial models.\n\nWe specialize in project appraisal and funding for real estate and infrastructure projects, offering clients tailored solutions to meet their unique financial needs.\n\nOur fully automated and technology-driven operations ensure efficiency, accuracy, and transparency \u2014 enabling us to deliver results that consistently exceed client expectations.\n\nAt S V Group, our mission is to empower clients with innovative, reliable, and result-oriented financial solutions that support sustainable growth and long-term success.\n________________________________________\nFinancial Services Offered\n\n\u2022\tReal Estate Project Construction Finance (Mixed Projects)\n\u2022\tProject Inventory Funding (Mixed Projects)\n\u2022\tRedevelopment Project Funding\n\u2022\tRaising Equity from PE Funds & AIFs\n\u2022\tExternal Commercial Borrowing (ECB)\n\u2022\tLease Rental Discounting (LRD)\n\u2022\tLoan Against Property (LAP) & Working Capital Loans\n\u2022\tProject APF & Home Loans\n________________________________________\nTypes of Projects Handled\n\nReal Estate Projects\n\u2022\tResidential Developments\n\u2022\tCommercial Complexes\n\u2022\tRedevelopment Projects\n\u2022\tMalls & Multiplexes\n\u2022\tWarehousing Facilities\n\u2022\tHospitals, Hotels & Resorts\n\u2022\tEducational Institutes (Schools & Colleges)\n\nMiscellaneous Projects\n\u2022\tIron & Steel Plants\n\u2022\tPharmaceutical Units\n\u2022\tPaper Mills & Windmills\n\u2022\tRetail Businesses\n________________________________________\n\nS.V. Group\u2019s Core Service Areas\n\nDebt Syndication by Way of:\n\u2022\tProject Construction Finance\n\u2022\tProject Inventory Funding\n\u2022\tExternal Commercial Borrowing (ECB)\n\u2022\tRaising Equity from PE Funds (Structured Finance)\n\u2022\tLease Rental Discounting (LRD)\n\u2022\tLoan Against Property (LAP) & Working Capital Loans",
         "avatar": "https://drive.google.com/open?id=115tQewRPJXrjgPfDnOoCG5AgGlNCMfnl",
         "logo": "https://drive.google.com/open?id=1waUb2AjbQowprBbw6F75zgnI7U4pIxLe",
-        "payment_ss": "https://drive.google.com/open?id=1bK9yhtDfQ0twBGMaUOK4Eldo814PfsAq"
+        "payment_ss": "https://drive.google.com/open?id=1bK9yhtDfQ0twBGMaUOK4Eldo814PfsAq",
+        "timestamp": "2025-10-12 17:55:33",
+        "birth_date": "1988-06-08",
+        "anniversary_date": null,
+        "residence_address": "Chavda Devendra Naranbhai"
     },
     {
         "full_name": "Chavda Devendra Naranbhai",
@@ -207,7 +271,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Book keeping , Gst Registration, Return filling and and Income tax return filing",
         "avatar": "https://drive.google.com/open?id=1vYwiKNk0kawwoNRBd8XGIUaueRBsdn-F",
         "logo": "https://drive.google.com/open?id=10auNV2q-gi4eSvWGhwkAhYV4SL17BeBM",
-        "payment_ss": "https://drive.google.com/open?id=17k4WFEzc8BKMOFW1FGQTjaew7nFO6dyL"
+        "payment_ss": "https://drive.google.com/open?id=17k4WFEzc8BKMOFW1FGQTjaew7nFO6dyL",
+        "timestamp": "2025-10-12 17:57:46",
+        "birth_date": "1987-01-01",
+        "anniversary_date": "2012-12-07",
+        "native_city": "Tax Consultant",
+        "residence_address": "JIGNESH JASMUKHLAL JADAV"
     },
     {
         "full_name": "JIGNESH JASMUKHLAL JADAV",
@@ -221,7 +290,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "All Insurance any types of loan mutual fund new car purchase",
         "avatar": "https://drive.google.com/open?id=14BdVEZolSENMLGWzQCxxUTwyBrsBhFsl",
         "logo": "https://drive.google.com/open?id=1cdhsCCzQO2MRa8WuvcrXQsNM7vUPqubt",
-        "payment_ss": "https://drive.google.com/open?id=1L7rGyqSy0fcvihY-4j83LtruoOCkfJ29"
+        "payment_ss": "https://drive.google.com/open?id=1L7rGyqSy0fcvihY-4j83LtruoOCkfJ29",
+        "timestamp": "2025-10-13 12:04:23",
+        "birth_date": "1999-04-28",
+        "anniversary_date": "2025-02-28",
+        "native_city": "J J WEALTH CREATORS",
+        "residence_address": "RAVI COMPUTER"
     },
     {
         "full_name": "CHAVDA RAVI RASIKBHAI",
@@ -232,10 +306,15 @@ class MembershipFormSeeder extends Seeder
         "email": "ravicomputer3911@gmail.com",
         "address": "2,3, VISHWAS CITY-1, F F, Maharana Pratap Rd, near 13, Ghatlodiya, Chanakyapuri, Ahmedabad, Gujarat 380061",
         "city": "Ahmedabad",
-        "bio": "Ravi Computer — Everything in Computer World\n\nRavi Computer is a trusted IT hardware and service provider based in Ahmedabad, offering complete technology solutions under one roof.\n\nWe specialize in:\n💻 Computer & Laptop Sales and Repairs\n🔧 Chip-level Motherboard Repair & Servicing\n📷 CCTV Camera Supply and Installation\n🌐 Networking & IT Infrastructure Setup\n🖨️ Printer and Biometric Machine Services\n💽 Data Recovery and Software Installation\n🧠 Annual Maintenance Contracts (AMC) for Computers, CCTV, and Networking\n\nWith a strong presence across the city, we operate from four branches in Ahmedabad:\n1️⃣ Ghatlodia (Head Office)\n2️⃣ Prahladnagar\n3️⃣ Bopal\n4️⃣ Naroda\n\nOur team of expert technicians ensures fast, reliable, and affordable IT services with a focus on customer satisfaction and long-term support.",
+        "bio": "Ravi Computer \u2014 Everything in Computer World\n\nRavi Computer is a trusted IT hardware and service provider based in Ahmedabad, offering complete technology solutions under one roof.\n\nWe specialize in:\n\ud83d\udcbb Computer & Laptop Sales and Repairs\n\ud83d\udd27 Chip-level Motherboard Repair & Servicing\n\ud83d\udcf7 CCTV Camera Supply and Installation\n\ud83c\udf10 Networking & IT Infrastructure Setup\n\ud83d\udda8\ufe0f Printer and Biometric Machine Services\n\ud83d\udcbd Data Recovery and Software Installation\n\ud83e\udde0 Annual Maintenance Contracts (AMC) for Computers, CCTV, and Networking\n\nWith a strong presence across the city, we operate from four branches in Ahmedabad:\n1\ufe0f\u20e3 Ghatlodia (Head Office)\n2\ufe0f\u20e3 Prahladnagar\n3\ufe0f\u20e3 Bopal\n4\ufe0f\u20e3 Naroda\n\nOur team of expert technicians ensures fast, reliable, and affordable IT services with a focus on customer satisfaction and long-term support.",
         "avatar": "https://drive.google.com/open?id=1lfO3ASTLMYdYWdpH_jq7yuAAKuP5aajr",
         "logo": "https://drive.google.com/open?id=16eeIKQV7ECoXKl3NuuGhjozipo17-Vk4",
-        "payment_ss": "https://drive.google.com/open?id=1tKb2A4zru2lEBArJSMq6wN4KCgmSl3c8"
+        "payment_ss": "https://drive.google.com/open?id=1tKb2A4zru2lEBArJSMq6wN4KCgmSl3c8",
+        "timestamp": "2025-10-13 14:58:26",
+        "birth_date": "1986-06-11",
+        "anniversary_date": "2011-12-06",
+        "native_city": "ravicomputer3911@gmail.com",
+        "residence_address": "harshad11j@gmail.com"
     },
     {
         "full_name": "Harshad Rathod",
@@ -246,10 +325,15 @@ class MembershipFormSeeder extends Seeder
         "email": "harshad11j@gmail.com",
         "address": "26-31 Xcelon Industrial Park- 1 , B/H intas Pharmaceuticals , Vasna-chacharvadi, Ta: Sanand , Dist: Ahmedabad 382213",
         "city": "Ahmedabad",
-        "bio": "From a spark of curiosity to a legacy of innovation—my journey in healthcare began with a simple belief: medicine has the power to transform lives.\n\nI remember the thrill of discovering how a well-formulated drug could change a patient’s life, and that passion propelled me through my academic journey—earning a Bachelor of Pharmacy from LJ Institute of Pharmacy and later an MBA from Madhyanchal Professional University, Bhopal. These experiences laid the foundation for a career spanning over 14 years in the healthcare industry, where every challenge became an opportunity to innovate and lead.\n\nIn 2012, driven by a desire to revolutionize healthcare, I became one of the founding members of Accretion Pharmaceuticals, paving the way for innovation and excellence in the pharmaceutical industry. What started as a vision to deliver international-quality healthcare products has evolved into a thriving enterprise, dedicated to excellence and precision. Our early days were marked by bold initiatives and groundbreaking ideas, setting the stage for the transformative work we do today.\n\nThe journey didn’t stop there. In 2019, we expanded our horizons with the launch of Accretion INC, forging domestic collaborations that allowed our innovations to thrive across the country. Then, in March 2021, I ventured into the nutraceutical and wellness arena with Accretion Nutraveda Private Limited, diversifying our portfolio and reinforcing our commitment to holistic health solutions.\n\nToday, I lead a passionate team in driving strategic financial management, operational efficiency, and business development. I oversee every facet of our operations—from meticulous financial planning and robust budgeting to ensuring our production processes and quality controls exceed global standards. Every decision, every process, is a step toward our goal of becoming a global leader in healthcare.\n\nMy approach to leadership is simple: inspire, collaborate, and empower. At Accretion, we believe in nurturing talent and fostering a culture where innovation thrives and every breakthrough makes a real impact on lives around the world.",
+        "bio": "From a spark of curiosity to a legacy of innovation\u2014my journey in healthcare began with a simple belief: medicine has the power to transform lives.\n\nI remember the thrill of discovering how a well-formulated drug could change a patient\u2019s life, and that passion propelled me through my academic journey\u2014earning a Bachelor of Pharmacy from LJ Institute of Pharmacy and later an MBA from Madhyanchal Professional University, Bhopal. These experiences laid the foundation for a career spanning over 14 years in the healthcare industry, where every challenge became an opportunity to innovate and lead.\n\nIn 2012, driven by a desire to revolutionize healthcare, I became one of the founding members of Accretion Pharmaceuticals, paving the way for innovation and excellence in the pharmaceutical industry. What started as a vision to deliver international-quality healthcare products has evolved into a thriving enterprise, dedicated to excellence and precision. Our early days were marked by bold initiatives and groundbreaking ideas, setting the stage for the transformative work we do today.\n\nThe journey didn\u2019t stop there. In 2019, we expanded our horizons with the launch of Accretion INC, forging domestic collaborations that allowed our innovations to thrive across the country. Then, in March 2021, I ventured into the nutraceutical and wellness arena with Accretion Nutraveda Private Limited, diversifying our portfolio and reinforcing our commitment to holistic health solutions.\n\nToday, I lead a passionate team in driving strategic financial management, operational efficiency, and business development. I oversee every facet of our operations\u2014from meticulous financial planning and robust budgeting to ensuring our production processes and quality controls exceed global standards. Every decision, every process, is a step toward our goal of becoming a global leader in healthcare.\n\nMy approach to leadership is simple: inspire, collaborate, and empower. At Accretion, we believe in nurturing talent and fostering a culture where innovation thrives and every breakthrough makes a real impact on lives around the world.",
         "avatar": "https://drive.google.com/open?id=12rXTnASCHcAMu0VWud7SV3OV44SdEL9J",
         "logo": "https://drive.google.com/open?id=1K6VA4462bZJOZg7mQng4dB0SFge4-OmF",
-        "payment_ss": "https://drive.google.com/open?id=1uqFldy4B8zdAY8HHaSPvZH5NA4Uu5lhe"
+        "payment_ss": "https://drive.google.com/open?id=1uqFldy4B8zdAY8HHaSPvZH5NA4Uu5lhe",
+        "timestamp": "2025-10-14 07:49:40",
+        "birth_date": "2000-06-04",
+        "anniversary_date": null,
+        "native_city": "Sanand",
+        "residence_address": "Partner"
     },
     {
         "full_name": "Bhavesh Mori Chauhan",
@@ -263,7 +347,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Bluegreenfarms Working as a Alage based products (Phycocyanin Pigment, Astaxanthin Powder, Spirulina Powder, Zeaxanthin Powder) wholesaler and Exporter.",
         "avatar": "https://drive.google.com/open?id=1A_5eOqk6su-TtDcL5oUwANZHozlQ2ozK",
         "logo": "https://drive.google.com/open?id=1aSIZ8ktDr-wxU0xvAI146Hg_0epnzZLp",
-        "payment_ss": "https://drive.google.com/open?id=1p9mvyrD8P22bUSIHV1q6zHbgV938_Hnf"
+        "payment_ss": "https://drive.google.com/open?id=1p9mvyrD8P22bUSIHV1q6zHbgV938_Hnf",
+        "timestamp": "2025-10-17 11:39:07",
+        "birth_date": "1991-08-17",
+        "anniversary_date": null,
+        "native_city": "Algae, Phytoextracts Wholesale, Trader."
     },
     {
         "full_name": "Nikita parmar",
@@ -277,7 +365,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Digital marketing is the promotion of products, service or brands using online platforms and digital channels such as search engine, social media, email, website and mobile apps.",
         "avatar": "https://drive.google.com/open?id=18lnmw7zwprk2nKHM0XlZPp0cxDy0lQnc",
         "logo": "https://drive.google.com/open?id=16u2oRw9fXGtWJPgLQxOLfpfAfP7m12fH",
-        "payment_ss": "https://drive.google.com/open?id=1daSHfibLBazJ096JOfpzyXlRHSfQ6eV-"
+        "payment_ss": "https://drive.google.com/open?id=1daSHfibLBazJ096JOfpzyXlRHSfQ6eV-",
+        "timestamp": "2025-10-17 22:41:06",
+        "birth_date": "1998-01-10",
+        "anniversary_date": null,
+        "native_city": "Nikita parmar"
     },
     {
         "full_name": "KRUPAL BHARATBHAI KADIYA",
@@ -288,10 +380,14 @@ class MembershipFormSeeder extends Seeder
         "email": "namasthetu.services@gmail.com",
         "address": "C-105, SURYAM AURA, NR. MUKTIDHAM ESTATE, JIVANWADI, NIKOL, AHMEDABAD - 382350.",
         "city": "AHMEDABAD",
-        "bio": "Welcome to Namasthetu Professional Services,\n\nWe offer comprehensive accounting and taxation solutions tailored to the unique needs of individuals, small businesses, and corporate clients. With a strong focus on accuracy, compliance, and strategic financial planning, we empower our clients to achieve long-term financial stability and sustainable growth.\n\nOur core services include:\n•\tBookkeeping Services\n•\tFinancial Statement Preparation\n•\tAccounting System Setup & Support\n•\tIncome Tax Return Filing\n•\tGoods and Services Tax (GST) Compliance\n•\tTax Deducted at Source (TDS) Compliance\n•\tTax Audit & Statutory Audit\n•\tHuman Resource (HR) Services\n•\tTax Planning & Advisory\n•\tCertification Services\n\nBacked by deep industry expertise and a commitment to ethical standards, we collaborate closely with our clients to streamline financial operations and ensure timely compliance with all tax obligations. At Namasthetu Professional Services, “we are more than accountants — we are your trusted financial partners in success.”",
+        "bio": "Welcome to Namasthetu Professional Services,\n\nWe offer comprehensive accounting and taxation solutions tailored to the unique needs of individuals, small businesses, and corporate clients. With a strong focus on accuracy, compliance, and strategic financial planning, we empower our clients to achieve long-term financial stability and sustainable growth.\n\nOur core services include:\n\u2022\tBookkeeping Services\n\u2022\tFinancial Statement Preparation\n\u2022\tAccounting System Setup & Support\n\u2022\tIncome Tax Return Filing\n\u2022\tGoods and Services Tax (GST) Compliance\n\u2022\tTax Deducted at Source (TDS) Compliance\n\u2022\tTax Audit & Statutory Audit\n\u2022\tHuman Resource (HR) Services\n\u2022\tTax Planning & Advisory\n\u2022\tCertification Services\n\nBacked by deep industry expertise and a commitment to ethical standards, we collaborate closely with our clients to streamline financial operations and ensure timely compliance with all tax obligations. At Namasthetu Professional Services, \u201cwe are more than accountants \u2014 we are your trusted financial partners in success.\u201d",
         "avatar": "https://drive.google.com/open?id=11_ylYE-fkOQlqxG-k0cosgzt7w9XVw7g",
         "logo": "https://drive.google.com/open?id=10FAIdiiC9MnwpGEm0buw2PdrD9ObL_R1",
-        "payment_ss": "https://drive.google.com/open?id=1hFBzL-ykt7NIhJsml-FLzrJWrnb2Kdof"
+        "payment_ss": "https://drive.google.com/open?id=1hFBzL-ykt7NIhJsml-FLzrJWrnb2Kdof",
+        "timestamp": "2025-10-20 12:06:45",
+        "birth_date": "2000-01-03",
+        "anniversary_date": null,
+        "native_city": "ACCOUNTING, AUDITING & TAX SERVICES"
     },
     {
         "full_name": "Yash Govindbhai Kadiya",
@@ -305,7 +401,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "We at Craftic Solution build a powerful, scalable, cost-effective and innovative tech products. Specialised in Agentic AI, Mobile Apps, Web and GIS domain. Also cater to customised requirements.",
         "avatar": "https://drive.google.com/open?id=1C34muJxEQ53DnMps9hanIF6b1YYTDHr9",
         "logo": "https://drive.google.com/open?id=1X3sOUVoUaPyW8sr2jm6NOXgz_XhGZUuP",
-        "payment_ss": "https://drive.google.com/open?id=1-jimDomY_rqjedUN1b6Wy9ux1PfRIB0v"
+        "payment_ss": "https://drive.google.com/open?id=1-jimDomY_rqjedUN1b6Wy9ux1PfRIB0v",
+        "timestamp": "2025-11-01 18:11:22",
+        "birth_date": "1980-11-09",
+        "anniversary_date": "2004-01-26",
+        "native_city": "Craftic Solutions"
     },
     {
         "full_name": "Jadav yogesh laxmanbhai",
@@ -319,7 +419,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "New Building contractors",
         "avatar": "https://drive.google.com/open?id=1L3tOqWrC6mbb7AvMopwLu6tW0d1fG3ZI",
         "logo": "https://drive.google.com/open?id=1GlTP3fg7RjFJcnXPbVr3uKQgQqBcPyzt",
-        "payment_ss": "https://drive.google.com/open?id=1aUZlYprAGs--z5zZpTMCvqKUnu89HbX_"
+        "payment_ss": "https://drive.google.com/open?id=1aUZlYprAGs--z5zZpTMCvqKUnu89HbX_",
+        "timestamp": "2025-11-01 18:36:36",
+        "birth_date": "1976-08-16",
+        "anniversary_date": "2000-04-24",
+        "native_city": "Jadav yogesh laxmanbhai"
     },
     {
         "full_name": "ANAND AMRUTLAL RATHOD",
@@ -333,7 +437,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Wholesale Dealing In Computer Parts, Peripheral, CCTV CAMERA, LAPTOP, ALL-IN-ONE, PRINTER, NETWORKING PRODUCT, ATTENDANCE MACHINE, DOOR BELL VIDEO SYSTEM \n\nREPAIRING HUB OF COMPUTER, PRINTER, LAPTOP, AIO, MOTHERBOARD",
         "avatar": "https://drive.google.com/open?id=1U7Ae-lHn3eP-S86s7RZgQ2KF4QBWXf21",
         "logo": "https://drive.google.com/open?id=1TIBoyExMHkDC8BV6NLBt4pBwYjjwoP_I",
-        "payment_ss": "https://drive.google.com/open?id=1qi8CTThzsIyIM4odaJi_rssHnK77cqXm"
+        "payment_ss": "https://drive.google.com/open?id=1qi8CTThzsIyIM4odaJi_rssHnK77cqXm",
+        "timestamp": "2025-11-02 13:40:55",
+        "birth_date": "1984-03-03",
+        "anniversary_date": "2009-02-13",
+        "native_city": "PRUTHVI COMPUTE",
+        "residence_address": "SANJAY SAMJIBHAI DALWADI"
     },
     {
         "full_name": "SANJAY SAMJIBHAI DALWADI",
@@ -347,7 +456,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Tile Adhesive, Epoxy and Building Materials",
         "avatar": "https://drive.google.com/open?id=1BRZfZjbXIOLbyDZa3rZnY6EpGJvw56MQ",
         "logo": "https://drive.google.com/open?id=1d2rOG1Lh40rW4cgxUwW6BO5-TlOnhKoq",
-        "payment_ss": "https://drive.google.com/open?id=1YlbzO99lv01Dw8pjoVV9FqUmcl0e2pFF"
+        "payment_ss": "https://drive.google.com/open?id=1YlbzO99lv01Dw8pjoVV9FqUmcl0e2pFF",
+        "timestamp": "2025-11-06 11:28:34",
+        "birth_date": "1992-11-17",
+        "anniversary_date": "2019-02-10",
+        "native_city": "BUILDING MATERIAL, TOOLS AND HARDWARE",
+        "residence_address": "Bhargav Dilipbhai Jambukiya"
     },
     {
         "full_name": "Bhargav Dilipbhai Jambukiya",
@@ -361,7 +475,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Stellar Code Systems designs and builds modern digital products for web, mobile, and cloud. Our teams blend deep engineering with thoughtful UX to deliver reliable software, actionable data, and measurable results. From greenfield development to legacy modernization, we bring DevOps discipline, strong security practices, and transparent delivery. Industries we serve include fintech, healthcare, retail, and SaaS.",
         "avatar": "https://drive.google.com/open?id=1jdqHWhGoxfghgy3K1Bre28mGSXHD9iCC",
         "logo": "https://drive.google.com/open?id=1Gbcw_YM-Xq76nNcAlgHhefhGIrQ7wA7c",
-        "payment_ss": "https://drive.google.com/open?id=1csFPx9fj6d1M_n7ZkElGnadnYp5YmJ7q"
+        "payment_ss": "https://drive.google.com/open?id=1csFPx9fj6d1M_n7ZkElGnadnYp5YmJ7q",
+        "timestamp": "2025-11-06 12:21:00",
+        "birth_date": "1980-12-30",
+        "anniversary_date": "2005-02-16",
+        "native_city": "Stellar Code System",
+        "residence_address": "PARTNER"
     },
     {
         "full_name": "PIYUSH SURYAKANTBHAI KADIA",
@@ -375,7 +494,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Retail & Wholesale supplier of Medicines",
         "avatar": "https://drive.google.com/open?id=1OU5R6TTpkj-w-nzURHF9xSgIlNxEHTRR",
         "logo": "https://drive.google.com/open?id=14XvdiydxQPD5rQcwB7UC2eXjptd78nKe",
-        "payment_ss": "https://drive.google.com/open?id=1GoOkI2slcMWy47Xw3aeNIGPCT0SnfmCL"
+        "payment_ss": "https://drive.google.com/open?id=1GoOkI2slcMWy47Xw3aeNIGPCT0SnfmCL",
+        "timestamp": "2025-11-06 15:15:33",
+        "birth_date": "1996-01-10",
+        "anniversary_date": "2025-02-12",
+        "native_city": "piyushkadia@gmail.com"
     },
     {
         "full_name": "Mitesh Makwana Kalyanbhai",
@@ -389,7 +512,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Injection Molding Dai Mould Specialist",
         "avatar": "https://drive.google.com/open?id=1qh5Z11lxHxCmG0gKkVkYGdkp6q_MYwF2",
         "logo": "https://drive.google.com/open?id=1K-jGndclFzLIaipgZRjITRI7sr3aVFP1",
-        "payment_ss": "https://drive.google.com/open?id=1gUBvPSLYRtL4dMnaGqEhQHOA-blMDHA-"
+        "payment_ss": "https://drive.google.com/open?id=1gUBvPSLYRtL4dMnaGqEhQHOA-blMDHA-",
+        "timestamp": "2025-11-10 12:18:51",
+        "birth_date": "1991-03-25",
+        "anniversary_date": "2018-12-10",
+        "native_city": "Manufacturing Engineering Works",
+        "residence_address": "Done (Logo & Profile Picture Pending)"
     },
     {
         "full_name": "Hitesh Pravinbhai Jadav",
@@ -403,7 +531,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "IT Related",
         "avatar": "https://drive.google.com/open?id=13GiQo_VYKEJZBDz6pcq_SyweHhtMuUvo",
         "logo": "https://drive.google.com/open?id=1Eau6zVDIYGSULzh2GAsOhmlLSY6swb6G",
-        "payment_ss": "https://drive.google.com/open?id=1KGcu30QpBgTjRmyMgCwvOxd25Rsdzcdr"
+        "payment_ss": "https://drive.google.com/open?id=1KGcu30QpBgTjRmyMgCwvOxd25Rsdzcdr",
+        "timestamp": "2025-11-14 20:44:55",
+        "birth_date": "1993-10-27",
+        "anniversary_date": "2017-01-22",
+        "native_city": "jadavhiteshp@gmail.com",
+        "residence_address": "Chintan Pativala"
     },
     {
         "full_name": "Chintan Pativala",
@@ -417,7 +550,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "PRACHI GREEN ENERGY PVT LTD found 2020 in mead years, Company working since  last 5 years in all over Gujarat. Prachi Green Energy is simple called Prachi Solar.Prachi Mainly Head office in Ahmedabad and branch office in Botad city location.Company working in Renewable Sector and In Renewable Sector working in Solar field. Government Authorities Empanelment Agency Works like Solar rooftops, Solar Turnkey project and also Ground Mounted Solar. Almost completed 10+ Mw solar  installed in roof top solar and Experience 20+ Mw Ground mounted in I&C work. Prachi  Connected with all over Gujarat 50 plus dealers network. Company future goals work in BES (Battery energy Storage system) and Rooftop Wind Mills .......",
         "avatar": "https://drive.google.com/open?id=1xUptTnzFbZHmJdVhY5qEBytTwIfvTsSd",
         "logo": "https://drive.google.com/open?id=1eKouDm-fJn99jzlTvKQgWjBjktYqIgXG",
-        "payment_ss": "https://drive.google.com/open?id=1rHMhzN3Lk7j2J7PU7p6AJ28gjNtOh-C9"
+        "payment_ss": "https://drive.google.com/open?id=1rHMhzN3Lk7j2J7PU7p6AJ28gjNtOh-C9",
+        "timestamp": "2025-11-21 18:06:14",
+        "birth_date": "1992-07-13",
+        "anniversary_date": null,
+        "native_city": "PRACHI GREEN ENERGY PVT LTD"
     },
     {
         "full_name": "Dharmesh Satwara",
@@ -428,10 +565,13 @@ class MembershipFormSeeder extends Seeder
         "email": "dhsatwara@gmail.com",
         "address": "13th Floor, Gala Empire, Opp. Doordarshan Tower, Thaltej, Ahmedabad - 380054.",
         "city": "Ahmedabad",
-        "bio": "Zybra Private Limited is an Indian software company offering cloud-based accounting solutions for Small & Medium Enterprises (SMEs). Their flagship product, named Zybra Accounting Software, is designed to handle everything from GST-compliance and invoicing to inventory and banking, aimed at making business accounting and bookkeeping “effortless, anytime & anywhere”",
+        "bio": "Zybra Private Limited is an Indian software company offering cloud-based accounting solutions for Small & Medium Enterprises (SMEs). Their flagship product, named Zybra Accounting Software, is designed to handle everything from GST-compliance and invoicing to inventory and banking, aimed at making business accounting and bookkeeping \u201ceffortless, anytime & anywhere\u201d",
         "avatar": "https://drive.google.com/open?id=1BggjPNBuDiqy_d3tFOyY2s2i1wwVCgIz",
         "logo": "https://drive.google.com/open?id=1wssy7dyXYMrKP2jRaKQEsqrvvG7hxEyD",
-        "payment_ss": "https://drive.google.com/open?id=1CeQKwsSSObhgKSSkSg_I3VX9M7DfrhUj"
+        "payment_ss": "https://drive.google.com/open?id=1CeQKwsSSObhgKSSkSg_I3VX9M7DfrhUj",
+        "timestamp": "2025-12-02 17:24:28",
+        "birth_date": "1991-03-07",
+        "anniversary_date": "2014-02-18"
     },
     {
         "full_name": "VISHALBHAI HADIYAL",
@@ -445,7 +585,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "We Do jobwork stiching cutting of Indo Western Clothing",
         "avatar": "https://drive.google.com/open?id=1DVRczyXxtnwaTSmkUClO88YA3oJDWjcJ",
         "logo": "https://drive.google.com/open?id=1yksUtFAlWI0lbh0bfvziRsFFcuRcTHf8",
-        "payment_ss": "https://drive.google.com/open?id=1q3No4KuMrYN3--KLV7_fRZgBGAgWxbCQ"
+        "payment_ss": "https://drive.google.com/open?id=1q3No4KuMrYN3--KLV7_fRZgBGAgWxbCQ",
+        "timestamp": "2025-12-08 09:30:23",
+        "birth_date": "1994-06-01",
+        "anniversary_date": "2019-01-27",
+        "native_city": "SV GARMENT",
+        "residence_address": "sonagarakd@gmail.com"
     },
     {
         "full_name": "SONAGARA KIRANBHAI DAYARAMBHAI",
@@ -459,7 +604,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "We deals in all kind of Building Materials, Paints, Plumbing, Electrical, Industrial Hardware, Safety items(Personal, Road Safety and Fire Safety), Power tools and Hand Tools Wholesale and Retail",
         "avatar": "https://drive.google.com/open?id=1h6qfhGmXmDEyXMDaSi5mW1lEpkHyDc-m",
         "logo": "https://drive.google.com/open?id=1yUbACTCcxBh5PJP5yHkMVVGpT13I_bXa",
-        "payment_ss": "https://drive.google.com/open?id=1qtNKUJqgBWm63KC8GkRQydwYyjmj1mCw"
+        "payment_ss": "https://drive.google.com/open?id=1qtNKUJqgBWm63KC8GkRQydwYyjmj1mCw",
+        "timestamp": "2025-12-10 10:42:22",
+        "birth_date": "1978-05-01",
+        "anniversary_date": "1997-02-15",
+        "native_city": "Naroda GIDC",
+        "residence_address": "Construction material suppliers"
     },
     {
         "full_name": "ASHOKBHAI CHATURBHAI SONAGARA",
@@ -473,7 +623,10 @@ class MembershipFormSeeder extends Seeder
         "bio": "Building material suppliers",
         "avatar": "https://drive.google.com/open?id=1xpiaQZqLMlOIA_Zw1x6b3dvvS16Xdaq0",
         "logo": "https://drive.google.com/open?id=1ZXWyo0dHXBmoMR2HbF6yZODH5SMLxBW6",
-        "payment_ss": "https://drive.google.com/open?id=1ngpnDMe0ZqOctHHL6BVsdchp97chhbSL"
+        "payment_ss": "https://drive.google.com/open?id=1ngpnDMe0ZqOctHHL6BVsdchp97chhbSL",
+        "timestamp": "2025-12-20 22:24:11",
+        "birth_date": "1991-09-18",
+        "anniversary_date": "2018-04-25"
     },
     {
         "full_name": "Bhavik Dineshkumar Parmar",
@@ -484,10 +637,15 @@ class MembershipFormSeeder extends Seeder
         "email": "shreejicarspa@gmail.com",
         "address": "SHOP NO. 1 & 2 GF, SHYAM ELEGANCE, near Rahul Tower Cross road, Satellite, Ahmedabad, Gujarat 380015",
         "city": "Ahmedabad",
-        "bio": "\"Welcome to SHREEJI CAR SPA, your premier destination for top-tier car care in Ahmedabad, Gujarat! 🚗✨ Specializing in advanced Ceramic Coating and PPF Coating, we offer unparalleled protection for your vehicle’s paint. \n\nWe provide one stop solution for car. Service like, \n PAINT PROTECTION FILM(PPF)\nCERAMIC COATING\nCAR WASH \nCAR DETAILING \nCAR SERVICE \nCAR REPAIRING \nDENTING & PAINTING \nCAR ACCESSORIES\n\nSHREEJI CAR SPA guarantees quality and satisfaction. Drive in today and let your car bask in the care it deserves. Protect, enhance, and maintain—join the SHREEJI CAR SPA family now and see the difference! 🌟🛡\"",
+        "bio": "\"Welcome to SHREEJI CAR SPA, your premier destination for top-tier car care in Ahmedabad, Gujarat! \ud83d\ude97\u2728 Specializing in advanced Ceramic Coating and PPF Coating, we offer unparalleled protection for your vehicle\u2019s paint. \n\nWe provide one stop solution for car. Service like, \n PAINT PROTECTION FILM(PPF)\nCERAMIC COATING\nCAR WASH \nCAR DETAILING \nCAR SERVICE \nCAR REPAIRING \nDENTING & PAINTING \nCAR ACCESSORIES\n\nSHREEJI CAR SPA guarantees quality and satisfaction. Drive in today and let your car bask in the care it deserves. Protect, enhance, and maintain\u2014join the SHREEJI CAR SPA family now and see the difference! \ud83c\udf1f\ud83d\udee1\"",
         "avatar": "https://drive.google.com/open?id=1IZNtkhvH8O9mhBe3LWYR8e_9YwPKHfBf",
         "logo": "https://drive.google.com/open?id=1lFvlrlkrGcvK2EYgRNOSscXCT8Dx2GJ9",
-        "payment_ss": "https://drive.google.com/open?id=1yWeIAkf2VmZUIoI0-pdyWwaHbZWcQJG3"
+        "payment_ss": "https://drive.google.com/open?id=1yWeIAkf2VmZUIoI0-pdyWwaHbZWcQJG3",
+        "timestamp": "2025-12-23 20:35:43",
+        "birth_date": "2002-12-23",
+        "anniversary_date": null,
+        "native_city": "Founder and owner",
+        "residence_address": "Jignesh dabhi"
     },
     {
         "full_name": "Jignesh dabhi",
@@ -501,7 +659,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "We manufacture all type of packaging material",
         "avatar": "https://drive.google.com/open?id=1Gm1guPZ6S9Kgj0zLb6PhEzxV4-hGLJEq",
         "logo": "https://drive.google.com/open?id=1FINuzIdst3FLBe6t4BhmWiDHK6jhmb-r",
-        "payment_ss": "https://drive.google.com/open?id=1s_gbiaJkWGFIeK87yYRXKhoMb94VWVL4"
+        "payment_ss": "https://drive.google.com/open?id=1s_gbiaJkWGFIeK87yYRXKhoMb94VWVL4",
+        "timestamp": "2025-12-24 16:32:44",
+        "birth_date": "1991-02-03",
+        "anniversary_date": null,
+        "native_city": "dabhijignesh1440@gmail.com",
+        "residence_address": "PRINTING ,"
     },
     {
         "full_name": "JAYDIP BHAI  GHANSHYAMBHAI PARMAR",
@@ -515,7 +678,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "ALL TYPE MULTI COLOR PRINTING , BOOK , BROUCHER , DR FILE , CATALOGUE , LIFLET AND ANY PRINTING",
         "avatar": "https://drive.google.com/open?id=1Ut3JnOka6Ubrmd0rK1bVBhIe905gp6QU",
         "logo": "https://drive.google.com/open?id=183maEkqBws5HO0q8vOtk2i9ttzr9DB75",
-        "payment_ss": "https://drive.google.com/open?id=1lAosKxaFEPWxY40WC6vdSVICx5kL5ODK"
+        "payment_ss": "https://drive.google.com/open?id=1lAosKxaFEPWxY40WC6vdSVICx5kL5ODK",
+        "timestamp": "2026-01-30 23:46:45",
+        "birth_date": "1996-04-16",
+        "anniversary_date": "2012-04-16",
+        "native_city": "C G ROAD , NAVRANG PURA.",
+        "residence_address": "KHUSHI AUTOMOBILE"
     },
     {
         "full_name": "Dineshbhai govindbhai dalvadi",
@@ -529,7 +697,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "A car workshop (or auto repair shop) is a professional facility providing comprehensive maintenance, diagnostics, and repair services for vehicles. Staffed by skilled technicians, these centers handle tasks ranging from routine oil changes and brake repairs to complex engine diagnostics, electrical system troubleshooting, and bodywork, ensuring vehicles operate safely and efficiently.",
         "avatar": "https://drive.google.com/open?id=1D071a3qjX-lOzoWdpl_G62BCAEe-3CR8",
         "logo": "https://drive.google.com/open?id=1F6GoXQZBWzfocXxGnGeuDmXcUaYO_dUs",
-        "payment_ss": "https://drive.google.com/open?id=1idGO5u-NskpalsYY_2Vy5gVmO7Prqdpu"
+        "payment_ss": "https://drive.google.com/open?id=1idGO5u-NskpalsYY_2Vy5gVmO7Prqdpu",
+        "timestamp": "2026-02-06 19:59:03",
+        "birth_date": "1986-02-10",
+        "anniversary_date": "2007-12-05",
+        "native_city": "dineshdalwadi007@gmail.com",
+        "residence_address": "SANJAY MAKWANA"
     },
     {
         "full_name": "SANJAY MAKWANA",
@@ -543,12 +716,17 @@ class MembershipFormSeeder extends Seeder
         "bio": "WE ARE IMPORT EXPORT BUSINESS & CONSULTANT, WE PROVIDE BEST KNOWLEDGE IMPORT EXPORT BUSINESS",
         "avatar": "https://drive.google.com/open?id=1iEctZvgsRmi8Vk0MLuTOejz6o1CPthyj",
         "logo": "https://drive.google.com/open?id=1FV-0XW4PO5znOwCLryo1OTKmbs0xOY88",
-        "payment_ss": "https://drive.google.com/open?id=16sD2GgB6ASH0dtCAY51aXAPcubeZqGDE"
+        "payment_ss": "https://drive.google.com/open?id=16sD2GgB6ASH0dtCAY51aXAPcubeZqGDE",
+        "timestamp": "2026-04-01 17:40:03",
+        "birth_date": "1981-09-15",
+        "anniversary_date": "2009-02-22",
+        "native_city": "VANDE MATARAM EXPORT",
+        "residence_address": "Critical Care physician"
     },
     {
         "full_name": "Dr. Dineshkumar Kantilal Dabhi",
         "designation": "Critical Care physician",
-        "business_name": "Dr. Dabhi’s Divine Health Care",
+        "business_name": "Dr. Dabhi\u2019s Divine Health Care",
         "category": "Heath Care",
         "mobile": "7600555510",
         "email": "drdkdabhi@gmail.com",
@@ -557,7 +735,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Treatment of each and every acute and chronic disease  and critically ill patients including heart attack, brain hemorrage, brain stroke, Pancreatitis, kidney disease, Dengue, Malariya, Pneumonia, Diabetes, Hypertension, Thyroid dysfunction",
         "avatar": "https://drive.google.com/open?id=1OZsw2P2wfMuXFiTpCPpjDG-fY01w2DtZ",
         "logo": "https://drive.google.com/open?id=1eqApG55LwGBhSClblrr9_wPyLTJG5y-X",
-        "payment_ss": "https://drive.google.com/open?id=1UwSBX4gEyAhBxdp15VCETyjhGZiFmypU"
+        "payment_ss": "https://drive.google.com/open?id=1UwSBX4gEyAhBxdp15VCETyjhGZiFmypU",
+        "timestamp": "2026-04-01 21:36:56",
+        "birth_date": "1990-08-02",
+        "anniversary_date": "2016-01-30",
+        "native_city": "Heath Care",
+        "residence_address": "Deepakkumar laljibhai sonagara"
     },
     {
         "full_name": "Deepakkumar laljibhai sonagara",
@@ -571,7 +754,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "We deal in tile adhesives, block joint mortar, waterproofing chemicals, industrial floorings",
         "avatar": "https://drive.google.com/open?id=15wxeOKrhCgoveMrnAa02kJ7tT6hIqqya",
         "logo": "https://drive.google.com/open?id=1qlm-8z7PrYBLNNYYDhf16COuriuFu_JT",
-        "payment_ss": "https://drive.google.com/open?id=169BCFCc-FPUcMP10QhV5ql1l3CzlrPq5"
+        "payment_ss": "https://drive.google.com/open?id=169BCFCc-FPUcMP10QhV5ql1l3CzlrPq5",
+        "timestamp": "2026-04-03 16:51:16",
+        "birth_date": "1984-12-16",
+        "anniversary_date": "2009-05-16",
+        "native_city": "Kishan construction chemicals",
+        "residence_address": "Dr Pravin Parmar"
     },
     {
         "full_name": "Dr Pravin Parmar",
@@ -582,10 +770,15 @@ class MembershipFormSeeder extends Seeder
         "email": "millionentrepreneurs@gmail.com",
         "address": "805, Sapath-1, Bodakdev, SG Highway",
         "city": "Ahmedabad",
-        "bio": "It all starts with one question…\n\n👉 “How many lives did you impact this month?”\n\nPeers Global is a community of collaboration, where entrepreneurs don’t just network —\nthey help, connect, and grow together.\n\nEvery referral, every connection, every support…\n\n👉 creates impact.\n\nAnd that’s why…\n\n👉 We are not counting members…\n👉 We are counting lives impacted.",
+        "bio": "It all starts with one question\u2026\n\n\ud83d\udc49 \u201cHow many lives did you impact this month?\u201d\n\nPeers Global is a community of collaboration, where entrepreneurs don\u2019t just network \u2014\nthey help, connect, and grow together.\n\nEvery referral, every connection, every support\u2026\n\n\ud83d\udc49 creates impact.\n\nAnd that\u2019s why\u2026\n\n\ud83d\udc49 We are not counting members\u2026\n\ud83d\udc49 We are counting lives impacted.",
         "avatar": "https://drive.google.com/open?id=1P_nwDy2r115PQqA9y7SjojGFzKKztmKL",
         "logo": "https://drive.google.com/open?id=1Ygb9VyBU9ICqNkpILrBXeyXG2hw-xw7B",
-        "payment_ss": "https://drive.google.com/open?id=1WAIqsZOqfL7uotSERmrawaiM2EXXm1EB"
+        "payment_ss": "https://drive.google.com/open?id=1WAIqsZOqfL7uotSERmrawaiM2EXXm1EB",
+        "timestamp": "2026-04-03 21:59:07",
+        "birth_date": "1996-10-03",
+        "anniversary_date": null,
+        "native_city": "millionentrepreneurs@gmail.com",
+        "residence_address": "Air Conditioner Sales & Service"
     },
     {
         "full_name": "KANZARIYA KAUSHIK NAGARBHAI",
@@ -599,7 +792,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Sales & Service of Air Conditioner of all Company On reasonable price.",
         "avatar": "https://drive.google.com/open?id=1KhisgRPiinbSYhryNLZMxsPr_YSO5qFR",
         "logo": "https://drive.google.com/open?id=1Bj59QabrHmuiWPCuZV3VJtn_mnOxqZPe",
-        "payment_ss": "https://drive.google.com/open?id=1oiTBIw7RHuwFVcvRsc-EQGhkaGtdk6Ss"
+        "payment_ss": "https://drive.google.com/open?id=1oiTBIw7RHuwFVcvRsc-EQGhkaGtdk6Ss",
+        "timestamp": "2026-04-04 14:43:56",
+        "birth_date": "1991-11-11",
+        "anniversary_date": "2019-02-21",
+        "residence_address": "AEROSPACE, DEFENCE AND ENERGY"
     },
     {
         "full_name": "Bhavdeep Keshavlal Nakum",
@@ -610,10 +807,14 @@ class MembershipFormSeeder extends Seeder
         "email": "bhavdeep.nakum@stellarade.com",
         "address": "B-1204, SHILP ANANTA, OPP. CLUB O7, SHELA, AHMEDABAD",
         "city": "AHMEDABAD",
-        "bio": "Stellarade Engineering Pvt. Ltd. serves in the aerospace, defence, and energy sectors, providing end-to-end technical and programmatic support. The company’s services include product development, project development, project management, and strategic business advisory, tailored to the requirements of government agencies, defence organisations, and private sector stakeholders.",
+        "bio": "Stellarade Engineering Pvt. Ltd. serves in the aerospace, defence, and energy sectors, providing end-to-end technical and programmatic support. The company\u2019s services include product development, project development, project management, and strategic business advisory, tailored to the requirements of government agencies, defence organisations, and private sector stakeholders.",
         "avatar": "https://drive.google.com/open?id=1lV5fmoc7cXuyG5AHe0kWJK-5zt4tGtAn",
         "logo": "https://drive.google.com/open?id=1jgplvqNjzww9gGkTu-GsrPbLjB3b2BNE",
-        "payment_ss": "https://drive.google.com/open?id=153Rk1f2l4YmalbBzVX2OugL4D8EHTkVh"
+        "payment_ss": "https://drive.google.com/open?id=153Rk1f2l4YmalbBzVX2OugL4D8EHTkVh",
+        "timestamp": "2026-04-06 18:04:48",
+        "birth_date": "1975-12-18",
+        "anniversary_date": "1997-02-16",
+        "residence_address": "The Game Hour"
     },
     {
         "full_name": "Vijay Chandubhai Kanzariya",
@@ -627,7 +828,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "1. The Game Hour specializes in creating engaging and interactive gaming experiences for all types of events, including corporate gatherings, birthday parties, school events, and community festivals.\n2. We offer a wide range of activities, from fun and competitive games to strategy-based and team-building challenges, ensuring entertainment for all age groups.\n3. Our expert facilitators bring energy and excitement to every event, making sure participants have an unforgettable experience filled with joy and laughter.\n4. We provide customized game setups, including themed activities, indoor and outdoor games, and large-group engagement sessions tailored to client preferences.\n5. With a mission to promote fun, teamwork, and active participation, The Game Hour is your go-to partner for turning any occasion into a thrilling and memorable celebration!.",
         "avatar": "https://drive.google.com/open?id=1RKaKNsu7wuuvdldw_Ush_GobcABBf9kt",
         "logo": "https://drive.google.com/open?id=1JctQzsNVpLB9EjZDxlW30ytst0Yx62uN",
-        "payment_ss": "https://drive.google.com/open?id=1ie1KhDwKikehuEtKY_mVJ-ryRkc3DJM8"
+        "payment_ss": "https://drive.google.com/open?id=1ie1KhDwKikehuEtKY_mVJ-ryRkc3DJM8",
+        "timestamp": "2026-04-06 22:47:02",
+        "birth_date": "1981-09-06",
+        "anniversary_date": "2007-05-27",
+        "native_city": "info@thegamehour.com",
+        "residence_address": "Parishram"
     },
     {
         "full_name": "Khandla Prahladbhai Savji bhai",
@@ -641,7 +847,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Civil contraction",
         "avatar": "https://drive.google.com/open?id=17fw9d-7ViFNi4q8tNn8-1le67otzuy0V",
         "logo": "https://drive.google.com/open?id=1nOTCfe0KpJ2-oVceoxOGrDbIVI2uV06n",
-        "payment_ss": "https://drive.google.com/open?id=1KX9VbTlb5lCL7ufa9JpqN16KEVYKjdZF"
+        "payment_ss": "https://drive.google.com/open?id=1KX9VbTlb5lCL7ufa9JpqN16KEVYKjdZF",
+        "timestamp": "2026-04-13 16:49:12",
+        "birth_date": "1992-10-21",
+        "anniversary_date": "2023-01-28",
+        "native_city": "Info@parishramindia.com"
     },
     {
         "full_name": "MITULKUMAR JAGDISHBHAI KANJARIYA",
@@ -655,7 +865,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "INCOME TAX RETURNS, GST REGISTRATION AND RETURNS, ACCOUNTING, AUDIT, TRUST WORK, COMPANY / LLP / PARTNERSHIP FIRM INCORPORATION, RERA, ETC.",
         "avatar": "https://drive.google.com/open?id=1pUXrBitH3QsyCeF9u0IA_7XlLG5FHobK",
         "logo": "https://drive.google.com/open?id=1Cq1lsQYTAGVf6TOpcEt3AP1cVWEVwmdT",
-        "payment_ss": "https://drive.google.com/open?id=1edzIrPROOENIl4k1SzGLGjvOihYy-dLm"
+        "payment_ss": "https://drive.google.com/open?id=1edzIrPROOENIl4k1SzGLGjvOihYy-dLm",
+        "timestamp": "2026-05-01 21:32:10",
+        "birth_date": "2001-06-02",
+        "anniversary_date": "2023-03-09",
+        "native_city": "MITULKUMAR JAGDISHBHAI KANJARIYA"
     },
     {
         "full_name": "Parth sonagara",
@@ -669,7 +883,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "We have our own brand in power tools industries named PRIME",
         "avatar": "https://drive.google.com/open?id=1Wgs-IEpufv-ue4yzPCXeBXfgpX-GowaZ",
         "logo": "https://drive.google.com/open?id=1iwirOci2fo-_ckvOQrA3utpJOy2dK6bR",
-        "payment_ss": "https://drive.google.com/open?id=1mkPdaprOhvpn98niG0nT-k8K8nqitxJX"
+        "payment_ss": "https://drive.google.com/open?id=1mkPdaprOhvpn98niG0nT-k8K8nqitxJX",
+        "timestamp": "2026-05-02 19:48:58",
+        "birth_date": "1995-05-27",
+        "anniversary_date": "2021-02-28",
+        "native_city": "Parth sonagara",
+        "residence_address": "Alpesh Parshottambhai Sathwara"
     },
     {
         "full_name": "Alpesh Parshottambhai Sathwara",
@@ -683,7 +902,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "I am providing All types Investment Services and Recruit Financial Advisor\nLife Insurance\nHealth Insurance\nMotor Insurance\nMutual Fund\nDemat A/c\nFD, BOND, NCD\nand I also offer to individual who ready for his career start in Financial Advising.",
         "avatar": "https://drive.google.com/open?id=1XDXRkl8RrVa4JKe92Jv8dzl9bjiFyIpE",
         "logo": "https://drive.google.com/open?id=1Dqq_CNQVF5GK0lo_QYwYNIEFqVXXS5_a",
-        "payment_ss": "https://drive.google.com/open?id=1R6aGulyffkjb6H6yNNCfDQsyNC7MGv1F"
+        "payment_ss": "https://drive.google.com/open?id=1R6aGulyffkjb6H6yNNCfDQsyNC7MGv1F",
+        "timestamp": "2026-05-03 07:17:25",
+        "birth_date": "1996-10-08",
+        "anniversary_date": "2019-01-01",
+        "native_city": "AS Wealth Solutions"
     },
     {
         "full_name": "KANTIBHAI KANJIBHAI Dabhi",
@@ -697,7 +920,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Wholesale in Tile Tools, Wooden Tools, agricultural Tools",
         "avatar": "https://drive.google.com/open?id=1UECuLkTxWjIDtv7_TraVM9uc4BzHPi6Y",
         "logo": "https://drive.google.com/open?id=1NNe_BPObS_uYcb-ftmV9gqibiMJp0gso",
-        "payment_ss": "https://drive.google.com/open?id=1sMujp2Vwo1Yzg5DQ49toV62f9RYZ-9Ju"
+        "payment_ss": "https://drive.google.com/open?id=1sMujp2Vwo1Yzg5DQ49toV62f9RYZ-9Ju",
+        "timestamp": "2026-05-03 18:44:25",
+        "birth_date": "1993-11-15",
+        "anniversary_date": null,
+        "native_city": "Helmik Enterprises",
+        "residence_address": "Lavanya Multispeciality Dental Clinic"
     },
     {
         "full_name": "Dr Nikita Kanzariya",
@@ -711,7 +939,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Lavanya Multispeciality Dental Clinic is a modern, patient-centric dental care center committed to delivering comprehensive and high-quality oral healthcare.",
         "avatar": "https://drive.google.com/open?id=1KpjVKBA9ceOZlSSolmbb_RB-jcDci_eZ",
         "logo": "https://drive.google.com/open?id=1ebCnKPYGoZBcr65kjj40F5G_Jn3ip2A3",
-        "payment_ss": "https://drive.google.com/open?id=1SwEyhZO69O5FBQZpNzYCcxXESwzZGQlk"
+        "payment_ss": "https://drive.google.com/open?id=1SwEyhZO69O5FBQZpNzYCcxXESwzZGQlk",
+        "timestamp": "2026-05-05 19:39:46",
+        "birth_date": "1977-07-22",
+        "anniversary_date": "2002-02-22",
+        "native_city": "drnikita151193@gmail.com",
+        "residence_address": "Pharmaceutical, medicine"
     },
     {
         "full_name": "Parag amrutlal sonagra",
@@ -725,7 +958,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Mfg of medicines, and sale and marketing of medicine",
         "avatar": "https://drive.google.com/open?id=1_f6IPfUcQpzdJydlGFwqI7Fm4XTmYbA9",
         "logo": "https://drive.google.com/open?id=13gdfVUx6l6bh_k_6gXcpP3bq7BnHwtUa",
-        "payment_ss": "https://drive.google.com/open?id=19yJ7BZjeUPkPo9eOtXjgQS5Qw7x2jZW9"
+        "payment_ss": "https://drive.google.com/open?id=19yJ7BZjeUPkPo9eOtXjgQS5Qw7x2jZW9",
+        "timestamp": "2026-05-09 20:00:02",
+        "birth_date": "1997-09-04",
+        "anniversary_date": "2024-11-17",
+        "native_city": "91 suminpark, nr.water canal vastral Ahmedabad",
+        "residence_address": "Rama Realty"
     },
     {
         "full_name": "Pradip Prabhubhai Sathwara",
@@ -739,7 +977,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Managing Brokerage firm",
         "avatar": "https://drive.google.com/open?id=1uCYXrv4AdCxycnv7z98j-qeJwWVrMa2q",
         "logo": "https://drive.google.com/open?id=1_mHaYZOWsaEmKpq8TYZbOg8kriLQmoCT",
-        "payment_ss": "https://drive.google.com/open?id=1Jp17CuvDpIZ99HwpBN6WXMVfiEUAX2K_"
+        "payment_ss": "https://drive.google.com/open?id=1Jp17CuvDpIZ99HwpBN6WXMVfiEUAX2K_",
+        "timestamp": "2026-05-09 22:35:12",
+        "birth_date": "2001-08-07",
+        "anniversary_date": null,
+        "native_city": "pradip13.pd@gmail.com",
+        "residence_address": "Chandresh mori"
     },
     {
         "full_name": "Chandresh mori",
@@ -753,7 +996,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Machine service",
         "avatar": "https://drive.google.com/open?id=1FogB4pqMmVOyu_or7rFcBQlzYa_hhmRR",
         "logo": "https://drive.google.com/open?id=11xKbX1GnB7KRElikfL8B8u6rhwk61j0e",
-        "payment_ss": "https://drive.google.com/open?id=1YRiAu_E22sR33lqKTjLwG0U9khkO2aYN"
+        "payment_ss": "https://drive.google.com/open?id=1YRiAu_E22sR33lqKTjLwG0U9khkO2aYN",
+        "timestamp": "2026-05-10 12:25:26",
+        "birth_date": "2002-03-28",
+        "anniversary_date": null,
+        "native_city": "JK power tools"
     },
     {
         "full_name": "Khandla paresh govindbhai",
@@ -767,7 +1014,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "\"JK PG Homes: Where Comfort Meets Convenience.\"\n\nDedicated to providing premium co-living spaces in Ahmedabad, JK PG Homes is the ideal choice for ambitious students and professionals. We prioritize your well-being with top-tier hygiene standards, 24/7 utilities, and a peaceful ambiance. Focus on your career and studies while we provide the warmth and security of a home.",
         "avatar": "https://drive.google.com/open?id=1QERi9SROY_LlmqiYb1cIED4WU5_dU9tt",
         "logo": "https://drive.google.com/open?id=1xHdcwSWOPrLPJA3wLDBQcjRHItZ59XYp",
-        "payment_ss": "https://drive.google.com/open?id=13fyJF2zZ99V6UdcXVpVe8e5hcdD2Y5Rw"
+        "payment_ss": "https://drive.google.com/open?id=13fyJF2zZ99V6UdcXVpVe8e5hcdD2Y5Rw",
+        "timestamp": "2026-05-10 21:14:35",
+        "birth_date": "1976-09-11",
+        "anniversary_date": "2000-02-10",
+        "native_city": "Boys pg"
     },
     {
         "full_name": "Chandresh M Kadia",
@@ -781,7 +1032,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Vidhi Industries Mfg:Hotel Kitchen Equipments",
         "avatar": "https://drive.google.com/open?id=1cm1vRNvU8F30HhPyMilFlTmyAhScHESA",
         "logo": "https://drive.google.com/open?id=1aAJiSQs_g-So402IL4K376uRqLUV0mNG",
-        "payment_ss": "https://drive.google.com/open?id=1J26bcWEdLeSQHozR8CH-PC7xQ3HKcQoy"
+        "payment_ss": "https://drive.google.com/open?id=1J26bcWEdLeSQHozR8CH-PC7xQ3HKcQoy",
+        "timestamp": "2026-05-11 17:30:21",
+        "birth_date": "2001-10-01",
+        "anniversary_date": "2025-01-17",
+        "native_city": "VIDHI INDUSTRIES"
     },
     {
         "full_name": "Dabhi Dixit Bharatbhai",
@@ -795,7 +1050,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Development of Residential and Commercial projects",
         "avatar": "https://drive.google.com/open?id=17BubdrXqINyszj2GxyL-5xo4hkf2Gndq",
         "logo": "https://drive.google.com/open?id=1V_-8SG7Y7vIO8UKoNsq3J3kjJwF3Aszq",
-        "payment_ss": "https://drive.google.com/open?id=1tG7Qp04dWCbPo8c0nOT7u8DUJWivcsxF"
+        "payment_ss": "https://drive.google.com/open?id=1tG7Qp04dWCbPo8c0nOT7u8DUJWivcsxF",
+        "timestamp": "2026-05-11 17:48:11",
+        "birth_date": "2007-04-09",
+        "anniversary_date": null,
+        "native_city": "Swagatam Group",
+        "residence_address": "Majestic group"
     },
     {
         "full_name": "Jaysukhbhai Dabhi",
@@ -809,7 +1069,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Devlopment of residential",
         "avatar": "https://drive.google.com/open?id=1lh-2ZUAzzh9ikM36Rn8thdCiafj-u8zR",
         "logo": "https://drive.google.com/open?id=1wlWGfRNKmNv1fi1qBti-RYlg_rAeJzOQ",
-        "payment_ss": "https://drive.google.com/open?id=1EkzjzJ_d3yC7WhpLNeItXllBAB04FZA7"
+        "payment_ss": "https://drive.google.com/open?id=1EkzjzJ_d3yC7WhpLNeItXllBAB04FZA7",
+        "timestamp": "2026-05-11 18:45:40",
+        "birth_date": "2006-08-22",
+        "anniversary_date": null,
+        "native_city": "dhruvdabhi947@gmail.com",
+        "residence_address": "Marketing And owner patner"
     },
     {
         "full_name": "Mori Harsh Mansukhbhai",
@@ -820,10 +1085,14 @@ class MembershipFormSeeder extends Seeder
         "email": "moriharsh375@gmail.com",
         "address": "Ahemdabad",
         "city": "Ahemdabad",
-        "bio": "JAY SIDDHNATH MAHADEV \nMY SELF -  HARSH MORI \nEXPRESS INFRASTRUCTURE PRIVATE LIMITED \nAa Aamari company che Jo koi reference Hoi to Mane jan karjo  High rise .Bungalow .Commercial. Residency Ma  Lift ni Requirement hoi to contact. Karva vinanti 🤝🙏",
+        "bio": "JAY SIDDHNATH MAHADEV \nMY SELF -  HARSH MORI \nEXPRESS INFRASTRUCTURE PRIVATE LIMITED \nAa Aamari company che Jo koi reference Hoi to Mane jan karjo  High rise .Bungalow .Commercial. Residency Ma  Lift ni Requirement hoi to contact. Karva vinanti \ud83e\udd1d\ud83d\ude4f",
         "avatar": "https://drive.google.com/open?id=1Sh2YxOzxzIe_ZYvAGISjTsaOWcnFJqYj",
         "logo": "https://drive.google.com/open?id=1ErYxDCgF-SW5EIR5UHUV5cvWuxyEFR4m",
-        "payment_ss": "https://drive.google.com/open?id=1ygc10C57SwK1xHZrt2FaRX5R4j_sTgYL"
+        "payment_ss": "https://drive.google.com/open?id=1ygc10C57SwK1xHZrt2FaRX5R4j_sTgYL",
+        "timestamp": "2026-05-12 10:15:55",
+        "birth_date": "1980-07-09",
+        "anniversary_date": "2004-02-16",
+        "native_city": "New Lift installation end maintenance"
     },
     {
         "full_name": "Sathavara vimalbhai Parsottambhai",
@@ -837,7 +1106,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Pamis is a manufacturer of construction chemicals, offering products like epoxy grout, tile adhesive, and tile grout. The company focuses on providing durable, high-quality, and reliable products for modern construction projects.Company also provides services like labour work for epoxy grout , epoxy flooring.",
         "avatar": "https://drive.google.com/open?id=1a7iZblgwStMI7wZrALwHbT8fCsuvGVGa",
         "logo": "https://drive.google.com/open?id=1GwadFo9qv_bbeh1kp5VhoGbuWDt7tzQu",
-        "payment_ss": "https://drive.google.com/open?id=1-osWIWaaWcf8mk7ApMNxV6qXm33wjwHh"
+        "payment_ss": "https://drive.google.com/open?id=1-osWIWaaWcf8mk7ApMNxV6qXm33wjwHh",
+        "timestamp": "2026-05-12 23:20:41",
+        "birth_date": "1995-05-22",
+        "anniversary_date": "2023-03-12",
+        "native_city": "Sathavara vimalbhai Parsottambhai"
     },
     {
         "full_name": "Gaurang Kanzariya",
@@ -851,7 +1124,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "All air conditioner repair and service",
         "avatar": "https://drive.google.com/open?id=1trq76Jf4IfXl9RrnbwTsQ9fMaQl3Kb1_",
         "logo": "https://drive.google.com/open?id=15mg321WymKT_fgSpbR-pdZjsGgVqmpsb",
-        "payment_ss": "https://drive.google.com/open?id=1-D2qVVa6DL8Q5sVjM6D1Ct3Wvfaqg_UO"
+        "payment_ss": "https://drive.google.com/open?id=1-D2qVVa6DL8Q5sVjM6D1Ct3Wvfaqg_UO",
+        "timestamp": "2026-05-13 09:22:35",
+        "birth_date": "1998-11-24",
+        "anniversary_date": null,
+        "native_city": "BHKG GROUP Air Conditioner",
+        "residence_address": "Dalwadi jignesh kanubhai"
     },
     {
         "full_name": "Dalwadi jignesh kanubhai",
@@ -865,7 +1143,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "All Type Turf Glass Setter",
         "avatar": "https://drive.google.com/open?id=1tLY9h2if7EhKNKiKs3zcIWYPSp5HJqDb",
         "logo": "https://drive.google.com/open?id=16YLUY1oWBzo87QEDX5B02r-VEnN7y3Q7",
-        "payment_ss": "https://drive.google.com/open?id=1yE13p_SN7MYxJxM_zsR6Q2OfNuhLsHFH"
+        "payment_ss": "https://drive.google.com/open?id=1yE13p_SN7MYxJxM_zsR6Q2OfNuhLsHFH",
+        "timestamp": "2026-05-13 12:57:26",
+        "birth_date": "1989-12-31",
+        "anniversary_date": "2016-01-30",
+        "native_city": "Glass Alliminium"
     },
     {
         "full_name": "Shailesh Thakarshibhai Sonagara",
@@ -879,21 +1161,31 @@ class MembershipFormSeeder extends Seeder
         "bio": "we work on 2 business \n1. Kishan Safety solutions \nsupplier of all types of industrial and construction safety equipments and installation services.\n\n2. Digital SKYLINK\nWe provide digital marketing and software development services.",
         "avatar": "https://drive.google.com/open?id=1TjGZWUQ3kjS1dSaFpjNhMPlbLkzkmBq6",
         "logo": "https://drive.google.com/open?id=1UvIC9IH628brL4lTxAfRrSi3uXxW2ySc",
-        "payment_ss": "https://drive.google.com/open?id=16ONDxdqiXkdqqtfscbEczqIDULmTcKTK"
+        "payment_ss": "https://drive.google.com/open?id=16ONDxdqiXkdqqtfscbEczqIDULmTcKTK",
+        "timestamp": "2026-05-13 14:22:29",
+        "birth_date": "1998-12-29",
+        "anniversary_date": null,
+        "native_city": "IT services and industrial SAFETY equipment",
+        "residence_address": "IT/Cyber Security Services"
     },
     {
         "full_name": "Apurva Vijaykumar Kanjaria",
         "designation": "Founder and CEO",
-        "business_name": "E² Global Cyber Security",
+        "business_name": "E\u00b2 Global Cyber Security",
         "category": "IT/Cyber Security Services",
         "mobile": "7779059966",
         "email": "apurva@e-squareglobal.com",
         "address": "Ahmedabad",
         "city": "Ahmedabad",
-        "bio": "🚨 One vulnerability is enough.\nSecurity is no longer optional.\n\nE² Global Cyber Security Solutions\n delivers real-world cybersecurity services designed to identify, validate, and reduce risk before attackers exploit it.\n\n💻 Web & Mobile VAPT\n☁️ Cloud Security\n🛡️ Compliance & GRC\n🎯 Red Teaming\n🔍 Risk Assessments\n📑 Evidence-Driven Reporting\n\nNo fluff. No generic reports.\nJust practical security with measurable impact.\n\n📩 Connect with us today\n🌐 e-squareglobal.com\n\n#CyberSecurityIndia #VAPTServices #CyberRisk #EthicalHacker #SecurityAudit #SOC #InfosecCommunity #CyberAwareness #DigitalSecurity #NetworkSecurity #OWASP #CyberExperts",
+        "bio": "\ud83d\udea8 One vulnerability is enough.\nSecurity is no longer optional.\n\nE\u00b2 Global Cyber Security Solutions\n delivers real-world cybersecurity services designed to identify, validate, and reduce risk before attackers exploit it.\n\n\ud83d\udcbb Web & Mobile VAPT\n\u2601\ufe0f Cloud Security\n\ud83d\udee1\ufe0f Compliance & GRC\n\ud83c\udfaf Red Teaming\n\ud83d\udd0d Risk Assessments\n\ud83d\udcd1 Evidence-Driven Reporting\n\nNo fluff. No generic reports.\nJust practical security with measurable impact.\n\n\ud83d\udce9 Connect with us today\n\ud83c\udf10 e-squareglobal.com\n\n#CyberSecurityIndia #VAPTServices #CyberRisk #EthicalHacker #SecurityAudit #SOC #InfosecCommunity #CyberAwareness #DigitalSecurity #NetworkSecurity #OWASP #CyberExperts",
         "avatar": "https://drive.google.com/open?id=1BUDZTiWKFRf9G0wmdDNLh7bRSedPW6zg",
         "logo": "https://drive.google.com/open?id=1djQeYsichNcFfuaum3EPC1qxLm70Mnxy",
-        "payment_ss": "https://drive.google.com/open?id=1hkzRqhxtiCuOopBvAR_pRg9LDI4bzVLj"
+        "payment_ss": "https://drive.google.com/open?id=1hkzRqhxtiCuOopBvAR_pRg9LDI4bzVLj",
+        "timestamp": "2026-05-13 17:14:40",
+        "birth_date": "2001-01-25",
+        "anniversary_date": "2024-12-14",
+        "native_city": "CTM",
+        "residence_address": "CONSTRUCTION"
     },
     {
         "full_name": "JAYDEEP VIJAYBHAI SONAGARA",
@@ -907,7 +1199,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "DEALS IN GRANITE,MARBLE AND BUILDING MATERIALS",
         "avatar": "https://drive.google.com/open?id=1XuaxHYIC2ihVZkImXZAUTJzlLGLbIZas",
         "logo": "https://drive.google.com/open?id=1DElJU2c-hpvp6mQ8hbPBkc0D1on-pcq7",
-        "payment_ss": "https://drive.google.com/open?id=1vzBgpvJF5W1hnyPdEaRMLwvZiU3ZJcnp"
+        "payment_ss": "https://drive.google.com/open?id=1vzBgpvJF5W1hnyPdEaRMLwvZiU3ZJcnp",
+        "timestamp": "2026-05-14 16:06:48",
+        "birth_date": "1993-08-07",
+        "anniversary_date": "2013-02-02",
+        "native_city": "NARODA",
+        "residence_address": "Kitchen, Toys and bath accessories"
     },
     {
         "full_name": "HADIYAL VIJAY",
@@ -921,7 +1218,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Wholesale and E-commerce",
         "avatar": "https://drive.google.com/open?id=1Ug0Jt2cEE7fEUdPuuxQ41G9Y-OvOd-Gx",
         "logo": "https://drive.google.com/open?id=10Rs32BLdmnOuYncI6v5EZKJrHk3yGl7U",
-        "payment_ss": "https://drive.google.com/open?id=1rik1uaHDUmLBcPAP38wX5wv_g6JeeTXH"
+        "payment_ss": "https://drive.google.com/open?id=1rik1uaHDUmLBcPAP38wX5wv_g6JeeTXH",
+        "timestamp": "2026-05-15 12:42:15",
+        "birth_date": "1978-02-11",
+        "anniversary_date": "2003-01-23",
+        "residence_address": "Dheyey Consultancy"
     },
     {
         "full_name": "Chirag Govindbhai Parmar",
@@ -935,7 +1236,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "Dheyey Consultancy is a professional proprietorship firm specializing in taxation, accounting, bookkeeping, direct and indirect tax compliance, and financial advisory services. We offer comprehensive support to individuals, MSMEs, and corporate clients, including management of government tax compliances, departmental notices, assessments, and preparation of replies to statutory authorities. Our focus is on delivering accurate, timely, and cost-effective tax and accounting solutions that enable businesses to maintain compliance, streamline financial operations, and achieve sustainable growth",
         "avatar": "https://drive.google.com/open?id=1_lt1LYJQUq3TxuqX2Dob1xdbWwLcWPU-",
         "logo": "https://drive.google.com/open?id=1WDC7FxCj9YnMPutZegSdmqt6Z2UbxoZo",
-        "payment_ss": "https://drive.google.com/open?id=1U2vEHVu2zy4OBFZaZAV2Jhipal9PcE2B"
+        "payment_ss": "https://drive.google.com/open?id=1U2vEHVu2zy4OBFZaZAV2Jhipal9PcE2B",
+        "timestamp": "2026-05-15 16:31:12",
+        "birth_date": "2002-01-25",
+        "anniversary_date": "2026-02-20",
+        "residence_address": "Peers Global Business Media Pvt. Ltd."
     },
     {
         "full_name": "Vishal Parmar",
@@ -949,7 +1254,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Peers Global is a dynamic business networking and growth platform that connects entrepreneurs, startups, business leaders, and professionals to create meaningful collaborations and growth opportunities. Through curated networking meetups, leadership circles, business events, workshops, and industry-focused communities, Peers Global aims to empower entrepreneurs with the right connections, visibility, and business support.\n\nThe platform is dedicated to building a strong entrepreneurial ecosystem by encouraging knowledge sharing, partnerships, and community-driven growth across India.",
         "avatar": "https://drive.google.com/open?id=1kw7m2EzXE26WpsNvg810H5heIJhF7N8W",
         "logo": "https://drive.google.com/open?id=1Eesp-ZYZLJOI6Yvfr-mxGP3NIC2KMyf0",
-        "payment_ss": "https://drive.google.com/open?id=1ITi9N6vlvssqu2HQ-PK-hTDoyYxEe24R"
+        "payment_ss": "https://drive.google.com/open?id=1ITi9N6vlvssqu2HQ-PK-hTDoyYxEe24R",
+        "timestamp": "2026-05-16 14:13:51",
+        "birth_date": "1978-07-05",
+        "anniversary_date": "2005-02-11",
+        "native_city": "hello.vishalparmar@gmail.com",
+        "residence_address": "Advocate"
     },
     {
         "full_name": "Haresh Laxmanbhai Parmar",
@@ -963,7 +1273,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "Practicing in Consumer Court as an Advocate",
         "avatar": "https://drive.google.com/open?id=1tj7O7_uJ3y9hUOsr0os5C0dW3Fuh8tEu",
         "logo": "https://drive.google.com/open?id=1irocZIhvKvFjBZfzDhkfl7HpUJN5wO04",
-        "payment_ss": "https://drive.google.com/open?id=1DEZyn4cDxmPtQhqNhfRs80VQILMsT1YO"
+        "payment_ss": "https://drive.google.com/open?id=1DEZyn4cDxmPtQhqNhfRs80VQILMsT1YO",
+        "timestamp": "2026-05-16 19:44:15",
+        "birth_date": "1978-08-11",
+        "anniversary_date": "2004-05-10",
+        "native_city": "Grahak Bhavan, Gota, Ahmedabad",
+        "residence_address": "S.S.UTENSILES MANUFACTURING"
     },
     {
         "full_name": "RAVINDRAKUMAR JASMATBHAI CHAVDA",
@@ -977,7 +1292,12 @@ class MembershipFormSeeder extends Seeder
         "bio": "S.S.UNESILES MANUFACTURING",
         "avatar": "https://drive.google.com/open?id=1C06YMPvbJhq_pUUxFao7Ha8NeA7p_Ton",
         "logo": "https://drive.google.com/open?id=1j9Fr1Tx1_NXZ3GrYEJh-IbAHPG0D7SsC",
-        "payment_ss": "https://drive.google.com/open?id=1rw5_gyouSx94SXNchzCnhoFK-0rY_2cD"
+        "payment_ss": "https://drive.google.com/open?id=1rw5_gyouSx94SXNchzCnhoFK-0rY_2cD",
+        "timestamp": "2026-05-21 23:08:56",
+        "birth_date": "1978-06-18",
+        "anniversary_date": null,
+        "native_city": "ODHAV, AHMEDABAD",
+        "residence_address": "48 PATHIK BUNGLOWS, B/H MUKTIDHAM ESTATE, JIVNWADI ROAD, ON 80 FEET ROAD, NIKOL, AHMEDABAD"
     },
     {
         "full_name": "Nilesh Ramanlal Chauhan",
@@ -991,7 +1311,11 @@ class MembershipFormSeeder extends Seeder
         "bio": "https://sites.google.com/view/sukruthospital/home",
         "avatar": "https://drive.google.com/open?id=1j24OnjUL592Uv5nebFGBMTQzc5aOB6QK",
         "logo": "https://drive.google.com/open?id=1yrp4SQIvInghNJfr5Zrxl9ZwG_yZOSiD",
-        "payment_ss": "https://drive.google.com/open?id=1j6Nhvwd14uYmwBJItE44EGWpF4cHrDp9"
+        "payment_ss": "https://drive.google.com/open?id=1j6Nhvwd14uYmwBJItE44EGWpF4cHrDp9",
+        "timestamp": "2026-05-28 10:49:31",
+        "birth_date": "1989-07-24",
+        "anniversary_date": null,
+        "native_city": "Sukrut Hospital"
     },
     {
         "full_name": "Chirag Jivanbhai Kanjariya",
@@ -1005,7 +1329,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=17esnlK9T0Qv07cZau93dxqoEjmmoABSz",
         "logo": "https://drive.google.com/open?id=1gAkdc-EqWEDkhUrY9V6b1A67XN0W1B6B",
-        "payment_ss": "https://drive.google.com/open?id=1_E_sn05DyS-ZSfTgClzwvqwO0yc4g2Rg"
+        "payment_ss": "https://drive.google.com/open?id=1_E_sn05DyS-ZSfTgClzwvqwO0yc4g2Rg",
+        "timestamp": "2026-05-30 17:39:55",
+        "birth_date": "1986-05-17",
+        "anniversary_date": null
     },
     {
         "full_name": "Sathvara mitesh nitinbhai",
@@ -1019,7 +1346,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1hj4H_iIM1TLtO_VY4WjiU_lF-vYgZXNG",
         "logo": "https://drive.google.com/open?id=1qeI8IApN5xyqD7QYTGPAWHya-Ka2uVjj",
-        "payment_ss": "https://drive.google.com/open?id=1AU6__hUHgGQz8_VmlU_2-nlsvcdGvzcX"
+        "payment_ss": "https://drive.google.com/open?id=1AU6__hUHgGQz8_VmlU_2-nlsvcdGvzcX",
+        "timestamp": "2026-06-04 23:04:03",
+        "birth_date": "1997-09-20",
+        "anniversary_date": null
     },
     {
         "full_name": "Akash Sathwara",
@@ -1033,7 +1363,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1TWv0NF200NjIF6Dbowkn1MWo2EQr68p1",
         "logo": "https://drive.google.com/open?id=1w1TWHtONYNf5at3vfBrf1N3GdpNlXaAO",
-        "payment_ss": "https://drive.google.com/open?id=177w0n6B9MEOeQ4_ModUCy-fslbjumMVU"
+        "payment_ss": "https://drive.google.com/open?id=177w0n6B9MEOeQ4_ModUCy-fslbjumMVU",
+        "timestamp": "2026-06-06 16:32:36",
+        "birth_date": "2001-11-19",
+        "anniversary_date": null,
+        "residence_address": "akashsathwara1997@gmail.com"
     },
     {
         "full_name": "Dhruvil Khandhala",
@@ -1047,7 +1381,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1KKj2IzRjf3kJtlLOCukWGpB9r9fRjauF",
         "logo": "https://drive.google.com/open?id=1HH-OEz7Tg2pUvLgCRUYKGaMb8BDG4WTz",
-        "payment_ss": "https://drive.google.com/open?id=1yvXsBuekciU-FIlNpX6RILr8hoiSoW9k"
+        "payment_ss": "https://drive.google.com/open?id=1yvXsBuekciU-FIlNpX6RILr8hoiSoW9k",
+        "timestamp": "2026-06-06 16:50:21",
+        "birth_date": null,
+        "anniversary_date": null,
+        "residence_address": "khandhala.d@gmail.com"
     },
     {
         "full_name": "Bharatbhai Popatbhai Dabhi",
@@ -1061,7 +1399,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1Lu-eu9lW3usrS7cYCshV10oPWPeqoixu",
         "logo": "https://drive.google.com/open?id=1rJgMSl0BfSGYyVpmI0DQ4HJ2s3nuZNLx",
-        "payment_ss": "https://drive.google.com/open?id=1EG6DPJDlsklJ1tCsX5ORwIBmb7XAI6li"
+        "payment_ss": "https://drive.google.com/open?id=1EG6DPJDlsklJ1tCsX5ORwIBmb7XAI6li",
+        "timestamp": "2026-06-12 18:55:19",
+        "birth_date": "1992-11-04",
+        "anniversary_date": null,
+        "residence_address": "Real Estate"
     },
     {
         "full_name": "Hirani Sanjay Mansukhbhai",
@@ -1075,7 +1417,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1GO6rCj6oDwt8qOnAKfUGFYUjQasWFVvv",
         "logo": "https://drive.google.com/open?id=1sxIuane6WBeV4cEBt2ZGPsK-vZNmmPNJ",
-        "payment_ss": "https://drive.google.com/open?id=1ikR5A1ks6Eqyt3SbPSduOPV_q3xrrpLG"
+        "payment_ss": "https://drive.google.com/open?id=1ikR5A1ks6Eqyt3SbPSduOPV_q3xrrpLG",
+        "timestamp": "2026-06-13 13:17:47",
+        "birth_date": "1999-08-30",
+        "anniversary_date": null,
+        "residence_address": "theshdesignstudio@gmail.com"
     },
     {
         "full_name": "SATHVARA ABHIJIT RAMESHBHAI",
@@ -1089,7 +1435,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1L2O_r3RRXMHjKlPxl0BlLnCXntcXljb6",
         "logo": "https://drive.google.com/open?id=1qoZjWtnSwav_Bue37kOOnsNvKmif2PMz",
-        "payment_ss": "https://drive.google.com/open?id=18q72x3Enkdm67SPHusofGbSUOrMDow7g"
+        "payment_ss": "https://drive.google.com/open?id=18q72x3Enkdm67SPHusofGbSUOrMDow7g",
+        "timestamp": "2026-06-14 12:37:48",
+        "birth_date": "1988-08-28",
+        "anniversary_date": null,
+        "residence_address": "Chandlodia, ahmedabad"
     },
     {
         "full_name": "Rahulkumar Harjibhai Khandhala",
@@ -1103,7 +1453,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1d5j9tEf2SRGTEN-JZcLrhIXku_lc1mBZ",
         "logo": "https://drive.google.com/open?id=1nkBS0w_YilEoC3JeZEc3mKMYFrASvvkh",
-        "payment_ss": "https://drive.google.com/open?id=18k0wMx9t35hIdop4497QZnRjc43fi0V3"
+        "payment_ss": "https://drive.google.com/open?id=18k0wMx9t35hIdop4497QZnRjc43fi0V3",
+        "timestamp": "2026-06-18 13:42:41",
+        "birth_date": "1996-09-08",
+        "anniversary_date": null,
+        "residence_address": "smartpackhub@gmail.com"
     },
     {
         "full_name": "Keyur dineshbhai khandar",
@@ -1117,7 +1471,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1X8168mLcfq4QwtyIsJbBA0RxHiz2gJ70",
         "logo": "https://drive.google.com/open?id=1WU6EsvHEDSRtpSGWRmvOfWwp3I2TwLD_",
-        "payment_ss": "https://drive.google.com/open?id=17EOk6VP1cG1RE99SELVN_ujrfa2VngU_"
+        "payment_ss": "https://drive.google.com/open?id=17EOk6VP1cG1RE99SELVN_ujrfa2VngU_",
+        "timestamp": "2026-06-18 22:17:49",
+        "birth_date": "1978-08-01",
+        "anniversary_date": null,
+        "residence_address": "keyurdkhandar@gmail.com"
     },
     {
         "full_name": "Makwana kamal Narottambhai",
@@ -1131,7 +1489,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1ZsCW6unz4M1kzmsCaZcIlthD5uQfpqEo",
         "logo": "https://drive.google.com/open?id=1-IefZ7226BBK4D_wnZtG1qYdjB8oKsf0",
-        "payment_ss": "https://drive.google.com/open?id=1YSk6HwfVWwBVjiMazfR5r7R9kFr-aW9g"
+        "payment_ss": "https://drive.google.com/open?id=1YSk6HwfVWwBVjiMazfR5r7R9kFr-aW9g",
+        "timestamp": "2026-06-20 14:35:31",
+        "birth_date": "1983-08-29",
+        "anniversary_date": null
     },
     {
         "full_name": "AJIT RAMJIBHAI SATWARA",
@@ -1145,7 +1506,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1EY-ZEavAOI3RlQOQE7mb3hDcQsDNRBxx",
         "logo": "https://drive.google.com/open?id=1Xp5Ow7vpwlbzsbENq2ozwX6nfxYa41_I",
-        "payment_ss": "https://drive.google.com/open?id=1BJuNDOFqMjd6gcKZ9rFdM67rZDFvfn0v"
+        "payment_ss": "https://drive.google.com/open?id=1BJuNDOFqMjd6gcKZ9rFdM67rZDFvfn0v",
+        "timestamp": "2026-06-21 21:32:33",
+        "birth_date": "1980-06-30",
+        "anniversary_date": null,
+        "native_city": "As Above"
     },
     {
         "full_name": "RATHOD MAHESHKUMAR GANGARAMBHAI",
@@ -1159,7 +1524,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1anlTN1V5uFd3qRD6A2gt0xBb4KHatVtb",
         "logo": "https://drive.google.com/open?id=1erSfpNjlQSH31kOUhDfYl_giEMu8I8UH",
-        "payment_ss": "https://drive.google.com/open?id=1xdk8Pf6RmBk9wGncvsj-ZH8qI5KN8YSU"
+        "payment_ss": "https://drive.google.com/open?id=1xdk8Pf6RmBk9wGncvsj-ZH8qI5KN8YSU",
+        "timestamp": "2026-06-22 17:07:28",
+        "birth_date": "1990-10-27",
+        "anniversary_date": null,
+        "native_city": "As per Above"
     },
     {
         "full_name": "DABHI VIJAY THOBHANBHAI",
@@ -1173,7 +1542,12 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1C0Dad5gPRa0NPoZJr9AskL0kV1vRJFRQ",
         "logo": "https://drive.google.com/open?id=1-fBuJVdi24zoq-TYqN_2AEbnHQvZW-YL",
-        "payment_ss": "https://drive.google.com/open?id=1ctD6Mqo2Rrm72qnEu2biiZZuWKAMN3Ec"
+        "payment_ss": "https://drive.google.com/open?id=1ctD6Mqo2Rrm72qnEu2biiZZuWKAMN3Ec",
+        "timestamp": "2026-06-23 14:02:41",
+        "birth_date": "1981-09-24",
+        "anniversary_date": null,
+        "native_city": "A-62,KRISHNANAGR , ODHAV , AHMEDABAD - 382415.",
+        "residence_address": "info@vedanshiinfotech.com"
     },
     {
         "full_name": "Songara Mukesh R.",
@@ -1187,7 +1561,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1LyPpZ6BEixMr1InzMUNqXWk4-lk_pgh_",
         "logo": "https://drive.google.com/open?id=16-4zNib0_5JkVl5WusVbs_G-hpQMIPOh",
-        "payment_ss": "https://drive.google.com/open?id=1ihdGSXo95eb0nsBYDR4NTKdeMwvIfGE2"
+        "payment_ss": "https://drive.google.com/open?id=1ihdGSXo95eb0nsBYDR4NTKdeMwvIfGE2",
+        "timestamp": "2026-06-26 14:17:38",
+        "birth_date": "1986-05-17",
+        "anniversary_date": null,
+        "residence_address": "mukeshmestre0064@gmail.com"
     },
     {
         "full_name": "Mitesh nitinbhai sathvara",
@@ -1201,7 +1579,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1xsN3Z3oEwOlLswa9yj65aYxxUoYLpkNi",
         "logo": "https://drive.google.com/open?id=1HLP7F4PFS-8A8Vr8-jZEIBc_UtV3wxEi",
-        "payment_ss": "https://drive.google.com/open?id=1-mzEuj2hy-cD055gXnV8W8ar4YuT6ycM"
+        "payment_ss": "https://drive.google.com/open?id=1-mzEuj2hy-cD055gXnV8W8ar4YuT6ycM",
+        "timestamp": "2026-06-26 20:35:06",
+        "birth_date": "1994-01-23",
+        "anniversary_date": null
     },
     {
         "full_name": "Ravi Jayantibhai Dabhi",
@@ -1215,7 +1596,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=19oOxMYbux_mmXkwXWvR9deJZPecbS9Ry",
         "logo": "https://drive.google.com/open?id=1oAjCfz48QYatEaDcZlt0RDSkVixFt0ze",
-        "payment_ss": "https://drive.google.com/open?id=1FvZtdZd4qWTKLWjCeWyHI9oNEKUhL6G5"
+        "payment_ss": "https://drive.google.com/open?id=1FvZtdZd4qWTKLWjCeWyHI9oNEKUhL6G5",
+        "timestamp": "2026-06-27 18:55:43",
+        "birth_date": "1999-04-25",
+        "anniversary_date": null
     },
     {
         "full_name": "Kanjariya Manthankumar Rajeshbhai",
@@ -1229,7 +1613,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1RiGSQyIYrm_LEKiavgjQXMKDttDjXSUW",
         "logo": "https://drive.google.com/open?id=16whld4CSCNFezGpHAQwx7aRSqokkOP2i",
-        "payment_ss": "https://drive.google.com/open?id=14VGF0Weu1WH8B88rW6xZg1wFCtdbJXtG"
+        "payment_ss": "https://drive.google.com/open?id=14VGF0Weu1WH8B88rW6xZg1wFCtdbJXtG",
+        "timestamp": "2026-06-29 12:12:38",
+        "birth_date": "1991-05-29",
+        "anniversary_date": null,
+        "residence_address": "Esic general hospital, kalol"
     },
     {
         "full_name": "NIRAV DHIRAJLAL DABHI",
@@ -1243,7 +1631,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1VEDxRpuNnGqWnCO4WvjKO1jWaT6MV-3L",
         "logo": "https://drive.google.com/open?id=1uUJqYTiBWTtXTZKJ6dxFbfo7o2L4rbsQ",
-        "payment_ss": "https://drive.google.com/open?id=1qFW5lcSWj9Me4wPQ6Cw7ZUFC28WyGm3l"
+        "payment_ss": "https://drive.google.com/open?id=1qFW5lcSWj9Me4wPQ6Cw7ZUFC28WyGm3l",
+        "timestamp": "2026-06-29 17:06:05",
+        "birth_date": "1980-12-20",
+        "anniversary_date": null
     },
     {
         "full_name": "SONAGARA VINODBHAI KARSHANBHAI",
@@ -1257,7 +1648,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=19R0kgDOerU0v-jhBj8ni5OAzzcb3Z6QN",
         "logo": "https://drive.google.com/open?id=1bvqPOablZIZlRDGXKpfd62s4Q_KzR-z4",
-        "payment_ss": "https://drive.google.com/open?id=1ED9K6ludqOPC8k7eEe-cH5Itk9H1H1gc"
+        "payment_ss": "https://drive.google.com/open?id=1ED9K6ludqOPC8k7eEe-cH5Itk9H1H1gc",
+        "timestamp": "2026-07-01 14:42:08",
+        "birth_date": "1976-07-10",
+        "anniversary_date": null,
+        "native_city": "SONAGARA VINODBHAI KARSHANBHAI"
     },
     {
         "full_name": "Dharmendra Satvara",
@@ -1271,7 +1666,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1CAiQ4yg-PXD_kYcuujyZQpsVX7qT8jZG",
         "logo": "https://drive.google.com/open?id=1ZEt7K_-pfFu23-pjBM3fkqI132tvhzvw",
-        "payment_ss": "https://drive.google.com/open?id=1smXbyybKVs9nL28QoqL95lNm3TLl7z3l"
+        "payment_ss": "https://drive.google.com/open?id=1smXbyybKVs9nL28QoqL95lNm3TLl7z3l",
+        "timestamp": "2026-07-01 15:17:29",
+        "birth_date": "1992-06-27",
+        "anniversary_date": null,
+        "native_city": "Jay Industries"
     },
     {
         "full_name": "VINKAL DHIRAJLAL RATHOD",
@@ -1285,7 +1684,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1mDuU8aJwtJMpt8aDnczMdzoXnxYBSi6a",
         "logo": "https://drive.google.com/open?id=1EtmwPrFkCTo0OZluBAQbWyOSJUupLNqJ",
-        "payment_ss": "https://drive.google.com/open?id=1tPTyMW5uQwRgM6FyqGPWl8AiSEUm-f-x"
+        "payment_ss": "https://drive.google.com/open?id=1tPTyMW5uQwRgM6FyqGPWl8AiSEUm-f-x",
+        "timestamp": "2026-07-02 14:27:09",
+        "birth_date": "1996-09-28",
+        "anniversary_date": null,
+        "native_city": "VINKAL DHIRAJLAL RATHOD"
     },
     {
         "full_name": "Mehulkumar Ghanshyambhai Parmar",
@@ -1299,7 +1702,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1hKOVkaY8UgPK7DpPlqLksdfXMlh6sx05",
         "logo": "https://drive.google.com/open?id=1fnJFlMETqc0FDV9tefS4oJtO3VOVHt5l",
-        "payment_ss": "https://drive.google.com/open?id=1oV38I_aRTc3XAi3c8m2OjFzQYSI1eLVq"
+        "payment_ss": "https://drive.google.com/open?id=1oV38I_aRTc3XAi3c8m2OjFzQYSI1eLVq",
+        "timestamp": "2026-07-02 20:21:36",
+        "birth_date": "1993-02-11",
+        "anniversary_date": null,
+        "native_city": "CHANDKHEDA"
     },
     {
         "full_name": "Nakum Pratik Jaysukhbhai",
@@ -1313,7 +1720,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1HGGcidfY7Z9rWNWxXH6qNrlKUqbUhmNq",
         "logo": "https://drive.google.com/open?id=1Xe6zAWwZUg0nBZJOXkJtEwgudKnRXzM8",
-        "payment_ss": "https://drive.google.com/open?id=16UQUkXY5B0vvhlk9dneDDUvjYHcn-GUD"
+        "payment_ss": "https://drive.google.com/open?id=16UQUkXY5B0vvhlk9dneDDUvjYHcn-GUD",
+        "timestamp": "2026-07-04 14:29:50",
+        "birth_date": "1978-12-14",
+        "anniversary_date": null
     },
     {
         "full_name": "Pradipkumar Narshibhai Rathod",
@@ -1327,7 +1737,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1JpVzGJoCuanVaCvN3KH6jEGhlpjPWf4M",
         "logo": "https://drive.google.com/open?id=1dJqe8oK7OXcxwme66xPAnrKEoJ60t2FA",
-        "payment_ss": "https://drive.google.com/open?id=1oJe6NBGo2YLo_URbz8OCnHSiAOdg7-D2"
+        "payment_ss": "https://drive.google.com/open?id=1oJe6NBGo2YLo_URbz8OCnHSiAOdg7-D2",
+        "timestamp": "2026-07-04 22:10:48",
+        "birth_date": "1996-12-23",
+        "anniversary_date": null,
+        "residence_address": "310, Business Bay 1, Opp BAPS Swaminarayan mandir, Near Khambhaliya bypass, Jamnagar, Gujarat, India"
     },
     {
         "full_name": "Vinay Nakum",
@@ -1341,7 +1755,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1mUIkhgjWh-DqSDtrBlagg-zvYAH7ETuk",
         "logo": "https://drive.google.com/open?id=1tE82lxIefmpTvCCMDz4PveY3dJye-TBu",
-        "payment_ss": "https://drive.google.com/open?id=1YVqsg4uISxeejj8TnIEi2ciI872jjtZ0"
+        "payment_ss": "https://drive.google.com/open?id=1YVqsg4uISxeejj8TnIEi2ciI872jjtZ0",
+        "timestamp": "2026-07-05 22:23:03",
+        "birth_date": "2004-01-26",
+        "anniversary_date": null,
+        "residence_address": "Plot no.170 near gate no.1 opp Ingersoll Rand, GIDC Naroda, Naroda, Ahmedabad."
     },
     {
         "full_name": "Chirag Shaileshbhai Jadav",
@@ -1355,7 +1773,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1p46FFoJZANi2UwrmPqlCK8Gu_P8-YAKU",
         "logo": "https://drive.google.com/open?id=19rdw6eY0ISN1C0S2e4lngpLYeaASvGfr",
-        "payment_ss": "https://drive.google.com/open?id=1jO2khm4Sm1WiRjcDz6EiN5cWUeCFe_If"
+        "payment_ss": "https://drive.google.com/open?id=1jO2khm4Sm1WiRjcDz6EiN5cWUeCFe_If",
+        "timestamp": "2026-07-05 22:47:33",
+        "birth_date": "1982-12-29",
+        "anniversary_date": null
     },
     {
         "full_name": "Bharatbhai ishverbhai khandhala",
@@ -1369,7 +1790,12 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1j0kkB-KzoLyAJy7YToCmYXMhVdo82_LY",
         "logo": "https://drive.google.com/open?id=174L6akFzfODC85WkEi7KpbYJp5ipKspT",
-        "payment_ss": "https://drive.google.com/open?id=15UNvMSoVkqc7sIVOCcZIPewBl5IbkuEv"
+        "payment_ss": "https://drive.google.com/open?id=15UNvMSoVkqc7sIVOCcZIPewBl5IbkuEv",
+        "timestamp": "2026-07-05 22:58:55",
+        "birth_date": "1983-06-08",
+        "anniversary_date": null,
+        "native_city": "C-604 Vinayak Homes near ujala circle ahmedabad",
+        "residence_address": "Shop no 2,3 swastik nagar society near sardar patel mall nikol gam road Ahmedabad pincode 382350"
     },
     {
         "full_name": "JITENDRA PITAMBAR BHAI KHANDHALA",
@@ -1383,7 +1809,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1VmOyfO5Y5hlob3Isc8cY98TC5ZYinogO",
         "logo": "https://drive.google.com/open?id=1VuLtzERWwQVAOre5cU-GkBMfEWY4x8hL",
-        "payment_ss": "https://drive.google.com/open?id=1ZigEF4GPvAYjt03iE8WDHDdhFWC0D2tM"
+        "payment_ss": "https://drive.google.com/open?id=1ZigEF4GPvAYjt03iE8WDHDdhFWC0D2tM",
+        "timestamp": "2026-07-06 16:02:48",
+        "birth_date": "2002-08-20",
+        "anniversary_date": null,
+        "residence_address": "6/7 SIDDHESHWAR SHOPPING CENTRE VIRAT NAGAR ROAD"
     },
     {
         "full_name": "KHUSHI HIREN CHAUHAN",
@@ -1397,7 +1827,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1aLXUxh9iYZsde7FZYRoPspLyHvDJShNp",
         "logo": "https://drive.google.com/open?id=1n8r-70sNJG2dkUnEWumba9xPO288Q6h3",
-        "payment_ss": "https://drive.google.com/open?id=13R2QxOqqxzymJdu1GFA8c7AdEiclM41s"
+        "payment_ss": "https://drive.google.com/open?id=13R2QxOqqxzymJdu1GFA8c7AdEiclM41s",
+        "timestamp": "2026-07-07 13:11:05",
+        "birth_date": "1982-05-08",
+        "anniversary_date": null
     },
     {
         "full_name": "Tejaskumar Ramanlal Sathvara",
@@ -1411,7 +1844,12 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1kff1I7ResZoUpiOJtgS_FgJCocfX3oYd",
         "logo": "https://drive.google.com/open?id=1fuYUP6UNC1TpBeIxhOLCZyZR19MAjn0r",
-        "payment_ss": "https://drive.google.com/open?id=12g7eSIjS8iHnOSxS7Wjxsf2R-n6PeozH"
+        "payment_ss": "https://drive.google.com/open?id=12g7eSIjS8iHnOSxS7Wjxsf2R-n6PeozH",
+        "timestamp": "2026-07-07 13:38:38",
+        "birth_date": "2023-05-04",
+        "anniversary_date": null,
+        "native_city": "VEJALPUR, AHMEDABAD",
+        "residence_address": "39, Bhikhabhai SaurashtraNagar, Opposite Gyan Mandir, Near Narayannagar, Near KhodiyarNagar, BapuNagar,"
     },
     {
         "full_name": "Dumaniya Kalpesh Jivrajbhai",
@@ -1425,7 +1863,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1jdylKpAWzgeFnspVeCyGF3aN6V-rjQTT",
         "logo": "https://drive.google.com/open?id=1c3n1kSONt-AcxDfRRir5iayXowTjuVfu",
-        "payment_ss": "https://drive.google.com/open?id=1ogV8Tdeniz73_uUU3JC-Y8jRpgTG25zF"
+        "payment_ss": "https://drive.google.com/open?id=1ogV8Tdeniz73_uUU3JC-Y8jRpgTG25zF",
+        "timestamp": "2026-07-08 09:21:32",
+        "birth_date": "1969-09-21",
+        "anniversary_date": null,
+        "residence_address": "24, Chandra Dimond Estate, Nr Krishna Vidhyalay, Bapunagar. 380024"
     },
     {
         "full_name": "Rathod Jayesh Ishwarlal",
@@ -1439,7 +1881,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1qljHkakKOmgwWZm-iuZ0aA1YKd2D8JzH",
         "logo": "https://drive.google.com/open?id=1-P_qT7AzZ0jaRH8MILj7h0MbffXHV5Of",
-        "payment_ss": "https://drive.google.com/open?id=1G-AGx6X9n5PkL6E2eHaq4wN78c6tN9_I"
+        "payment_ss": "https://drive.google.com/open?id=1G-AGx6X9n5PkL6E2eHaq4wN78c6tN9_I",
+        "timestamp": "2026-07-11 11:23:49",
+        "birth_date": "1974-07-31",
+        "anniversary_date": null
     },
     {
         "full_name": "KANJARIYA DHIRAJBHAI TRIKAMBHAI",
@@ -1453,7 +1898,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1ZoEnTM-GZQxhOavNW8qG28DM0HS_Vioh",
         "logo": "https://drive.google.com/open?id=1wik_jNxHEaev8frBi4y5uJTGTyjFBG1h",
-        "payment_ss": "https://drive.google.com/open?id=103Pk8RI86Uu-UZDKRENeA8S_uYflhdPZ"
+        "payment_ss": "https://drive.google.com/open?id=103Pk8RI86Uu-UZDKRENeA8S_uYflhdPZ",
+        "timestamp": "2026-07-11 11:26:41",
+        "birth_date": "1979-08-27",
+        "anniversary_date": null
     },
     {
         "full_name": "Prakash Kanzariya",
@@ -1467,7 +1915,12 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=15r7SqGkkHZ3EkIQCTMOGzqNLEiYblLcC",
         "logo": "https://drive.google.com/open?id=1ESdmdpfchZR79Einyw0Sl_1M1a5oaDQ4",
-        "payment_ss": "https://drive.google.com/open?id=1Q3J3R_ZkfcrORwuTmSz5S5uYW-6cw5_H"
+        "payment_ss": "https://drive.google.com/open?id=1Q3J3R_ZkfcrORwuTmSz5S5uYW-6cw5_H",
+        "timestamp": "2026-07-13 18:13:32",
+        "birth_date": "1982-02-07",
+        "anniversary_date": null,
+        "native_city": "139, kashinathpark , vastral road, ahmedabad",
+        "residence_address": "Rajkot Ahmedabad National Highway limbdi"
     },
     {
         "full_name": "Chavda Hareshbhai Hargovind bhai",
@@ -1481,7 +1934,12 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=19C__agAG_vQUhNwnodLH9xGnFWZ-6GEP",
         "logo": "https://drive.google.com/open?id=1KvA8A_BUjNG9s1vYuGt9jYb74pMTYtIN",
-        "payment_ss": "https://drive.google.com/open?id=1WxeXT4yRTmTYuO6l4P8IqDVkGeqKCKiH"
+        "payment_ss": "https://drive.google.com/open?id=1WxeXT4yRTmTYuO6l4P8IqDVkGeqKCKiH",
+        "timestamp": "2026-07-13 21:52:52",
+        "birth_date": "1982-03-28",
+        "anniversary_date": null,
+        "native_city": "139, kashinathpark , vastral road, ahmedabad",
+        "residence_address": "Chavda Hareshbhai Hargovind bhai"
     },
     {
         "full_name": "Ashvin Dalwadi",
@@ -1495,7 +1953,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1Lp3xYp19Hgm_zWgpF2_dKITRLHIiW0XC",
         "logo": "https://drive.google.com/open?id=15zX0_GW5iPV1gE0IVlEVoQTsGysNqMLP",
-        "payment_ss": "https://drive.google.com/open?id=1k88HeeBK7lVOVy23llTHS-ulOra9Y8IZ"
+        "payment_ss": "https://drive.google.com/open?id=1k88HeeBK7lVOVy23llTHS-ulOra9Y8IZ",
+        "timestamp": "2026-07-14 13:03:48",
+        "birth_date": "1982-03-28",
+        "anniversary_date": null,
+        "native_city": "Food"
     },
     {
         "full_name": "Ashvin Dalwadi",
@@ -1509,7 +1971,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=13RiVoaqoZ9I2BxTyieS815XU0PnLp0yL",
         "logo": "https://drive.google.com/open?id=1XFBvV7WAF8ydZJiY2mWv7pw6fSCuuw6r",
-        "payment_ss": "https://drive.google.com/open?id=1FWv2W4Ac-q8LhsT3bAuR-ujzznV3TGbC"
+        "payment_ss": "https://drive.google.com/open?id=1FWv2W4Ac-q8LhsT3bAuR-ujzznV3TGbC",
+        "timestamp": "2026-07-15 08:07:53",
+        "birth_date": "1974-07-27",
+        "anniversary_date": null,
+        "native_city": "Ashvin Dalwadi"
     },
     {
         "full_name": "Haresh Kanjariya",
@@ -1523,7 +1989,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=10F20up_wTb7Zd26gk_wNOWUFTtcPtmLx",
         "logo": "https://drive.google.com/open?id=1wQIzCOZRAvl8QeS9QPwVdTzBRcmWCya1",
-        "payment_ss": "https://drive.google.com/open?id=18yFdGlzC3zL_DoyJChPAknHj4snJ7TUj"
+        "payment_ss": "https://drive.google.com/open?id=18yFdGlzC3zL_DoyJChPAknHj4snJ7TUj",
+        "timestamp": "2026-07-15 10:27:46",
+        "birth_date": null,
+        "anniversary_date": null,
+        "residence_address": "D-30, Shanti Niketan society, Nr. Sardar chowk, Ahmedabad -382345"
     },
     {
         "full_name": "DHIRAJBHAI T. KANJARIYA",
@@ -1537,7 +2007,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1Nk3nlbGGY4AWXiDznqRGo_HCUe6g2eig",
         "logo": "https://drive.google.com/open?id=1BFppKq0xVO_YUUVZvVwhel6bmniQEs0S",
-        "payment_ss": "https://drive.google.com/open?id=10sWvZXc9gXaB6HsDhgs4_xAeCB_sj1kh"
+        "payment_ss": "https://drive.google.com/open?id=10sWvZXc9gXaB6HsDhgs4_xAeCB_sj1kh",
+        "timestamp": "2026-07-15 11:58:44",
+        "birth_date": "1991-12-21",
+        "anniversary_date": null
     },
     {
         "full_name": "Vishal Ambarambhai Kanjariya",
@@ -1551,7 +2024,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1CWl-6-AyvJCWs-PVwmTTtHlJeTwH_w83",
         "logo": "https://drive.google.com/open?id=1H55PtgotB42rwETDxZE81NosjbKzqxfS",
-        "payment_ss": "https://drive.google.com/open?id=1GHkCGISvaNU9OkfZb4nJ5X5Mfn2k4bpl"
+        "payment_ss": "https://drive.google.com/open?id=1GHkCGISvaNU9OkfZb4nJ5X5Mfn2k4bpl",
+        "timestamp": "2026-07-16 10:41:13",
+        "birth_date": "1979-10-20",
+        "anniversary_date": null,
+        "native_city": "129, Kashinath park, Vastral road, Ahmedabad"
     },
     {
         "full_name": "Parmar Pravinbhai Gopalbhai",
@@ -1565,7 +2042,10 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=108M_nnnP87LvVT3-q6diOPTY0B94T9nC",
         "logo": "https://drive.google.com/open?id=1YXfc6pwWRSj97SmybVmytWxBMMSa_qnp",
-        "payment_ss": "https://drive.google.com/open?id=1CPfzJGS2b68kYenHT8gc9bdn6g0mqMhW"
+        "payment_ss": "https://drive.google.com/open?id=1CPfzJGS2b68kYenHT8gc9bdn6g0mqMhW",
+        "timestamp": "2026-07-17 14:24:36",
+        "birth_date": "2026-05-17",
+        "anniversary_date": null
     },
     {
         "full_name": "Yogeshkumar Bharatbhai Sathwara",
@@ -1579,7 +2059,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1zGyA4u4Vg87N0Q4-kargrJpfSnkDSYlo",
         "logo": "https://drive.google.com/open?id=1vKvfLXf38nAlrdcYKe7ANMJip1dcakGK",
-        "payment_ss": "https://drive.google.com/open?id=1wMwumcANcDnp3YlxZgP-y6liYBZ1uaAD"
+        "payment_ss": "https://drive.google.com/open?id=1wMwumcANcDnp3YlxZgP-y6liYBZ1uaAD",
+        "timestamp": "2026-07-17 17:07:48",
+        "birth_date": "1992-10-22",
+        "anniversary_date": null,
+        "residence_address": "yogeshsathwara1992@gmail.com"
     },
     {
         "full_name": "kahndhla prahlad mansukbhai",
@@ -1593,7 +2077,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1byVg56a-dxr50ircKsSYXb_F_YUXfGRw",
         "logo": "https://drive.google.com/open?id=1lbPSCk9V6RvpCSdQB0HdvRz_FJc1ElJ8",
-        "payment_ss": "https://drive.google.com/open?id=1Te_FtA5irWLgLiiJ_6MFDX3TiQvFdSy0"
+        "payment_ss": "https://drive.google.com/open?id=1Te_FtA5irWLgLiiJ_6MFDX3TiQvFdSy0",
+        "timestamp": "2026-07-18 13:49:14",
+        "birth_date": "1974-10-13",
+        "anniversary_date": null,
+        "residence_address": "Khandalalprahlad171@gmail.com"
     },
     {
         "full_name": "Mitesh Vinodchandra Sathwara",
@@ -1607,7 +2095,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1xY2NoKhtgQNAnvRnDlAupRJUEZLOKv-J",
         "logo": "https://drive.google.com/open?id=1nzph0Vp-7sC1qV6fKX8pZzsAVj49FcWW",
-        "payment_ss": "https://drive.google.com/open?id=1nfhQI49MrUHXpR_giREnrh7OsPPyfZHh"
+        "payment_ss": "https://drive.google.com/open?id=1nfhQI49MrUHXpR_giREnrh7OsPPyfZHh",
+        "timestamp": "2026-07-18 20:45:12",
+        "birth_date": "1980-01-26",
+        "anniversary_date": null,
+        "residence_address": "N-161 Vrundavan Vihar flat, B/h Dharnidhar derasar, Vasan, Ahmedabad"
     },
     {
         "full_name": "SATVARA AMITKUMAR CHHNALAL",
@@ -1621,7 +2113,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1G2yVvZ03NDbmxCSV8PquxroQsEN81pJv",
         "logo": "https://drive.google.com/open?id=1e4gTp4ZElBdM8UZFw8OHekNs2hhJvOWL",
-        "payment_ss": "https://drive.google.com/open?id=1Mwv-l3j4QOhZXwPwtCVvXJxp1qRQLmp5"
+        "payment_ss": "https://drive.google.com/open?id=1Mwv-l3j4QOhZXwPwtCVvXJxp1qRQLmp5",
+        "timestamp": "2026-07-19 19:05:30",
+        "birth_date": "1985-10-25",
+        "anniversary_date": null,
+        "residence_address": "A-403,Shagun Antilia, Opp.OM  Residency,NrpSilver Cross Road, Chandlodiya,Ahemdabad 382481"
     },
     {
         "full_name": "TARBUNDIYA SANDIP",
@@ -1635,7 +2131,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1uFTjduwb31X478fvDHCMJj3Xxp2iB3qc",
         "logo": "https://drive.google.com/open?id=1buJeJyGB_pajn0AxKPPzTqY21PSY0gz7",
-        "payment_ss": "https://drive.google.com/open?id=19DfX3qH8pp3kDU5TQyuNQ_t0s4hGGI3V"
+        "payment_ss": "https://drive.google.com/open?id=19DfX3qH8pp3kDU5TQyuNQ_t0s4hGGI3V",
+        "timestamp": "2026-07-21 23:37:53",
+        "birth_date": "1989-12-06",
+        "anniversary_date": null,
+        "residence_address": "421, shivalik satyamev, vakil saheb bridge, bopal, ahmedabad - 380058"
     },
     {
         "full_name": "Khandla chiragbhai Natvarbhai",
@@ -1649,7 +2149,11 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1l6z3SCA3eErj9acdvm9ipFjUGzDOBuEC",
         "logo": "https://drive.google.com/open?id=1r6jDKtreQ8gZh19DLr6FxT_T6xT9TEKy",
-        "payment_ss": "https://drive.google.com/open?id=1zQpYLaw8HUYDbTYtjjTwklPJL-MybQOn"
+        "payment_ss": "https://drive.google.com/open?id=1zQpYLaw8HUYDbTYtjjTwklPJL-MybQOn",
+        "timestamp": "2026-07-22 14:16:50",
+        "birth_date": "1987-10-02",
+        "anniversary_date": null,
+        "residence_address": "Kadiya no khacho,Tankshal road,Kalupur, Ahmedabad,380001"
     },
     {
         "full_name": "JItendra Baldevbhai Dabhi",
@@ -1663,7 +2167,12 @@ class MembershipFormSeeder extends Seeder
         "bio": null,
         "avatar": "https://drive.google.com/open?id=1lwMdYePGgR6j-L7QTHZZJjV0bxxrQuTV",
         "logo": "https://drive.google.com/open?id=1Qk5ALSPdK8fZ3rReV4jrOi826rrXsAuW",
-        "payment_ss": "https://drive.google.com/open?id=154AGei5FkfodQyz_0cKm2dOtM2HgHSTW"
+        "payment_ss": "https://drive.google.com/open?id=154AGei5FkfodQyz_0cKm2dOtM2HgHSTW",
+        "timestamp": "2026-07-23 11:07:17",
+        "birth_date": "1996-07-30",
+        "anniversary_date": null,
+        "native_city": "",
+        "residence_address": ""
     },
     {
         "full_name": "MAKWANA JATIN DILIPBHAI",
@@ -1682,203 +2191,100 @@ class MembershipFormSeeder extends Seeder
 ]
 JSON;
 
-        $membersData = json_decode($json, true);
+        $items = json_decode($json, true);
 
-        foreach ($membersData as $data) {
-            // 1. Ensure Business Category exists with standardized name
-            $rawCategory = $data['category'] ?: 'General';
+        foreach ($items as $data) {
+            $rawCategory = $data['category'] ?? 'General';
             $categoryName = $this->getStandardCategory($rawCategory, $data['business_name'] ?? '', $data['bio'] ?? '');
             $category = BusinessCategory::firstOrCreate(
                 ['name' => $categoryName],
                 ['sort_order' => 0, 'is_active' => true]
             );
 
-            // 2. Create or Update User
+            $createdAt = !empty($data['timestamp']) ? $data['timestamp'] : now();
+            $mobile = !empty($data['mobile']) ? trim($data['mobile']) : null;
+            $email = !empty($data['email']) ? trim(strtolower($data['email'])) : null;
+
+            // 1. Create or Update User by email (Seeds all 118 form entries)
             $user = User::updateOrCreate(
-                ['email' => $data['email']],
+                ['email' => $email],
                 [
                     'name' => $data['full_name'],
-                    'phone' => $data['mobile'],
-                    'city' => $data['city'],
-                    'designation' => $data['designation'],
-                    'company' => $data['business_name'],
-                    'bio' => $data['bio'],
-                    'avatar' => $data['avatar'],
+                    'phone' => $mobile,
+                    'city' => $data['city'] ?? null,
+                    'native_city' => $data['native_city'] ?? null,
+                    'birth_date' => $data['birth_date'] ?? null,
+                    'anniversary_date' => $data['anniversary_date'] ?? null,
+                    'residence_address' => $data['residence_address'] ?? null,
+                    'avatar' => $data['avatar'] ?? null,
                     'password' => $hashedPassword,
                     'email_verified_at' => now(),
                     'role' => 'business_owner',
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
                 ]
             );
 
-            // 3. Create or Update Business
-            $fullAddressParts = array_filter([
-                $data['address'] ?? null,
-                $data['city'] ?? null,
-                'Gujarat'
-            ]);
-            $fullLocation = count($fullAddressParts) > 0 ? implode(', ', $fullAddressParts) : 'Gujarat';
+            $bizPhone = $mobile ?: $user->phone;
+            $bizEmail = $email ?: $user->email;
 
+            // 2. Create or Update Business by user_id (1 business for each of the 118 members)
             Business::updateOrCreate(
-                ['name' => $data['business_name']],
+                ['user_id' => $user->id],
                 [
-                    'user_id' => $user->id,
                     'business_category_id' => $category->id,
+                    'name' => $data['business_name'] ?: ($user->name . ' Business'),
                     'category' => $categoryName,
-                    'location' => $fullLocation,
+                    'designation' => $data['designation'] ?? null,
                     'address' => $data['address'] ?? null,
-                    'city' => $data['city'] ?? null,
                     'state' => 'Gujarat',
-                    'description' => $data['bio'],
-                    'logo' => $data['logo'],
-                    'phone' => $data['mobile'],
-                    'email' => $data['email'],
+                    'description' => $data['bio'] ?? null,
+                    'business_phone' => $bizPhone,
+                    'business_email' => $bizEmail,
+                    'whatsapp' => $bizPhone,
+                    'logo' => $data['logo'] ?? null,
+                    'payment_screenshot' => $data['payment_ss'] ?? null,
                     'status' => 'approved',
                     'is_verified' => true,
-                    'payment_screenshot' => $data['payment_ss'] ?? null,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
                 ]
             );
         }
     }
 
-    private function getStandardCategory(string $raw, string $name = '', string $bio = ''): string
+    private function getStandardCategory(string $raw, string $bName, string $desc): string
     {
-        $search = strtoupper(trim($raw . ' ' . $name . ' ' . $bio));
-        $rawUpper = strtoupper(trim($raw));
+        $rawLower = strtolower($raw);
+        $nameLower = strtolower($bName);
+        $descLower = strtolower($desc);
 
-        if (
-            str_contains($rawUpper, 'IT') ||
-            str_contains($rawUpper, 'SOFTWARE') ||
-            str_contains($rawUpper, 'DIGITAL MARKETING') ||
-            str_contains($rawUpper, 'CYBER')
-        ) {
-            return 'IT & Software';
+        if (str_contains($rawLower, 'it') || str_contains($rawLower, 'software') || str_contains($rawLower, 'digital marketing') || str_contains($rawLower, 'app')) {
+            return 'IT & Software Services';
         }
-
-        if (
-            str_contains($rawUpper, 'FINANCE') ||
-            str_contains($rawUpper, 'FINANCIAL') ||
-            str_contains($rawUpper, 'WEALTH') ||
-            str_contains($rawUpper, 'INSURANCE') ||
-            str_contains($rawUpper, 'TAX') ||
-            str_contains($rawUpper, 'ACCOUNT') ||
-            str_contains($rawUpper, 'AUDIT') ||
-            str_contains($rawUpper, 'CHARTERED') ||
-            str_contains($search, 'WEALTH') ||
-            str_contains($search, 'INSURANCE')
-        ) {
-            return 'Finance & Accounting';
+        if (str_contains($rawLower, 'financial') || str_contains($rawLower, 'loan') || str_contains($rawLower, 'insurance') || str_contains($rawLower, 'wealth') || str_contains($rawLower, 'investment')) {
+            return 'Finance & Insurance';
         }
-
-        if (
-            str_contains($rawUpper, 'REAL ESTATE') ||
-            str_contains($rawUpper, 'DEVELOPER') ||
-            str_contains($rawUpper, 'BUILDING CONTRACTOR') ||
-            str_contains($rawUpper, 'CIVIL WORK') ||
-            str_contains($rawUpper, 'INTERIOR DESIGNER')
-        ) {
+        if (str_contains($rawLower, 'pharma') || str_contains($rawLower, 'health') || str_contains($rawLower, 'medical') || str_contains($rawLower, 'doctor') || str_contains($rawLower, 'physician')) {
+            return 'Healthcare & Medical';
+        }
+        if (str_contains($rawLower, 'construction') || str_contains($rawLower, 'building') || str_contains($rawLower, 'civil') || str_contains($rawLower, 'contractor') || str_contains($rawLower, 'interior')) {
             return 'Construction & Real Estate';
         }
-
-        if (
-            str_contains($rawUpper, 'BUILDING MATERIAL') ||
-            str_contains($rawUpper, 'CONSTRUCTION MATERIAL') ||
-            str_contains($rawUpper, 'CONSTRUCTION CHEMICAL') ||
-            str_contains($rawUpper, 'HARDWARE') ||
-            str_contains($rawUpper, 'PAINTS') ||
-            str_contains($rawUpper, 'GLASS') ||
-            str_contains($rawUpper, 'MARBLE') ||
-            str_contains($rawUpper, 'ELECTRICAL')
-        ) {
-            return 'Building Materials & Hardware';
+        if (str_contains($rawLower, 'mfg') || str_contains($rawLower, 'manufacturing') || str_contains($rawLower, 'motor') || str_contains($rawLower, 'led') || str_contains($rawLower, 'engineering')) {
+            return 'Industrial & Manufacturing';
         }
-
-        if (
-            str_contains($rawUpper, 'PHARMA') ||
-            str_contains($rawUpper, 'HEALTH') ||
-            str_contains($rawUpper, 'MEDICINE') ||
-            str_contains($rawUpper, 'DENTAL') ||
-            str_contains($rawUpper, 'HOSPITAL') ||
-            str_contains($rawUpper, 'SONOGRAPHY') ||
-            str_contains($rawUpper, 'PERSONAL CARE')
-        ) {
-            return 'Healthcare & Pharma';
+        if (str_contains($rawLower, 'tax') || str_contains($rawLower, 'account') || str_contains($rawLower, 'auditing') || str_contains($rawLower, 'chartered')) {
+            return 'Legal & Accounting';
         }
-
-        if (
-            str_contains($rawUpper, 'SOLAR') ||
-            str_contains($rawUpper, 'RENEW') ||
-            str_contains($search, 'SOLAR')
-        ) {
-            return 'Renewable Energy';
+        if (str_contains($rawLower, 'automobile') || str_contains($rawLower, 'car')) {
+            return 'Automotive Services';
         }
-
-        if (
-            str_contains($rawUpper, 'MANUFACTURING') ||
-            str_contains($rawUpper, 'MENUFECTURING') ||
-            str_contains($rawUpper, 'ENGINEERING') ||
-            str_contains($rawUpper, 'PACKAGING') ||
-            str_contains($rawUpper, 'AIR MOTOR') ||
-            str_contains($rawUpper, 'TOOLS') ||
-            str_contains($rawUpper, 'EQUIPMENT') ||
-            str_contains($rawUpper, 'LIFT') ||
-            str_contains($rawUpper, 'UTENSILES') ||
-            str_contains($rawUpper, 'AEROSPACE')
-        ) {
-            return 'Manufacturing & Engineering';
+        if (str_contains($rawLower, 'solar') || str_contains($rawLower, 'energy') || str_contains($rawLower, 'renewal')) {
+            return 'Renewable Energy & Solar';
         }
-
-        if (
-            str_contains($rawUpper, 'AUTOMOBILE') ||
-            str_contains($rawUpper, 'CAR') ||
-            str_contains($rawUpper, 'AIR CONDITION') ||
-            str_contains($rawUpper, 'AC SERVICE')
-        ) {
-            return 'Automobile & AC Services';
-        }
-
-        if (
-            str_contains($rawUpper, 'TRAVEL') ||
-            str_contains($rawUpper, 'EVENT')
-        ) {
-            return 'Travel & Events';
-        }
-
-        if (
-            str_contains($rawUpper, 'GARMENT') ||
-            str_contains($rawUpper, 'CLOTH') ||
-            str_contains($rawUpper, 'KITCHEN, TOYS') ||
-            str_contains($rawUpper, 'WHOLESALE') ||
-            str_contains($rawUpper, 'RETAIL')
-        ) {
-            return 'Garment, Retail & Trade';
-        }
-
-        if (str_contains($rawUpper, 'PRINT')) {
-            return 'Printing & Packaging';
-        }
-
-        if (
-            str_contains($rawUpper, 'IMPORT EXPORT') ||
-            str_contains($rawUpper, 'LOGISTICS') ||
-            str_contains($rawUpper, 'SUPPLY CHAIN')
-        ) {
-            return 'Import, Export & Logistics';
-        }
-
-        if (str_contains($rawUpper, 'COMMUNITY') || str_contains($rawUpper, 'ENTREPRENEURS')) {
-            return 'Community & Networking';
-        }
-
-        if (str_contains($rawUpper, 'LEGAL') || str_contains($rawUpper, 'ADVOCATE')) {
-            return 'Legal & Advisory';
-        }
-
-        if (str_contains($rawUpper, 'PG') || str_contains($rawUpper, 'HOME')) {
-            return 'Hospitality & Accommodation';
-        }
-
-        if (str_contains($rawUpper, 'CONSTRUCTION')) {
-            return 'Construction & Real Estate';
+        if (str_contains($rawLower, 'travel') || str_contains($rawLower, 'vacations')) {
+            return 'Travel & Tourism';
         }
 
         return 'General Services';

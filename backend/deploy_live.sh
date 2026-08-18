@@ -5,8 +5,8 @@ echo "🚀 Starting LIVE Deployment"
 echo "========================================"
 echo "⏱️ Started at: $(date)"
 
-# Define live project directory (configure as needed for production server)
-LIVE_DIR="/var/www/html/sabha/backend"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIVE_DIR="${LIVE_DIR:-$SCRIPT_DIR}"
 
 # Confirmation (safety check)
 read -p "⚠️ Are you sure you want to deploy to LIVE? (yes/no): " confirm
