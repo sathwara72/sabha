@@ -56,6 +56,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::view('/gallery', 'pages.admin.gallery')->name('gallery.index');
     Route::view('/hero-slider', 'pages.admin.hero-slider')->name('hero-slider.index');
     Route::view('/categories', 'pages.admin.categories')->name('categories.index');
+    Route::view('/locations', 'pages.admin.locations')->name('locations.index');
     Route::view('/statistics', 'pages.admin.statistics')->name('statistics.index');
     Route::view('/settings', 'pages.admin.settings')->name('settings.index');
 });

@@ -114,14 +114,24 @@
                                 </div>
                                 <div>
                                     <label class="{{ $labelClass }}">{{ __('site.profile.city') }}</label>
-                                    <div class="relative">
-                                        <x-icon name="map-pin" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                                        <input type="text" wire:model.blur="profileCity" placeholder="e.g. Ahmedabad" class="{{ $inputClass }} pl-8" />
-                                    </div>
+                                    <x-searchable-select
+                                        wire-model="profileCity"
+                                        :options="$cityOptions"
+                                        :value="$profileCity"
+                                        placeholder="e.g. Ahmedabad"
+                                        leading-icon="map-pin"
+                                        class="{{ $inputClass }}"
+                                    />
                                 </div>
                                 <div>
                                     <label class="{{ $labelClass }}">Native City (વતન)</label>
-                                    <input type="text" wire:model.blur="profileNativeCity" placeholder="e.g. Surendranagar" class="{{ $inputClass }}" />
+                                    <x-searchable-select
+                                        wire-model="profileNativeCity"
+                                        :options="$cityOptions"
+                                        :value="$profileNativeCity"
+                                        placeholder="e.g. Surendranagar"
+                                        class="{{ $inputClass }}"
+                                    />
                                 </div>
                                 <div>
                                     <label class="{{ $labelClass }}">Birth Date (જન્મ તારીખ)</label>
@@ -409,11 +419,14 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div>
                                                     <label class="{{ $labelClass }}">{{ __('site.profile.biz_category') }}</label>
-                                                    <select wire:model.blur="bizCategory" class="{{ $inputClass }}">
-                                                        @foreach ($categories as $cat)
-                                                            <option value="{{ $cat }}">{{ $cat }}</option>
-                                                        @endforeach
-                                                    </select>
+                                                    <x-searchable-select
+                                                        wire-model="bizCategory"
+                                                        :options="$categories"
+                                                        :value="$bizCategory"
+                                                        :allow-custom="false"
+                                                        placeholder="Search categories..."
+                                                        class="{{ $inputClass }}"
+                                                    />
                                                 </div>
                                                 <div>
                                                     <label class="{{ $labelClass }}">{{ __('site.profile.biz_tagline') }}</label>
@@ -432,8 +445,28 @@
                                                         <input type="text" wire:model.blur="bizAddress" placeholder="e.g. 402, Wall Street Business Park" class="{{ $inputClass }}" />
                                                     </div>
                                                     <div>
+                                                        <label class="{{ $labelClass }}">City</label>
+                                                        <x-searchable-select
+                                                            wire-model="bizCity"
+                                                            :options="$cityOptions"
+                                                            :value="$bizCity"
+                                                            placeholder="e.g. Ahmedabad"
+                                                            class="{{ $inputClass }}"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
                                                         <label class="{{ $labelClass }}">Area / Landmark</label>
-                                                        <input type="text" wire:model.blur="bizArea" placeholder="e.g. Near University, Navrangpura" class="{{ $inputClass }}" />
+                                                        <x-searchable-select
+                                                            wire-model="bizArea"
+                                                            :options="$areaOptions"
+                                                            :value="$bizArea"
+                                                            :wire-key="'biz-area-' . $bizCity"
+                                                            placeholder="{{ $bizCity ? 'e.g. Navrangpura' : 'Select a city first' }}"
+                                                            class="{{ $inputClass }}"
+                                                        />
                                                     </div>
                                                 </div>
 

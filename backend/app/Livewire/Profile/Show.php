@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Profile;
 
+use App\Models\Area;
 use App\Models\Business;
 use App\Models\BusinessCategory;
+use App\Models\City;
 use App\Models\EventRegistration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,6 +25,8 @@ class Show extends Component
     public string $activeTab = 'profile';
 
     public array $categories = [];
+
+    public array $cityOptions = [];
 
     // ---- Personal profile ----
     public string $profileName = '';
@@ -59,6 +63,7 @@ class Show extends Component
     public string $bizDescription = '';
     public string $bizTagline = '';
     public string $bizAddress = '';
+    public string $bizCity = '';
     public string $bizArea = '';
     public string $bizState = '';
     public string $bizPincode = '';
@@ -92,6 +97,7 @@ class Show extends Component
         $this->profileResidenceAddress = $user->residence_address ?? '';
 
         $this->categories = BusinessCategory::active()->pluck('name')->all() ?: self::FALLBACK_CATEGORIES;
+        $this->cityOptions = City::active()->pluck('name')->all();
 
         $this->loadBusiness();
     }
@@ -116,6 +122,7 @@ class Show extends Component
         $this->bizDescription = $b->description ?? '';
         $this->bizTagline = $b->tagline ?? '';
         $this->bizAddress = $b->address ?? '';
+        $this->bizCity = $b->city ?? '';
         $this->bizArea = $b->area ?? '';
         $this->bizState = $b->state ?? '';
         $this->bizPincode = $b->pincode ?? '';
@@ -164,6 +171,13 @@ class Show extends Component
     public function updatedBizPincode(): void
     {
         $this->bizPincode = substr(preg_replace('/\D/', '', $this->bizPincode), 0, 6);
+    }
+
+    public function updatedBizCity(): void
+    {
+        // Area belongs to the previously selected city — clear it so a stale
+        // area from a different city can't be silently carried over.
+        $this->bizArea = '';
     }
 
     public function addService(): void
@@ -265,6 +279,7 @@ class Show extends Component
                 'category' => $this->bizCategory ?: 'Software Development',
                 'tagline' => $this->bizTagline ?: null,
                 'address' => $this->bizAddress ?: null,
+                'city' => $this->bizCity ?: null,
                 'area' => $this->bizArea ?: null,
                 'state' => $this->bizState ?: null,
                 'pincode' => $this->bizPincode ?: null,
@@ -344,9 +359,18 @@ class Show extends Component
             ->latest()
             ->get();
 
+        $areaOptions = [];
+        if ($this->bizCity) {
+            $city = City::active()->where('name', $this->bizCity)->first();
+            if ($city) {
+                $areaOptions = $city->areas()->orderBy('name')->pluck('name')->all();
+            }
+        }
+
         return view('livewire.profile.show', [
             'registeredEvents' => $registeredEvents,
             'user' => Auth::user(),
+            'areaOptions' => $areaOptions,
         ]);
     }
 }

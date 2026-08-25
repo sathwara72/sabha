@@ -24,6 +24,7 @@
                 ['name' => 'Gallery', 'icon' => 'image', 'href' => route('admin.gallery.index'), 'active' => request()->routeIs('admin.gallery.*')],
                 ['name' => 'Hero Slider', 'icon' => 'sliders', 'href' => route('admin.hero-slider.index'), 'active' => request()->routeIs('admin.hero-slider.*')],
                 ['name' => 'Categories', 'icon' => 'tag', 'href' => route('admin.categories.index'), 'active' => request()->routeIs('admin.categories.*')],
+                ['name' => 'Cities & Areas', 'icon' => 'map-pin', 'href' => route('admin.locations.index'), 'active' => request()->routeIs('admin.locations.*')],
                 ['name' => 'Statistics', 'icon' => 'bar-chart-3', 'href' => route('admin.statistics.index'), 'active' => request()->routeIs('admin.statistics.*')],
                 ['name' => 'Site Settings', 'icon' => 'settings', 'href' => route('admin.settings.index'), 'active' => request()->routeIs('admin.settings.*')],
             ];

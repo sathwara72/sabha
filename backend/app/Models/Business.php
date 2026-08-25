@@ -14,6 +14,7 @@ class Business extends Model
         'category',
         'tagline',
         'address',
+        'city',
         'area',
         'state',
         'pincode',
