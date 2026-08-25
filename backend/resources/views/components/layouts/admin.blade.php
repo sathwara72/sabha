@@ -65,7 +65,7 @@
                 <div class="flex items-center gap-2.5">
                     <div class="text-right hidden sm:block">
                         <p class="text-xs font-semibold text-foreground leading-tight">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] text-muted">{{ auth()->user()->email }}</p>
+                        <p class="text-[12px] text-muted">{{ auth()->user()->email }}</p>
                     </div>
                     <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-soft text-xs font-bold text-primary">
                         {{ auth()->user()->name ? mb_substr(auth()->user()->name, 0, 1) : 'A' }}

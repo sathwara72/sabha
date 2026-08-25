@@ -3,7 +3,9 @@
 namespace App\Livewire\Admin\Events;
 
 use App\Models\Event;
+use App\Models\EventRegistration;
 use App\Models\GalleryImage;
+use App\Services\EventTicketApprover;
 use App\Services\GalleryMediaUploader;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -59,51 +61,8 @@ class Show extends Component
 
     public function approve(int $id): void
     {
-        $registration = \App\Models\EventRegistration::with(['user', 'event'])->findOrFail($id);
-        $event = $registration->event;
-
-        $eventCode = $event->event_code;
-        if (! $eventCode) {
-            $eventCode = $this->generateEventCode($event->title);
-            $event->update(['event_code' => $eventCode]);
-        }
-
-        $year = $event->date ? $event->date->format('Y') : date('Y');
-
-        $ticketNo = $registration->ticket_number;
-        if (! $ticketNo) {
-            do {
-                $ticketNo = $year . '-' . $eventCode . '-' . mt_rand(1000, 9999);
-            } while (\App\Models\EventRegistration::where('ticket_number', $ticketNo)->exists());
-        }
-
-        $registration->update([
-            'status' => 'approved',
-            'ticket_number' => $ticketNo,
-            'rejection_reason' => null,
-        ]);
-    }
-
-    private function generateEventCode(string $title): string
-    {
-        $cleanTitle = preg_replace('/[^a-zA-Z0-9\s]/', '', $title);
-        $words = array_filter(explode(' ', trim($cleanTitle)));
-        $code = '';
-
-        if (count($words) >= 2) {
-            foreach ($words as $word) {
-                $code .= strtoupper(substr($word, 0, 1));
-            }
-        } else {
-            $code = strtoupper(substr($cleanTitle, 0, 4));
-        }
-
-        $code = preg_replace('/[^A-Z0-9]/', '', $code);
-        if (strlen($code) < 3) {
-            $code .= mt_rand(100, 999);
-        }
-
-        return substr($code, 0, 6);
+        $registration = EventRegistration::with(['user', 'event'])->findOrFail($id);
+        app(EventTicketApprover::class)->approve($registration);
     }
 
     public function openReject(int $id): void

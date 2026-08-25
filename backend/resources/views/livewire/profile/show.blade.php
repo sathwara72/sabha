@@ -1,6 +1,6 @@
 @php
     $inputClass = 'w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold';
-    $labelClass = 'text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5 block';
+    $labelClass = 'text-[12px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5 block';
     $avatarSrc = $avatarFile ? $avatarFile->temporaryUrl() : media_url($user->avatar);
 @endphp
 
@@ -24,12 +24,12 @@
                         </label>
                     </div>
                     <h2 class="mt-2 text-sm font-bold text-foreground leading-tight">{{ $user->name }}</h2>
-                    <p class="text-[10px] text-muted font-medium truncate max-w-full">{{ $user->email }}</p>
-                    <span class="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
+                    <p class="text-[12px] text-muted font-medium truncate max-w-full">{{ $user->email }}</p>
+                    <span class="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/10 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-primary">
                         {{ $user->role === 'admin' ? __('site.profile.administrator') : __('site.profile.member') }}
                     </span>
                     @if ($avatarFile)
-                        <p class="mt-1 text-[10px] font-semibold text-amber-600">{{ __('site.profile.photo_pending') }}</p>
+                        <p class="mt-1 text-[12px] font-semibold text-amber-600">{{ __('site.profile.photo_pending') }}</p>
                     @endif
                 </div>
 
@@ -52,7 +52,7 @@
                     <button type="button" wire:click="setTab('events')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'events' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
                         <x-icon name="calendar" class="h-[14px] w-[14px] {{ $activeTab === 'events' ? 'text-white' : 'text-primary' }}" />
                         <span class="flex-1 text-left">{{ __('site.profile.tab_events') }}</span>
-                        <span class="inline-flex h-4 items-center justify-center rounded-full px-1.5 text-[9px] font-bold {{ $activeTab === 'events' ? 'bg-white/20 text-white' : 'bg-primary-soft text-primary border border-primary/10' }}">{{ $registeredEvents->count() }}</span>
+                        <span class="inline-flex h-4 items-center justify-center rounded-full px-1.5 text-[12px] font-bold {{ $activeTab === 'events' ? 'bg-white/20 text-white' : 'bg-primary-soft text-primary border border-primary/10' }}">{{ $registeredEvents->count() }}</span>
                         <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'events' ? 'text-white/80' : 'text-muted-foreground' }}" />
                     </button>
 
@@ -78,7 +78,7 @@
                             <x-icon name="user" class="h-[15px] w-[15px] text-primary" />
                             <div>
                                 <h2 class="text-sm font-bold text-foreground leading-tight">{{ __('site.profile.profile_title') }}</h2>
-                                <p class="text-[10px] text-muted font-medium">{{ __('site.profile.profile_subtitle') }}</p>
+                                <p class="text-[12px] text-muted font-medium">{{ __('site.profile.profile_subtitle') }}</p>
                             </div>
                         </div>
 
@@ -177,21 +177,21 @@
                                     <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors {{ !$business ? 'bg-primary border-primary text-white' : 'bg-emerald-500 border-emerald-500 text-white' }}">
                                         @if ($business) <x-icon name="check-circle-2" class="h-4 w-4" /> @else 1 @endif
                                     </div>
-                                    <p class="text-[10px] font-bold text-center mt-1 text-foreground leading-tight">{{ __('site.profile.step_payment') }}</p>
+                                    <p class="text-[12px] font-bold text-center mt-1 text-foreground leading-tight">{{ __('site.profile.step_payment') }}</p>
                                 </div>
                                 <div class="flex-1 h-0.5 -mt-4 mx-1 rounded {{ $business ? 'bg-emerald-400' : 'bg-border' }}"></div>
                                 <div class="flex flex-col items-center flex-1">
                                     <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors {{ $business?->status === 'approved' ? 'bg-emerald-500 border-emerald-500 text-white' : ($business ? 'bg-amber-400 border-amber-400 text-white' : 'bg-white border-border text-muted-foreground') }}">
                                         @if ($business?->status === 'approved') <x-icon name="check-circle-2" class="h-4 w-4" /> @else <x-icon name="clock" class="h-[14px] w-[14px]" /> @endif
                                     </div>
-                                    <p class="text-[10px] font-bold text-center mt-1 leading-tight {{ $business?->status === 'approved' ? 'text-foreground' : 'text-muted' }}">{{ __('site.profile.step_approval') }}</p>
+                                    <p class="text-[12px] font-bold text-center mt-1 leading-tight {{ $business?->status === 'approved' ? 'text-foreground' : 'text-muted' }}">{{ __('site.profile.step_approval') }}</p>
                                 </div>
                                 <div class="flex-1 h-0.5 -mt-4 mx-1 rounded {{ $business?->status === 'approved' ? 'bg-emerald-400' : 'bg-border' }}"></div>
                                 <div class="flex flex-col items-center flex-1">
                                     <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors {{ $business?->status === 'approved' && ($business?->description || !$isEditingBusiness) ? 'bg-emerald-500 border-emerald-500 text-white' : ($business?->status === 'approved' ? 'bg-primary border-primary text-white' : 'bg-white border-border text-muted-foreground') }}">
                                         @if ($business?->status === 'approved' && ($business?->description || !$isEditingBusiness)) <x-icon name="check-circle-2" class="h-4 w-4" /> @else 3 @endif
                                     </div>
-                                    <p class="text-[10px] font-bold text-center mt-1 leading-tight {{ $business?->status === 'approved' ? 'text-foreground' : 'text-muted' }}">{{ __('site.profile.step_details') }}</p>
+                                    <p class="text-[12px] font-bold text-center mt-1 leading-tight {{ $business?->status === 'approved' ? 'text-foreground' : 'text-muted' }}">{{ __('site.profile.step_details') }}</p>
                                 </div>
                             </div>
 
@@ -239,7 +239,7 @@
                                                         <x-icon name="upload" class="h-7 w-7 text-primary" />
                                                     </div>
                                                     <span class="text-sm font-semibold text-foreground text-center">{{ __('site.profile.click_upload_receipt') }}</span>
-                                                    <span class="text-[11px] text-muted mt-1">{{ __('site.profile.file_hint') }}</span>
+                                                    <span class="text-[12px] text-muted mt-1">{{ __('site.profile.file_hint') }}</span>
                                                 @endif
                                             </label>
                                         </div>
@@ -268,8 +268,8 @@
                                             @if (media_url($business->payment_screenshot))
                                                 <div class="md:col-span-5 space-y-1.5">
                                                     <div class="flex items-center justify-between">
-                                                        <span class="text-[10px] uppercase font-bold text-muted tracking-wider">{{ __('site.profile.submitted_screenshot') }}</span>
-                                                        <a href="{{ media_url($business->payment_screenshot) }}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:opacity-85 transition-opacity">
+                                                        <span class="text-[12px] uppercase font-bold text-muted tracking-wider">{{ __('site.profile.submitted_screenshot') }}</span>
+                                                        <a href="{{ media_url($business->payment_screenshot) }}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:opacity-85 transition-opacity">
                                                             <x-icon name="eye" class="h-3 w-3" /> {{ __('site.profile.view_full') }}
                                                         </a>
                                                     </div>
@@ -313,7 +313,7 @@
                                             <input type="file" accept="image/*" required wire:model="paymentFile" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
                                             <x-icon name="upload" class="h-8 w-8 text-red-400 mb-2" />
                                             <span class="text-sm font-semibold text-foreground">{{ $paymentFile ? $paymentFile->getClientOriginalName() : __('site.profile.upload_new_screenshot') }}</span>
-                                            <span class="text-[11px] text-muted mt-1">{{ __('site.profile.file_hint') }}</span>
+                                            <span class="text-[12px] text-muted mt-1">{{ __('site.profile.file_hint') }}</span>
                                         </label>
                                         <button type="submit" {{ !$paymentFile ? 'disabled' : '' }} wire:loading.attr="disabled" wire:target="submitBusiness" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90">
                                             <span wire:loading.remove wire:target="submitBusiness">{{ __('site.profile.biz_resubmit_payment') }}</span>
@@ -355,29 +355,29 @@
 
                                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 <div class="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
-                                                    <span class="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><x-icon name="briefcase" class="h-3 w-3 text-primary" /> {{ __('site.profile.biz_category') }}</span>
+                                                    <span class="text-[12px] uppercase font-bold text-muted-foreground flex items-center gap-1"><x-icon name="briefcase" class="h-3 w-3 text-primary" /> {{ __('site.profile.biz_category') }}</span>
                                                     <p class="text-xs font-extrabold text-foreground break-words">{{ $business->category ?: '—' }}</p>
                                                 </div>
                                                 <div class="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
-                                                    <span class="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><x-icon name="map-pin" class="h-3 w-3 text-primary" /> {{ __('site.profile.biz_location') }}</span>
+                                                    <span class="text-[12px] uppercase font-bold text-muted-foreground flex items-center gap-1"><x-icon name="map-pin" class="h-3 w-3 text-primary" /> {{ __('site.profile.biz_location') }}</span>
                                                     <p class="text-xs font-extrabold text-foreground break-words">{{ $business->area ?: '—' }}</p>
                                                 </div>
                                                 <div class="glass-card p-4 flex flex-col gap-1 border border-border/60 min-w-0">
-                                                    <span class="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1"><x-icon name="clock" class="h-3 w-3 text-primary" /> {{ __('site.profile.biz_hours') }}</span>
+                                                    <span class="text-[12px] uppercase font-bold text-muted-foreground flex items-center gap-1"><x-icon name="clock" class="h-3 w-3 text-primary" /> {{ __('site.profile.biz_hours') }}</span>
                                                     <p class="text-xs font-extrabold text-foreground break-words">{{ $business->hours ?: '—' }}</p>
                                                 </div>
                                             </div>
 
                                             @if ($business->description)
                                                 <div class="min-w-0">
-                                                    <span class="text-[10px] uppercase font-bold text-muted">{{ __('site.profile.about_company') }}</span>
+                                                    <span class="text-[12px] uppercase font-bold text-muted">{{ __('site.profile.about_company') }}</span>
                                                     <p class="text-xs leading-relaxed text-muted mt-1 font-medium bg-surface/30 p-4 rounded-xl border border-border/60 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{{ $business->description }}</p>
                                                 </div>
                                             @endif
 
                                             @if (!empty($business->services))
                                                 <div>
-                                                    <span class="text-[10px] uppercase font-bold text-muted block mb-2">{{ __('site.profile.core_services') }}</span>
+                                                    <span class="text-[12px] uppercase font-bold text-muted block mb-2">{{ __('site.profile.core_services') }}</span>
                                                     <div class="flex flex-wrap gap-2">
                                                         @foreach ($business->services as $s)
                                                             <span class="rounded-full bg-primary-soft border border-primary/10 px-3 py-1 text-xs font-semibold text-primary">{{ is_array($s) ? ($s['title'] ?? '') : $s }}</span>
@@ -450,8 +450,8 @@
 
                                                 <div>
                                                     <label class="{{ $labelClass }}">Google Maps Embed Iframe Code or Map URL</label>
-                                                    <textarea rows="3" wire:model.blur="bizMapIframe" placeholder='Paste Google Maps Embed HTML iframe code or map URL' class="{{ $inputClass }} resize-none font-mono text-[11px]"></textarea>
-                                                    <p class="text-[10px] text-muted-foreground mt-1 font-medium">💡 Tip: Open Google Maps &gt; Search your location &gt; Share &gt; Embed a map &gt; Copy HTML and paste it here!</p>
+                                                    <textarea rows="3" wire:model.blur="bizMapIframe" placeholder='Paste Google Maps Embed HTML iframe code or map URL' class="{{ $inputClass }} resize-none font-mono text-[12px]"></textarea>
+                                                    <p class="text-[12px] text-muted-foreground mt-1 font-medium">💡 Tip: Open Google Maps &gt; Search your location &gt; Share &gt; Embed a map &gt; Copy HTML and paste it here!</p>
                                                     @if (parse_google_maps_iframe_src($bizMapIframe))
                                                         <div class="mt-2.5 rounded-xl border border-border overflow-hidden bg-slate-900 h-44 w-full shadow-sm">
                                                             <iframe src="{{ parse_google_maps_iframe_src($bizMapIframe) }}" class="w-full h-full border-0" allowfullscreen loading="lazy"></iframe>
@@ -497,7 +497,7 @@
                                                 <div class="flex justify-between items-center">
                                                     <label class="{{ $labelClass }}">{{ __('site.profile.biz_services') }} (Max 4)</label>
                                                     @if (count($bizServices) < 4)
-                                                        <button type="button" wire:click="addService" class="inline-flex items-center gap-1 text-[10px] font-extrabold text-primary hover:opacity-85">
+                                                        <button type="button" wire:click="addService" class="inline-flex items-center gap-1 text-[12px] font-extrabold text-primary hover:opacity-85">
                                                             <x-icon name="plus" class="h-3 w-3" /> {{ __('site.profile.add_service') }}
                                                         </button>
                                                     @endif
@@ -516,11 +516,11 @@
                                                                 </button>
                                                                 <div class="grid grid-cols-1 gap-2 pr-6">
                                                                     <div>
-                                                                        <label class="text-[9px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Title</label>
+                                                                        <label class="text-[12px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Title</label>
                                                                         <input type="text" required wire:model.blur="bizServices.{{ $idx }}.title" placeholder="e.g. Cloud Migration" class="{{ $inputClass }}" />
                                                                     </div>
                                                                     <div>
-                                                                        <label class="text-[9px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Description</label>
+                                                                        <label class="text-[12px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Description</label>
                                                                         <textarea rows="2" wire:model.blur="bizServices.{{ $idx }}.desc" placeholder="e.g. End-to-end cloud strategy and deployment services." class="{{ $inputClass }} resize-none"></textarea>
                                                                     </div>
                                                                 </div>
@@ -596,12 +596,12 @@
                                                                     <div class="h-16 w-16 rounded-xl border border-border overflow-hidden bg-white p-1 shadow-sm">
                                                                         <img src="{{ $logoFile ? $logoFile->temporaryUrl() : $logoPreview }}" alt="Logo Preview" class="h-full w-full object-contain" />
                                                                     </div>
-                                                                    <span class="text-[9px] font-bold text-primary">Click to change</span>
+                                                                    <span class="text-[12px] font-bold text-primary">Click to change</span>
                                                                 </div>
                                                             @else
                                                                 <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
-                                                                <span class="text-[11px] font-semibold text-foreground text-center">{{ __('site.profile.choose_logo') }}</span>
-                                                                <span class="text-[9px] text-muted-foreground mt-1">{{ __('site.profile.logo_hint') }}</span>
+                                                                <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_logo') }}</span>
+                                                                <span class="text-[12px] text-muted-foreground mt-1">{{ __('site.profile.logo_hint') }}</span>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -631,12 +631,12 @@
                                                                     <div class="h-20 w-full max-w-[240px] rounded-xl border border-border overflow-hidden bg-slate-900 shadow-sm">
                                                                         <img src="{{ $coverFile ? $coverFile->temporaryUrl() : $coverPreview }}" alt="Cover Preview" class="h-full w-full object-cover" />
                                                                     </div>
-                                                                    <span class="text-[9px] font-bold text-primary">Click to crop & change</span>
+                                                                    <span class="text-[12px] font-bold text-primary">Click to crop & change</span>
                                                                 </div>
                                                             @else
                                                                 <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
-                                                                <span class="text-[11px] font-semibold text-foreground text-center">{{ __('site.profile.choose_cover') }}</span>
-                                                                <span class="text-[9px] text-muted-foreground mt-1">{{ __('site.profile.cover_hint') }}</span>
+                                                                <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_cover') }}</span>
+                                                                <span class="text-[12px] text-muted-foreground mt-1">{{ __('site.profile.cover_hint') }}</span>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -689,14 +689,14 @@
                                             </div>
                                             <div class="min-w-0 flex-1">
                                                 <h4 class="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{{ $eventDetails->title }}</h4>
-                                                <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium mt-1">
+                                                <div class="flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-muted font-medium mt-1">
                                                     <span class="inline-flex items-center gap-1 flex-wrap"><x-icon name="calendar" class="h-3 w-3" /> {{ $eventDetails->date->format('M j, Y') }}</span>
                                                     <span class="inline-flex items-center gap-1 flex-wrap"><x-icon name="map-pin" class="h-3 w-3" /> {{ $eventDetails->location }}</span>
                                                     <span class="font-semibold text-foreground">{{ __('site.profile.paid') }}: {{ $ticketPrice }}</span>
                                                 </div>
                                             </div>
                                             <div class="shrink-0 flex flex-col sm:items-end gap-2 pt-2 sm:pt-0">
-                                                <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide border {{ $isApproved ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : ($isRejected ? 'bg-red-50 text-red-700 border-red-200/50' : 'bg-amber-50 text-amber-700 border-amber-200/50') }}">
+                                                <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-wide border {{ $isApproved ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : ($isRejected ? 'bg-red-50 text-red-700 border-red-200/50' : 'bg-amber-50 text-amber-700 border-amber-200/50') }}">
                                                     @if ($isApproved)
                                                         <x-icon name="check-circle-2" class="h-3 w-3" /> {{ __('site.profile.event_confirmed') }}
                                                     @elseif ($isRejected)
@@ -706,11 +706,11 @@
                                                     @endif
                                                 </span>
                                                 @if ($evt->is_attended)
-                                                    <span class="inline-flex items-center gap-0.5 rounded-full bg-emerald-100/70 border border-emerald-200/50 px-2 py-0.5 text-[9px] font-bold text-emerald-800 uppercase tracking-wider self-start sm:self-end">
+                                                    <span class="inline-flex items-center gap-0.5 rounded-full bg-emerald-100/70 border border-emerald-200/50 px-2 py-0.5 text-[12px] font-bold text-emerald-800 uppercase tracking-wider self-start sm:self-end">
                                                         <x-icon name="check-circle-2" class="h-[10px] w-[10px]" /> Attended
                                                     </span>
                                                 @endif
-                                                <span class="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                                                <span class="text-[12px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                                                     {{ __('site.profile.view_details') }} <x-icon name="chevron-right" class="h-3 w-3" />
                                                 </span>
                                             </div>

@@ -20,7 +20,7 @@
             @if (media_url($event->image))
                 <div class="w-full md:w-56 h-40 rounded-xl overflow-hidden bg-slate-900 shrink-0 relative">
                     <img src="{{ media_url($event->image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover" />
-                    <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-white">{{ $event->type ?: 'Event' }}</span>
+                    <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[12px] font-bold bg-primary text-white">{{ $event->type ?: 'Event' }}</span>
                 </div>
             @endif
 
@@ -35,28 +35,28 @@
                     <div class="flex items-center gap-2">
                         <div class="p-2 rounded-lg bg-primary-soft text-primary"><x-icon name="calendar" class="h-3.5 w-3.5" /></div>
                         <div>
-                            <p class="text-[10px] font-semibold text-muted">Date</p>
+                            <p class="text-[12px] font-semibold text-muted">Date</p>
                             <p class="text-xs font-bold text-foreground">{{ $event->date->format('M j, Y') }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600"><x-icon name="map-pin" class="h-3.5 w-3.5" /></div>
                         <div>
-                            <p class="text-[10px] font-semibold text-muted">Location</p>
+                            <p class="text-[12px] font-semibold text-muted">Location</p>
                             <p class="text-xs font-bold text-foreground truncate max-w-[120px]">{{ $event->location }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="p-2 rounded-lg bg-blue-50 text-blue-600"><x-icon name="users" class="h-3.5 w-3.5" /></div>
                         <div>
-                            <p class="text-[10px] font-semibold text-muted">Registrations</p>
+                            <p class="text-[12px] font-semibold text-muted">Registrations</p>
                             <p class="text-xs font-bold text-foreground">{{ $registrationsTotal }} Total</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="p-2 rounded-lg bg-amber-50 text-amber-600"><x-icon name="image" class="h-3.5 w-3.5" /></div>
                         <div>
-                            <p class="text-[10px] font-semibold text-muted">Event Gallery</p>
+                            <p class="text-[12px] font-semibold text-muted">Event Gallery</p>
                             <p class="text-xs font-bold text-foreground">{{ $galleryTotal }} Media</p>
                         </div>
                     </div>
@@ -71,14 +71,14 @@
                 class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 {{ $activeTab === 'registrations' ? 'border-primary text-primary bg-primary-soft/30 rounded-t-xl' : 'border-transparent text-muted hover:text-foreground' }}"
             >
                 <x-icon name="users" class="h-3.5 w-3.5" /> Registrations & Bookings
-                <span class="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-foreground">{{ $registrationsTotal }}</span>
+                <span class="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-bold text-foreground">{{ $registrationsTotal }}</span>
             </button>
             <button
                 wire:click="setTab('gallery')"
                 class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 {{ $activeTab === 'gallery' ? 'border-primary text-primary bg-primary-soft/30 rounded-t-xl' : 'border-transparent text-muted hover:text-foreground' }}"
             >
                 <x-icon name="image" class="h-3.5 w-3.5" /> Event Gallery
-                <span class="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-foreground">{{ $galleryTotal }}</span>
+                <span class="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-bold text-foreground">{{ $galleryTotal }}</span>
             </button>
         </div>
 
@@ -117,7 +117,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-border bg-slate-50/70 text-[11px] font-bold text-muted uppercase tracking-wider">
+                                    <tr class="border-b border-border bg-slate-50/70 text-[12px] font-bold text-muted uppercase tracking-wider">
                                         <th class="py-3 px-4">Member</th>
                                         <th class="py-3 px-4">Contact</th>
                                         <th class="py-3 px-4">Ticket No.</th>
@@ -138,30 +138,30 @@
                                             <td class="py-3 px-4 font-semibold text-foreground">
                                                 <div class="flex flex-col">
                                                     <span>{{ $user->name ?? 'N/A' }}</span>
-                                                    <span class="text-[10px] text-muted font-normal">Member</span>
+                                                    <span class="text-[12px] text-muted font-normal">Member</span>
                                                 </div>
                                             </td>
                                             <td class="py-3 px-4 text-muted">
                                                 <div class="flex flex-col">
                                                     <span>{{ $user->email ?? 'N/A' }}</span>
-                                                    <span class="text-[10px] text-muted">{{ $user->phone ?? '' }}</span>
+                                                    <span class="text-[12px] text-muted">{{ $user->phone ?? '' }}</span>
                                                 </div>
                                             </td>
                                             <td class="py-3 px-4 font-mono font-bold text-foreground">{{ $reg->ticket_number ?: '#' . $reg->id }}</td>
                                             <td class="py-3 px-4">
                                                 @if ($isApproved)
-                                                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 border border-emerald-100"><x-icon name="check-circle-2" class="h-2.5 w-2.5" /> Approved</span>
+                                                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[12px] font-bold text-emerald-600 border border-emerald-100"><x-icon name="check-circle-2" class="h-2.5 w-2.5" /> Approved</span>
                                                 @elseif ($isPending)
-                                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-600 border border-amber-100"><x-icon name="clock" class="h-2.5 w-2.5" /> Pending</span>
+                                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-bold text-amber-600 border border-amber-100"><x-icon name="clock" class="h-2.5 w-2.5" /> Pending</span>
                                                 @elseif ($isRejected)
-                                                    <span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-600 border border-red-100"><x-icon name="x-circle" class="h-2.5 w-2.5" /> Rejected</span>
+                                                    <span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[12px] font-bold text-red-600 border border-red-100"><x-icon name="x-circle" class="h-2.5 w-2.5" /> Rejected</span>
                                                 @endif
                                             </td>
                                             <td class="py-3 px-4">
                                                 <button
                                                     wire:click="toggleAttendance({{ $reg->id }})"
                                                     @disabled(! $isApproved)
-                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all {{ $reg->is_attended ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-muted hover:bg-slate-200' }} {{ ! $isApproved ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer' }}"
+                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[12px] font-bold transition-all {{ $reg->is_attended ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-muted hover:bg-slate-200' }} {{ ! $isApproved ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer' }}"
                                                 >
                                                     @if ($reg->is_attended)
                                                         <x-icon name="check" class="h-2.5 w-2.5" /> Attended
@@ -173,10 +173,10 @@
                                             <td class="py-3 px-4 text-right">
                                                 <div class="flex items-center justify-end gap-1.5">
                                                     @if ($isPending)
-                                                        <button wire:click="approve({{ $reg->id }})" class="px-2.5 py-1 rounded-lg bg-emerald-500 text-white text-[10px] font-bold hover:bg-emerald-600 transition-colors shadow-sm">Approve</button>
-                                                        <button wire:click="openReject({{ $reg->id }})" class="px-2.5 py-1 rounded-lg bg-red-50 text-red-600 border border-red-100 text-[10px] font-bold hover:bg-red-600 hover:text-white transition-colors shadow-sm">Reject</button>
+                                                        <button wire:click="approve({{ $reg->id }})" class="px-2.5 py-1 rounded-lg bg-emerald-500 text-white text-[12px] font-bold hover:bg-emerald-600 transition-colors shadow-sm">Approve</button>
+                                                        <button wire:click="openReject({{ $reg->id }})" class="px-2.5 py-1 rounded-lg bg-red-50 text-red-600 border border-red-100 text-[12px] font-bold hover:bg-red-600 hover:text-white transition-colors shadow-sm">Reject</button>
                                                     @elseif ($isApproved)
-                                                        <button wire:click="openReject({{ $reg->id }})" class="px-2.5 py-1 rounded-lg bg-slate-100 text-muted hover:bg-red-50 hover:text-red-600 text-[10px] font-bold transition-colors">Revoke</button>
+                                                        <button wire:click="openReject({{ $reg->id }})" class="px-2.5 py-1 rounded-lg bg-slate-100 text-muted hover:bg-red-50 hover:text-red-600 text-[12px] font-bold transition-colors">Revoke</button>
                                                     @endif
                                                 </div>
                                             </td>
@@ -230,7 +230,7 @@
                                         </div>
 
                                         <div class="absolute top-2 left-2 z-10">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border {{ $isVideo ? 'bg-white/92 text-amber-700 border-amber-200/80' : 'bg-white/92 text-primary border-primary/20' }}">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border {{ $isVideo ? 'bg-white/92 text-amber-700 border-amber-200/80' : 'bg-white/92 text-primary border-primary/20' }}">
                                                 @if ($isVideo)
                                                     <x-icon name="film" class="h-2.5 w-2.5 text-amber-500" /> Video
                                                 @else
@@ -309,7 +309,7 @@
                         <div class="space-y-1.5">
                             <label class="text-xs font-semibold text-foreground flex items-center justify-between">
                                 <span>Select Files (Images, Videos or ZIP Archives)</span>
-                                <span class="text-[10px] text-primary font-bold bg-primary-soft px-1.5 py-0.5 rounded">Multi-Select Enabled</span>
+                                <span class="text-[12px] text-primary font-bold bg-primary-soft px-1.5 py-0.5 rounded">Multi-Select Enabled</span>
                             </label>
                             <div class="relative border-2 border-dashed border-border rounded-xl p-6 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer flex flex-col items-center justify-center">
                                 <input type="file" multiple wire:model="mediaFiles" accept="image/*,video/*,.zip,application/zip,application/x-zip-compressed" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
@@ -321,7 +321,7 @@
                                         Click to select single/multiple files or ZIP archive
                                     @endif
                                 </span>
-                                <span class="text-[10px] text-muted-foreground mt-1">Select multiple images/videos or ZIP archive (up to 100MB)</span>
+                                <span class="text-[12px] text-muted-foreground mt-1">Select multiple images/videos or ZIP archive (up to 100MB)</span>
                             </div>
                         </div>
 

@@ -60,20 +60,20 @@
                         <div class="flex flex-col justify-between h-full gap-3">
                             <div class="space-y-3">
                                 <div class="space-y-2">
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">Attendee Info</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">Attendee Info</p>
                                     <div class="flex items-center gap-2.5">
                                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-base font-bold text-primary">
                                             {{ $reg->user?->name ? mb_substr($reg->user->name, 0, 1) : '?' }}
                                         </div>
                                         <div class="min-w-0">
                                             <h4 class="text-xs font-bold text-foreground truncate">{{ $reg->user?->name ?: 'Unknown' }}</h4>
-                                            <p class="text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                                            <p class="text-[12px] text-muted-foreground truncate flex items-center gap-1 mt-0.5">
                                                 <x-icon name="mail" class="h-2.5 w-2.5" /> {{ $reg->user?->email }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="mt-1">
-                                        <span class="inline-flex items-center gap-1 rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider {{ $reg->ticket_type === 'verified' ? 'text-emerald-700 bg-emerald-50 border-emerald-100' : 'text-muted' }}">
+                                        <span class="inline-flex items-center gap-1 rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[12px] font-bold uppercase tracking-wider {{ $reg->ticket_type === 'verified' ? 'text-emerald-700 bg-emerald-50 border-emerald-100' : 'text-muted' }}">
                                             {{ $reg->ticket_type === 'verified' ? '⭐ Sabha Member' : 'Standard Tier' }}
                                         </span>
                                     </div>
@@ -82,7 +82,7 @@
                                 <div class="border-t border-border/80"></div>
 
                                 <div class="space-y-2">
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">Payment & Ticket</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">Payment & Ticket</p>
                                     <p class="text-xs text-muted-foreground">Ticket No: <span class="font-semibold text-foreground font-mono">{{ $reg->ticket_number ?: 'Pending Approval' }}</span></p>
 
                                     @if (media_url($reg->payment_screenshot))
@@ -116,12 +116,12 @@
                                 @else
                                     <div class="w-full flex flex-col gap-2">
                                         @if ($reg->status === 'rejected' && $reg->rejection_reason)
-                                            <p class="text-[10px] text-red-500 bg-red-50 border border-red-100/50 rounded-lg p-1.5 text-left max-w-full leading-relaxed">
+                                            <p class="text-[12px] text-red-500 bg-red-50 border border-red-100/50 rounded-lg p-1.5 text-left max-w-full leading-relaxed">
                                                 <strong>Reason:</strong> {{ $reg->rejection_reason }}
                                             </p>
                                         @endif
                                         <div class="flex items-center justify-between gap-2">
-                                            <div class="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold text-muted justify-center shrink-0">
+                                            <div class="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[12px] font-bold text-muted justify-center shrink-0">
                                                 <x-icon name="shield-check" class="h-3 w-3 {{ in_array($reg->status, ['approved', 'confirmed']) ? 'text-primary' : 'text-muted' }}" />
                                                 {{ in_array($reg->status, ['approved', 'confirmed']) ? 'Verified' : 'Rejected' }}
                                             </div>
@@ -129,7 +129,7 @@
                                             @if (in_array($reg->status, ['approved', 'confirmed']))
                                                 <button
                                                     wire:click="toggleAttendance({{ $reg->id }})"
-                                                    class="inline-flex items-center justify-center gap-1 rounded-xl border px-2.5 py-1 text-[10px] font-bold cursor-pointer transition-all active:scale-[0.98] shrink-0 {{ $reg->is_attended ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100' }}"
+                                                    class="inline-flex items-center justify-center gap-1 rounded-xl border px-2.5 py-1 text-[12px] font-bold cursor-pointer transition-all active:scale-[0.98] shrink-0 {{ $reg->is_attended ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100' }}"
                                                 >
                                                     <span class="h-1.5 w-1.5 rounded-full {{ $reg->is_attended ? 'bg-emerald-600 animate-pulse' : 'bg-slate-400' }}"></span>
                                                     {{ $reg->is_attended ? 'Attended' : 'Attendance' }}
@@ -210,7 +210,7 @@
 
                             <div class="relative flex py-1 items-center">
                                 <div class="flex-grow border-t border-border"></div>
-                                <span class="flex-shrink mx-3 text-[10px] font-bold text-muted uppercase tracking-wider">or Enter Manually</span>
+                                <span class="flex-shrink mx-3 text-[12px] font-bold text-muted uppercase tracking-wider">or Enter Manually</span>
                                 <div class="flex-grow border-t border-border"></div>
                             </div>
 

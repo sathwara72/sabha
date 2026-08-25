@@ -14,18 +14,19 @@ class Dashboard extends Component
         $userCount = User::count();
         $businessCount = Business::count();
 
-        $businesses = Business::with('user')->get();
-        $registrations = EventRegistration::with(['user', 'event'])->get();
-
-        $pendingBiz = $businesses->where('status', 'pending');
-        $pendingReg = $registrations->where('status', 'pending');
-        $pendingApprovals = $pendingBiz->count() + $pendingReg->count();
+        $pendingBiz = Business::where('status', 'pending')->get(['id', 'name']);
+        $pendingReg = EventRegistration::with(['user:id,name', 'event:id,title'])
+            ->where('status', 'pending')
+            ->latest()
+            ->take(3)
+            ->get();
+        $pendingApprovals = $pendingBiz->count() + EventRegistration::where('status', 'pending')->count();
 
         $alerts = [];
         foreach ($pendingBiz as $b) {
             $alerts[] = "New business '{$b->name}' is awaiting verification.";
         }
-        foreach ($pendingReg->take(3) as $r) {
+        foreach ($pendingReg as $r) {
             $uName = $r->user->name ?? 'A member';
             $eTitle = $r->event->title ?? 'an event';
             $alerts[] = "{$uName} requested a seat for '{$eTitle}'.";
@@ -38,15 +39,26 @@ class Dashboard extends Component
             ];
         }
 
+        // Only the 3 most-recently-updated rows from each table are needed: the
+        // combined top-3 by timestamp can never draw more than 3 from either side.
+        $recentBiz = Business::with('user:id,name')
+            ->latest('updated_at')
+            ->take(3)
+            ->get(['id', 'name', 'user_id', 'status', 'updated_at', 'created_at']);
+        $recentReg = EventRegistration::with(['user:id,name', 'event:id,title'])
+            ->latest('updated_at')
+            ->take(3)
+            ->get(['id', 'user_id', 'event_id', 'status', 'updated_at', 'created_at']);
+
         $activities = collect();
-        foreach ($businesses as $b) {
+        foreach ($recentBiz as $b) {
             $activities->push([
                 'user' => $b->user->name ?? $b->name,
                 'action' => $b->status === 'approved' ? "Approved business '{$b->name}'" : "Submitted business '{$b->name}'",
                 'time' => $b->updated_at ?? $b->created_at,
             ]);
         }
-        foreach ($registrations as $r) {
+        foreach ($recentReg as $r) {
             $activities->push([
                 'user' => $r->user->name ?? 'Member',
                 'action' => $r->status === 'approved' ? "Approved booking for '" . ($r->event->title ?? '') . "'" : "Requested booking for '" . ($r->event->title ?? '') . "'",

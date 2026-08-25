@@ -28,7 +28,7 @@
 
     @php
         $inputClass = 'w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors focus:border-primary font-semibold';
-        $labelClass = 'text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5 block';
+        $labelClass = 'text-[12px] font-bold text-muted uppercase tracking-wider mb-0.5 block';
     @endphp
 
     <div class="space-y-3">
@@ -84,7 +84,7 @@
                 <h3 class="text-xs font-bold text-foreground flex items-center gap-1.5">
                     <x-icon name="mail" class="h-3.5 w-3.5 text-primary" /> Regional Coordinators
                 </h3>
-                <button type="button" wire:click="addCoordinator" class="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary-soft hover:opacity-90 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                <button type="button" wire:click="addCoordinator" class="inline-flex items-center gap-1 text-[12px] font-bold text-primary bg-primary-soft hover:opacity-90 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
                     <x-icon name="plus" class="h-3 w-3" /> Add Coordinator
                 </button>
             </div>
@@ -133,7 +133,7 @@
                 <h3 class="text-xs font-bold text-foreground flex items-center gap-1.5">
                     <x-icon name="users" class="h-3.5 w-3.5 text-primary" /> Trustees & Committee Members
                 </h3>
-                <button type="button" wire:click="addTrustee" class="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary-soft hover:opacity-90 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
+                <button type="button" wire:click="addTrustee" class="inline-flex items-center gap-1 text-[12px] font-bold text-primary bg-primary-soft hover:opacity-90 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
                     <x-icon name="plus" class="h-3 w-3" /> Add Trustee
                 </button>
             </div>
@@ -149,7 +149,7 @@
                                     @if (! empty($trustee['avatar']))
                                         <img src="{{ media_url($trustee['avatar']) ?? $trustee['avatar'] }}" alt="" class="h-3.5 w-3.5 rounded-full object-cover border border-border shrink-0" />
                                     @endif
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-wider">Name</label>
+                                    <label class="text-[12px] font-bold text-muted uppercase tracking-wider">Name</label>
                                 </div>
                                 <input type="text" wire:model="trustees.{{ $idx }}.name" class="{{ $inputClass }}" placeholder="e.g. Ravi Sharma" />
                             </div>
@@ -166,7 +166,7 @@
                                     <label class="{{ $labelClass }}">Avatar URL</label>
                                     <div class="flex gap-1">
                                         <input type="text" wire:model="trustees.{{ $idx }}.avatar" class="{{ $inputClass }}" placeholder="e.g. https://images.unsplash.com/..." />
-                                        <label class="h-[30px] px-2 rounded-lg border border-border bg-surface hover:bg-surface/70 text-[10px] font-bold text-muted flex items-center justify-center cursor-pointer transition-colors shrink-0">
+                                        <label class="h-[30px] px-2 rounded-lg border border-border bg-surface hover:bg-surface/70 text-[12px] font-bold text-muted flex items-center justify-center cursor-pointer transition-colors shrink-0">
                                             Upload
                                             <input
                                                 type="file"

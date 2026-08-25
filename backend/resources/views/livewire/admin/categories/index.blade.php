@@ -49,7 +49,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-xs font-extrabold text-slate-900 group-hover:text-primary transition-colors">{{ $cat->name }}</h3>
-                                    <p class="text-[11px] font-medium text-slate-500 flex items-center gap-1 mt-0.5">
+                                    <p class="text-[12px] font-medium text-slate-500 flex items-center gap-1 mt-0.5">
                                         <x-icon name="briefcase" class="h-2.5 w-2.5 text-slate-400" />
                                         {{ $cat->businesses_count ?? 0 }} {{ $cat->businesses_count === 1 ? 'business' : 'businesses' }} registered
                                     </p>
@@ -109,7 +109,7 @@
                             />
                         </div>
                         @error('addName')
-                            <p class="text-[11px] font-semibold text-rose-600">{{ $message }}</p>
+                            <p class="text-[12px] font-semibold text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -155,7 +155,7 @@
                             />
                         </div>
                         @error('editName')
-                            <p class="text-[11px] font-semibold text-rose-600">{{ $message }}</p>
+                            <p class="text-[12px] font-semibold text-rose-600">{{ $message }}</p>
                         @enderror
                     </div>
 

@@ -46,7 +46,7 @@
                         @if ($parsedDate)
                             <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white shadow-2xl overflow-hidden border border-white/70 flex flex-col items-center transform transition-transform duration-300 group-hover:scale-105">
                                 <div class="w-full bg-gradient-to-r from-[#00379D] to-[#1d4ed8] py-0.5 text-center shadow-xs">
-                                    <span class="text-[10px] font-black tracking-widest text-white uppercase block leading-none">{{ $parsedDate['monthShort'] }}</span>
+                                    <span class="text-[12px] font-black tracking-widest text-white uppercase block leading-none">{{ $parsedDate['monthShort'] }}</span>
                                 </div>
                                 <div class="flex-1 flex items-center justify-center bg-white w-full">
                                     <span class="text-xl sm:text-2xl font-black text-[#0F3459] leading-none tracking-tight">{{ $parsedDate['dayNum'] }}</span>
@@ -58,7 +58,7 @@
                             </div>
                         @endif
                         @if ($title)
-                            <span class="mt-2.5 text-[11px] font-bold text-white/95 truncate max-w-[85%] bg-[#0F3459]/75 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/20">{{ $title }}</span>
+                            <span class="mt-2.5 text-[12px] font-bold text-white/95 truncate max-w-[85%] bg-[#0F3459]/75 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/20">{{ $title }}</span>
                         @endif
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                             <x-icon name="image" class="h-[22px] w-[22px]" />
                         </div>
                         @if ($title)
-                            <span class="text-[10px] font-semibold text-white/90 line-clamp-1 max-w-[85%] text-center">{{ $title }}</span>
+                            <span class="text-[12px] font-semibold text-white/90 line-clamp-1 max-w-[85%] text-center">{{ $title }}</span>
                         @endif
                     </div>
                 </div>

@@ -32,17 +32,18 @@ Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index
 Route::get('/gallery/event/{id}', [GalleryController::class, 'event'])->name('gallery.event');
 
 Route::get('/login', [AuthController::class, 'loginRedirect'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 Route::get('/register', [AuthController::class, 'registerPage'])->name('register');
-Route::post('/register/send-otp', [AuthController::class, 'registerSendOtp'])->name('register.send-otp');
-Route::post('/register/confirm', [AuthController::class, 'registerConfirm'])->name('register.confirm');
+Route::post('/register/send-otp', [AuthController::class, 'registerSendOtp'])->middleware('throttle:3,1')->name('register.send-otp');
+Route::post('/register/confirm', [AuthController::class, 'registerConfirm'])->middleware('throttle:6,1')->name('register.confirm');
 Route::get('/forgot-password', [AuthController::class, 'forgotPasswordPage'])->name('forgot-password');
-Route::post('/forgot-password/send-otp', [AuthController::class, 'forgotPasswordSendOtp'])->name('forgot-password.send-otp');
-Route::post('/forgot-password/reset', [AuthController::class, 'forgotPasswordReset'])->name('forgot-password.reset');
+Route::post('/forgot-password/send-otp', [AuthController::class, 'forgotPasswordSendOtp'])->middleware('throttle:3,1')->name('forgot-password.send-otp');
+Route::post('/forgot-password/reset', [AuthController::class, 'forgotPasswordReset'])->middleware('throttle:6,1')->name('forgot-password.reset');
 
 Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 Route::get('/profile/events/{id}', [ProfileController::class, 'eventShow'])->name('profile.events.show');
+Route::get('/profile/events/{id}/ticket.png', [ProfileController::class, 'downloadTicket'])->name('profile.events.ticket');
 
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::view('/', 'pages.admin.dashboard')->name('dashboard');

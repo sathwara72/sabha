@@ -79,7 +79,7 @@
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
             <div class="absolute bottom-0 left-0 right-0 px-6 pb-6">
                 <div class="mx-auto max-w-7xl">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-primary/90 px-3 py-1 text-[10px] font-bold text-white mb-2">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-primary/90 px-3 py-1 text-[12px] font-bold text-white mb-2">
                         📁 {{ __('site.gallery.event_folder') }}
                     </span>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">{{ $event->title }}</h1>
@@ -133,7 +133,7 @@
                                     </button>
                                 </div>
                                 <div>
-                                    <span class="inline-flex items-center gap-1 mb-1.5 rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-white uppercase">
+                                    <span class="inline-flex items-center gap-1 mb-1.5 rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-0.5 text-[12px] font-bold text-white uppercase">
                                         <x-icon name="zoom-in" class="h-[10px] w-[10px]" /> {{ __('site.gallery.click_to_zoom') }}
                                     </span>
                                     @if ($photo->caption)
@@ -141,7 +141,7 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="absolute top-3 left-3 h-6 w-6 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="absolute top-3 left-3 h-6 w-6 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-[12px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                 {{ $idx + 1 }}
                             </div>
                         </div>

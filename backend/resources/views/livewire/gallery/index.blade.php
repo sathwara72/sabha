@@ -121,12 +121,12 @@
                                     <div class="absolute h-10 w-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                                         <x-icon name="play" class="h-[18px] w-[18px] ml-0.5" />
                                     </div>
-                                    <span class="absolute bottom-2.5 left-2.5 flex items-center gap-1 text-[9px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
+                                    <span class="absolute bottom-2.5 left-2.5 flex items-center gap-1 text-[12px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
                                         <x-icon name="film" class="h-[9px] w-[9px]" /> {{ __('site.gallery.video') }}
                                     </span>
                                     @if ($item->caption)
                                         <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end pt-8">
-                                            <h3 class="text-[11px] font-semibold text-white line-clamp-2">{{ $item->caption }}</h3>
+                                            <h3 class="text-[12px] font-semibold text-white line-clamp-2">{{ $item->caption }}</h3>
                                         </div>
                                     @endif
                                 </div>
@@ -134,7 +134,7 @@
                                 <div class="relative w-full h-full">
                                     <x-safe-image :src="$itemSrc" img-class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" :alt="$caption" :title="$caption" fallback-type="gallery" />
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
-                                        <span class="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm uppercase">{{ __('site.gallery.image') }}</span>
+                                        <span class="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[12px] font-bold text-white backdrop-blur-sm uppercase">{{ __('site.gallery.image') }}</span>
                                         @if ($item->caption)
                                             <h3 class="text-xs font-semibold text-white line-clamp-2">{{ $item->caption }}</h3>
                                         @endif

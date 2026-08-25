@@ -53,7 +53,8 @@ class Directory extends Component
         $query = Business::where('status', 'approved')
             ->with(['user', 'businessCategory'])
             ->withAvg('reviews', 'rating')
-            ->withCount('reviews');
+            ->withCount('reviews')
+            ->latest();
 
         if ($this->category !== 'All') {
             $query->where('category', $this->category);

@@ -15,7 +15,7 @@
 
     {{-- Nav --}}
     <nav class="space-y-0.5 flex-1">
-        <p class="px-3 mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Menu</p>
+        <p class="px-3 mb-2 text-[12px] font-bold text-muted-foreground uppercase tracking-wider">Menu</p>
         @foreach ($menuItems as $item)
             <a
                 href="{{ $item['href'] }}"

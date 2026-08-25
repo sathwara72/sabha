@@ -83,18 +83,18 @@
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none"></div>
 
                                 <div class="absolute left-3 top-3 z-10">
-                                    <span class="rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold text-foreground backdrop-blur shadow-xs">{{ $event->model->type }}</span>
+                                    <span class="rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-bold text-foreground backdrop-blur shadow-xs">{{ $event->model->type }}</span>
                                 </div>
 
                                 <div class="absolute right-3 top-3 z-10">
-                                    <span class="rounded-full bg-black/70 border border-white/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-black text-white shadow-md">
+                                    <span class="rounded-full bg-black/70 border border-white/20 backdrop-blur-md px-2.5 py-0.5 text-[12px] font-black text-white shadow-md">
                                         {{ $event->monthShort }} {{ $event->dayNum }}, {{ $event->yearNum }}
                                     </span>
                                 </div>
 
                                 <div class="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
-                                    <span class="rounded bg-black/75 border border-white/15 backdrop-blur-sm px-2.5 py-1 text-[11px] font-black text-white truncate max-w-[70%] shadow-md">{{ $event->model->title }}</span>
-                                    <span class="rounded bg-primary border border-primary/20 backdrop-blur-sm px-2 py-1 text-[9px] font-black text-white shrink-0 shadow-md">{{ $event->dateLabel }}</span>
+                                    <span class="rounded bg-black/75 border border-white/15 backdrop-blur-sm px-2.5 py-1 text-[12px] font-black text-white truncate max-w-[70%] shadow-md">{{ $event->model->title }}</span>
+                                    <span class="rounded bg-primary border border-primary/20 backdrop-blur-sm px-2 py-1 text-[12px] font-black text-white shrink-0 shadow-md">{{ $event->dateLabel }}</span>
                                 </div>
                             </div>
 
@@ -102,16 +102,16 @@
                                 @if ($event->status === 'upcoming' || $event->status === 'past')
                                     <div class="mb-2 flex items-center justify-between">
                                         @if ($event->status === 'upcoming')
-                                            <span class="rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[9px] font-bold text-amber-700 uppercase tracking-wider">{{ __('site.events.upcoming') }}</span>
+                                            <span class="rounded-full bg-amber-50 border border-amber-100 px-2 py-0.5 text-[12px] font-bold text-amber-700 uppercase tracking-wider">{{ __('site.events.upcoming') }}</span>
                                         @else
-                                            <span class="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">{{ __('site.events.past') }}</span>
+                                            <span class="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">{{ __('site.events.past') }}</span>
                                         @endif
                                     </div>
                                 @endif
 
                                 <div class="flex items-start justify-between gap-3">
                                     <p class="line-clamp-2 text-xs leading-relaxed text-muted font-medium flex-1">{{ $event->model->description }}</p>
-                                    <span class="inline-flex items-center gap-1 text-[11px] text-muted font-bold shrink-0 mt-0.5">
+                                    <span class="inline-flex items-center gap-1 text-[12px] text-muted font-bold shrink-0 mt-0.5">
                                         <x-icon name="map-pin" class="h-[11px] w-[11px] text-primary" /> {{ $event->attendees }} {{ __('site.events.going') }}
                                     </span>
                                 </div>
@@ -120,10 +120,10 @@
                                     <div class="mb-2.5 flex flex-col justify-center rounded-xl border p-2.5 transition-colors {{ $isVerifiedMember && $hasDiscount ? 'border-emerald-200 bg-emerald-50/30' : 'border-border bg-slate-50/50' }}">
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="flex items-center gap-2">
-                                                <span class="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground">{{ __('site.events.ticket_price') }}</span>
+                                                <span class="text-[12px] font-extrabold uppercase tracking-wider text-muted-foreground">{{ __('site.events.ticket_price') }}</span>
                                                 <div class="flex items-baseline gap-1">
                                                     @if ($isVerifiedMember && $hasDiscount)
-                                                        <span class="text-[10px] font-semibold text-muted-foreground line-through decoration-slate-400">{{ $event->priceNormal }}</span>
+                                                        <span class="text-[12px] font-semibold text-muted-foreground line-through decoration-slate-400">{{ $event->priceNormal }}</span>
                                                     @endif
                                                     <span class="text-sm font-black leading-none {{ $isFree ? 'text-emerald-600 uppercase' : 'text-primary' }}">{{ $displayPrice }}</span>
                                                 </div>
@@ -132,11 +132,11 @@
                                             @if ($hasDiscount)
                                                 <div class="shrink-0">
                                                     @if ($isVerifiedMember)
-                                                        <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold text-emerald-700 shadow-sm border border-emerald-100">
+                                                        <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[12px] font-extrabold text-emerald-700 shadow-sm border border-emerald-100">
                                                             <x-icon name="shield-check" class="h-[10px] w-[10px] shrink-0 text-emerald-600" /> {{ __('site.events.verified_discount') }}
                                                         </span>
                                                     @else
-                                                        <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50/80 px-2 py-0.5 text-[9px] font-bold text-emerald-700 shadow-sm border border-emerald-100/60">
+                                                        <span class="inline-flex items-center gap-1 rounded-md bg-emerald-50/80 px-2 py-0.5 text-[12px] font-bold text-emerald-700 shadow-sm border border-emerald-100/60">
                                                             <x-icon name="shield-check" class="h-[10px] w-[10px] shrink-0 text-emerald-600" /> {{ __('site.events.verified') }}: {{ $event->priceVerified }}
                                                         </span>
                                                     @endif

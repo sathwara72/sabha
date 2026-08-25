@@ -24,10 +24,10 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50/90 border-b border-border/70 backdrop-blur-sm">
-                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Member</th>
-                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Joined</th>
-                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Role / Status</th>
-                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                        <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Member</th>
+                        <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Joined</th>
+                        <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Role / Status</th>
+                        <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border/60">
@@ -44,7 +44,7 @@
                                     @endif
                                     <div>
                                         <p class="text-xs font-extrabold text-slate-900 leading-tight">{{ $user->name }}</p>
-                                        <p class="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                                        <p class="mt-0.5 flex items-center gap-1 text-[12px] font-medium text-slate-500">
                                             <x-icon name="mail" class="h-2.5 w-2.5 text-primary/70" /> {{ $user->email }}
                                         </p>
                                     </div>
@@ -53,18 +53,18 @@
                             <td class="px-5 py-3.5">
                                 <div class="flex flex-col">
                                     <p class="text-xs font-semibold text-slate-800">{{ $user->created_at->format('n/j/Y') }}</p>
-                                    <p class="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
+                                    <p class="flex items-center gap-1 text-[12px] text-slate-400 mt-0.5">
                                         <x-icon name="clock" class="h-2.5 w-2.5" /> {{ $user->created_at->format('g:i A') }}
                                     </p>
                                 </div>
                             </td>
                             <td class="px-5 py-3.5">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ $user->role === 'admin' ? 'bg-primary-soft text-primary border border-primary/20' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
+                                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold {{ $user->role === 'admin' ? 'bg-primary-soft text-primary border border-primary/20' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
                                         <x-icon name="shield-check" class="h-2.5 w-2.5" /> {{ $user->role }}
                                     </span>
                                     @if ($user->is_blocked)
-                                        <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-200">
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-200">
                                             <x-icon name="ban" class="h-2.5 w-2.5" /> Blocked
                                         </span>
                                     @endif
@@ -75,7 +75,7 @@
                                     @if ($user->role !== 'admin')
                                         <button
                                             wire:click="openBlock({{ $user->id }})"
-                                            class="inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1.5 text-[10px] font-extrabold border transition-all active:scale-95 cursor-pointer shadow-xs {{ $user->is_blocked ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' }}"
+                                            class="inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1.5 text-[12px] font-extrabold border transition-all active:scale-95 cursor-pointer shadow-xs {{ $user->is_blocked ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' }}"
                                             title="{{ $user->is_blocked ? 'Unblock Member' : 'Block Member' }}"
                                         >
                                             @if ($user->is_blocked)
@@ -134,11 +134,11 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 class="text-base font-bold text-foreground">{{ $selectedUser->name }}</h3>
-                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold {{ $selectedUser->role === 'admin' ? 'bg-primary-soft text-primary' : 'bg-slate-100 text-slate-700' }}">
+                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-bold {{ $selectedUser->role === 'admin' ? 'bg-primary-soft text-primary' : 'bg-slate-100 text-slate-700' }}">
                                     {{ $selectedUser->role }}
                                 </span>
                                 @if ($selectedUser->is_blocked)
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-200">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-200">
                                         <x-icon name="ban" class="h-2.5 w-2.5" /> Blocked
                                     </span>
                                 @endif

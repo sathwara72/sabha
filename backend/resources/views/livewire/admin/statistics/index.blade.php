@@ -35,17 +35,17 @@
             @foreach ($stats as $stat)
                 <div class="glass-card p-4 flex flex-col gap-3">
                     <div class="flex items-center justify-between">
-                        <span class="flex items-center gap-1 text-[10px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-md">
+                        <span class="flex items-center gap-1 text-[12px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-md">
                             <x-icon name="layers" class="h-2.5 w-2.5" /> Stat #{{ $stat->id }}
                         </span>
-                        <span class="text-[10px] text-muted-foreground font-semibold truncate max-w-[140px]">
+                        <span class="text-[12px] text-muted-foreground font-semibold truncate max-w-[140px]">
                             Live: <span class="text-foreground">{{ $stat->value }}</span> — {{ $stat->label }}
                         </span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div class="space-y-0.5">
-                            <label class="text-[10px] font-bold text-muted uppercase tracking-wider block">Label</label>
+                            <label class="text-[12px] font-bold text-muted uppercase tracking-wider block">Label</label>
                             <input
                                 type="text"
                                 wire:model="editValues.{{ $stat->id }}.label"
@@ -54,7 +54,7 @@
                             />
                         </div>
                         <div class="space-y-0.5">
-                            <label class="text-[10px] font-bold text-muted uppercase tracking-wider block">Value</label>
+                            <label class="text-[12px] font-bold text-muted uppercase tracking-wider block">Value</label>
                             <input
                                 type="text"
                                 wire:model="editValues.{{ $stat->id }}.value"
@@ -69,7 +69,7 @@
                             wire:click="update({{ $stat->id }})"
                             wire:loading.attr="disabled"
                             wire:target="update({{ $stat->id }})"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-[12px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
                         >
                             <x-icon name="save" class="h-3 w-3" />
                             <span wire:loading.remove wire:target="update({{ $stat->id }})">Save</span>

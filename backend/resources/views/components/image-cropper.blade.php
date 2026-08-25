@@ -8,7 +8,7 @@
                     <x-icon name="crop" class="text-primary h-4 w-4" />
                     <span x-text="title"></span>
                 </h3>
-                <p class="text-[11px] font-medium text-slate-500 mt-0.5">Drag &amp; resize the selection box over the image portion to crop</p>
+                <p class="text-[12px] font-medium text-slate-500 mt-0.5">Drag &amp; resize the selection box over the image portion to crop</p>
             </div>
             <button x-on:click="close" class="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer">
                 <x-icon name="x" class="h-4 w-4" />
@@ -17,15 +17,15 @@
 
         <div class="flex flex-wrap items-center justify-between gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-100">
             <div class="flex items-center gap-1.5 flex-wrap">
-                <button type="button" x-on:click="selectFullImage" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
+                <button type="button" x-on:click="selectFullImage" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 text-[12px] font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
                     <x-icon name="maximize-2" class="h-3 w-3 text-primary" /> Select Full Image
                 </button>
-                <button type="button" x-on:click="lockDefaultRatio" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer" :class="aspectMode === 'default' ? 'bg-primary text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100'">
+                <button type="button" x-on:click="lockDefaultRatio" class="px-2.5 py-1 rounded-lg text-[12px] font-bold transition-all cursor-pointer" :class="aspectMode === 'default' ? 'bg-primary text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100'">
                     Lock Ratio
                 </button>
             </div>
 
-            <button type="button" x-on:click="rotate" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer ml-auto">
+            <button type="button" x-on:click="rotate" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 text-[12px] font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer ml-auto">
                 <x-icon name="rotate-cw" class="h-3 w-3 text-primary" /> Rotate 90°
             </button>
         </div>
@@ -68,7 +68,7 @@
                     </div>
 
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div class="bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold text-white flex items-center gap-1.5 border border-white/20 shadow-md">
+                        <div class="bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-[12px] font-bold text-white flex items-center gap-1.5 border border-white/20 shadow-md">
                             <x-icon name="move" class="h-3 w-3 text-primary" /> Drag box to position
                         </div>
                     </div>
@@ -94,12 +94,12 @@
         </div>
 
         <div class="flex items-center gap-3 bg-slate-50 p-2 px-3 rounded-xl border border-slate-100">
-            <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1 shrink-0">
+            <span class="text-[12px] font-bold text-slate-700 flex items-center gap-1 shrink-0">
                 <x-icon name="zoom-in" class="h-[13px] w-[13px] text-primary" /> Zoom:
             </span>
             <input type="range" min="1" max="3" step="0.05" x-model.number="zoom" x-on:input="onZoomChange" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-primary" />
-            <span class="text-[11px] font-extrabold text-slate-900 w-9 text-right shrink-0" x-text="Math.round(zoom * 100) + '%'"></span>
-            <button type="button" x-on:click="resetAll" class="text-[10px] font-bold text-slate-500 hover:text-primary transition-colors shrink-0">Reset All</button>
+            <span class="text-[12px] font-extrabold text-slate-900 w-9 text-right shrink-0" x-text="Math.round(zoom * 100) + '%'"></span>
+            <button type="button" x-on:click="resetAll" class="text-[12px] font-bold text-slate-500 hover:text-primary transition-colors shrink-0">Reset All</button>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">

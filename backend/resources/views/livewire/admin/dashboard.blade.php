@@ -12,7 +12,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-lg font-bold text-foreground leading-none">{{ $tile['value'] }}</p>
-                    <p class="mt-1 text-[11px] font-semibold text-muted truncate">{{ $tile['label'] }}</p>
+                    <p class="mt-1 text-[12px] font-semibold text-muted truncate">{{ $tile['label'] }}</p>
                 </div>
             </div>
         @endforeach

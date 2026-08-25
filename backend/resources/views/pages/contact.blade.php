@@ -60,7 +60,7 @@
                                 <x-icon name="mail" class="h-4 w-4" />
                             </div>
                             <div>
-                                <h3 class="text-[10px] font-bold text-muted uppercase">{{ __('site.contact.general_email') }}</h3>
+                                <h3 class="text-[12px] font-bold text-muted uppercase">{{ __('site.contact.general_email') }}</h3>
                                 <p class="text-xs font-extrabold text-slate-900">{{ $contactEmail }}</p>
                             </div>
                         </div>
@@ -69,7 +69,7 @@
                                 <x-icon name="clock" class="h-4 w-4" />
                             </div>
                             <div>
-                                <h3 class="text-[10px] font-bold text-muted uppercase">{{ __('site.contact.response_time') }}</h3>
+                                <h3 class="text-[12px] font-bold text-muted uppercase">{{ __('site.contact.response_time') }}</h3>
                                 <p class="text-xs font-extrabold text-slate-900">{{ $responseTime }}</p>
                             </div>
                         </div>
@@ -87,13 +87,13 @@
                                 <div class="rounded-xl border {{ $ch['border'] ?? 'border-border' }} {{ $ch['bg'] ?? 'bg-white' }} p-3 space-y-1.5">
                                     <div class="flex justify-between items-center">
                                         <span class="text-xs font-extrabold text-foreground">{{ $cityLabel }}</span>
-                                        <span class="inline-flex items-center gap-1 text-[8px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
+                                        <span class="inline-flex items-center gap-1 text-[12px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
                                             {{ __('site.contact.coordinator') }}
                                         </span>
                                     </div>
                                     <div class="space-y-0.5">
                                         <p class="text-xs font-extrabold text-slate-900">{{ $ch['contact'] }}</p>
-                                        <div class="flex flex-wrap gap-x-3 text-[11px] text-muted font-medium">
+                                        <div class="flex flex-wrap gap-x-3 text-[12px] text-muted font-medium">
                                             <span class="flex items-center gap-1"><x-icon name="phone" class="h-[11px] w-[11px] text-primary" /> {{ $ch['phone'] }}</span>
                                             <span class="flex items-center gap-1"><x-icon name="mail" class="h-[11px] w-[11px] text-primary" /> {{ $ch['email'] }}</span>
                                         </div>
@@ -113,7 +113,7 @@
                         <form x-on:submit.prevent="submit" class="mt-4 space-y-3">
 
                             <div class="space-y-1.5">
-                                <label class="text-[10px] font-bold uppercase tracking-wider text-muted">{{ __('site.contact.inquiry_category') }}</label>
+                                <label class="text-[12px] font-bold uppercase tracking-wider text-muted">{{ __('site.contact.inquiry_category') }}</label>
                                 <div class="flex flex-wrap gap-1.5">
                                     @foreach ([
                                         ['value' => 'Membership', 'label' => __('site.contact.inquiry_membership')],
@@ -133,22 +133,22 @@
 
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="space-y-1">
-                                    <label class="text-[10px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.full_name') }}</label>
+                                    <label class="text-[12px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.full_name') }}</label>
                                     <input type="text" required placeholder="{{ __('site.contact.ph_name') }}" x-model="form.name" class="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground" />
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-[10px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.email_address') }}</label>
+                                    <label class="text-[12px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.email_address') }}</label>
                                     <input type="email" required placeholder="{{ __('site.contact.ph_email') }}" x-model="form.email" class="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground" />
                                 </div>
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-[10px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.subject') }}</label>
+                                <label class="text-[12px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.subject') }}</label>
                                 <input type="text" required placeholder="{{ __('site.contact.ph_subject') }}" x-model="form.subject" class="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground" />
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-[10px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.your_message') }}</label>
+                                <label class="text-[12px] font-bold text-foreground uppercase tracking-wide">{{ __('site.contact.your_message') }}</label>
                                 <textarea required rows="4" placeholder="{{ __('site.contact.ph_message') }}" x-model="form.message" class="w-full resize-none rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary placeholder:text-muted-foreground"></textarea>
                             </div>
 
@@ -162,7 +162,7 @@
                             </button>
 
                             <div x-show="submitError" x-cloak x-transition class="flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700">
-                                <div class="h-5 w-5 rounded-full border-2 border-red-600 flex items-center justify-center text-[10px] font-extrabold shrink-0">✕</div>
+                                <div class="h-5 w-5 rounded-full border-2 border-red-600 flex items-center justify-center text-[12px] font-extrabold shrink-0">✕</div>
                                 <p x-text="submitError"></p>
                             </div>
 
@@ -170,7 +170,7 @@
                                 <x-icon name="check-circle-2" class="h-5 w-5 text-green-600 shrink-0" />
                                 <div>
                                     <p>{{ __('site.contact.success_msg') }}</p>
-                                    <p class="text-[10px] text-green-600 font-semibold mt-0.5">{{ __('site.contact.success_note') }}</p>
+                                    <p class="text-[12px] text-green-600 font-semibold mt-0.5">{{ __('site.contact.success_note') }}</p>
                                 </div>
                             </div>
 

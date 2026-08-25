@@ -162,7 +162,7 @@
                                         </span>
                                     </div>
 
-                                    <div class="pt-2 border-t border-border flex items-center justify-between text-[11px] font-semibold">
+                                    <div class="pt-2 border-t border-border flex items-center justify-between text-[12px] font-semibold">
                                         <span class="text-muted">
                                             {{ __('site.home.events_std') }}: <strong class="text-foreground">{{ $event->price_normal ?: '₹1,499' }}</strong>
                                         </span>

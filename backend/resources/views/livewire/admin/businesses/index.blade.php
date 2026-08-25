@@ -29,7 +29,7 @@
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg capitalize transition-all cursor-pointer {{ $statusFilter === $status ? 'bg-white text-foreground shadow-sm' : 'text-muted hover:text-foreground' }}"
                     >
                         {{ $status }}
-                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold transition-colors {{ $statusFilter === $status ? 'bg-primary-soft text-primary' : 'bg-slate-200/60 text-slate-500' }}">
+                        <span class="px-1.5 py-0.5 text-[12px] rounded-full font-bold transition-colors {{ $statusFilter === $status ? 'bg-primary-soft text-primary' : 'bg-slate-200/60 text-slate-500' }}">
                             {{ $counts[$status] ?? 0 }}
                         </span>
                     </button>
@@ -58,7 +58,7 @@
                             @else
                                 <div class="w-full h-full bg-gradient-to-br from-primary/10 via-primary/5 to-slate-100"></div>
                             @endif
-                            <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border {{ $statusColor[$biz->status] ?? 'bg-surface text-muted border-border' }}">
+                            <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[12px] font-bold border {{ $statusColor[$biz->status] ?? 'bg-surface text-muted border-border' }}">
                                 {{ ucfirst($biz->status) }}
                             </span>
                         </div>
@@ -75,12 +75,12 @@
                                 <div class="flex-1 mt-8">
                                     <h3 class="text-sm font-bold text-foreground leading-tight line-clamp-1">{{ $biz->name }}</h3>
                                     @if ($biz->tagline)
-                                        <p class="text-[10px] text-muted italic line-clamp-1 mt-0.5">{{ $biz->tagline }}</p>
+                                        <p class="text-[12px] text-muted italic line-clamp-1 mt-0.5">{{ $biz->tagline }}</p>
                                     @endif
                                 </div>
                             </div>
 
-                            <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted font-medium">
+                            <div class="flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-muted font-medium">
                                 <span class="flex items-center gap-1 text-primary font-semibold">{{ $biz->category }}</span>
                                 @php $addressLine = collect([$biz->area, $biz->state])->filter()->implode(', '); @endphp
                                 @if ($addressLine)
@@ -96,14 +96,14 @@
                                 @endif
                             </div>
 
-                            <p class="text-[11px] text-muted leading-relaxed line-clamp-2 flex-1">
+                            <p class="text-[12px] text-muted leading-relaxed line-clamp-2 flex-1">
                                 {{ $biz->description ?: 'No description available for this business.' }}
                             </p>
 
                             @if (media_url($biz->payment_screenshot))
                                 <button
                                     x-on:click="paymentModalUrl = {{ Illuminate\Support\Js::from(media_url($biz->payment_screenshot)) }}"
-                                    class="flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 hover:bg-amber-100 transition-colors w-full justify-center"
+                                    class="flex items-center gap-1.5 text-[12px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 hover:bg-amber-100 transition-colors w-full justify-center"
                                 >
                                     <x-icon name="receipt" class="h-3 w-3" /> View Payment Screenshot
                                 </button>
@@ -112,13 +112,13 @@
                             <div class="flex items-center gap-2 {{ ! media_url($biz->payment_screenshot) ? 'mt-auto' : '' }}">
                                 <a
                                     href="{{ route('admin.businesses.show', $biz->id) }}"
-                                    class="flex-1 flex items-center gap-1.5 text-[10px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 hover:bg-slate-100 transition-colors justify-center cursor-pointer"
+                                    class="flex-1 flex items-center gap-1.5 text-[12px] font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 hover:bg-slate-100 transition-colors justify-center cursor-pointer"
                                 >
                                     <x-icon name="eye" class="h-3 w-3" /> View Details
                                 </a>
                                 <button
                                     wire:click="openDelete({{ $biz->id }}, {{ Illuminate\Support\Js::from($biz->name) }})"
-                                    class="flex items-center gap-1.5 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1.5 hover:bg-rose-100 transition-colors justify-center cursor-pointer"
+                                    class="flex items-center gap-1.5 text-[12px] font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1.5 hover:bg-rose-100 transition-colors justify-center cursor-pointer"
                                     title="Delete Business"
                                 >
                                     <x-icon name="trash-2" class="h-3 w-3" /> Delete
@@ -129,13 +129,13 @@
                                 <div class="flex items-center gap-2 pt-2 border-t border-border">
                                     <button
                                         wire:click="approve({{ $biz->id }})"
-                                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+                                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[12px] font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
                                     >
                                         <x-icon name="check-circle-2" class="h-3.5 w-3.5" /> Approve
                                     </button>
                                     <button
                                         wire:click="openReject({{ $biz->id }}, {{ Illuminate\Support\Js::from($biz->name) }})"
-                                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-[11px] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98]"
+                                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-[12px] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98]"
                                     >
                                         <x-icon name="x-circle" class="h-3.5 w-3.5" /> Reject
                                     </button>

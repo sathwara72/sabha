@@ -49,14 +49,14 @@
                             </div>
 
                             <div class="absolute top-2 left-2 z-10">
-                                <span class="flex items-center gap-1 text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                <span class="flex items-center gap-1 text-[12px] font-bold text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
                                     <x-icon name="image" class="h-2.5 w-2.5 text-primary-soft" /> Slider Banner
                                 </span>
                             </div>
                         </div>
 
                         <div class="p-3 flex-1 flex flex-col gap-1 bg-white">
-                            <p class="text-[11px] text-muted">
+                            <p class="text-[12px] text-muted">
                                 Uploaded: {{ $item->created_at->format('M j, Y') }}
                             </p>
                         </div>
@@ -111,7 +111,7 @@
                             <span class="text-xs font-semibold text-foreground text-center line-clamp-1 px-2">
                                 {{ $mediaFile ? $mediaFile->getClientOriginalName() : 'Click to select banner image' }}
                             </span>
-                            <span class="text-[10px] text-muted-foreground mt-1">Recommended aspect ratio: 21:9 or landscape</span>
+                            <span class="text-[12px] text-muted-foreground mt-1">Recommended aspect ratio: 21:9 or landscape</span>
                         </div>
                     </div>
 

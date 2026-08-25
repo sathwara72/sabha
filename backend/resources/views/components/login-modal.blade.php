@@ -70,7 +70,7 @@
             <div class="space-y-1">
                 <div class="flex items-center justify-between">
                     <label class="text-xs font-semibold text-foreground">{{ __('site.auth.password') }}</label>
-                    <a href="/forgot-password" x-on:click="$store.auth.closeLogin()" class="text-[11px] font-semibold text-primary hover:opacity-80 transition-opacity">
+                    <a href="/forgot-password" x-on:click="$store.auth.closeLogin()" class="text-[12px] font-semibold text-primary hover:opacity-80 transition-opacity">
                         {{ __('site.auth.forgot_password') }}
                     </a>
                 </div>

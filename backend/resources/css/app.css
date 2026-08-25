@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -28,20 +28,25 @@
   --border: #dbe3ef;            /* light blue-gray border */
   --input: #ffffff;
   --ring: #00379D;
-  --radius: 0.875rem;
+  --radius: 1rem;
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-sm: calc(var(--radius) - 6px);
+
+  /* Shadow tint — every shadow-* utility is tinted toward the brand navy
+     instead of flat black, and layered (tight contact + soft ambient) for
+     a softer, more elevated "premium" depth than single flat shadows. */
+  --shadow-color: 17 53 82;
 }
 
 * {
   border-color: var(--border);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-style: normal;
 }
 
 html.lang-gu, html.lang-gu * {
-  font-family: 'Noto Sans Gujarati', 'Outfit', sans-serif;
+  font-family: 'Noto Sans Gujarati', 'Plus Jakarta Sans', sans-serif;
 }
 
 html {
@@ -99,13 +104,17 @@ em,
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow:
+    0 1px 2px rgba(17, 53, 82, 0.03),
+    0 10px 24px -14px rgba(17, 53, 82, 0.14);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .glass-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 14px 30px -16px rgba(15, 23, 42, 0.18);
+  border-color: #c3d0e3;
+  box-shadow:
+    0 2px 4px rgba(17, 53, 82, 0.05),
+    0 24px 44px -18px rgba(17, 53, 82, 0.26);
   transform: translateY(-4px);
 }
 
@@ -143,7 +152,9 @@ em,
   @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:opacity-90 active:scale-[0.98];
   background: var(--primary);
   color: var(--primary-foreground);
-  box-shadow: 0 6px 16px -8px rgba(29, 78, 216, 0.5);
+  box-shadow:
+    0 1px 2px rgba(0, 55, 157, 0.15),
+    0 10px 20px -8px rgba(0, 55, 157, 0.5);
 }
 
 /* ---------- Scrollbar ---------- */

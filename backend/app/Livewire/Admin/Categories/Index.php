@@ -118,8 +118,13 @@ class Index extends Component
 
         $categories = $query->paginate(9);
 
-        $categories->getCollection()->transform(function ($cat) {
-            $cat->businesses_count = Business::where('category', $cat->name)->count();
+        $counts = Business::whereIn('category', $categories->pluck('name'))
+            ->selectRaw('category, count(*) as aggregate')
+            ->groupBy('category')
+            ->pluck('aggregate', 'category');
+
+        $categories->getCollection()->transform(function ($cat) use ($counts) {
+            $cat->businesses_count = $counts[$cat->name] ?? 0;
 
             return $cat;
         });

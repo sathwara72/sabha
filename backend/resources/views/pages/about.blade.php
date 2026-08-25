@@ -97,7 +97,7 @@
                     <div class="relative pl-8 md:pl-10">
                         <div class="hidden md:flex absolute right-full mr-10 top-0.5 text-right flex-col">
                             <span class="text-2xl font-extrabold text-primary">{{ $m['year'] }}</span>
-                            <span class="text-[10px] font-bold text-muted uppercase">{{ __('site.about.milestone') }}</span>
+                            <span class="text-[12px] font-bold text-muted uppercase">{{ __('site.about.milestone') }}</span>
                         </div>
 
                         <div class="absolute -left-1.5 top-2.5 h-3.5 w-3.5 rounded-full border-2 border-primary bg-white z-10"></div>
@@ -135,8 +135,8 @@
                             class="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
                         />
                         <h3 class="text-sm font-extrabold text-foreground">{{ $name }}</h3>
-                        <p class="text-[11px] font-bold text-primary mt-0.5">{{ $role }}</p>
-                        <p class="text-[10px] text-muted font-semibold mt-1 truncate max-w-full">{{ $company }}</p>
+                        <p class="text-[12px] font-bold text-primary mt-0.5">{{ $role }}</p>
+                        <p class="text-[12px] text-muted font-semibold mt-1 truncate max-w-full">{{ $company }}</p>
                     </div>
                 @endforeach
             </div>

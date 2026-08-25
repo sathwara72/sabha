@@ -77,35 +77,35 @@
                             <div class="flex items-start gap-3">
                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="calendar" class="h-4 w-4" /></div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.date') }}</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.date') }}</p>
                                     <p class="text-sm font-semibold text-foreground mt-0.5">{{ $event->date->format('M j, Y') }}</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="clock" class="h-4 w-4" /></div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.time') }}</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.time') }}</p>
                                     <p class="text-sm font-semibold text-foreground mt-0.5">{{ $event->date->format('g:i A') }}</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3 sm:col-span-2">
                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="map-pin" class="h-4 w-4" /></div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.venue') }}</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.venue') }}</p>
                                     <p class="text-sm font-semibold text-foreground mt-0.5">{{ $event->location }}</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="users" class="h-4 w-4" /></div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.attendees') }}</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.attendees') }}</p>
                                     <p class="text-sm font-semibold text-foreground mt-0.5">100+ {{ __('site.bookingDetail.registered') }}</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="credit-card" class="h-4 w-4" /></div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.amount_paid') }}</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.amount_paid') }}</p>
                                     <p class="text-sm font-semibold text-foreground mt-0.5">{{ $price }} <span class="text-muted font-medium">{{ __('site.bookingDetail.on') }} {{ $registration->created_at->format('M j, Y') }}</span></p>
                                 </div>
                             </div>
@@ -124,7 +124,7 @@
                             <ol class="space-y-3">
                                 @foreach ($event->agenda as $i => $item)
                                     <li class="flex items-start gap-3">
-                                        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold mt-0.5">{{ $i + 1 }}</span>
+                                        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-white text-[12px] font-bold mt-0.5">{{ $i + 1 }}</span>
                                         <span class="text-sm font-medium text-foreground">{{ $item }}</span>
                                     </li>
                                 @endforeach
@@ -160,7 +160,7 @@
 
                         <div class="px-5 py-5 space-y-4">
                             <div>
-                                <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.ticket_number') }}</p>
+                                <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.ticket_number') }}</p>
                                 <div class="flex items-center gap-2 mt-1">
                                     <p class="text-sm font-extrabold text-foreground font-mono tracking-wider">{{ $registration->ticket_number ?: 'Pending Approval' }}</p>
                                     @if ($registration->ticket_number)
@@ -173,17 +173,17 @@
                             </div>
 
                             <div>
-                                <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.registered_for') }}</p>
+                                <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.registered_for') }}</p>
                                 <p class="text-sm font-semibold text-foreground mt-1 leading-snug">{{ $event->title }}</p>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.date') }}</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.date') }}</p>
                                     <p class="text-xs font-semibold text-foreground mt-0.5">{{ $event->date->format('M j, Y') }}</p>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.paid') }}</p>
+                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider">{{ __('site.bookingDetail.paid') }}</p>
                                     <p class="text-xs font-semibold text-foreground mt-0.5">{{ $price }}</p>
                                 </div>
                             </div>
@@ -191,7 +191,7 @@
                             @if ($registration->ticket_number && $isConfirmed)
                                 <div class="mt-2 flex flex-col items-center justify-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
                                     <x-qr-code :value="$registration->ticket_number" :size="120" class="border border-slate-200 rounded-lg p-1 bg-white" />
-                                    <span class="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Scan QR at Entrance</span>
+                                    <span class="text-[12px] font-bold text-muted-foreground uppercase tracking-widest">Scan QR at Entrance</span>
                                 </div>
                             @else
                                 <div class="mt-2 flex justify-center">
@@ -204,11 +204,11 @@
                             @endif
                         </div>
 
-                        @if ($registration->status === 'confirmed' || $registration->status === 'approved')
+                        @if (($registration->status === 'confirmed' || $registration->status === 'approved') && $registration->ticket_number)
                             <div class="border-t border-border px-5 py-4 space-y-2">
-                                <button type="button" onclick="window.print()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition-all hover:opacity-90">
+                                <a href="{{ route('profile.events.ticket', $registration->id) }}" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition-all hover:opacity-90">
                                     <x-icon name="download" class="h-[14px] w-[14px]" /> {{ __('site.bookingDetail.download_ticket') }}
-                                </button>
+                                </a>
                             </div>
                         @endif
                     </div>
@@ -219,7 +219,7 @@
 
                     <div class="flex items-center gap-2 rounded-xl border border-border bg-surface p-3">
                         <x-icon name="shield-check" class="h-[15px] w-[15px] text-primary shrink-0" />
-                        <p class="text-[10px] font-semibold text-muted">{{ __('site.bookingDetail.trust_note') }}</p>
+                        <p class="text-[12px] font-semibold text-muted">{{ __('site.bookingDetail.trust_note') }}</p>
                     </div>
                 </div>
             </div>

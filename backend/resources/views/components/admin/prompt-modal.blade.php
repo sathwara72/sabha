@@ -47,7 +47,7 @@
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-rose-500 focus:bg-white focus:ring-1 focus:ring-rose-500"
                     ></textarea>
                     @error($model)
-                        <p class="mt-1 text-[11px] font-semibold text-rose-600">{{ $errorMessage }}</p>
+                        <p class="mt-1 text-[12px] font-semibold text-rose-600">{{ $errorMessage }}</p>
                     @enderror
                 </div>
 

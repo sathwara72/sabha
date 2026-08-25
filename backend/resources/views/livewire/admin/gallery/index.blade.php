@@ -44,7 +44,7 @@
                             </div>
 
                             <div class="absolute top-2 left-2 z-10">
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border {{ $isVideo ? 'bg-white/92 text-amber-700 border-amber-200/80' : 'bg-white/92 text-primary border-primary/20' }}">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border {{ $isVideo ? 'bg-white/92 text-amber-700 border-amber-200/80' : 'bg-white/92 text-primary border-primary/20' }}">
                                     @if ($isVideo)
                                         <x-icon name="film" class="h-2.5 w-2.5 text-amber-500" /> Video
                                     @else
@@ -113,7 +113,7 @@
                     <div class="space-y-1.5">
                         <label class="text-xs font-semibold text-foreground flex items-center justify-between">
                             <span>Select Files (Images, Videos or ZIP Archives)</span>
-                            <span class="text-[10px] text-primary font-bold bg-primary-soft px-1.5 py-0.5 rounded">Multi-Select Enabled</span>
+                            <span class="text-[12px] text-primary font-bold bg-primary-soft px-1.5 py-0.5 rounded">Multi-Select Enabled</span>
                         </label>
                         <div class="relative border-2 border-dashed border-border rounded-xl p-6 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer flex flex-col items-center justify-center">
                             <input
@@ -131,7 +131,7 @@
                                     Click to select single or multiple files
                                 @endif
                             </span>
-                            <span class="text-[10px] text-muted-foreground mt-1">Select multiple images/videos or ZIP archives (up to 100MB)</span>
+                            <span class="text-[12px] text-muted-foreground mt-1">Select multiple images/videos or ZIP archives (up to 100MB)</span>
                         </div>
                     </div>
 

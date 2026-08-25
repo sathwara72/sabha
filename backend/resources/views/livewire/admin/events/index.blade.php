@@ -31,12 +31,12 @@
                             <td class="px-4 py-2.5">
                                 <div>
                                     <p class="text-xs font-bold text-foreground">{{ $evt->title }}</p>
-                                    <span class="inline-block rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary mt-0.5">{{ $evt->type }}</span>
+                                    <span class="inline-block rounded-full bg-primary-soft px-2 py-0.5 text-[12px] font-bold text-primary mt-0.5">{{ $evt->type }}</span>
                                 </div>
                             </td>
                             <td class="px-4 py-2.5">
                                 <p class="text-xs font-semibold text-foreground">{{ $evt->date->format('M j, Y') }}</p>
-                                <p class="text-[10px] text-muted-foreground mt-0.5">{{ $evt->location }}</p>
+                                <p class="text-[12px] text-muted-foreground mt-0.5">{{ $evt->location }}</p>
                             </td>
                             <td class="px-4 py-2.5 font-bold text-xs text-foreground">{{ $evt->price_normal ?: 'N/A' }}</td>
                             <td class="px-4 py-2.5 font-bold text-xs text-primary">{{ $evt->price_verified ?: 'N/A' }}</td>
@@ -91,7 +91,7 @@
                 <div class="flex items-center justify-between px-5 py-3.5 border-b border-border bg-surface">
                     <div>
                         <h3 class="text-base font-bold text-foreground">{{ $editingEventId ? 'Edit Event' : 'Create New Event' }}</h3>
-                        <p class="text-[11px] text-muted-foreground mt-0.5">{{ $editingEventId ? 'Update the details of this event' : 'Fill in the details below to publish an event' }}</p>
+                        <p class="text-[12px] text-muted-foreground mt-0.5">{{ $editingEventId ? 'Update the details of this event' : 'Fill in the details below to publish an event' }}</p>
                     </div>
                     <button type="button" wire:click="closeModal" class="p-1 rounded-lg text-muted-foreground hover:bg-slate-100 hover:text-foreground transition-colors cursor-pointer">
                         <x-icon name="x" class="h-4 w-4" />
@@ -104,18 +104,18 @@
                             <div class="space-y-1">
                                 <label class="{{ $labelClass }}">Event title</label>
                                 <input type="text" wire:model="title" placeholder="e.g. Sabha networking night" class="{{ $inputClass }}" />
-                                @error('title') <p class="text-[10px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
+                                @error('title') <p class="text-[12px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                             </div>
                             <div class="space-y-1">
                                 <label class="{{ $labelClass }}">Location</label>
                                 <input type="text" wire:model="location" placeholder="e.g. Aloft Hotel, Ahmedabad" class="{{ $inputClass }}" />
-                                @error('location') <p class="text-[10px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
+                                @error('location') <p class="text-[12px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                             </div>
 
                             <div class="space-y-1">
                                 <label class="{{ $labelClass }}">Date</label>
                                 <input type="date" wire:model="date" class="{{ $inputClass }}" />
-                                @error('date') <p class="text-[10px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
+                                @error('date') <p class="text-[12px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                             </div>
                             <div class="space-y-1">
                                 <label class="{{ $labelClass }}">Category</label>
@@ -129,18 +129,18 @@
                             <div class="space-y-1">
                                 <label class="{{ $labelClass }}">Price for Normal Member</label>
                                 <input type="text" wire:model="price_normal" placeholder="e.g. ₹2,499 or Free" class="{{ $inputClass }}" />
-                                @error('price_normal') <p class="text-[10px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
+                                @error('price_normal') <p class="text-[12px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                             </div>
                             <div class="space-y-1">
                                 <label class="{{ $labelClass }}">Price for Verified Member</label>
                                 <input type="text" wire:model="price_verified" placeholder="e.g. ₹1,499 or Free" class="{{ $inputClass }}" />
-                                @error('price_verified') <p class="text-[10px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
+                                @error('price_verified') <p class="text-[12px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                             </div>
 
                             <div class="space-y-1 sm:col-span-2">
                                 <label class="{{ $labelClass }}">Description</label>
                                 <textarea wire:model="description" rows="2" placeholder="What is this event about?" class="{{ $inputClass }}"></textarea>
-                                @error('description') <p class="text-[10px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
+                                @error('description') <p class="text-[12px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                             </div>
 
                             <div class="space-y-1 sm:col-span-2">
@@ -163,31 +163,31 @@
                                     @else
                                         <label class="flex h-20 w-32 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border bg-slate-50/50 hover:bg-slate-50 transition-colors">
                                             <x-icon name="upload" class="h-5 w-5 text-muted-foreground" />
-                                            <span class="text-[10px] text-muted-foreground mt-1 font-semibold">Upload Image</span>
+                                            <span class="text-[12px] text-muted-foreground mt-1 font-semibold">Upload Image</span>
                                             <input type="file" wire:model="imageFile" accept="image/*" class="hidden" />
                                         </label>
                                     @endif
-                                    <div class="text-[10px] text-muted-foreground">
+                                    <div class="text-[12px] text-muted-foreground">
                                         <p class="font-semibold">Upload a high-quality cover photo.</p>
                                         <p>Supports PNG, JPG, GIF, WebP (max 10MB).</p>
                                     </div>
                                 </div>
-                                @error('imageFile') <p class="text-[10px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
+                                @error('imageFile') <p class="text-[12px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Agenda --}}
                             <div class="sm:col-span-2 border-t border-border pt-3">
                                 <div class="flex items-center justify-between mb-2">
                                     <label class="{{ $labelClass }}">Agenda Items</label>
-                                    <button type="button" wire:click="addAgendaItem" class="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">+ Add Item</button>
+                                    <button type="button" wire:click="addAgendaItem" class="text-[12px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">+ Add Item</button>
                                 </div>
                                 @if (empty($agenda))
-                                    <p class="text-[10px] text-muted-foreground italic">No agenda items added yet.</p>
+                                    <p class="text-[12px] text-muted-foreground italic">No agenda items added yet.</p>
                                 @else
                                     <div class="space-y-2 max-h-[150px] overflow-y-auto pr-1">
                                         @foreach ($agenda as $idx => $item)
                                             <div class="flex items-center gap-2">
-                                                <span class="text-[10px] font-bold text-muted-foreground w-4">{{ $idx + 1 }}.</span>
+                                                <span class="text-[12px] font-bold text-muted-foreground w-4">{{ $idx + 1 }}.</span>
                                                 <input type="text" wire:model="agenda.{{ $idx }}" placeholder="e.g. Registration & Welcome" class="{{ $inputClass }}" />
                                                 <button type="button" wire:click="removeAgendaItem({{ $idx }})" class="text-red-500 hover:text-red-700 p-1 cursor-pointer">
                                                     <x-icon name="x" class="h-3.5 w-3.5" />
@@ -202,10 +202,10 @@
                             <div class="sm:col-span-2 border-t border-border pt-3">
                                 <div class="flex items-center justify-between mb-2">
                                     <label class="{{ $labelClass }}">Speakers</label>
-                                    <button type="button" wire:click="addSpeaker" class="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">+ Add Speaker</button>
+                                    <button type="button" wire:click="addSpeaker" class="text-[12px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">+ Add Speaker</button>
                                 </div>
                                 @if (empty($speakers))
-                                    <p class="text-[10px] text-muted-foreground italic">No speakers added yet.</p>
+                                    <p class="text-[12px] text-muted-foreground italic">No speakers added yet.</p>
                                 @else
                                     <div class="space-y-3 max-h-[220px] overflow-y-auto pr-1">
                                         @foreach ($speakers as $idx => $speaker)
@@ -215,16 +215,16 @@
                                                 </button>
                                                 <div class="grid grid-cols-2 gap-2">
                                                     <div class="space-y-0.5">
-                                                        <label class="text-[10px] font-semibold text-muted-foreground">Speaker Name</label>
+                                                        <label class="text-[12px] font-semibold text-muted-foreground">Speaker Name</label>
                                                         <input type="text" wire:model="speakers.{{ $idx }}.name" placeholder="Name" class="{{ $inputClass }}" />
                                                     </div>
                                                     <div class="space-y-0.5">
-                                                        <label class="text-[10px] font-semibold text-muted-foreground">Role / Designation</label>
+                                                        <label class="text-[12px] font-semibold text-muted-foreground">Role / Designation</label>
                                                         <input type="text" wire:model="speakers.{{ $idx }}.role" placeholder="Role (e.g. CEO)" class="{{ $inputClass }}" />
                                                     </div>
                                                 </div>
                                                 <div class="space-y-0.5">
-                                                    <label class="text-[10px] font-semibold text-muted-foreground">Short Bio</label>
+                                                    <label class="text-[12px] font-semibold text-muted-foreground">Short Bio</label>
                                                     <textarea wire:model="speakers.{{ $idx }}.bio" rows="1" placeholder="Brief description..." class="{{ $inputClass }}"></textarea>
                                                 </div>
                                             </div>
@@ -236,16 +236,16 @@
                     </div>
 
                     <div class="px-5 py-3 border-t border-border bg-surface flex flex-col sm:flex-row items-center justify-between gap-3">
-                        <div class="flex items-center gap-1.5 text-muted-foreground text-[10px] self-start sm:self-auto">
+                        <div class="flex items-center gap-1.5 text-muted-foreground text-[12px] self-start sm:self-auto">
                             <x-icon name="info" class="h-3 w-3 text-primary shrink-0" />
                             <span>Appears on public site immediately.</span>
                         </div>
 
                         <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                            <button type="button" wire:click="closeModal" class="w-1/2 sm:w-auto rounded-xl border border-border bg-white px-3 py-1.5 text-[11px] font-semibold text-foreground hover:bg-slate-50 transition-all cursor-pointer shadow-sm">
+                            <button type="button" wire:click="closeModal" class="w-1/2 sm:w-auto rounded-xl border border-border bg-white px-3 py-1.5 text-[12px] font-semibold text-foreground hover:bg-slate-50 transition-all cursor-pointer shadow-sm">
                                 Cancel
                             </button>
-                            <button type="submit" wire:loading.attr="disabled" wire:target="save" class="w-1/2 sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-[11px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer shadow-sm">
+                            <button type="submit" wire:loading.attr="disabled" wire:target="save" class="w-1/2 sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-[12px] font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer shadow-sm">
                                 <span wire:loading.remove wire:target="save">
                                     {{ $editingEventId ? 'Update Event' : 'Create Event' }} <x-icon name="check-circle-2" class="h-3 w-3 inline" />
                                 </span>

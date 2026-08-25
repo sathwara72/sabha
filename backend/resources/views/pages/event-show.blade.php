@@ -143,7 +143,7 @@
                             <div class="space-y-1.5">
                                 @foreach ($event->agenda as $i => $item)
                                     <div class="flex items-center gap-2.5 py-1.5 border-b border-dashed border-slate-100 last:border-0">
-                                        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[10px] font-semibold text-primary">{{ $i + 1 }}</span>
+                                        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[12px] font-semibold text-primary">{{ $i + 1 }}</span>
                                         <span class="text-xs font-medium text-foreground">{{ $item }}</span>
                                     </div>
                                 @endforeach
@@ -163,7 +163,7 @@
                                         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-sm font-bold text-primary">{{ mb_substr($speaker['name'] ?? '', 0, 1) }}</div>
                                         <div class="min-w-0 flex-1">
                                             <h4 class="text-xs font-semibold text-foreground leading-tight">{{ $speaker['name'] ?? '' }}</h4>
-                                            <p class="text-[10px] font-medium text-primary leading-tight mt-0.5">{{ $speaker['role'] ?? '' }}</p>
+                                            <p class="text-[12px] font-medium text-primary leading-tight mt-0.5">{{ $speaker['role'] ?? '' }}</p>
                                             <p class="mt-1.5 text-xs text-muted leading-relaxed line-clamp-2">{{ $speaker['bio'] ?? '' }}</p>
                                         </div>
                                     </div>
@@ -183,12 +183,12 @@
                             <div class="grid grid-cols-2 gap-2 md:grid-cols-3">
                                 @foreach ($members as $member)
                                     <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100">
-                                        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-[10px] font-bold text-muted border border-border">
+                                        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-[12px] font-bold text-muted border border-border">
                                             {{ collect(explode(' ', $member['name']))->map(fn ($n) => mb_substr($n, 0, 1))->implode('') }}
                                         </div>
                                         <div class="min-w-0">
                                             <p class="truncate text-xs font-semibold text-foreground leading-tight">{{ $member['name'] }}</p>
-                                            <p class="truncate text-[9px] text-muted leading-tight mt-0.5">{{ $member['role'] }}</p>
+                                            <p class="truncate text-[12px] text-muted leading-tight mt-0.5">{{ $member['role'] }}</p>
                                         </div>
                                     </div>
                                 @endforeach
@@ -219,7 +219,7 @@
                                         @endif
                                         @if ($img->caption)
                                             <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <p class="text-[10px] text-white font-semibold truncate">{{ $img->caption }}</p>
+                                                <p class="text-[12px] text-white font-semibold truncate">{{ $img->caption }}</p>
                                             </div>
                                         @endif
                                     </div>
@@ -232,27 +232,27 @@
                 {{-- Right Column - Sticky Sidebar --}}
                 <div class="space-y-4 lg:sticky lg:top-20 h-fit">
                     <div class="glass-card p-4">
-                        <p class="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-2">{{ __('site.eventDetail.ticket_prices') }}</p>
+                        <p class="text-[12px] font-bold uppercase tracking-wider text-muted-foreground mb-2">{{ __('site.eventDetail.ticket_prices') }}</p>
                         <div class="space-y-1.5 text-center">
                             <div class="py-1.5 px-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                                <span class="text-[11px] font-semibold text-muted-foreground">{{ __('site.eventDetail.standard') }}:</span>
+                                <span class="text-[12px] font-semibold text-muted-foreground">{{ __('site.eventDetail.standard') }}:</span>
                                 <span class="text-sm font-bold text-foreground">{{ $priceNormal }}</span>
                             </div>
 
                             @if ($isVerifiedMember)
                                 <div class="py-1.5 px-2.5 rounded-xl border flex items-center justify-between transition-colors bg-emerald-50 border-emerald-200 text-emerald-700">
-                                    <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-0.5"><x-icon name="shield-check" class="h-[11px] w-[11px]" /> {{ __('site.eventDetail.verified') }}:</span>
+                                    <span class="text-[12px] font-semibold text-emerald-600 flex items-center gap-0.5"><x-icon name="shield-check" class="h-[11px] w-[11px]" /> {{ __('site.eventDetail.verified') }}:</span>
                                     <div class="text-right">
                                         <span class="text-sm font-bold text-foreground">{{ $priceVerified }}</span>
                                     </div>
                                 </div>
                             @else
                                 <a href="/profile?tab=business" class="block py-1.5 px-2.5 rounded-xl border flex items-center justify-between transition-colors {{ $status === 'past' ? 'bg-slate-50 border-border text-muted-foreground pointer-events-none' : 'bg-white border-border hover:bg-emerald-50/20 hover:border-emerald-200 text-muted-foreground group cursor-pointer' }}">
-                                    <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-0.5"><x-icon name="shield-check" class="h-[11px] w-[11px]" /> {{ __('site.eventDetail.verified') }}:</span>
+                                    <span class="text-[12px] font-semibold text-emerald-600 flex items-center gap-0.5"><x-icon name="shield-check" class="h-[11px] w-[11px]" /> {{ __('site.eventDetail.verified') }}:</span>
                                     <div class="text-right">
                                         <span class="text-sm font-bold text-foreground">{{ $priceVerified }}</span>
                                         @if ($status !== 'past')
-                                            <span class="block text-[7px] font-semibold text-emerald-600">{{ __('site.eventDetail.click_to_get') }} &rarr;</span>
+                                            <span class="block text-[12px] font-semibold text-emerald-600">{{ __('site.eventDetail.click_to_get') }} &rarr;</span>
                                         @endif
                                     </div>
                                 </a>
@@ -287,24 +287,24 @@
                             <div class="flex gap-2.5">
                                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="map-pin" class="h-3.5 w-3.5" /></div>
                                 <div>
-                                    <p class="text-[9px] font-semibold text-muted">{{ __('site.eventDetail.location') }}</p>
+                                    <p class="text-[12px] font-semibold text-muted">{{ __('site.eventDetail.location') }}</p>
                                     <p class="mt-0.5 text-xs font-medium text-foreground">{{ $event->location }}</p>
                                 </div>
                             </div>
                             <div class="flex gap-2.5">
                                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="zap" class="h-3.5 w-3.5" /></div>
                                 <div>
-                                    <p class="text-[9px] font-semibold text-muted">{{ __('site.eventDetail.format') }}</p>
+                                    <p class="text-[12px] font-semibold text-muted">{{ __('site.eventDetail.format') }}</p>
                                     <p class="mt-0.5 text-xs font-medium text-foreground">{{ $event->type }} {{ __('site.eventDetail.interactive') }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-4 space-y-2">
-                            <div class="flex items-center gap-1.5 rounded-xl bg-primary-soft px-2.5 py-1.5 text-[11px] font-medium text-primary">
+                            <div class="flex items-center gap-1.5 rounded-xl bg-primary-soft px-2.5 py-1.5 text-[12px] font-medium text-primary">
                                 <x-icon name="check-circle-2" class="h-3 w-3" /> {{ __('site.eventDetail.limited_capacity') }}
                             </div>
-                            <div class="flex items-center gap-1.5 px-1 text-[11px] text-muted">
+                            <div class="flex items-center gap-1.5 px-1 text-[12px] text-muted">
                                 <x-icon name="info" class="h-3 w-3" /> {{ __('site.eventDetail.register_before') }}
                             </div>
                         </div>
@@ -315,7 +315,7 @@
                         <p class="mt-1.5 text-xs leading-relaxed text-white/80">{{ __('site.eventDetail.good_to_know_desc') }}</p>
                         <div class="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-2.5 py-1.5">
                             <x-icon name="star" class="h-3.5 w-3.5 text-white fill-current" />
-                            <span class="text-[11px] font-semibold text-white">{{ __('site.eventDetail.great_experience') }}</span>
+                            <span class="text-[12px] font-semibold text-white">{{ __('site.eventDetail.great_experience') }}</span>
                         </div>
                     </div>
                 </div>
@@ -360,7 +360,7 @@
                 <div class="flex items-center justify-between border-b border-border pb-3 mb-3">
                     <div>
                         <h3 class="text-sm font-bold text-foreground">{{ __('site.eventDetail.reserve_seat_title') }}</h3>
-                        <p class="text-[10px] text-muted-foreground mt-0.5">{{ $event->title }}</p>
+                        <p class="text-[12px] text-muted-foreground mt-0.5">{{ $event->title }}</p>
                     </div>
                     <button x-on:click="isReserving = false" class="rounded-lg p-1 text-muted-foreground hover:bg-slate-100 transition-colors cursor-pointer">
                         <x-icon name="x" class="h-4 w-4" />
@@ -373,7 +373,7 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-foreground">{{ __('site.eventDetail.reservation_requested') }}</h4>
-                        <p class="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">{{ __('site.eventDetail.reservation_requested_desc') }}</p>
+                        <p class="text-[12px] text-muted-foreground mt-1 max-w-xs mx-auto">{{ __('site.eventDetail.reservation_requested_desc') }}</p>
                     </div>
                     <button x-on:click="isReserving = false; reserveSuccess = false" class="w-full inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 active:scale-[0.98] cursor-pointer">
                         {{ __('site.eventDetail.close') }}
@@ -384,29 +384,29 @@
                     <div x-show="reserveError" x-cloak class="rounded-xl bg-red-50 border border-red-100 p-2.5 text-center text-xs font-semibold text-red-600" x-text="reserveError"></div>
 
                     <div class="space-y-1.5 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                        <h4 class="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{{ __('site.eventDetail.your_personal_details') }}</h4>
+                        <h4 class="text-[12px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{{ __('site.eventDetail.your_personal_details') }}</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                             <div class="min-w-0">
-                                <span class="text-[9px] text-muted-foreground font-semibold block">{{ __('site.eventDetail.full_name') }}</span>
+                                <span class="text-[12px] text-muted-foreground font-semibold block">{{ __('site.eventDetail.full_name') }}</span>
                                 <span class="font-bold text-foreground block truncate">{{ auth()->user()->name ?? '' }}</span>
                             </div>
                             <div class="min-w-0">
-                                <span class="text-[9px] text-muted-foreground font-semibold block">{{ __('site.eventDetail.email_address') }}</span>
+                                <span class="text-[12px] text-muted-foreground font-semibold block">{{ __('site.eventDetail.email_address') }}</span>
                                 <span class="font-bold text-foreground block truncate" title="{{ auth()->user()->email ?? '' }}">{{ auth()->user()->email ?? '' }}</span>
                             </div>
                             <div class="min-w-0">
-                                <span class="text-[9px] text-muted-foreground font-semibold block">{{ __('site.eventDetail.phone_number') }}</span>
+                                <span class="text-[12px] text-muted-foreground font-semibold block">{{ __('site.eventDetail.phone_number') }}</span>
                                 <span class="font-bold text-foreground block truncate">{{ auth()->user()->phone ?? __('site.eventDetail.phone_not_provided') }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-muted-foreground block">{{ __('site.eventDetail.select_ticket_type') }}</label>
+                        <label class="text-[12px] font-bold text-muted-foreground block">{{ __('site.eventDetail.select_ticket_type') }}</label>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="p-2.5 rounded-xl border flex flex-col justify-between transition-all {{ !$isVerifiedMember ? 'border-primary bg-primary-soft/30 text-foreground' : 'border-border bg-slate-50 text-muted-foreground' }}">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-[9px] font-bold uppercase tracking-wider">{{ __('site.eventDetail.standard') }}</span>
+                                    <span class="text-[12px] font-bold uppercase tracking-wider">{{ __('site.eventDetail.standard') }}</span>
                                     @if (!$isVerifiedMember)
                                         <div class="h-2.5 w-2.5 rounded-full border-2 border-primary bg-primary flex items-center justify-center"><div class="h-1 w-1 rounded-full bg-white"></div></div>
                                     @endif
@@ -416,7 +416,7 @@
 
                             <div class="p-2.5 rounded-xl border flex flex-col justify-between transition-all {{ $isVerifiedMember ? 'border-primary bg-primary-soft/30 text-foreground' : 'border-border bg-white text-muted-foreground' }}">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-0.5"><x-icon name="shield-check" class="h-[10px] w-[10px]" /> {{ __('site.eventDetail.verified') }}</span>
+                                    <span class="text-[12px] font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-0.5"><x-icon name="shield-check" class="h-[10px] w-[10px]" /> {{ __('site.eventDetail.verified') }}</span>
                                     @if ($isVerifiedMember)
                                         <div class="h-2.5 w-2.5 rounded-full border-2 border-primary bg-primary flex items-center justify-center"><div class="h-1 w-1 rounded-full bg-white"></div></div>
                                     @endif
@@ -424,7 +424,7 @@
                                 <div class="mt-0.5 flex flex-col">
                                     <span class="text-sm font-extrabold text-foreground">{{ $priceVerified }}</span>
                                     @if (!$isVerifiedMember)
-                                        <span class="text-[7px] font-semibold text-emerald-600 mt-0.5">{{ __('site.eventDetail.requires_business') }} &rarr;</span>
+                                        <span class="text-[12px] font-semibold text-emerald-600 mt-0.5">{{ __('site.eventDetail.requires_business') }} &rarr;</span>
                                     @endif
                                 </div>
                             </div>
@@ -432,7 +432,7 @@
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-muted-foreground block">{{ __('site.eventDetail.upload_payment') }}</label>
+                        <label class="text-[12px] font-bold text-muted-foreground block">{{ __('site.eventDetail.upload_payment') }}</label>
                         <div class="flex items-center justify-center w-full">
                             <label class="flex flex-col items-center justify-center w-full h-22 border-2 border-dashed border-border rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
                                 <template x-if="paymentPreview">
@@ -444,7 +444,7 @@
                                 <template x-if="!paymentPreview">
                                     <div class="flex flex-col items-center justify-center py-3">
                                         <x-icon name="upload" class="w-6 h-6 text-muted-foreground mb-1" />
-                                        <p class="text-[10px] text-muted-foreground font-semibold">{{ __('site.eventDetail.click_upload') }}</p>
+                                        <p class="text-[12px] text-muted-foreground font-semibold">{{ __('site.eventDetail.click_upload') }}</p>
                                     </div>
                                 </template>
                                 <input type="file" accept="image/*" x-on:change="onFileChange" class="hidden" />

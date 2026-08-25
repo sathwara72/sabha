@@ -29,7 +29,7 @@
                 </a>
                 <div>
                     <h1 class="text-lg font-black text-slate-800 tracking-tight">Business Profile Review</h1>
-                    <p class="text-[10px] text-slate-400">Detailed verification and approval workspace</p>
+                    <p class="text-[12px] text-slate-400">Detailed verification and approval workspace</p>
                 </div>
             </div>
 
@@ -66,7 +66,7 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/20 to-transparent pointer-events-none"></div>
 
                         <div class="absolute top-3 right-3 flex items-center gap-2">
-                            <span class="px-3 py-0.5 rounded-full text-[9px] font-extrabold border uppercase tracking-widest shadow-lg {{ $statusBadgeColor[$business->status] ?? 'bg-white/10 text-white border-white/20' }}">
+                            <span class="px-3 py-0.5 rounded-full text-[12px] font-extrabold border uppercase tracking-widest shadow-lg {{ $statusBadgeColor[$business->status] ?? 'bg-white/10 text-white border-white/20' }}">
                                 {{ $business->status }}
                             </span>
                         </div>
@@ -84,7 +84,7 @@
                         <div>
                             <h2 class="text-xl font-black text-slate-800 leading-tight">{{ $business->name }}</h2>
                             @if ($business->tagline)
-                                <p class="text-[11px] text-slate-400 italic mt-1">{{ $business->tagline }}</p>
+                                <p class="text-[12px] text-slate-400 italic mt-1">{{ $business->tagline }}</p>
                             @endif
                         </div>
 
@@ -94,8 +94,8 @@
                                     <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
                                         <x-icon name="briefcase" class="h-3 w-3" />
                                     </div>
-                                    <div class="text-[11px]">
-                                        <p class="text-[9px] text-slate-400 font-semibold uppercase leading-none">Category</p>
+                                    <div class="text-[12px]">
+                                        <p class="text-[12px] text-slate-400 font-semibold uppercase leading-none">Category</p>
                                         <p class="font-extrabold text-slate-800 mt-0.5">{{ $business->category }}</p>
                                     </div>
                                 </div>
@@ -105,8 +105,8 @@
                                         <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0 mt-0.5">
                                             <x-icon name="map-pin" class="h-3 w-3" />
                                         </div>
-                                        <div class="text-[11px]">
-                                            <p class="text-[9px] text-slate-400 font-semibold uppercase leading-none">Address & Location</p>
+                                        <div class="text-[12px]">
+                                            <p class="text-[12px] text-slate-400 font-semibold uppercase leading-none">Address & Location</p>
                                             <p class="font-bold text-slate-800 mt-0.5 leading-snug">
                                                 {{ $addressLine }}{{ $business->pincode ? " - {$business->pincode}" : '' }}
                                             </p>
@@ -119,8 +119,8 @@
                                         <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
                                             <x-icon name="link-2" class="h-3 w-3" />
                                         </div>
-                                        <div class="text-[11px] truncate">
-                                            <p class="text-[9px] text-slate-400 font-semibold uppercase leading-none">Website</p>
+                                        <div class="text-[12px] truncate">
+                                            <p class="text-[12px] text-slate-400 font-semibold uppercase leading-none">Website</p>
                                             <a href="{{ $business->website }}" target="_blank" rel="noopener noreferrer" class="font-bold text-indigo-600 hover:underline truncate block max-w-[180px] mt-0.5">{{ $business->website }}</a>
                                         </div>
                                     </div>
@@ -133,8 +133,8 @@
                                         <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
                                             <x-icon name="phone" class="h-3 w-3" />
                                         </div>
-                                        <div class="text-[11px]">
-                                            <p class="text-[9px] text-slate-400 font-semibold uppercase leading-none">Business Phone</p>
+                                        <div class="text-[12px]">
+                                            <p class="text-[12px] text-slate-400 font-semibold uppercase leading-none">Business Phone</p>
                                             <a href="tel:{{ $business->business_phone }}" class="font-bold text-indigo-600 hover:underline mt-0.5 block">{{ $business->business_phone }}</a>
                                         </div>
                                     </div>
@@ -145,8 +145,8 @@
                                         <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
                                             <x-icon name="mail" class="h-3 w-3" />
                                         </div>
-                                        <div class="text-[11px] truncate">
-                                            <p class="text-[9px] text-slate-400 font-semibold uppercase leading-none">Business Email</p>
+                                        <div class="text-[12px] truncate">
+                                            <p class="text-[12px] text-slate-400 font-semibold uppercase leading-none">Business Email</p>
                                             <a href="mailto:{{ $business->business_email }}" class="font-bold text-indigo-600 hover:underline truncate block max-w-[180px] mt-0.5">{{ $business->business_email }}</a>
                                         </div>
                                     </div>
@@ -156,7 +156,7 @@
 
                         @if ($mapSrc)
                             <div class="pt-3 border-t border-slate-100 space-y-2">
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <p class="text-[12px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
                                     <x-icon name="map-pin" class="h-3 w-3 text-indigo-600" /> Embedded Location Map
                                 </p>
                                 <div class="relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-52 w-full bg-slate-900">
@@ -189,7 +189,7 @@
                                         {{ $service['title'] }}
                                     </h4>
                                     @if ($service['desc'])
-                                        <p class="text-[11px] text-slate-500 leading-relaxed pl-4">{{ $service['desc'] }}</p>
+                                        <p class="text-[12px] text-slate-500 leading-relaxed pl-4">{{ $service['desc'] }}</p>
                                     @endif
                                 </div>
                             @endforeach
@@ -244,10 +244,10 @@
                                         <div class="flex items-center gap-2">
                                             <h4 class="text-xs font-black text-white leading-tight">{{ $business->user->name }}</h4>
                                             @if ($business->user->is_blocked)
-                                                <span class="rounded-md bg-rose-500/30 border border-rose-400/30 px-2 py-0.5 text-[9px] font-bold text-rose-300 uppercase tracking-wider">Blocked</span>
+                                                <span class="rounded-md bg-rose-500/30 border border-rose-400/30 px-2 py-0.5 text-[12px] font-bold text-rose-300 uppercase tracking-wider">Blocked</span>
                                             @endif
                                         </div>
-                                        <span class="inline-block rounded-md bg-indigo-500/20 border border-indigo-400/20 px-2 py-0.5 text-[9px] font-bold text-indigo-300 mt-1 uppercase tracking-wider">
+                                        <span class="inline-block rounded-md bg-indigo-500/20 border border-indigo-400/20 px-2 py-0.5 text-[12px] font-bold text-indigo-300 mt-1 uppercase tracking-wider">
                                             {{ $business->user->role ?: 'Member' }}
                                         </span>
                                     </div>
@@ -256,7 +256,7 @@
                                 @if ($business->user->role !== 'admin')
                                     <button
                                         wire:click="openBlockOwnerModal"
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer border {{ $business->user->is_blocked ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/30' }}"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[12px] font-bold transition-all cursor-pointer border {{ $business->user->is_blocked ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/30' }}"
                                         title="{{ $business->user->is_blocked ? 'Unblock Owner User' : 'Block Owner User' }}"
                                     >
                                         @if ($business->user->is_blocked)
