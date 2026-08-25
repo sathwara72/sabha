@@ -1,3 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Brand palette — derived from user's color list */
+  --background: #f7f9fc;        /* very light blue-tinted gray — page background */
+  --foreground: #113552;        /* Dark navy/slate blue */
+  --muted: #5b6b85;             /* muted slate-blue — secondary text */
+  --muted-foreground: #94a3b8;  /* slate-400 — tertiary text */
+
+  --primary: #00379D;           /* Deep blue */
+  --primary-dark: #0F3459;      /* Dark navy/slate */
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(0, 55, 157, 0.05); /* soft version of primary */
+
+  --accent: #CD0E1B;            /* Bright red */
+  --accent-dark: #7E0A57;       /* Deep magenta/plum */
+  --accent-foreground: #ffffff;
+  --accent-soft: rgba(212, 128, 126, 0.15); /* soft version of coral pink #D4807E */
+  --accent-coral: #D4807E;      /* Coral pink / pastel red */
+
+  --card: #ffffff;
+  --card-foreground: #113552;
+  --surface: #eef2f8;           /* subtle blue-tinted section bg */
+
+  --border: #dbe3ef;            /* light blue-gray border */
+  --input: #ffffff;
+  --ring: #00379D;
+  --radius: 0.875rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+* {
+  border-color: var(--border);
+  font-family: 'Outfit', sans-serif;
+  font-style: normal;
+}
+
+html.lang-gu, html.lang-gu * {
+  font-family: 'Noto Sans Gujarati', 'Outfit', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+[x-cloak] {
+  display: none !important;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Text selection styling — matches brand instead of default blue */
+::selection {
+  background: var(--primary);
+  color: #ffffff;
+}
+::-moz-selection {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* No italics anywhere — keep everything upright */
+i,
+em,
+.italic {
+  font-style: normal;
+}
+
+/* ---------- Surfaces ---------- */
+/* Translucent surface used by the navbar when scrolled */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+/* Standard content card */
+.glass-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.glass-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 14px 30px -16px rgba(15, 23, 42, 0.18);
+  transform: translateY(-4px);
+}
+
+/* ---------- Accent helpers ---------- */
+.text-gradient {
+  background: linear-gradient(120deg, var(--primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.bg-premium {
+  background: var(--primary);
+}
+
+.glow-purple {
+  box-shadow: 0 6px 16px -8px rgba(29, 78, 216, 0.45);
+}
+
+/* ---------- Compact page hero ---------- */
+/* Subtle dot texture + soft blue/red tint for a distinctive, low-height header */
+.hero-surface {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(34rem 16rem at 100% -20%, rgba(226, 55, 68, 0.05), transparent 70%),
+    radial-gradient(34rem 18rem at 0% -10%, rgba(29, 78, 216, 0.06), transparent 70%),
+    radial-gradient(circle, rgba(15, 30, 61, 0.05) 1px, transparent 1px);
+  background-size: auto, auto, 22px 22px;
+  background-position: center, center, center;
+}
+
+/* ---------- Primary button ---------- */
+.btn-premium {
+  @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:opacity-90 active:scale-[0.98];
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 6px 16px -8px rgba(29, 78, 216, 0.5);
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

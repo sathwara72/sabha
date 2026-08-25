@@ -1,0 +1,240 @@
+<?php
+
+namespace App\Livewire\Admin\Events;
+
+use App\Models\Event;
+use App\Models\GalleryImage;
+use App\Services\GalleryMediaUploader;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
+
+class Show extends Component
+{
+    use WithFileUploads;
+    use WithPagination;
+
+    public int $eventId;
+
+    public string $activeTab = 'registrations';
+
+    public string $memberSearch = '';
+
+    public string $memberFilter = 'all';
+
+    public ?int $actionLoadingId = null;
+
+    public ?int $rejectModalId = null;
+
+    public string $rejectReason = '';
+
+    public bool $isUploadModalOpen = false;
+
+    public array $mediaFiles = [];
+
+    public string $uploadError = '';
+
+    public ?int $deleteMediaId = null;
+
+    public function mount(int $id): void
+    {
+        $this->eventId = $id;
+    }
+
+    public function setTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
+
+    public function updatedMemberSearch(): void
+    {
+        $this->resetPage('regPage');
+    }
+
+    public function setMemberFilter(string $filter): void
+    {
+        $this->memberFilter = $filter;
+        $this->resetPage('regPage');
+    }
+
+    public function approve(int $id): void
+    {
+        $registration = \App\Models\EventRegistration::with(['user', 'event'])->findOrFail($id);
+        $event = $registration->event;
+
+        $eventCode = $event->event_code;
+        if (! $eventCode) {
+            $eventCode = $this->generateEventCode($event->title);
+            $event->update(['event_code' => $eventCode]);
+        }
+
+        $year = $event->date ? $event->date->format('Y') : date('Y');
+
+        $ticketNo = $registration->ticket_number;
+        if (! $ticketNo) {
+            do {
+                $ticketNo = $year . '-' . $eventCode . '-' . mt_rand(1000, 9999);
+            } while (\App\Models\EventRegistration::where('ticket_number', $ticketNo)->exists());
+        }
+
+        $registration->update([
+            'status' => 'approved',
+            'ticket_number' => $ticketNo,
+            'rejection_reason' => null,
+        ]);
+    }
+
+    private function generateEventCode(string $title): string
+    {
+        $cleanTitle = preg_replace('/[^a-zA-Z0-9\s]/', '', $title);
+        $words = array_filter(explode(' ', trim($cleanTitle)));
+        $code = '';
+
+        if (count($words) >= 2) {
+            foreach ($words as $word) {
+                $code .= strtoupper(substr($word, 0, 1));
+            }
+        } else {
+            $code = strtoupper(substr($cleanTitle, 0, 4));
+        }
+
+        $code = preg_replace('/[^A-Z0-9]/', '', $code);
+        if (strlen($code) < 3) {
+            $code .= mt_rand(100, 999);
+        }
+
+        return substr($code, 0, 6);
+    }
+
+    public function openReject(int $id): void
+    {
+        $this->rejectModalId = $id;
+        $this->rejectReason = '';
+    }
+
+    public function cancelReject(): void
+    {
+        $this->rejectModalId = null;
+        $this->rejectReason = '';
+    }
+
+    public function confirmReject(): void
+    {
+        if (! $this->rejectModalId || trim($this->rejectReason) === '') {
+            return;
+        }
+
+        \App\Models\EventRegistration::findOrFail($this->rejectModalId)->update([
+            'status' => 'rejected',
+            'rejection_reason' => $this->rejectReason,
+        ]);
+
+        $this->cancelReject();
+    }
+
+    public function toggleAttendance(int $id): void
+    {
+        $registration = \App\Models\EventRegistration::findOrFail($id);
+        $registration->update(['is_attended' => ! $registration->is_attended]);
+    }
+
+    public function openUploadModal(): void
+    {
+        $this->mediaFiles = [];
+        $this->uploadError = '';
+        $this->isUploadModalOpen = true;
+    }
+
+    public function closeUploadModal(): void
+    {
+        $this->isUploadModalOpen = false;
+        $this->mediaFiles = [];
+        $this->uploadError = '';
+    }
+
+    public function uploadMedia(GalleryMediaUploader $uploader): void
+    {
+        $this->uploadError = '';
+
+        if (empty($this->mediaFiles)) {
+            $this->uploadError = 'Please select at least one image, video, or ZIP archive.';
+
+            return;
+        }
+
+        $created = $uploader->upload($this->mediaFiles, $this->eventId);
+
+        if (empty($created)) {
+            $this->uploadError = 'No valid media files were uploaded.';
+
+            return;
+        }
+
+        $this->closeUploadModal();
+        $this->resetPage('galPage');
+    }
+
+    public function openDeleteMedia(int $id): void
+    {
+        $this->deleteMediaId = $id;
+    }
+
+    public function cancelDeleteMedia(): void
+    {
+        $this->deleteMediaId = null;
+    }
+
+    public function confirmDeleteMedia(): void
+    {
+        $image = GalleryImage::find($this->deleteMediaId);
+
+        if ($image) {
+            $path = public_path($image->image_path);
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+            $image->delete();
+        }
+
+        $this->deleteMediaId = null;
+    }
+
+    public function render()
+    {
+        $event = Event::find($this->eventId);
+
+        $registrationsQuery = \App\Models\EventRegistration::with('user')
+            ->where('event_id', $this->eventId)
+            ->latest();
+
+        if ($this->memberFilter !== 'all') {
+            $registrationsQuery->where('status', $this->memberFilter);
+        }
+
+        if ($this->memberSearch !== '') {
+            $search = $this->memberSearch;
+            $registrationsQuery->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $registrations = $registrationsQuery->paginate(10, pageName: 'regPage');
+        $registrationsTotal = \App\Models\EventRegistration::where('event_id', $this->eventId)->count();
+
+        $gallery = GalleryImage::where('event_id', $this->eventId)->latest()->paginate(8, pageName: 'galPage');
+        $galleryTotal = GalleryImage::where('event_id', $this->eventId)->count();
+
+        return view('livewire.admin.events.show', [
+            'event' => $event,
+            'registrations' => $registrations,
+            'registrationsTotal' => $registrationsTotal,
+            'gallery' => $gallery,
+            'galleryTotal' => $galleryTotal,
+        ]);
+    }
+}

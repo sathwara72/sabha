@@ -60,10 +60,4 @@ yarn-error.log*
 /backend/.env.*
 /backend/phpunit.result.cache
 
-# Frontend specific
-/frontend/.next/
-/frontend/node_modules/
-/frontend/.env
-/frontend/.env.*
-.vercel
 .env*

@@ -4,20 +4,18 @@ Welcome to **Sabha**, a premium business community platform built with a modern 
 
 ## Project Structure
 
-This project is organized as a monorepo containing both the frontend and backend.
+This is a single Laravel application in `/backend`:
 
--   **`/frontend`**: Next.js 16 (React 19) application for the user interface.
--   **`/backend`**: Laravel 11 application for the API and business logic.
+-   **Public site & admin panel**: Laravel 11 + Blade + Livewire + Alpine.js + Tailwind CSS.
+-   **JSON API**: `routes/api.php` (Laravel Sanctum), kept for backward compatibility.
 
 ## Prerequisites
 
 -   **Docker Desktop**: Required to run the environment via Laravel Sail.
--   **PHP 8.2+**: For local backend development.
--   **Node.js 18+**: For frontend development.
+-   **PHP 8.2+**: For local development.
+-   **Node.js 18+**: For building frontend assets (Vite).
 
 ## Setup Instructions
-
-### Backend (Laravel)
 
 1.  Navigate into the backend directory:
     ```bash
@@ -35,34 +33,24 @@ This project is organized as a monorepo containing both the frontend and backend
     ```bash
     php artisan key:generate
     ```
-5.  Start the environment with Docker (Sail):
+5.  Install Node dependencies and build frontend assets:
+    ```bash
+    npm install
+    npm run build
+    ```
+6.  Start the environment with Docker (Sail):
     ```bash
     ./vendor/bin/sail up -d
     ```
-6.  Run migrations:
+7.  Run migrations:
     ```bash
     ./vendor/bin/sail artisan migrate
     ```
 
-### Frontend (Next.js)
-
-1.  Navigate into the frontend directory:
-    ```bash
-    cd frontend
-    ```
-2.  Install Node dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start the development server:
-    ```bash
-    npm run dev
-    ```
-
 ## Development
 
--   Frontend: [http://localhost:3000](http://localhost:3000)
--   Backend (API): [http://localhost:8000](http://localhost:8000)
+-   App (site + admin): [http://localhost:8000](http://localhost:8000)
+-   Run `npm run dev` inside `backend/` for hot-reloading Vite assets while developing.
 
 ## License
 
