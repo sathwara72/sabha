@@ -1,5 +1,21 @@
 <?php
 
+if (! function_exists('admin_authorize')) {
+    /**
+     * Guards a mutating admin action. Full admins always pass; sub-admins
+     * pass only when granted the specific module/ability; aborts 403
+     * otherwise. Called at the top of the actual state-changing method
+     * (not the "open modal" methods that precede it) — opening a confirm
+     * dialog isn't itself a security boundary, submitting the mutation is.
+     */
+    function admin_authorize(string $module, string $ability): void
+    {
+        if (! auth()->check() || ! auth()->user()->hasModuleAbility($module, $ability)) {
+            abort(403);
+        }
+    }
+}
+
 if (! function_exists('has_media_file')) {
     /**
      * Mirrors the frontend's hasMediaFile() — filters out stray placeholder

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Business;
+use App\Models\BusinessReferral;
 use App\Models\Review;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +26,7 @@ class BusinessController extends Controller
             return view('pages.business-show', ['business' => null]);
         }
 
-        $business->load(['user', 'businessCategory'])->loadAvg('reviews', 'rating')->loadCount('reviews');
+        $business->load(['user.memberTitle', 'businessCategory'])->loadAvg('reviews', 'rating')->loadCount('reviews');
 
         $services = collect($business->services ?? [])
             ->map(function ($service) {
@@ -44,11 +45,22 @@ class BusinessController extends Controller
 
         $dbReviews = Review::where('business_id', $business->id)->with('user')->latest()->get();
 
+        $testimonials = $business->user
+            ? BusinessReferral::where('giver_id', $business->user_id)
+                ->where('status', 'closed')
+                ->where('display_testimonial', true)
+                ->whereNotNull('testimonial')
+                ->with('receiver')
+                ->latest()
+                ->get()
+            : collect();
+
         return view('pages.business-show', [
             'business' => $business,
             'services' => $services,
             'reviews' => $dbReviews,
             'hasUserReviewed' => auth()->check() && $dbReviews->contains(fn ($r) => $r->user_id === auth()->id()),
+            'testimonials' => $testimonials,
         ]);
     }
 

@@ -121,6 +121,8 @@ class Index extends Component
 
     public function save(): void
     {
+        admin_authorize('events', $this->editingEventId ? 'can_edit' : 'can_add');
+
         $validated = $this->validate([
             'title' => 'required|string',
             'description' => 'required|string',
@@ -208,6 +210,8 @@ class Index extends Component
 
     public function confirmDelete(): void
     {
+        admin_authorize('events', 'can_delete');
+
         Event::findOrFail($this->deletingId)->delete();
         $this->cancelDelete();
     }

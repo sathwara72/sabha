@@ -6,6 +6,11 @@
     'allowCustom' => true,
     'wireKey' => null,
     'leadingIcon' => null,
+    // Optional label => id map. When given, selecting an option commits the
+    // mapped id to $wireModel instead of the label text itself — used for
+    // pickers (e.g. "member") where the display label isn't the value the
+    // backend actually needs.
+    'valueMap' => null,
 ])
 
 {{--
@@ -22,6 +27,7 @@
         open: false,
         query: {{ Illuminate\Support\Js::from((string) $value) }},
         options: {{ Illuminate\Support\Js::from(array_values($options)) }},
+        valueMap: {{ Illuminate\Support\Js::from($valueMap ?? []) }},
         get filtered() {
             const q = (this.query || '').toLowerCase().trim();
             if (!q) return this.options;
@@ -30,7 +36,7 @@
         select(opt) {
             this.query = opt;
             this.open = false;
-            $wire.set('{{ $wireModel }}', opt);
+            $wire.set('{{ $wireModel }}', opt in this.valueMap ? this.valueMap[opt] : opt);
         },
         commit() {
             @if (! $allowCustom)
@@ -38,7 +44,7 @@
                     this.query = '';
                 }
             @endif
-            $wire.set('{{ $wireModel }}', this.query);
+            $wire.set('{{ $wireModel }}', this.query in this.valueMap ? this.valueMap[this.query] : this.query);
         },
     }"
     class="relative"

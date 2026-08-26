@@ -24,6 +24,7 @@ class Business extends Model
         'cover_image',
         'website',
         'business_phone',
+        'phone2',
         'business_email',
         'linkedin',
         'instagram',

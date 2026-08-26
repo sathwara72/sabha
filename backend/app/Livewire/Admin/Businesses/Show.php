@@ -24,6 +24,8 @@ class Show extends Component
 
     public function approve(): void
     {
+        admin_authorize('businesses', 'can_approve');
+
         $this->business()->update([
             'status' => 'approved',
             'is_verified' => true,
@@ -46,6 +48,8 @@ class Show extends Component
 
     public function confirmReject(): void
     {
+        admin_authorize('businesses', 'can_approve');
+
         $this->validate(['rejectReason' => 'required|string']);
 
         $this->business()->update([
@@ -69,6 +73,8 @@ class Show extends Component
 
     public function confirmDelete()
     {
+        admin_authorize('businesses', 'can_delete');
+
         $this->business()->delete();
 
         return redirect()->route('admin.businesses.index');
@@ -86,6 +92,8 @@ class Show extends Component
 
     public function confirmToggleBlockOwner(): void
     {
+        admin_authorize('businesses', 'can_edit');
+
         $business = $this->business();
         $user = $business->user;
 

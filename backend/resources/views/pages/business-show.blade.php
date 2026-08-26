@@ -275,6 +275,35 @@
                             </template>
                         </div>
                     </section>
+
+                    @if ($testimonials->isNotEmpty())
+                        <section class="space-y-4">
+                            <div class="flex items-center gap-2">
+                                <span class="h-4 w-1 rounded-full bg-primary"></span>
+                                <h2 class="text-base font-bold text-foreground">Referral Testimonials</h2>
+                            </div>
+                            <p class="text-xs text-muted -mt-2">Network-verified feedback from members who received a referral from this business and closed the deal</p>
+
+                            <div class="space-y-3.5">
+                                @foreach ($testimonials as $t)
+                                    <div class="glass-card p-5 space-y-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-9 w-9 rounded-full bg-emerald-50 flex items-center justify-center font-bold text-xs text-emerald-700 shrink-0 select-none">
+                                                {{ $t->receiver ? mb_substr($t->receiver->name, 0, 1) : '?' }}
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-foreground leading-none">{{ $t->receiver?->name ?? 'SABHA Member' }}</h4>
+                                                <span class="text-[12px] text-emerald-700 leading-none mt-0.5 inline-flex items-center gap-1">
+                                                    <x-icon name="check-circle-2" class="h-2.5 w-2.5" /> Verified Referral Partner
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-muted leading-relaxed font-medium bg-surface/40 p-3 rounded-lg">&quot;{{ $t->testimonial }}&quot;</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
                 </div>
 
                 {{-- Sidebar Column --}}
@@ -286,7 +315,9 @@
                                 <img src="{{ $memberAvatar }}" alt="{{ $business->user->name }}" class="h-14 w-14 rounded-full object-cover border border-border shadow-sm shrink-0" />
                                 <div class="min-w-0 flex-1">
                                     <h4 class="text-sm font-bold text-slate-900 truncate">{{ $business->user->name }}</h4>
-                                    <p class="text-xs text-primary font-semibold truncate mt-0.5">SABHA Member</p>
+                                    <div class="mt-0.5">
+                                        <x-member-title-badge :title="$business->user->memberTitle" fallback="SABHA Member" />
+                                    </div>
                                     <span class="inline-flex items-center gap-1 text-[12px] text-muted-foreground mt-1">
                                         <x-icon name="shield-check" class="h-3 w-3 text-green-500" /> {{ __('site.businessDetail.verified_member') }}
                                     </span>
@@ -325,6 +356,15 @@
                                         <div class="min-w-0">
                                             <p class="text-[12px] font-semibold text-muted leading-none">{{ __('site.businessDetail.direct_phone') }}</p>
                                             <a href="tel:{{ $business->business_phone }}" class="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block">{{ $business->business_phone }}</a>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($business->phone2)
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="phone" class="h-[18px] w-[18px]" /></div>
+                                        <div class="min-w-0">
+                                            <p class="text-[12px] font-semibold text-muted leading-none">Alternate Phone</p>
+                                            <a href="tel:{{ $business->phone2 }}" class="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block">{{ $business->phone2 }}</a>
                                         </div>
                                     </div>
                                 @endif

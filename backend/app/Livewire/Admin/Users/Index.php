@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Models\MemberTitle;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -49,6 +50,8 @@ class Index extends Component
 
     public function confirmToggleBlock(): void
     {
+        admin_authorize('users', 'can_edit');
+
         $user = User::findOrFail($this->blockingUserId);
         $user->is_blocked = ! $user->is_blocked;
         $user->save();
@@ -76,6 +79,8 @@ class Index extends Component
 
     public function confirmDelete(): void
     {
+        admin_authorize('users', 'can_delete');
+
         $user = User::findOrFail($this->deletingUserId);
 
         if ($user->business) {
@@ -92,9 +97,16 @@ class Index extends Component
         $this->deletingUserId = null;
     }
 
+    public function assignTitle(int $userId, ?int $titleId): void
+    {
+        admin_authorize('users', 'can_edit');
+
+        User::findOrFail($userId)->update(['member_title_id' => $titleId ?: null]);
+    }
+
     public function render()
     {
-        $query = User::with('business')->orderByDesc('created_at')->orderByDesc('id');
+        $query = User::with(['business', 'memberTitle'])->orderByDesc('created_at')->orderByDesc('id');
 
         if ($this->search !== '') {
             $search = $this->search;
@@ -109,9 +121,10 @@ class Index extends Component
 
         return view('livewire.admin.users.index', [
             'users' => $users,
-            'selectedUser' => $this->selectedUserId ? User::with('business')->find($this->selectedUserId) : null,
+            'selectedUser' => $this->selectedUserId ? User::with(['business', 'memberTitle'])->find($this->selectedUserId) : null,
             'blockingUser' => $this->blockingUserId ? User::find($this->blockingUserId) : null,
             'deletingUser' => $this->deletingUserId ? User::find($this->deletingUserId) : null,
+            'memberTitles' => MemberTitle::active()->get(),
         ]);
     }
 }

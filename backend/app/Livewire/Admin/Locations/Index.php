@@ -57,6 +57,8 @@ class Index extends Component
 
     public function addCity(): void
     {
+        admin_authorize('locations', 'can_add');
+
         $this->validate(['addCityName' => 'required|string|max:100|unique:cities,name']);
 
         $maxOrder = City::max('sort_order') ?? -1;
@@ -81,6 +83,8 @@ class Index extends Component
 
     public function updateCity(): void
     {
+        admin_authorize('locations', 'can_edit');
+
         $this->validate(['editCityName' => 'required|string|max:100|unique:cities,name,' . $this->editingCityId]);
 
         City::findOrFail($this->editingCityId)->update(['name' => $this->editCityName]);
@@ -103,6 +107,8 @@ class Index extends Component
 
     public function confirmDeleteCity(): void
     {
+        admin_authorize('locations', 'can_delete');
+
         $name = $this->deletingCityName;
         City::findOrFail($this->deletingCityId)->delete();
 
@@ -131,6 +137,8 @@ class Index extends Component
 
     public function addArea(): void
     {
+        admin_authorize('locations', 'can_add');
+
         $this->validate([
             'addAreaName' => 'required|string|max:100|unique:areas,name,NULL,id,city_id,' . $this->managingCityId,
         ]);
@@ -155,6 +163,8 @@ class Index extends Component
 
     public function confirmDeleteArea(): void
     {
+        admin_authorize('locations', 'can_delete');
+
         Area::findOrFail($this->deletingAreaId)->delete();
         $this->cancelDeleteArea();
     }

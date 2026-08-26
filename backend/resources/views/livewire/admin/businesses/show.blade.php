@@ -140,6 +140,18 @@
                                     </div>
                                 @endif
 
+                                @if ($business->phone2)
+                                    <div class="flex items-center gap-2 bg-slate-50/50 p-1.5 rounded-xl border border-slate-100/30">
+                                        <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                                            <x-icon name="phone" class="h-3 w-3" />
+                                        </div>
+                                        <div class="text-[12px]">
+                                            <p class="text-[12px] text-slate-400 font-semibold uppercase leading-none">Alternate Phone</p>
+                                            <a href="tel:{{ $business->phone2 }}" class="font-bold text-indigo-600 hover:underline mt-0.5 block">{{ $business->phone2 }}</a>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 @if ($business->business_email)
                                     <div class="flex items-center gap-2 bg-slate-50/50 p-1.5 rounded-xl border border-slate-100/30">
                                         <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">

@@ -38,6 +38,8 @@ class Index extends Component
 
     public function upload(): void
     {
+        admin_authorize('hero-slider', 'can_add');
+
         $this->uploadError = '';
         $this->success = false;
 
@@ -71,6 +73,8 @@ class Index extends Component
 
     public function confirmDelete(): void
     {
+        admin_authorize('hero-slider', 'can_delete');
+
         $image = HeroImage::find($this->deleteId);
 
         if ($image) {

@@ -1,7 +1,35 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8791/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8791/businesses)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8791/events)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8791/gallery)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8791/login)",
+      "Bash(kill %1)",
+      "Bash(php -l app/Livewire/Profile/Show.php)",
+      "Bash(php -l app/Livewire/Admin/MemberTitles/Index.php)",
+      "Bash(php -l app/Livewire/Admin/Users/Index.php)",
+      "Bash(php -l app/Http/Controllers/Web/BusinessController.php)",
+      "Bash(php -l app/Models/MemberTitle.php)",
+      "Bash(grep -n '@if \\($activeTab === '\\\\''events'\\\\''\\)\\\\|^            </div>\\\\|^        </div>\\\\|^    </div>\\\\|^</div>' resources/views/livewire/profile/show.blade.php)",
+      "Bash(php -l app/Livewire/Profile/Meetings.php)",
+      "Bash(php -l app/Livewire/Admin/Meetings/Index.php)",
+      "Bash(php -l app/Livewire/Profile/Referrals.php)",
+      "Bash(php -l app/Livewire/Admin/Referrals/Index.php)",
+      "Bash(php -l app/Livewire/Admin/Testimonials/Index.php)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8796/)",
+      "Bash(curl -s -c /tmp/phase7_cookies.txt -b /tmp/phase7_cookies.txt -o /dev/null -w 'dashboard: %{http_code}\\\\n' http://127.0.0.1:8796/admin)",
+      "Bash(curl -s -c /tmp/phase7_cookies.txt -b /tmp/phase7_cookies.txt -o /dev/null -w 'businesses: %{http_code}\\\\n' http://127.0.0.1:8796/admin/businesses)",
+      "Bash(curl -s -c /tmp/phase7_cookies.txt -b /tmp/phase7_cookies.txt -o /dev/null -w 'events: %{http_code}\\\\n' http://127.0.0.1:8796/admin/events)",
+      "Bash(curl -s -c /tmp/phase7_cookies.txt -b /tmp/phase7_cookies.txt -o /dev/null -w 'bookings: %{http_code}\\\\n' http://127.0.0.1:8796/admin/bookings)",
+      "Bash(curl -s -c /tmp/phase7_cookies.txt -b /tmp/phase7_cookies.txt -o /dev/null -w 'users: %{http_code}\\\\n' http://127.0.0.1:8796/admin/users)",
+      "Bash(php -l app/Livewire/Profile/Analytics.php)",
+      "Bash(php -l app/Livewire/Admin/Analytics/Index.php)",
+      "Bash(php -l app/Models/SubAdminPermission.php)",
+      "Bash(php -l lang/en/site.php)",
+      "Bash(php -l lang/gu/site.php)"
     ]
   }
 }

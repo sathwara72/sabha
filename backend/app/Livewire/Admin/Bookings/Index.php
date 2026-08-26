@@ -40,12 +40,16 @@ class Index extends Component
 
     public function approve(int $id): void
     {
+        admin_authorize('bookings', 'can_approve');
+
         $registration = EventRegistration::with(['user', 'event'])->findOrFail($id);
         app(EventTicketApprover::class)->approve($registration);
     }
 
     public function reject(int $id, string $reason): void
     {
+        admin_authorize('bookings', 'can_approve');
+
         if (trim($reason) === '') {
             return;
         }
@@ -58,12 +62,16 @@ class Index extends Component
 
     public function toggleAttendance(int $id): void
     {
+        admin_authorize('bookings', 'can_edit');
+
         $registration = EventRegistration::findOrFail($id);
         $registration->update(['is_attended' => ! $registration->is_attended]);
     }
 
     public function processCheckIn(string $ticketNo): void
     {
+        admin_authorize('bookings', 'can_edit');
+
         $ticketNo = trim($ticketNo);
         if ($ticketNo === '') {
             return;

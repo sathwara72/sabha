@@ -34,6 +34,8 @@ class Index extends Component
 
     public function update(int $id): void
     {
+        admin_authorize('statistics', 'can_edit');
+
         $this->errorMsg = '';
         $this->successMsg = '';
 

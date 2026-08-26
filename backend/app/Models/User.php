@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'member_title_id',
         'phone',
         'city',
         'native_city',
@@ -64,5 +65,40 @@ class User extends Authenticatable
     public function business()
     {
         return $this->hasOne(Business::class, 'user_id');
+    }
+
+    public function memberTitle()
+    {
+        return $this->belongsTo(MemberTitle::class);
+    }
+
+    public function subAdminPermissions()
+    {
+        return $this->hasMany(SubAdminPermission::class);
+    }
+
+    /**
+     * Full admins pass every check; sub-admins pass only for modules/abilities
+     * explicitly granted in sub_admin_permissions; everyone else fails.
+     */
+    public function hasModuleAbility(string $module, string $ability): bool
+    {
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        if ($this->role !== 'sub_admin') {
+            return false;
+        }
+
+        return $this->subAdminPermissions()
+            ->where('module', $module)
+            ->where($ability, true)
+            ->exists();
+    }
+
+    public function canAccessAdminArea(): bool
+    {
+        return in_array($this->role, ['admin', 'sub_admin'], true);
     }
 }

@@ -47,6 +47,8 @@ class Index extends Component
 
     public function addCategory(): void
     {
+        admin_authorize('categories', 'can_add');
+
         $this->validate([
             'addName' => 'required|string|max:100|unique:business_categories,name',
         ]);
@@ -78,6 +80,8 @@ class Index extends Component
 
     public function updateCategory(): void
     {
+        admin_authorize('categories', 'can_edit');
+
         $this->validate([
             'editName' => 'required|string|max:100|unique:business_categories,name,' . $this->editingId,
         ]);
@@ -102,6 +106,8 @@ class Index extends Component
 
     public function confirmDelete(): void
     {
+        admin_authorize('categories', 'can_delete');
+
         $name = $this->deletingName;
         BusinessCategory::findOrFail($this->deletingId)->delete();
         $this->successMsg = "\"{$name}\" category deleted";

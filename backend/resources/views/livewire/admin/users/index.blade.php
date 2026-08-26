@@ -60,14 +60,21 @@
                             </td>
                             <td class="px-5 py-3.5">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold {{ $user->role === 'admin' ? 'bg-primary-soft text-primary border border-primary/20' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
-                                        <x-icon name="shield-check" class="h-2.5 w-2.5" /> {{ $user->role }}
-                                    </span>
+                                    @if ($user->role === 'admin')
+                                        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold bg-primary-soft text-primary border border-primary/20">
+                                            <x-icon name="shield-check" class="h-2.5 w-2.5" /> admin
+                                        </span>
+                                    @elseif ($user->role === 'sub_admin')
+                                        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-200">
+                                            <x-icon name="key-round" class="h-2.5 w-2.5" /> sub-admin
+                                        </span>
+                                    @endif
                                     @if ($user->is_blocked)
                                         <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-200">
                                             <x-icon name="ban" class="h-2.5 w-2.5" /> Blocked
                                         </span>
                                     @endif
+                                    <x-member-title-badge :title="$user->memberTitle" />
                                 </div>
                             </td>
                             <td class="px-5 py-3.5 text-right">
@@ -134,14 +141,17 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 class="text-base font-bold text-foreground">{{ $selectedUser->name }}</h3>
-                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-bold {{ $selectedUser->role === 'admin' ? 'bg-primary-soft text-primary' : 'bg-slate-100 text-slate-700' }}">
-                                    {{ $selectedUser->role }}
-                                </span>
+                                @if ($selectedUser->role === 'admin')
+                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-bold bg-primary-soft text-primary">admin</span>
+                                @elseif ($selectedUser->role === 'sub_admin')
+                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-bold bg-indigo-50 text-indigo-600">sub-admin</span>
+                                @endif
                                 @if ($selectedUser->is_blocked)
                                     <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[12px] font-bold text-rose-600 border border-rose-200">
                                         <x-icon name="ban" class="h-2.5 w-2.5" /> Blocked
                                     </span>
                                 @endif
+                                <x-member-title-badge :title="$selectedUser->memberTitle" />
                             </div>
                             <p class="text-xs text-muted-foreground mt-0.5">{{ $selectedUser->email }}</p>
                         </div>
@@ -183,6 +193,18 @@
                             <div>
                                 <span class="text-muted-foreground block mb-0.5">Joined Date</span>
                                 <span class="font-semibold text-foreground">{{ $selectedUser->created_at->format('n/j/Y g:i:s A') }}</span>
+                            </div>
+                            <div wire:key="title-{{ $selectedUser->id }}">
+                                <span class="text-muted-foreground block mb-1">Member Title</span>
+                                <select
+                                    wire:change="assignTitle({{ $selectedUser->id }}, $event.target.value || null)"
+                                    class="w-full rounded-lg border border-border bg-white px-2.5 py-1.5 text-xs font-semibold text-foreground outline-none focus:border-primary"
+                                >
+                                    <option value="" @selected(! $selectedUser->member_title_id)>No title assigned</option>
+                                    @foreach ($memberTitles as $title)
+                                        <option value="{{ $title->id }}" @selected($selectedUser->member_title_id === $title->id)>{{ $title->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>

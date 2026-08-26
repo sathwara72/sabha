@@ -1,7 +1,7 @@
-{{-- expects: $menuItems --}}
-<div class="flex flex-col h-full">
+{{-- expects: $menuGroups (array of ['label' => ?string, 'items' => [...]]) --}}
+<div class="flex flex-col h-full overflow-y-auto">
     {{-- Logo --}}
-    <div class="flex items-center justify-between gap-3 mb-8 px-1">
+    <div class="flex items-center justify-between gap-3 mb-6 px-1">
         <div class="flex items-center gap-3">
             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shrink-0">
                 <x-icon name="zap" class="h-4 w-4" />
@@ -14,16 +14,22 @@
     </div>
 
     {{-- Nav --}}
-    <nav class="space-y-0.5 flex-1">
-        <p class="px-3 mb-2 text-[12px] font-bold text-muted-foreground uppercase tracking-wider">Menu</p>
-        @foreach ($menuItems as $item)
-            <a
-                href="{{ $item['href'] }}"
-                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors {{ $item['active'] ? 'bg-primary text-white' : 'text-muted hover:bg-surface hover:text-foreground' }}"
-            >
-                <x-icon name="{{ $item['icon'] }}" class="h-4 w-4" />
-                <span>{{ $item['name'] }}</span>
-            </a>
+    <nav class="flex-1 space-y-4">
+        @foreach ($menuGroups as $group)
+            <div class="space-y-0.5">
+                @if ($group['label'])
+                    <p class="px-3 mb-1.5 text-[12px] font-bold text-muted-foreground uppercase tracking-wider">{{ $group['label'] }}</p>
+                @endif
+                @foreach ($group['items'] as $item)
+                    <a
+                        href="{{ $item['href'] }}"
+                        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors {{ $item['active'] ? 'bg-primary text-white' : 'text-muted hover:bg-surface hover:text-foreground' }}"
+                    >
+                        <x-icon name="{{ $item['icon'] }}" class="h-4 w-4" />
+                        <span>{{ $item['name'] }}</span>
+                    </a>
+                @endforeach
+            </div>
         @endforeach
     </nav>
 

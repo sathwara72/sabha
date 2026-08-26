@@ -47,18 +47,32 @@ Route::get('/profile/events/{id}/ticket.png', [ProfileController::class, 'downlo
 
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::view('/', 'pages.admin.dashboard')->name('dashboard');
-    Route::view('/businesses', 'pages.admin.businesses')->name('businesses.index');
-    Route::view('/businesses/{id}', 'pages.admin.business-show')->name('businesses.show');
-    Route::view('/events', 'pages.admin.events')->name('events.index');
-    Route::view('/events/{id}', 'pages.admin.event-show')->name('events.show');
-    Route::view('/bookings', 'pages.admin.bookings')->name('bookings.index');
-    Route::view('/users', 'pages.admin.users')->name('users.index');
-    Route::view('/gallery', 'pages.admin.gallery')->name('gallery.index');
-    Route::view('/hero-slider', 'pages.admin.hero-slider')->name('hero-slider.index');
-    Route::view('/categories', 'pages.admin.categories')->name('categories.index');
-    Route::view('/locations', 'pages.admin.locations')->name('locations.index');
-    Route::view('/statistics', 'pages.admin.statistics')->name('statistics.index');
-    Route::view('/settings', 'pages.admin.settings')->name('settings.index');
+
+    Route::middleware('module:businesses')->group(function () {
+        Route::view('/businesses', 'pages.admin.businesses')->name('businesses.index');
+        Route::view('/businesses/{id}', 'pages.admin.business-show')->name('businesses.show');
+    });
+    Route::middleware('module:events')->group(function () {
+        Route::view('/events', 'pages.admin.events')->name('events.index');
+        Route::view('/events/{id}', 'pages.admin.event-show')->name('events.show');
+    });
+    Route::view('/bookings', 'pages.admin.bookings')->name('bookings.index')->middleware('module:bookings');
+    Route::view('/users', 'pages.admin.users')->name('users.index')->middleware('module:users');
+    Route::view('/gallery', 'pages.admin.gallery')->name('gallery.index')->middleware('module:gallery');
+    Route::view('/hero-slider', 'pages.admin.hero-slider')->name('hero-slider.index')->middleware('module:hero-slider');
+    Route::view('/categories', 'pages.admin.categories')->name('categories.index')->middleware('module:categories');
+    Route::view('/locations', 'pages.admin.locations')->name('locations.index')->middleware('module:locations');
+    Route::view('/member-titles', 'pages.admin.member-titles')->name('member-titles.index')->middleware('module:member-titles');
+    Route::view('/meetings', 'pages.admin.meetings')->name('meetings.index')->middleware('module:meetings');
+    Route::view('/referrals', 'pages.admin.referrals')->name('referrals.index')->middleware('module:referrals');
+    Route::view('/testimonials', 'pages.admin.testimonials')->name('testimonials.index')->middleware('module:testimonials');
+    Route::view('/statistics', 'pages.admin.statistics')->name('statistics.index')->middleware('module:statistics');
+    Route::view('/analytics', 'pages.admin.analytics')->name('analytics.index')->middleware('module:analytics');
+
+    Route::middleware('full-admin')->group(function () {
+        Route::view('/settings', 'pages.admin.settings')->name('settings.index');
+        Route::view('/sub-admins', 'pages.admin.sub-admins')->name('sub-admins.index');
+    });
 });
 
 Route::get('/lang/{locale}', function (string $locale) {

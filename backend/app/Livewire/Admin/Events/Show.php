@@ -61,6 +61,8 @@ class Show extends Component
 
     public function approve(int $id): void
     {
+        admin_authorize('events', 'can_approve');
+
         $registration = EventRegistration::with(['user', 'event'])->findOrFail($id);
         app(EventTicketApprover::class)->approve($registration);
     }
@@ -79,6 +81,8 @@ class Show extends Component
 
     public function confirmReject(): void
     {
+        admin_authorize('events', 'can_approve');
+
         if (! $this->rejectModalId || trim($this->rejectReason) === '') {
             return;
         }
@@ -93,6 +97,8 @@ class Show extends Component
 
     public function toggleAttendance(int $id): void
     {
+        admin_authorize('events', 'can_edit');
+
         $registration = \App\Models\EventRegistration::findOrFail($id);
         $registration->update(['is_attended' => ! $registration->is_attended]);
     }
@@ -113,6 +119,8 @@ class Show extends Component
 
     public function uploadMedia(GalleryMediaUploader $uploader): void
     {
+        admin_authorize('events', 'can_add');
+
         $this->uploadError = '';
 
         if (empty($this->mediaFiles)) {
@@ -145,6 +153,8 @@ class Show extends Component
 
     public function confirmDeleteMedia(): void
     {
+        admin_authorize('events', 'can_delete');
+
         $image = GalleryImage::find($this->deleteMediaId);
 
         if ($image) {

@@ -40,6 +40,8 @@ class Index extends Component
 
     public function upload(GalleryMediaUploader $uploader): void
     {
+        admin_authorize('gallery', 'can_add');
+
         $this->uploadError = '';
 
         if (empty($this->mediaFiles)) {
@@ -76,6 +78,8 @@ class Index extends Component
 
     public function confirmDelete(): void
     {
+        admin_authorize('gallery', 'can_delete');
+
         $image = GalleryImage::find($this->deleteId);
 
         if ($image) {

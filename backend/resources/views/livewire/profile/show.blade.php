@@ -28,6 +28,7 @@
                     <span class="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/10 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-primary">
                         {{ $user->role === 'admin' ? __('site.profile.administrator') : __('site.profile.member') }}
                     </span>
+                    <x-member-title-badge :title="$user->memberTitle" class="mt-1.5" />
                     @if ($avatarFile)
                         <p class="mt-1 text-[12px] font-semibold text-amber-600">{{ __('site.profile.photo_pending') }}</p>
                     @endif
@@ -54,6 +55,30 @@
                         <span class="flex-1 text-left">{{ __('site.profile.tab_events') }}</span>
                         <span class="inline-flex h-4 items-center justify-center rounded-full px-1.5 text-[12px] font-bold {{ $activeTab === 'events' ? 'bg-white/20 text-white' : 'bg-primary-soft text-primary border border-primary/10' }}">{{ $registeredEvents->count() }}</span>
                         <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'events' ? 'text-white/80' : 'text-muted-foreground' }}" />
+                    </button>
+
+                    <button type="button" wire:click="setTab('analytics')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'analytics' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
+                        <x-icon name="trending-up" class="h-[14px] w-[14px] {{ $activeTab === 'analytics' ? 'text-white' : 'text-primary' }}" />
+                        <span class="flex-1 text-left">{{ __('site.profile.tab_analytics') }}</span>
+                        <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'analytics' ? 'text-white/80' : 'text-muted-foreground' }}" />
+                    </button>
+
+                    <button type="button" wire:click="setTab('meetings')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'meetings' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
+                        <x-icon name="users" class="h-[14px] w-[14px] {{ $activeTab === 'meetings' ? 'text-white' : 'text-primary' }}" />
+                        <span class="flex-1 text-left">{{ __('site.profile.tab_meetings') }}</span>
+                        <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'meetings' ? 'text-white/80' : 'text-muted-foreground' }}" />
+                    </button>
+
+                    <button type="button" wire:click="setTab('referrals-given')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'referrals-given' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
+                        <x-icon name="send" class="h-[14px] w-[14px] {{ $activeTab === 'referrals-given' ? 'text-white' : 'text-primary' }}" />
+                        <span class="flex-1 text-left">{{ __('site.profile.tab_referrals_given') }}</span>
+                        <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'referrals-given' ? 'text-white/80' : 'text-muted-foreground' }}" />
+                    </button>
+
+                    <button type="button" wire:click="setTab('referrals-received')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'referrals-received' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
+                        <x-icon name="download" class="h-[14px] w-[14px] {{ $activeTab === 'referrals-received' ? 'text-white' : 'text-primary' }}" />
+                        <span class="flex-1 text-left">{{ __('site.profile.tab_referrals_received') }}</span>
+                        <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'referrals-received' ? 'text-white/80' : 'text-muted-foreground' }}" />
                     </button>
 
                     <div class="my-1 border-t border-border"></div>
@@ -565,7 +590,7 @@
 
                                             <div class="space-y-4 border-t border-border pt-4">
                                                 <h4 class="text-sm font-bold text-foreground">{{ __('site.profile.contact_channels') }}</h4>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                     <div>
                                                         <label class="{{ $labelClass }}">Business Email</label>
                                                         <input type="email" wire:model.blur="bizEmail" placeholder="{{ $user->email ?: 'e.g. contact@vertex.solutions' }}" class="{{ $inputClass }}" />
@@ -573,6 +598,10 @@
                                                     <div>
                                                         <label class="{{ $labelClass }}">Business Phone</label>
                                                         <input type="text" maxlength="10" wire:model.live="bizPhone" placeholder="{{ $user->phone ?: '10-digit mobile number' }}" class="{{ $inputClass }}" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="{{ $labelClass }}">Alternate Phone</label>
+                                                        <input type="text" maxlength="10" wire:model.live="bizPhone2" placeholder="Optional 2nd number" class="{{ $inputClass }}" />
                                                     </div>
                                                 </div>
                                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -752,6 +781,34 @@
                                 </div>
                             @endif
                         </div>
+                    </div>
+                @endif
+
+                {{-- My Analytics Section --}}
+                @if ($activeTab === 'analytics')
+                    <div class="glass-card p-4">
+                        @livewire('profile.analytics')
+                    </div>
+                @endif
+
+                {{-- 1-to-1 Meetings Section --}}
+                @if ($activeTab === 'meetings')
+                    <div class="glass-card p-4">
+                        @livewire('profile.meetings')
+                    </div>
+                @endif
+
+                {{-- Referrals Given Section --}}
+                @if ($activeTab === 'referrals-given')
+                    <div class="glass-card p-4">
+                        @livewire('profile.referrals', ['direction' => 'given'], 'referrals-given')
+                    </div>
+                @endif
+
+                {{-- Referrals Received Section --}}
+                @if ($activeTab === 'referrals-received')
+                    <div class="glass-card p-4">
+                        @livewire('profile.referrals', ['direction' => 'received'], 'referrals-received')
                     </div>
                 @endif
             </div>

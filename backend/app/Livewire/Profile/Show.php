@@ -73,6 +73,7 @@ class Show extends Component
     public string $bizTeamSize = '';
     public string $bizProjects = '';
     public string $bizPhone = '';
+    public string $bizPhone2 = '';
     public string $bizEmail = '';
     public string $bizLinkedin = '';
     public string $bizInstagram = '';
@@ -132,6 +133,7 @@ class Show extends Component
         $this->bizTeamSize = $b->team_size ?? '';
         $this->bizProjects = $b->projects ?? '';
         $this->bizPhone = $b->business_phone ?? $user->phone ?? '';
+        $this->bizPhone2 = $b->phone2 ?? '';
         $this->bizEmail = $b->business_email ?? $user->email ?? '';
         $this->bizLinkedin = $b->linkedin ?? '';
         $this->bizInstagram = $b->instagram ?? '';
@@ -161,6 +163,11 @@ class Show extends Component
         if (! $this->bizWhatsapp) {
             $this->bizWhatsapp = $this->bizPhone;
         }
+    }
+
+    public function updatedBizPhone2(): void
+    {
+        $this->bizPhone2 = substr(preg_replace('/\D/', '', $this->bizPhone2), 0, 10);
     }
 
     public function updatedBizWhatsapp(): void
@@ -263,6 +270,7 @@ class Show extends Component
             $this->validate([
                 'bizName' => 'nullable|string',
                 'bizDescription' => $this->business?->status === 'approved' ? 'required|string' : 'nullable|string',
+                'bizPhone2' => 'nullable|string|max:10',
                 'paymentFile' => 'nullable|image|max:10240',
                 'logoFile' => 'nullable|image|max:5120',
                 'coverFile' => 'nullable|image|max:10240',
@@ -287,6 +295,7 @@ class Show extends Component
                 'description' => $this->bizDescription ?: null,
                 'website' => $this->bizWebsite ?: null,
                 'business_phone' => $bizPhone,
+                'phone2' => $this->bizPhone2 ?: null,
                 'business_email' => $bizEmail,
                 'linkedin' => $this->bizLinkedin ?: null,
                 'instagram' => $this->bizInstagram ?: null,

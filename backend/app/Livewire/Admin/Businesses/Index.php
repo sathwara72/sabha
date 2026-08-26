@@ -39,6 +39,8 @@ class Index extends Component
 
     public function approve(int $id): void
     {
+        admin_authorize('businesses', 'can_approve');
+
         Business::findOrFail($id)->update([
             'status' => 'approved',
             'is_verified' => true,
@@ -63,6 +65,8 @@ class Index extends Component
 
     public function confirmReject(): void
     {
+        admin_authorize('businesses', 'can_approve');
+
         $this->validate(['rejectReason' => 'required|string']);
 
         Business::findOrFail($this->rejectingId)->update([
@@ -88,6 +92,8 @@ class Index extends Component
 
     public function confirmDelete(): void
     {
+        admin_authorize('businesses', 'can_delete');
+
         Business::findOrFail($this->deletingId)->delete();
         $this->cancelDelete();
     }
