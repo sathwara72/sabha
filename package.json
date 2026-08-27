@@ -16,6 +16,8 @@
     },
     "dependencies": {
         "@alpinejs/collapse": "^3.16.2",
-        "html5-qrcode": "^2.3.8"
+        "html5-qrcode": "^2.3.8",
+        "laravel-echo": "^2.4.0",
+        "pusher-js": "^8.6.0"
     }
 }

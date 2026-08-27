@@ -16,6 +16,28 @@ if (! function_exists('admin_authorize')) {
     }
 }
 
+if (! function_exists('linkify_text')) {
+    /**
+     * Escapes a raw chat message body first (XSS safety), then wraps
+     * http(s):// and www. URLs in clickable, new-tab anchor tags. Escaping
+     * happens before linking so injected HTML in the message text can never
+     * survive as markup — only the URLs this function itself adds do.
+     */
+    function linkify_text(string $body): string
+    {
+        $escaped = e($body);
+
+        $pattern = '#(https?://[^\s<]+[^\s<\.\,\)]|www\.[^\s<]+[^\s<\.\,\)])#i';
+
+        return preg_replace_callback($pattern, function ($matches) {
+            $url = $matches[1];
+            $href = str_starts_with(strtolower($url), 'http') ? $url : 'https://' . $url;
+
+            return '<a href="' . $href . '" target="_blank" rel="noopener noreferrer nofollow" class="underline">' . $url . '</a>';
+        }, $escaped);
+    }
+}
+
 if (! function_exists('has_media_file')) {
     /**
      * Mirrors the frontend's hasMediaFile() — filters out stray placeholder

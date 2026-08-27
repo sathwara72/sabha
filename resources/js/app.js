@@ -15,6 +15,110 @@ document.addEventListener('alpine:init', () => {
         },
     });
 
+    window.Alpine.data('chatThread', (config) => ({
+        conversationId: config.conversationId,
+        currentUserId: config.currentUserId,
+        messages: config.initialMessages ?? [],
+        editingId: null,
+        editText: '',
+
+        init() {
+            this.$nextTick(() => this.scrollToBottom());
+
+            if (window.Echo) {
+                window.Echo.private('conversation.' + this.conversationId)
+                    .listen('.message.sent', (e) => this.onMessageSent(e))
+                    .listen('.message.updated', (e) => this.onMessageUpdated(e))
+                    .listen('.message.deleted', (e) => this.onMessageDeleted(e));
+            }
+
+            this.syncHandler = (e) => this.mergeMessages(e.detail.messages);
+            window.addEventListener('chat-messages-synced', this.syncHandler);
+        },
+
+        destroy() {
+            window.removeEventListener('chat-messages-synced', this.syncHandler);
+            if (window.Echo) window.Echo.leave('conversation.' + this.conversationId);
+        },
+
+        onMessageSent(e) {
+            if (this.messages.some((m) => m.id === e.id)) return;
+            this.messages.push({
+                id: e.id,
+                sender_id: e.sender_id,
+                sender_name: e.sender_name,
+                sender_avatar: e.sender_avatar,
+                body: e.body,
+                body_html: e.body_html,
+                is_mine: e.sender_id === this.currentUserId,
+                is_edited: e.is_edited,
+                is_deleted: e.is_deleted,
+                editable: e.sender_id === this.currentUserId,
+                deletable: e.sender_id === this.currentUserId,
+                created_at_human: e.created_at_human,
+            });
+            this.$nextTick(() => this.scrollToBottom());
+        },
+
+        onMessageUpdated(e) {
+            const msg = this.messages.find((m) => m.id === e.id);
+            if (msg) {
+                msg.body = e.body;
+                msg.body_html = e.body_html;
+                msg.is_edited = e.is_edited;
+            }
+            if (this.editingId === e.id) this.editingId = null;
+        },
+
+        onMessageDeleted(e) {
+            const msg = this.messages.find((m) => m.id === e.id);
+            if (msg) {
+                msg.is_deleted = true;
+                msg.body = null;
+                msg.body_html = null;
+                msg.editable = false;
+                msg.deletable = false;
+            }
+        },
+
+        mergeMessages(list) {
+            list.forEach((incoming) => {
+                const idx = this.messages.findIndex((m) => m.id === incoming.id);
+                if (idx === -1) {
+                    this.messages.push(incoming);
+                } else {
+                    this.messages[idx] = incoming;
+                }
+            });
+            this.messages.sort((a, b) => a.id - b.id);
+        },
+
+        startEdit(msg) {
+            this.editingId = msg.id;
+            this.editText = msg.body ?? '';
+        },
+
+        cancelEdit() {
+            this.editingId = null;
+            this.editText = '';
+        },
+
+        saveEdit() {
+            if (!this.editingId || this.editText.trim() === '') return;
+            this.$wire.saveEdit(this.editingId, this.editText.trim());
+        },
+
+        deleteMsg(id) {
+            if (! confirm('Delete this message for everyone?')) return;
+            this.$wire.deleteMessage(id);
+        },
+
+        scrollToBottom() {
+            const el = this.$refs.messageList;
+            if (el) el.scrollTop = el.scrollHeight;
+        },
+    }));
+
     window.Alpine.data('imageCropper', () => ({
         isOpen: false,
         imageSrc: '',

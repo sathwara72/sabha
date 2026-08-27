@@ -46,6 +46,9 @@ Route::middleware('registration.complete')->group(function () {
     Route::get('/profile/events/{id}/ticket.png', [ProfileController::class, 'downloadTicket'])->name('profile.events.ticket');
     Route::view('/profile/meetings/create', 'pages.profile-meeting-form')->name('profile.meetings.create');
     Route::view('/profile/meetings/{id}/edit', 'pages.profile-meeting-form')->name('profile.meetings.edit');
+
+    Route::view('/chat', 'pages.chat')->name('chat.index');
+    Route::view('/chat/{id}', 'pages.chat')->name('chat.show');
 });
 
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {

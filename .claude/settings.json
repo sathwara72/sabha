@@ -85,7 +85,9 @@
       "Bash(php -l app/Livewire/Profile/MeetingForm.php)",
       "Bash(curl -s \"http://127.0.0.1:8123/\" -o /tmp/home2.html)",
       "Bash(lsof -ti:8123 -sTCP:LISTEN)",
-      "Bash(xargs -r kill)"
+      "Bash(xargs -r kill)",
+      "Bash(composer require *)",
+      "Bash(lsof -ti:8080 -sTCP:LISTEN)"
     ]
   }
 }

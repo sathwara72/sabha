@@ -44,6 +44,9 @@
             {{-- Desktop actions --}}
             <div class="hidden lg:flex lg:items-center lg:gap-2">
                 @auth
+                    <a href="/chat" class="rounded-lg px-3.5 py-2 text-sm font-medium text-muted hover:text-foreground hover:bg-surface">
+                        Chat
+                    </a>
                     <a href="/profile" class="rounded-lg px-3.5 py-2 text-sm font-medium text-muted hover:text-foreground hover:bg-surface">
                         {{ __('site.nav.profile') }}
                     </a>
@@ -117,6 +120,9 @@
 
             <div class="flex flex-col gap-3">
                 @auth
+                    <a href="/chat" x-on:click="mobileMenuOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface">
+                        Chat
+                    </a>
                     <a href="/profile" x-on:click="mobileMenuOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface">
                         {{ __('site.nav.profile') }}
                     </a>
