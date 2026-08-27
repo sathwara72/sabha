@@ -30,13 +30,27 @@
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($categories as $cat)
-                        <button
-                            wire:click="$set('category', '{{ $cat }}')"
-                            class="rounded-full border px-4 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $category === $cat ? 'border-primary bg-primary text-white' : 'border-border bg-white text-muted hover:bg-surface hover:text-foreground' }}"
-                        >{{ $cat }}</button>
-                    @endforeach
+                <div class="w-full max-w-[220px]">
+                    <x-searchable-select
+                        wire-model="category"
+                        :options="$categories"
+                        :value="$category"
+                        :allow-custom="false"
+                        placeholder="All Categories"
+                        leading-icon="tag"
+                        wire-key="directory-category-filter"
+                    />
+                </div>
+                <div class="w-full max-w-[220px]">
+                    <x-searchable-select
+                        wire-model="area"
+                        :options="$areas"
+                        :value="$area"
+                        :allow-custom="false"
+                        placeholder="All Areas"
+                        leading-icon="map-pin"
+                        wire-key="directory-area-filter"
+                    />
                 </div>
             </div>
         </div>
@@ -74,9 +88,18 @@
 
                             <div class="flex-1">
                                 <h3 class="text-lg font-bold text-foreground transition-colors group-hover:text-primary">{{ $business->name }}</h3>
+                                @if ($business->user)
+                                    <p class="mt-0.5 inline-flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                                        <x-icon name="user" class="h-[12px] w-[12px] text-muted-foreground shrink-0" />
+                                        {{ $business->user->name }}
+                                    </p>
+                                @endif
                                 <p class="mt-1 inline-flex items-center gap-1.5 text-xs text-muted">
-                                    <x-icon name="map-pin" class="h-[13px] w-[13px] text-primary shrink-0" />
-                                    {{ $business->area ?: 'Mumbai' }} • {{ $business->category }}
+                                    @if ($business->area)
+                                        <x-icon name="map-pin" class="h-[13px] w-[13px] text-primary shrink-0" />
+                                        {{ $business->area }} •
+                                    @endif
+                                    {{ $business->category }}
                                 </p>
                                 <p class="mt-3.5 text-xs leading-relaxed text-muted line-clamp-3">
                                     {{ $business->description ?: 'No description provided yet.' }}
@@ -90,7 +113,7 @@
             @if ($businesses->total() === 0)
                 <div class="rounded-xl border border-dashed border-border py-20 text-center">
                     <h3 class="text-lg font-semibold text-foreground">No businesses found</h3>
-                    <p class="mx-auto mt-2 max-w-xs text-sm text-muted">Try a different search term or category.</p>
+                    <p class="mx-auto mt-2 max-w-xs text-sm text-muted">Try a different search term, category, or area.</p>
                 </div>
             @endif
 

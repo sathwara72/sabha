@@ -4,12 +4,12 @@
             <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Business Categories</h1>
             <p class="text-xs text-muted">Manage directory categories displayed in member registrations and search filters</p>
         </div>
-        <button
-            wire:click="openAddModal"
+        <a
+            href="{{ route('admin.categories.create') }}"
             class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-sm self-start sm:self-auto"
         >
             <x-icon name="plus" class="h-3.5 w-3.5" /> Add Category
-        </button>
+        </a>
     </div>
 
     @if ($successMsg)
@@ -57,13 +57,13 @@
                             </div>
 
                             <div class="flex items-center gap-1.5">
-                                <button
-                                    wire:click="openEditModal({{ $cat->id }}, {{ Illuminate\Support\Js::from($cat->name) }})"
+                                <a
+                                    href="{{ route('admin.categories.edit', $cat->id) }}"
                                     class="h-7 w-7 rounded-xl border border-amber-200/80 bg-amber-50 text-amber-700 flex items-center justify-center transition-all hover:bg-amber-100 active:scale-[0.95] cursor-pointer shadow-xs"
                                     title="Edit Category"
                                 >
                                     <x-icon name="pencil" class="h-3 w-3" />
-                                </button>
+                                </a>
                                 <button
                                     wire:click="openDelete({{ $cat->id }}, {{ Illuminate\Support\Js::from($cat->name) }})"
                                     class="h-7 w-7 rounded-xl border border-rose-200/80 bg-rose-50 text-rose-600 flex items-center justify-center transition-all hover:bg-rose-100 active:scale-[0.95] disabled:opacity-50 cursor-pointer shadow-xs"
@@ -80,98 +80,6 @@
             </div>
         @endif
     </div>
-
-    {{-- Add Category Modal --}}
-    @if ($isAddModalOpen)
-        <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm" wire:click="cancelAdd"></div>
-            <div x-data x-show="true" x-transition class="relative z-50 w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-border space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                        <x-icon name="tag" class="h-4.5 w-4.5 text-primary" /> Add New Category
-                    </h3>
-                    <button wire:click="cancelAdd" class="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer">
-                        <x-icon name="x" class="h-4.5 w-4.5" />
-                    </button>
-                </div>
-
-                <form wire:submit="addCategory" class="space-y-4">
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-700">Category Name</label>
-                        <div class="relative">
-                            <x-icon name="tag" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <input
-                                type="text"
-                                wire:model="addName"
-                                placeholder="e.g. Renewables & Solar"
-                                class="w-full rounded-xl border border-border bg-slate-50/50 py-2.5 pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition-all focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary/20"
-                                autofocus
-                            />
-                        </div>
-                        @error('addName')
-                            <p class="text-[12px] font-semibold text-rose-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                        <button type="button" wire:click="cancelAdd" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
-                            Cancel
-                        </button>
-                        <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all cursor-pointer">
-                            <span wire:loading.remove wire:target="addCategory" class="inline-flex items-center gap-1.5"><x-icon name="plus" class="h-3.5 w-3.5" /> Create Category</span>
-                            <span wire:loading wire:target="addCategory">Creating...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
-
-    {{-- Edit Category Modal --}}
-    @if ($editingId !== null)
-        <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm" wire:click="cancelEdit"></div>
-            <div x-data x-show="true" x-transition class="relative z-50 w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-border space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                        <x-icon name="pencil" class="h-4.5 w-4.5 text-amber-600" /> Edit Category
-                    </h3>
-                    <button wire:click="cancelEdit" class="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer">
-                        <x-icon name="x" class="h-4.5 w-4.5" />
-                    </button>
-                </div>
-
-                <form wire:submit="updateCategory" class="space-y-4">
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-700">Category Name</label>
-                        <div class="relative">
-                            <x-icon name="tag" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <input
-                                type="text"
-                                wire:model="editName"
-                                placeholder="Enter category name"
-                                class="w-full rounded-xl border border-border bg-slate-50/50 py-2.5 pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition-all focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary/20"
-                                autofocus
-                            />
-                        </div>
-                        @error('editName')
-                            <p class="text-[12px] font-semibold text-rose-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                        <button type="button" wire:click="cancelEdit" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer">
-                            Cancel
-                        </button>
-                        <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700 active:scale-95 disabled:opacity-50 transition-all cursor-pointer">
-                            <span wire:loading.remove wire:target="updateCategory" class="inline-flex items-center gap-1.5"><x-icon name="pencil" class="h-3.5 w-3.5" /> Save Changes</span>
-                            <span wire:loading wire:target="updateCategory">Saving...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
 
     <x-admin.confirm-modal
         :show="$deletingId !== null"

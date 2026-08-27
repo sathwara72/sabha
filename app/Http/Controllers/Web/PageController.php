@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\Statistic;
+use App\Models\Trustee;
 use Illuminate\View\View;
 
 class PageController extends Controller
@@ -36,6 +37,17 @@ class PageController extends Controller
             'membersStat' => $members->value ?? '500+',
             'businessExchangedStat' => $businessExchanged->value ?? '₹10Cr+',
             'team' => $team,
+        ]);
+    }
+
+    public function trustees(): View
+    {
+        $trustees = Trustee::active()
+            ->with('user.business')
+            ->get();
+
+        return view('pages.trustees', [
+            'trustees' => $trustees,
         ]);
     }
 }

@@ -7,20 +7,11 @@ document.addEventListener('alpine:init', () => {
 
     window.Alpine.store('auth', {
         loginOpen: false,
-        registerOpen: false,
         openLogin() {
-            this.registerOpen = false;
             this.loginOpen = true;
         },
         closeLogin() {
             this.loginOpen = false;
-        },
-        openRegister() {
-            this.loginOpen = false;
-            this.registerOpen = true;
-        },
-        closeRegister() {
-            this.registerOpen = false;
         },
     });
 

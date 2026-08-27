@@ -57,6 +57,12 @@
                         <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'events' ? 'text-white/80' : 'text-muted-foreground' }}" />
                     </button>
 
+                    <button type="button" wire:click="setTab('visitor-pass')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'visitor-pass' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
+                        <x-icon name="ticket" class="h-[14px] w-[14px] {{ $activeTab === 'visitor-pass' ? 'text-white' : 'text-primary' }}" />
+                        <span class="flex-1 text-left">Visitor Pass</span>
+                        <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'visitor-pass' ? 'text-white/80' : 'text-muted-foreground' }}" />
+                    </button>
+
                     <button type="button" wire:click="setTab('analytics')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'analytics' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
                         <x-icon name="trending-up" class="h-[14px] w-[14px] {{ $activeTab === 'analytics' ? 'text-white' : 'text-primary' }}" />
                         <span class="flex-1 text-left">{{ __('site.profile.tab_analytics') }}</span>
@@ -206,30 +212,6 @@
                                 @endif
                             </div>
 
-                            {{-- Progress Steps --}}
-                            <div class="flex items-center gap-0 mb-2">
-                                <div class="flex flex-col items-center flex-1">
-                                    <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors {{ !$business ? 'bg-primary border-primary text-white' : 'bg-emerald-500 border-emerald-500 text-white' }}">
-                                        @if ($business) <x-icon name="check-circle-2" class="h-4 w-4" /> @else 1 @endif
-                                    </div>
-                                    <p class="text-[12px] font-bold text-center mt-1 text-foreground leading-tight">{{ __('site.profile.step_payment') }}</p>
-                                </div>
-                                <div class="flex-1 h-0.5 -mt-4 mx-1 rounded {{ $business ? 'bg-emerald-400' : 'bg-border' }}"></div>
-                                <div class="flex flex-col items-center flex-1">
-                                    <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors {{ $business?->status === 'approved' ? 'bg-emerald-500 border-emerald-500 text-white' : ($business ? 'bg-amber-400 border-amber-400 text-white' : 'bg-white border-border text-muted-foreground') }}">
-                                        @if ($business?->status === 'approved') <x-icon name="check-circle-2" class="h-4 w-4" /> @else <x-icon name="clock" class="h-[14px] w-[14px]" /> @endif
-                                    </div>
-                                    <p class="text-[12px] font-bold text-center mt-1 leading-tight {{ $business?->status === 'approved' ? 'text-foreground' : 'text-muted' }}">{{ __('site.profile.step_approval') }}</p>
-                                </div>
-                                <div class="flex-1 h-0.5 -mt-4 mx-1 rounded {{ $business?->status === 'approved' ? 'bg-emerald-400' : 'bg-border' }}"></div>
-                                <div class="flex flex-col items-center flex-1">
-                                    <div class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors {{ $business?->status === 'approved' && ($business?->description || !$isEditingBusiness) ? 'bg-emerald-500 border-emerald-500 text-white' : ($business?->status === 'approved' ? 'bg-primary border-primary text-white' : 'bg-white border-border text-muted-foreground') }}">
-                                        @if ($business?->status === 'approved' && ($business?->description || !$isEditingBusiness)) <x-icon name="check-circle-2" class="h-4 w-4" /> @else 3 @endif
-                                    </div>
-                                    <p class="text-[12px] font-bold text-center mt-1 leading-tight {{ $business?->status === 'approved' ? 'text-foreground' : 'text-muted' }}">{{ __('site.profile.step_details') }}</p>
-                                </div>
-                            </div>
-
                             @if ($bizError)
                                 <div class="rounded-xl bg-red-50 border border-red-100 p-3 text-center text-xs font-semibold text-red-600">{{ $bizError }}</div>
                             @endif
@@ -237,131 +219,34 @@
                                 <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-center text-xs font-semibold text-emerald-600">{{ $bizSuccess }}</div>
                             @endif
 
-                            {{-- STEP 1: No business yet --}}
-                            @if (!$business)
-                                <div class="space-y-6">
-                                    <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 flex items-start gap-3">
-                                        <x-icon name="alert-circle" class="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
-                                        <div>
-                                            <p class="text-sm font-bold text-blue-800">{{ __('site.profile.how_it_works') }}</p>
-                                            <ol class="mt-1.5 space-y-1 text-xs text-blue-700 font-medium list-decimal list-inside">
-                                                <li>{{ __('site.profile.biz_step1') }}</li>
-                                                <li>{{ __('site.profile.biz_step2') }}</li>
-                                                <li>{{ __('site.profile.biz_step3') }}</li>
-                                            </ol>
-                                        </div>
-                                    </div>
 
-                                    <form wire:submit="submitBusiness" class="space-y-5">
-                                        <div class="space-y-2">
-                                            <h4 class="text-sm font-bold text-foreground flex items-center gap-2">
-                                                <x-icon name="upload" class="h-[15px] w-[15px] text-primary" /> {{ __('site.profile.upload_payment_title') }}
-                                            </h4>
-                                            <p class="text-xs text-muted font-medium">{{ __('site.profile.upload_payment_desc') }}</p>
-
-                                            <label class="mt-3 flex flex-col items-center justify-center border-2 border-dashed border-primary/30 rounded-2xl p-10 bg-primary-soft/20 hover:bg-primary-soft/30 transition-colors cursor-pointer relative group">
-                                                <input type="file" accept="image/*" required wire:model="paymentFile" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
-                                                @if ($paymentFile)
-                                                    <div class="flex flex-col items-center gap-2">
-                                                        <div class="h-24 w-36 rounded-xl border border-border overflow-hidden bg-slate-900 shadow-sm">
-                                                            <img src="{{ $paymentFile->temporaryUrl() }}" alt="Payment Preview" class="h-full w-full object-cover" />
-                                                        </div>
-                                                        <span class="text-sm font-bold text-foreground text-center truncate max-w-[220px]">{{ $paymentFile->getClientOriginalName() }}</span>
-                                                        <span class="text-xs text-emerald-600 font-semibold">{{ __('site.profile.screenshot_selected') }} ✓</span>
-                                                    </div>
-                                                @else
-                                                    <div class="h-14 w-14 rounded-2xl bg-primary-soft flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                                                        <x-icon name="upload" class="h-7 w-7 text-primary" />
-                                                    </div>
-                                                    <span class="text-sm font-semibold text-foreground text-center">{{ __('site.profile.click_upload_receipt') }}</span>
-                                                    <span class="text-[12px] text-muted mt-1">{{ __('site.profile.file_hint') }}</span>
-                                                @endif
-                                            </label>
-                                        </div>
-
-                                        <button type="submit" wire:loading.attr="disabled" wire:target="submitBusiness,paymentFile" {{ !$paymentFile ? 'disabled' : '' }} class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 cursor-pointer">
-                                            <span wire:loading.remove wire:target="submitBusiness">{{ __('site.profile.biz_submit_payment') }}</span>
-                                            <span wire:loading wire:target="submitBusiness">{{ __('site.profile.biz_submitting') }}</span>
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
-
-                            {{-- STEP 2: pending --}}
+                            {{-- Pending: content moderation review, no payment involved --}}
                             @if ($business && $business->status === 'pending')
-                                <div class="space-y-4">
-                                    <div class="rounded-xl bg-amber-50 border border-amber-100 p-5 flex items-start gap-3">
-                                        <x-icon name="clock" class="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                                        <div>
-                                            <p class="font-bold text-amber-800">{{ __('site.profile.payment_review_title') }}</p>
-                                            <p class="font-medium text-xs mt-1 text-amber-700">{{ __('site.profile.payment_review_desc') }}</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="glass-card p-5 rounded-2xl border border-border/80 shadow-xs">
-                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-                                            @if (media_url($business->payment_screenshot))
-                                                <div class="md:col-span-5 space-y-1.5">
-                                                    <div class="flex items-center justify-between">
-                                                        <span class="text-[12px] uppercase font-bold text-muted tracking-wider">{{ __('site.profile.submitted_screenshot') }}</span>
-                                                        <a href="{{ media_url($business->payment_screenshot) }}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:opacity-85 transition-opacity">
-                                                            <x-icon name="eye" class="h-3 w-3" /> {{ __('site.profile.view_full') }}
-                                                        </a>
-                                                    </div>
-                                                    <div class="relative rounded-xl border border-border overflow-hidden h-40 sm:h-44 w-full bg-slate-900 group shadow-sm">
-                                                        <img src="{{ media_url($business->payment_screenshot) }}" alt="Payment Screenshot" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                        <a href="{{ media_url($business->payment_screenshot) }}" target="_blank" rel="noreferrer" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold gap-1.5 backdrop-blur-[2px]">
-                                                            <x-icon name="eye" class="h-4 w-4" /> {{ __('site.profile.view_full') }}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                            <div class="{{ media_url($business->payment_screenshot) ? 'md:col-span-7' : 'md:col-span-12' }}">
-                                                <div class="rounded-xl border border-dashed border-border/80 bg-surface/30 p-6 flex flex-col items-center md:items-start text-center md:text-left gap-2.5">
-                                                    <div class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shadow-xs">
-                                                        <x-icon name="briefcase" class="h-5 w-5" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 class="text-sm font-bold text-foreground">{{ __('site.profile.details_locked_title') }}</h3>
-                                                        <p class="text-xs text-muted font-medium mt-1 leading-relaxed max-w-sm">{{ __('site.profile.details_locked_desc') }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div class="rounded-xl bg-amber-50 border border-amber-100 p-5 flex items-start gap-3">
+                                    <x-icon name="clock" class="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p class="font-bold text-amber-800">Your Business is Under Review</p>
+                                        <p class="font-medium text-xs mt-1 text-amber-700">Our team is reviewing your business details. You'll be notified once it's approved.</p>
                                     </div>
                                 </div>
                             @endif
 
-                            {{-- REJECTED --}}
+                            {{-- Rejected: reason banner, then the same form below to resubmit --}}
                             @if ($business && $business->status === 'rejected')
-                                <div class="space-y-5">
-                                    <div class="rounded-xl bg-red-50 border border-red-100 p-4 flex items-start gap-3">
-                                        <x-icon name="x-circle" class="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
-                                        <div>
-                                            <p class="font-bold text-red-800">{{ __('site.profile.payment_rejected_title') }}</p>
-                                            <p class="font-bold text-xs mt-1 text-red-700">{{ __('site.profile.biz_reason') }}: <span class="underline">{{ $business->rejection_reason ?: __('site.profile.rejected_default_reason') }}</span></p>
-                                            <p class="font-medium text-xs mt-2 text-red-700">{{ __('site.profile.rejected_resubmit_hint') }}</p>
-                                        </div>
+                                <div class="rounded-xl bg-red-50 border border-red-100 p-4 flex items-start gap-3 mb-5">
+                                    <x-icon name="x-circle" class="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p class="font-bold text-red-800">{{ __('site.profile.payment_rejected_title') }}</p>
+                                        <p class="font-bold text-xs mt-1 text-red-700">{{ __('site.profile.biz_reason') }}: <span class="underline">{{ $business->rejection_reason ?: __('site.profile.rejected_default_reason') }}</span></p>
+                                        <p class="font-medium text-xs mt-2 text-red-700">Please review and resubmit your details below.</p>
                                     </div>
-                                    <form wire:submit="submitBusiness" class="space-y-4">
-                                        <label class="flex flex-col items-center justify-center border-2 border-dashed border-red-200 rounded-2xl p-8 bg-red-50/30 hover:bg-red-50/50 transition-colors cursor-pointer relative">
-                                            <input type="file" accept="image/*" required wire:model="paymentFile" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
-                                            <x-icon name="upload" class="h-8 w-8 text-red-400 mb-2" />
-                                            <span class="text-sm font-semibold text-foreground">{{ $paymentFile ? $paymentFile->getClientOriginalName() : __('site.profile.upload_new_screenshot') }}</span>
-                                            <span class="text-[12px] text-muted mt-1">{{ __('site.profile.file_hint') }}</span>
-                                        </label>
-                                        <button type="submit" {{ !$paymentFile ? 'disabled' : '' }} wire:loading.attr="disabled" wire:target="submitBusiness" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90">
-                                            <span wire:loading.remove wire:target="submitBusiness">{{ __('site.profile.biz_resubmit_payment') }}</span>
-                                            <span wire:loading wire:target="submitBusiness">{{ __('site.profile.biz_resubmitting') }}</span>
-                                        </button>
-                                    </form>
                                 </div>
                             @endif
 
-                            {{-- APPROVED --}}
-                            @if ($business && $business->status === 'approved')
+                            {{-- No business yet, rejected, or approved: show the form (approved additionally gets a view/edit toggle) --}}
+                            @if (! $business || $business->status !== 'pending')
                                 <div class="space-y-6">
-                                    @if (!$business->description)
+                                    @if (!$business?->description && $business?->status === 'approved')
                                         <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 flex items-start gap-3">
                                             <x-icon name="check-circle-2" class="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
                                             <div>
@@ -371,7 +256,7 @@
                                         </div>
                                     @endif
 
-                                    @if (!$isEditingBusiness)
+                                    @if ($business && $business->status === 'approved' && !$isEditingBusiness)
                                         {{-- View mode --}}
                                         <div class="space-y-8">
                                             <div class="relative rounded-2xl overflow-hidden border border-border aspect-[3.2/1] max-h-[320px] min-h-[160px] bg-slate-900 shadow-sm">
@@ -706,11 +591,17 @@
                                             </div>
 
                                             <div class="flex gap-4 pt-4 border-t border-border">
-                                                <button type="button" wire:click="$set('isEditingBusiness', false)" class="flex-1 rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer">
-                                                    {{ __('site.profile.biz_cancel') }}
-                                                </button>
+                                                @if ($business && $business->status === 'approved')
+                                                    <button type="button" wire:click="$set('isEditingBusiness', false)" class="flex-1 rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer">
+                                                        {{ __('site.profile.biz_cancel') }}
+                                                    </button>
+                                                @endif
                                                 <button type="submit" wire:loading.attr="disabled" wire:target="submitBusiness" class="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer">
-                                                    <span wire:loading.remove wire:target="submitBusiness">{{ __('site.profile.biz_save_details') }}</span>
+                                                    <span wire:loading.remove wire:target="submitBusiness">
+                                                        @if ($business && $business->status === 'approved') {{ __('site.profile.biz_save_details') }}
+                                                        @elseif ($business && $business->status === 'rejected') Resubmit for Review
+                                                        @else Submit for Review @endif
+                                                    </span>
                                                     <span wire:loading wire:target="submitBusiness">{{ __('site.profile.biz_saving') }}</span>
                                                 </button>
                                             </div>
@@ -781,6 +672,13 @@
                                 </div>
                             @endif
                         </div>
+                    </div>
+                @endif
+
+                {{-- Visitor Pass Section --}}
+                @if ($activeTab === 'visitor-pass')
+                    <div class="glass-card p-4">
+                        @livewire('profile.visitor-passes')
                     </div>
                 @endif
 

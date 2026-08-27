@@ -51,7 +51,6 @@
     </main>
     <x-footer />
     <x-login-modal />
-    <x-register-modal />
     @livewireScripts
 </body>
 </html>

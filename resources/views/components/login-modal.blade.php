@@ -92,9 +92,9 @@
 
         <p class="mt-4 text-center text-xs text-muted">
             {{ __('site.auth.no_account') }}
-            <button x-on:click="$store.auth.closeLogin(); $store.auth.openRegister()" class="font-semibold text-primary hover:opacity-80 transition-opacity">
+            <a href="/register" class="font-semibold text-primary hover:opacity-80 transition-opacity">
                 {{ __('site.auth.create_one') }}
-            </button>
+            </a>
         </p>
     </div>
 </div>

@@ -50,6 +50,10 @@ class AuthController extends Controller
             return response()->json(['message' => 'you had blocked by admin please contact admin'], 403);
         }
 
+        if ($user->registration_status === 'pending_review') {
+            return response()->json(['message' => 'Your registration application is pending admin review. We\'ll email you once it\'s reviewed.'], 403);
+        }
+
         Auth::login($user);
         $request->session()->regenerate();
 
@@ -63,68 +67,6 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
-    }
-
-    public function registerSendOtp(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'phone' => 'nullable|digits:10',
-            'password' => 'required|string|min:6',
-        ]);
-
-        $otp = (string) mt_rand(100000, 999999);
-
-        Cache::put('reg_otp_' . $validated['email'], [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'password' => Hash::make($validated['password']),
-            'otp' => $otp,
-        ], 900);
-
-        try {
-            Mail::to($validated['email'])->send(new OtpMail($otp, $validated['name']));
-        } catch (\Exception $e) {
-            Log::error("SABHA OTP email failed for {$validated['email']}: " . $e->getMessage());
-
-            return response()->json(['message' => 'Could not send verification email. Please check your email address and try again.'], 500);
-        }
-
-        return response()->json([
-            'message' => 'Email verification code has been sent to your email.',
-            'email' => $validated['email'],
-        ]);
-    }
-
-    public function registerConfirm(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'otp' => 'required|string',
-        ]);
-
-        $cached = Cache::get('reg_otp_' . $validated['email']);
-
-        if (! $cached || $cached['otp'] !== $validated['otp']) {
-            return response()->json(['message' => 'Invalid or expired OTP verification code.'], 400);
-        }
-
-        $user = User::create([
-            'name' => $cached['name'],
-            'email' => $cached['email'],
-            'phone' => $cached['phone'] ?? null,
-            'password' => $cached['password'],
-            'role' => 'user',
-        ]);
-
-        Cache::forget('reg_otp_' . $validated['email']);
-
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return response()->json(['message' => 'Email verified and account registered successfully.']);
     }
 
     public function forgotPasswordPage(): View

@@ -27,6 +27,8 @@ class SubAdminPermission extends Model
         'testimonials' => 'Testimonials',
         'statistics' => 'Statistics',
         'analytics' => 'Analytics',
+        'registrations' => 'Member Registrations',
+        'trustees' => 'Trustees',
     ];
 
     public const ABILITIES = ['can_view', 'can_add', 'can_edit', 'can_delete', 'can_approve'];

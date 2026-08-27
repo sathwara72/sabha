@@ -113,6 +113,9 @@
                                     <p class="text-sm font-semibold text-white/70">{{ $business->tagline }}</p>
                                 @endif
                                 <div class="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-white/60 font-medium">
+                                    @if ($business->user)
+                                        <span class="inline-flex items-center gap-1"><x-icon name="user" class="h-3 w-3" /> {{ __('site.businessDetail.owner_prefix') }} {{ $business->user->name }}</span>
+                                    @endif
                                     @if ($business->area)
                                         <span class="inline-flex items-center gap-1"><x-icon name="map-pin" class="h-3 w-3" /> {{ $business->area }}</span>
                                     @endif

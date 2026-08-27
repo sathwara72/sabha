@@ -17,6 +17,7 @@ return [
         'logout' => 'Log out',
         'register' => 'Join Now',
         'about' => 'About Us',
+        'trustees' => 'Trustees',
         'contact' => 'Contact Us',
     ],
 
@@ -115,6 +116,7 @@ return [
         'not_found_desc' => 'The requested business listing is pending approval or does not exist.',
         'back_to_directory' => 'Back to directory',
         'verified' => 'SABHA Member',
+        'owner_prefix' => 'Owned by',
         'connect_now' => 'Connect now',
         'open' => 'Open',
         'about_company' => 'About the company',
@@ -205,6 +207,7 @@ return [
         'booking_closed' => 'Booking Closed',
         'reserve_seat' => 'Reserve seat',
         'about_event' => 'About this event',
+        'video' => 'Video',
         'agenda' => 'Agenda',
         'speakers' => 'Speakers',
         'members_attending' => 'Members Attending',
@@ -576,6 +579,15 @@ return [
             'no_referrals' => 'No referrals yet — give or receive one to see your breakdown here.',
             'no_data' => 'No data yet',
         ],
+    ],
+
+    'trustees' => [
+        'kicker' => 'Leadership',
+        'title' => 'Our Trustees',
+        'subtitle' => 'Meet the members who guide the Sabha community',
+        'empty' => 'No trustees have been added yet.',
+        'view_business' => 'View Business',
+        'no_business' => 'No business listed yet',
     ],
 
     'bookingDetail' => [

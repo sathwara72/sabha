@@ -4,12 +4,12 @@
             <h1 class="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Gallery management</h1>
             <p class="text-xs text-muted">Upload and manage images and videos for the community gallery</p>
         </div>
-        <button
-            wire:click="openUploadModal"
+        <a
+            href="{{ route('admin.gallery.create') }}"
             class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] whitespace-nowrap self-start sm:self-auto"
         >
             <x-icon name="plus" class="h-3.5 w-3.5" /> Add Gallery
-        </button>
+        </a>
     </div>
 
     <div class="space-y-4 pt-2">
@@ -88,66 +88,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Upload Modal --}}
-    @if ($isModalOpen)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" wire:click="closeUploadModal"></div>
-            <div x-data x-show="true" x-transition class="relative w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl border border-border">
-                <div class="flex items-start justify-between border-b border-border pb-3 mb-4">
-                    <h2 class="text-base font-bold text-foreground flex items-center gap-2">
-                        <x-icon name="upload" class="h-4 w-4 text-primary" /> Upload Media
-                    </h2>
-                    <button wire:click="closeUploadModal" class="rounded-lg p-1 text-muted-foreground hover:bg-slate-100 hover:text-foreground transition-colors">
-                        <x-icon name="x" class="h-4.5 w-4.5" />
-                    </button>
-                </div>
-
-                @if ($uploadError)
-                    <div class="rounded-xl bg-red-50 border border-red-100 p-3 text-xs font-semibold text-red-600 flex items-center gap-2 mb-4">
-                        <x-icon name="alert-circle" class="h-3.5 w-3.5 shrink-0" /><span>{{ $uploadError }}</span>
-                    </div>
-                @endif
-
-                <form wire:submit="upload" class="space-y-4">
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-foreground flex items-center justify-between">
-                            <span>Select Files (Images, Videos or ZIP Archives)</span>
-                            <span class="text-[12px] text-primary font-bold bg-primary-soft px-1.5 py-0.5 rounded">Multi-Select Enabled</span>
-                        </label>
-                        <div class="relative border-2 border-dashed border-border rounded-xl p-6 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer flex flex-col items-center justify-center">
-                            <input
-                                type="file"
-                                multiple
-                                wire:model="mediaFiles"
-                                accept="image/*,video/*,.zip,application/zip,application/x-zip-compressed"
-                                class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                            />
-                            <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
-                            <span class="text-xs font-semibold text-foreground text-center line-clamp-1 px-2">
-                                @if (count($mediaFiles) > 0)
-                                    {{ count($mediaFiles) }} file{{ count($mediaFiles) > 1 ? 's' : '' }} selected ({{ collect($mediaFiles)->map(fn ($f) => $f->getClientOriginalName())->implode(', ') }})
-                                @else
-                                    Click to select single or multiple files
-                                @endif
-                            </span>
-                            <span class="text-[12px] text-muted-foreground mt-1">Select multiple images/videos or ZIP archives (up to 100MB)</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end gap-2 border-t border-border pt-4 mt-2">
-                        <button type="button" wire:click="closeUploadModal" class="rounded-xl border border-border bg-white px-4 py-2 text-xs font-bold text-foreground hover:bg-slate-50 active:scale-95 transition-colors">
-                            Cancel
-                        </button>
-                        <button type="submit" wire:loading.attr="disabled" wire:target="upload" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer transition-all">
-                            <span wire:loading.remove wire:target="upload">Upload <x-icon name="plus" class="h-3.5 w-3.5 inline" /></span>
-                            <span wire:loading wire:target="upload">Uploading...</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
 
     <x-admin.confirm-modal
         :show="$deleteId !== null"

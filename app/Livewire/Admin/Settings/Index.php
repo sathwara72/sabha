@@ -34,6 +34,10 @@ class Index extends Component
 
     public $trusteeAvatarUpload = null;
 
+    public $membershipQrUpiFile = null;
+
+    public string $membershipQrUpiImage = '';
+
     public function mount(): void
     {
         $this->loadData();
@@ -53,6 +57,24 @@ class Index extends Component
 
         $this->coordinators = $this->decodeJson($settings['coordinators'] ?? null);
         $this->trustees = $this->decodeJson($settings['trustees'] ?? null);
+        $this->membershipQrUpiImage = $settings['membership_qr_upi_image'] ?? '';
+    }
+
+    public function uploadMembershipQrUpi(): void
+    {
+        $this->validate(['membershipQrUpiFile' => 'image|max:5120']);
+
+        if (! $this->membershipQrUpiFile) {
+            return;
+        }
+
+        $fileName = 'membership_qr_upi_' . time() . '.' . $this->membershipQrUpiFile->getClientOriginalExtension();
+        $this->membershipQrUpiFile->storeAs('settings', $fileName, 'public');
+
+        $this->membershipQrUpiImage = '/storage/settings/' . $fileName;
+        Setting::updateOrCreate(['key' => 'membership_qr_upi_image'], ['value' => $this->membershipQrUpiImage]);
+        $this->membershipQrUpiFile = null;
+        $this->successMsg = 'Membership QR/UPI image updated successfully!';
     }
 
     private function decodeJson($raw): array

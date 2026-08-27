@@ -31,6 +31,9 @@ class Directory extends Component
     #[Url]
     public string $category = 'All';
 
+    #[Url]
+    public string $area = 'All';
+
     public function updatedSearch(): void
     {
         $this->resetPage();
@@ -41,11 +44,34 @@ class Directory extends Component
         $this->resetPage();
     }
 
+    public function updatedArea(): void
+    {
+        $this->resetPage();
+    }
+
     public function categories(): array
     {
         $cats = BusinessCategory::active()->pluck('name')->all();
 
         return array_merge(['All'], empty($cats) ? self::FALLBACK_CATEGORIES : $cats);
+    }
+
+    /**
+     * Sourced from areas actually present on approved businesses (not the
+     * full city/area reference list) so the filter never offers an area
+     * with zero matching results.
+     */
+    public function areas(): array
+    {
+        $areas = Business::where('status', 'approved')
+            ->whereNotNull('area')
+            ->where('area', '!=', '')
+            ->distinct()
+            ->orderBy('area')
+            ->pluck('area')
+            ->all();
+
+        return array_merge(['All'], $areas);
     }
 
     public function render()
@@ -60,18 +86,24 @@ class Directory extends Component
             $query->where('category', $this->category);
         }
 
+        if ($this->area !== 'All') {
+            $query->where('area', $this->area);
+        }
+
         if ($this->search !== '') {
             $search = $this->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"));
             });
         }
 
         return view('livewire.businesses.directory', [
             'businesses' => $query->paginate(self::ITEMS_PER_PAGE),
             'categories' => $this->categories(),
+            'areas' => $this->areas(),
         ]);
     }
 }

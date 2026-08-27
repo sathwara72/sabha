@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'module' => \App\Http\Middleware\CheckModuleAccess::class,
             'full-admin' => \App\Http\Middleware\RequireFullAdmin::class,
+            'registration.complete' => \App\Http\Middleware\EnsureRegistrationComplete::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

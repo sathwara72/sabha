@@ -50,7 +50,6 @@ class Show extends Component
     public bool $bizSubmitting = false;
     public string $bizSuccess = '';
     public string $bizError = '';
-    public $paymentFile;
     public $logoFile;
     public $coverFile;
     public string $logoPreview = '';
@@ -86,7 +85,8 @@ class Show extends Component
     {
         $user = Auth::user();
 
-        $this->activeTab = request('tab') === 'business' ? 'business' : 'profile';
+        $validTabs = ['profile', 'business', 'events', 'visitor-pass', 'analytics', 'meetings', 'referrals-given', 'referrals-received'];
+        $this->activeTab = in_array(request('tab'), $validTabs, true) ? request('tab') : 'profile';
 
         $this->profileName = $user->name;
         $this->profileEmail = $user->email ?? '';
@@ -258,20 +258,13 @@ class Show extends Component
         $this->bizSuccess = '';
         $this->bizError = '';
 
-        if (! $this->paymentFile && ! $this->business) {
-            $this->bizError = __('site.profile.biz_payment_required');
-
-            return;
-        }
-
         $this->bizSubmitting = true;
 
         try {
             $this->validate([
                 'bizName' => 'nullable|string',
-                'bizDescription' => $this->business?->status === 'approved' ? 'required|string' : 'nullable|string',
+                'bizDescription' => 'required|string',
                 'bizPhone2' => 'nullable|string|max:10',
-                'paymentFile' => 'nullable|image|max:10240',
                 'logoFile' => 'nullable|image|max:5120',
                 'coverFile' => 'nullable|image|max:10240',
             ]);
@@ -310,11 +303,6 @@ class Show extends Component
                 'user_id' => $user->id,
             ];
 
-            if ($this->paymentFile) {
-                $fileName = time() . '_payment_' . uniqid() . '.' . $this->paymentFile->getClientOriginalExtension();
-                $this->paymentFile->storeAs('payments', $fileName, 'public');
-                $data['payment_screenshot'] = '/storage/payments/' . $fileName;
-            }
             if ($this->logoFile) {
                 $fileName = time() . '_logo_' . uniqid() . '.' . $this->logoFile->getClientOriginalExtension();
                 $this->logoFile->storeAs('logos', $fileName, 'public');
@@ -350,7 +338,6 @@ class Show extends Component
 
             $this->bizSuccess = __('site.profile.biz_success');
             $this->isEditingBusiness = false;
-            $this->paymentFile = null;
             $this->logoFile = null;
             $this->coverFile = null;
             $this->loadBusiness();

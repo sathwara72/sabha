@@ -63,19 +63,24 @@
                                     <p class="text-[12px] font-bold text-muted uppercase tracking-wider">Attendee Info</p>
                                     <div class="flex items-center gap-2.5">
                                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-base font-bold text-primary">
-                                            {{ $reg->user?->name ? mb_substr($reg->user->name, 0, 1) : '?' }}
+                                            {{ $reg->attendeeName() ? mb_substr($reg->attendeeName(), 0, 1) : '?' }}
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="text-xs font-bold text-foreground truncate">{{ $reg->user?->name ?: 'Unknown' }}</h4>
+                                            <h4 class="text-xs font-bold text-foreground truncate">{{ $reg->attendeeName() ?: 'Unknown' }}</h4>
                                             <p class="text-[12px] text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                                                <x-icon name="mail" class="h-2.5 w-2.5" /> {{ $reg->user?->email }}
+                                                <x-icon name="mail" class="h-2.5 w-2.5" /> {{ $reg->attendeeEmail() }}
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="mt-1">
+                                    <div class="mt-1 flex flex-wrap items-center gap-1">
                                         <span class="inline-flex items-center gap-1 rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[12px] font-bold uppercase tracking-wider {{ $reg->ticket_type === 'verified' ? 'text-emerald-700 bg-emerald-50 border-emerald-100' : 'text-muted' }}">
                                             {{ $reg->ticket_type === 'verified' ? '⭐ Sabha Member' : 'Standard Tier' }}
                                         </span>
+                                        @if ($reg->purchased_by_user_id)
+                                            <span class="inline-flex items-center gap-1 rounded bg-amber-50 border border-amber-100 px-1.5 py-0.5 text-[12px] font-bold uppercase tracking-wider text-amber-700">
+                                                Visitor pass · bought by {{ $reg->purchasedBy?->name }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
 

@@ -28,7 +28,7 @@ class ProfileController extends Controller
         }
 
         $registration = EventRegistration::where('id', $id)
-            ->where('user_id', Auth::id())
+            ->where(fn ($q) => $q->where('user_id', Auth::id())->orWhere('purchased_by_user_id', Auth::id()))
             ->with('event')
             ->first();
 
@@ -44,7 +44,7 @@ class ProfileController extends Controller
         }
 
         $registration = EventRegistration::where('id', $id)
-            ->where('user_id', Auth::id())
+            ->where(fn ($q) => $q->where('user_id', Auth::id())->orWhere('purchased_by_user_id', Auth::id()))
             ->with('event')
             ->first();
 

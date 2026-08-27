@@ -172,7 +172,7 @@ class Show extends Component
     {
         $event = Event::find($this->eventId);
 
-        $registrationsQuery = \App\Models\EventRegistration::with('user')
+        $registrationsQuery = \App\Models\EventRegistration::with(['user', 'purchasedBy'])
             ->where('event_id', $this->eventId)
             ->latest();
 
@@ -184,6 +184,9 @@ class Show extends Component
             $search = $this->memberSearch;
             $registrationsQuery->where(function ($q) use ($search) {
                 $q->where('ticket_number', 'like', "%{$search}%")
+                    ->orWhere('guest_name', 'like', "%{$search}%")
+                    ->orWhere('guest_email', 'like', "%{$search}%")
+                    ->orWhere('guest_mobile', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($uq) use ($search) {
                         $uq->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")

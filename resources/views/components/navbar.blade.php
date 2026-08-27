@@ -5,6 +5,7 @@
         ['href' => '/events', 'label' => __('site.nav.events'), 'match' => 'events*'],
         ['href' => '/gallery', 'label' => __('site.nav.gallery'), 'match' => 'gallery*'],
         ['href' => '/about', 'label' => __('site.nav.about'), 'match' => 'about'],
+        ['href' => '/trustees', 'label' => __('site.nav.trustees'), 'match' => 'trustees'],
         ['href' => '/contact', 'label' => __('site.nav.contact'), 'match' => 'contact'],
     ];
     $locale = app()->getLocale();
@@ -61,9 +62,9 @@
                     <button type="button" x-on:click="$store.auth.openLogin()" class="rounded-lg px-3.5 py-2 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-surface cursor-pointer">
                         {{ __('site.nav.login') }}
                     </button>
-                    <button type="button" x-on:click="$store.auth.openRegister()" class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer">
+                    <a href="/register" class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer">
                         {{ __('site.nav.register') }} <x-icon name="arrow-right" class="h-[15px] w-[15px]" />
-                    </button>
+                    </a>
                 @endauth
 
                 {{-- Language Switcher --}}
@@ -134,9 +135,9 @@
                     <button type="button" x-on:click="mobileMenuOpen = false; $store.auth.openLogin()" class="rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold text-foreground hover:bg-surface cursor-pointer">
                         {{ __('site.nav.login') }}
                     </button>
-                    <button type="button" x-on:click="mobileMenuOpen = false; $store.auth.openRegister()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white cursor-pointer">
+                    <a href="/register" class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white cursor-pointer">
                         {{ __('site.nav.register') }} <x-icon name="arrow-right" class="h-4 w-4" />
-                    </button>
+                    </a>
                 @endauth
 
                 {{-- Mobile Language Switcher --}}

@@ -3,62 +3,47 @@
 namespace App\Livewire\Admin\HeroSlider;
 
 use App\Models\HeroImage;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class Index extends Component
 {
-    use WithFileUploads;
-
-    public $mediaFile = null;
-
-    public bool $isModalOpen = false;
-
-    public bool $success = false;
-
-    public string $uploadError = '';
-
     public ?int $deleteId = null;
 
-    public function openUploadModal(): void
+    public function moveUp(int $id): void
     {
-        $this->mediaFile = null;
-        $this->success = false;
-        $this->uploadError = '';
-        $this->resetErrorBag();
-        $this->isModalOpen = true;
+        admin_authorize('hero-slider', 'can_edit');
+        $this->swap($id, 'up');
     }
 
-    public function closeUploadModal(): void
+    public function moveDown(int $id): void
     {
-        $this->isModalOpen = false;
-        $this->mediaFile = null;
-        $this->uploadError = '';
+        admin_authorize('hero-slider', 'can_edit');
+        $this->swap($id, 'down');
     }
 
-    public function upload(): void
+    private function swap(int $id, string $direction): void
     {
-        admin_authorize('hero-slider', 'can_add');
+        $images = HeroImage::orderBy('sort_order')->get(['id', 'sort_order']);
+        $index = $images->search(fn ($img) => $img->id === $id);
 
-        $this->uploadError = '';
-        $this->success = false;
-
-        if (! $this->mediaFile) {
-            $this->uploadError = 'Please select an image file to upload.';
-
+        if ($index === false) {
             return;
         }
 
-        $this->validate(['mediaFile' => 'image|max:10240']);
+        $targetIndex = $direction === 'up' ? $index - 1 : $index + 1;
 
-        $fileName = time() . '_' . uniqid() . '.' . $this->mediaFile->getClientOriginalExtension();
-        $this->mediaFile->storeAs('hero', $fileName, 'public');
+        if ($targetIndex < 0 || $targetIndex >= $images->count()) {
+            return;
+        }
 
-        HeroImage::create(['image_path' => '/storage/hero/' . $fileName]);
+        $current = $images[$index];
+        $target = $images[$targetIndex];
 
-        $this->success = true;
-        $this->mediaFile = null;
-        $this->closeUploadModal();
+        DB::transaction(function () use ($current, $target) {
+            HeroImage::where('id', $current->id)->update(['sort_order' => $target->sort_order]);
+            HeroImage::where('id', $target->id)->update(['sort_order' => $current->sort_order]);
+        });
     }
 
     public function openDelete(int $id): void
@@ -91,7 +76,7 @@ class Index extends Component
     public function render()
     {
         return view('livewire.admin.hero-slider.index', [
-            'heroImages' => HeroImage::latest()->get(),
+            'heroImages' => HeroImage::with('event')->orderBy('sort_order')->get(),
         ]);
     }
 }

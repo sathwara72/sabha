@@ -13,14 +13,6 @@ class Index extends Component
 
     public string $search = '';
 
-    public bool $isAddModalOpen = false;
-
-    public string $addName = '';
-
-    public ?int $editingId = null;
-
-    public string $editName = '';
-
     public ?int $deletingId = null;
 
     public string $deletingName = '';
@@ -30,66 +22,6 @@ class Index extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
-    }
-
-    public function openAddModal(): void
-    {
-        $this->addName = '';
-        $this->resetErrorBag('addName');
-        $this->isAddModalOpen = true;
-    }
-
-    public function cancelAdd(): void
-    {
-        $this->isAddModalOpen = false;
-        $this->addName = '';
-    }
-
-    public function addCategory(): void
-    {
-        admin_authorize('categories', 'can_add');
-
-        $this->validate([
-            'addName' => 'required|string|max:100|unique:business_categories,name',
-        ]);
-
-        $maxOrder = BusinessCategory::max('sort_order') ?? -1;
-
-        BusinessCategory::create([
-            'name' => $this->addName,
-            'sort_order' => $maxOrder + 1,
-            'is_active' => true,
-        ]);
-
-        $this->successMsg = "Category \"{$this->addName}\" added successfully!";
-        $this->cancelAdd();
-    }
-
-    public function openEditModal(int $id, string $name): void
-    {
-        $this->editingId = $id;
-        $this->editName = $name;
-        $this->resetErrorBag('editName');
-    }
-
-    public function cancelEdit(): void
-    {
-        $this->editingId = null;
-        $this->editName = '';
-    }
-
-    public function updateCategory(): void
-    {
-        admin_authorize('categories', 'can_edit');
-
-        $this->validate([
-            'editName' => 'required|string|max:100|unique:business_categories,name,' . $this->editingId,
-        ]);
-
-        BusinessCategory::findOrFail($this->editingId)->update(['name' => $this->editName]);
-
-        $this->successMsg = "Category updated to \"{$this->editName}\" successfully!";
-        $this->cancelEdit();
     }
 
     public function openDelete(int $id, string $name): void

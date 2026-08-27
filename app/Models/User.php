@@ -34,6 +34,17 @@ class User extends Authenticatable
         'avatar',
         'email_verified_at',
         'is_blocked',
+        'registration_status',
+        'ref1_name',
+        'ref1_phone',
+        'ref2_name',
+        'ref2_phone',
+        'aadhar_document',
+        'pan_document',
+        'business_document',
+        'business_document_type',
+        'membership_payment_screenshot',
+        'registration_rejection_reason',
     ];
 
     /**
@@ -72,6 +83,11 @@ class User extends Authenticatable
         return $this->belongsTo(MemberTitle::class);
     }
 
+    public function trustee()
+    {
+        return $this->hasOne(Trustee::class);
+    }
+
     public function subAdminPermissions()
     {
         return $this->hasMany(SubAdminPermission::class);
@@ -100,5 +116,10 @@ class User extends Authenticatable
     public function canAccessAdminArea(): bool
     {
         return in_array($this->role, ['admin', 'sub_admin'], true);
+    }
+
+    public function isRegistrationComplete(): bool
+    {
+        return $this->registration_status === 'active';
     }
 }

@@ -55,8 +55,10 @@
                 [
                     'label' => 'Members',
                     'items' => [
+                        ['name' => 'Registrations', 'icon' => 'user-check', 'href' => route('admin.registrations.index'), 'active' => request()->routeIs('admin.registrations.*'), 'module' => 'registrations'],
                         ['name' => 'Users', 'icon' => 'users', 'href' => route('admin.users.index'), 'active' => request()->routeIs('admin.users.*'), 'module' => 'users'],
                         ['name' => 'Member Titles', 'icon' => 'award', 'href' => route('admin.member-titles.index'), 'active' => request()->routeIs('admin.member-titles.*'), 'module' => 'member-titles'],
+                        ['name' => 'Trustees', 'icon' => 'award', 'href' => route('admin.trustees.index'), 'active' => request()->routeIs('admin.trustees.*'), 'module' => 'trustees'],
                     ],
                 ],
                 [

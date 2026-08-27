@@ -15,6 +15,8 @@ class Event extends Model
         'google_map_link',
         'type',
         'image',
+        'youtube_urls',
+        'is_popup',
         'price_normal',
         'price_verified',
         'event_code',
@@ -26,6 +28,8 @@ class Event extends Model
         'date' => 'datetime',
         'agenda' => 'array',
         'speakers' => 'array',
+        'youtube_urls' => 'array',
+        'is_popup' => 'boolean',
     ];
 
     public function registrations(): HasMany

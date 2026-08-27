@@ -16,6 +16,8 @@
         };
     @endphp
 
+    <x-event-popup :event="$popupEvent" />
+
     <div class="bg-background">
         {{-- Hero --}}
         <section class="hero-surface relative overflow-hidden border-b border-border">
@@ -55,19 +57,36 @@
                     x-init="setInterval(() => { current = (current + 1) % {{ count($heroImages) }} }, 5000)"
                     class="relative h-[280px] w-full overflow-hidden rounded-2xl border border-border bg-muted sm:h-[360px] lg:h-[420px] shadow-lg"
                 >
-                    @foreach ($heroImages as $i => $image)
-                        <img
-                            src="{{ $image }}"
-                            alt="Sabha Event"
-                            x-show="current === {{ $i }}"
-                            x-transition:enter="transition ease-out duration-[600ms]"
-                            x-transition:enter-start="opacity-0 scale-105"
-                            x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-[600ms]"
-                            x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute inset-0 h-full w-full object-cover"
-                        />
+                    @foreach ($heroImages as $i => $slide)
+                        @if ($slide['link'])
+                            <a
+                                href="{{ $slide['link'] }}"
+                                @if ($slide['external']) target="_blank" rel="noopener" @endif
+                                x-show="current === {{ $i }}"
+                                x-transition:enter="transition ease-out duration-[600ms]"
+                                x-transition:enter-start="opacity-0 scale-105"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-[600ms]"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute inset-0 h-full w-full"
+                            >
+                                <img src="{{ $slide['url'] }}" alt="Sabha Event" class="h-full w-full object-cover" />
+                            </a>
+                        @else
+                            <img
+                                src="{{ $slide['url'] }}"
+                                alt="Sabha Event"
+                                x-show="current === {{ $i }}"
+                                x-transition:enter="transition ease-out duration-[600ms]"
+                                x-transition:enter-start="opacity-0 scale-105"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-[600ms]"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute inset-0 h-full w-full object-cover"
+                            />
+                        @endif
                     @endforeach
 
                     {{-- Navigation overlays --}}

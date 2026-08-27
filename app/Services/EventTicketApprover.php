@@ -76,9 +76,15 @@ class EventTicketApprover
     private function sendApprovalEmail(EventRegistration $registration, Event $event, string $ticketNo): void
     {
         try {
-            $userEmail = $registration->user->email;
-            $userName = $registration->user->name;
+            $userEmail = $registration->attendeeEmail();
+            $userName = $registration->attendeeName();
             $eventName = $event->title;
+
+            if (! $userEmail) {
+                Log::error("Skipped approval email for registration #{$registration->id}: no attendee email on file.");
+
+                return;
+            }
 
             $qrCode = new QRCode($ticketNo, [
                 's' => 'qrm', // Medium ECC
@@ -124,7 +130,7 @@ class EventTicketApprover
 
             Log::info("SABHA Approved Ticket Email successfully dispatched to {$userEmail}. Ticket No: {$ticketNo}.");
         } catch (\Exception $e) {
-            Log::error("Failed to send approval email to {$registration->user->email}: " . $e->getMessage());
+            Log::error("Failed to send approval email to {$registration->attendeeEmail()}: " . $e->getMessage());
         }
     }
 }

@@ -84,6 +84,40 @@ if (! function_exists('parse_google_maps_iframe_src')) {
     }
 }
 
+if (! function_exists('youtube_embed_url')) {
+    /**
+     * Extracts a YouTube video ID from a watch/short/embed URL and returns
+     * an embeddable src, or null if the input isn't a recognizable YouTube
+     * URL. Mirrors parse_google_maps_iframe_src()'s "accept whatever the
+     * admin pasted" approach.
+     */
+    function youtube_embed_url(?string $url): ?string
+    {
+        $str = trim((string) $url);
+        if ($str === '') {
+            return null;
+        }
+
+        if (preg_match('#youtube(?:-nocookie)?\.com/embed/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        if (preg_match('#youtu\.be/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        if (preg_match('#youtube\.com/shorts/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        if (preg_match('#[?&]v=([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        return null;
+    }
+}
+
 if (! function_exists('is_video_file')) {
     /**
      * Mirrors the frontend's isVideoFile() — checked by extension only,

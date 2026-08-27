@@ -1,18 +1,32 @@
-# Root-level .gitignore for Sabha (Laravel + Next.js)
+# .gitignore for Sabha (Laravel)
 
 # Dependencies
-node_modules/
-vendor/
+/node_modules
+/vendor
 .pnp
 .pnp.*
 
 # Testing
 coverage/
+/phpunit.result.cache
+/.phpunit.cache
+/.phpunit.result.cache
 
-# Next.js
-.next/
-out/
-next-env.d.ts
+# Laravel
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/pail
+.phpactor.json
+Homestead.json
+Homestead.yaml
+/auth.json
 
 # Production
 build/
@@ -42,22 +56,3 @@ yarn-error.log*
 .fleet/
 .nova/
 .zed/
-.editorconfig
-
-# Laravel specific
-/backend/public/build
-/backend/public/hot
-/backend/public/storage
-/backend/storage/*.key
-/backend/storage/framework/cache/data/*
-/backend/storage/framework/sessions/*
-/backend/storage/framework/testing/*
-/backend/storage/framework/views/*
-/backend/storage/logs/*
-/backend/storage/pail
-/backend/vendor/
-/backend/.env
-/backend/.env.*
-/backend/phpunit.result.cache
-
-.env*

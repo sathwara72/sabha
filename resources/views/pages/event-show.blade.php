@@ -134,6 +134,35 @@
                         </section>
                     @endif
 
+                    @php
+                        $videoEmbeds = collect($event->youtube_urls ?? [])
+                            ->map(fn ($url) => youtube_embed_url($url))
+                            ->filter()
+                            ->values();
+                    @endphp
+                    @if ($videoEmbeds->isNotEmpty())
+                        <section class="glass-card p-4">
+                            <div class="mb-3 flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.eventDetail.video') }}</h2>
+                            </div>
+                            <div class="grid grid-cols-1 {{ $videoEmbeds->count() > 1 ? 'sm:grid-cols-2' : '' }} gap-3">
+                                @foreach ($videoEmbeds as $idx => $embedUrl)
+                                    <div class="aspect-video overflow-hidden rounded-xl border border-border">
+                                        <iframe
+                                            src="{{ $embedUrl }}"
+                                            title="{{ $event->title }} video {{ $idx + 1 }}"
+                                            class="h-full w-full"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowfullscreen
+                                        ></iframe>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
                     @if (!empty($event->agenda))
                         <section class="glass-card p-4">
                             <div class="mb-3 flex items-center gap-2">

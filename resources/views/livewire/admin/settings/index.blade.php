@@ -127,6 +127,34 @@
             @endif
         </div>
 
+        {{-- Membership Payment QR/UPI --}}
+        <div class="glass-card p-4 space-y-3">
+            <h3 class="text-xs font-bold text-foreground border-b border-border pb-2 flex items-center gap-1.5">
+                <x-icon name="qr-code" class="h-3.5 w-3.5 text-primary" /> Membership Payment QR/UPI
+            </h3>
+            <p class="text-[12px] text-muted">Shown to applicants during Step 2 of registration so they know where to send their membership payment.</p>
+            <div class="flex items-center gap-4">
+                <label class="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-3 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative h-28 w-28 shrink-0">
+                    <input type="file" accept="image/*" wire:model="membershipQrUpiFile" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" />
+                    @if ($membershipQrUpiFile)
+                        <img src="{{ $membershipQrUpiFile->temporaryUrl() }}" class="h-full w-full object-contain" />
+                    @elseif ($membershipQrUpiImage)
+                        <img src="{{ media_url($membershipQrUpiImage) }}" class="h-full w-full object-contain" />
+                    @else
+                        <x-icon name="upload" class="h-5 w-5 text-primary" />
+                        <span class="text-[12px] text-muted-foreground mt-1 text-center">Upload QR image</span>
+                    @endif
+                </label>
+                @if ($membershipQrUpiFile)
+                    <button wire:click="uploadMembershipQrUpi" wire:loading.attr="disabled" wire:target="uploadMembershipQrUpi" class="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:opacity-90 cursor-pointer">
+                        <span wire:loading.remove wire:target="uploadMembershipQrUpi">Save Image</span>
+                        <span wire:loading wire:target="uploadMembershipQrUpi">Saving...</span>
+                    </button>
+                @endif
+                @error('membershipQrUpiFile') <p class="text-[12px] font-semibold text-rose-600">{{ $message }}</p> @enderror
+            </div>
+        </div>
+
         {{-- Trustees --}}
         <div class="glass-card p-4 space-y-3">
             <div class="flex items-center justify-between border-b border-border pb-2">

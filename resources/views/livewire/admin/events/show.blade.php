@@ -137,14 +137,18 @@
                                         <tr class="hover:bg-slate-50/60 transition-colors">
                                             <td class="py-3 px-4 font-semibold text-foreground">
                                                 <div class="flex flex-col">
-                                                    <span>{{ $user->name ?? 'N/A' }}</span>
-                                                    <span class="text-[12px] text-muted font-normal">Member</span>
+                                                    <span>{{ $reg->attendeeName() ?? 'N/A' }}</span>
+                                                    @if ($reg->purchased_by_user_id)
+                                                        <span class="text-[12px] text-amber-600 font-semibold">Visitor pass (bought by {{ $reg->purchasedBy?->name }})</span>
+                                                    @else
+                                                        <span class="text-[12px] text-muted font-normal">Member</span>
+                                                    @endif
                                                 </div>
                                             </td>
                                             <td class="py-3 px-4 text-muted">
                                                 <div class="flex flex-col">
-                                                    <span>{{ $user->email ?? 'N/A' }}</span>
-                                                    <span class="text-[12px] text-muted">{{ $user->phone ?? '' }}</span>
+                                                    <span>{{ $reg->attendeeEmail() ?? 'N/A' }}</span>
+                                                    <span class="text-[12px] text-muted">{{ $user->phone ?? $reg->guest_mobile ?? '' }}</span>
                                                 </div>
                                             </td>
                                             <td class="py-3 px-4 font-mono font-bold text-foreground">{{ $reg->ticket_number ?: '#' . $reg->id }}</td>

@@ -103,7 +103,7 @@ class Index extends Component
         $registration->update(['is_attended' => true]);
 
         $this->scanSuccess = true;
-        $this->scanMessage = 'Attendance marked successfully for ' . ($registration->user->name ?? 'attendee') . '!';
+        $this->scanMessage = 'Attendance marked successfully for ' . ($registration->attendeeName() ?? 'attendee') . '!';
         $this->manualTicketNo = '';
     }
 
@@ -114,7 +114,7 @@ class Index extends Component
 
     public function render()
     {
-        $registrations = EventRegistration::with(['user', 'event'])->latest()->get();
+        $registrations = EventRegistration::with(['user', 'event', 'purchasedBy'])->latest()->get();
 
         return view('livewire.admin.bookings.index', [
             'registrations' => $registrations,
