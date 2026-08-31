@@ -3,6 +3,8 @@
     x-data="chatThread({
         conversationId: {{ $conversationId }},
         currentUserId: {{ auth()->id() }},
+        isGroup: {{ $isGroup ? 'true' : 'false' }},
+        isGroupAdmin: {{ $isGroupAdmin ? 'true' : 'false' }},
         initialMessages: @js($initialMessages),
     })"
     wire:poll.5s="pollSync"
@@ -13,13 +15,37 @@
             <x-icon name="arrow-left" class="h-4 w-4" />
         </a>
         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary font-bold text-xs overflow-hidden">
-            @if ($otherUser && media_url($otherUser->avatar))
+            @if ($isGroup)
+                @if (media_url($conversation->avatar))
+                    <img src="{{ media_url($conversation->avatar) }}" alt="" class="h-full w-full object-cover" />
+                @else
+                    <x-icon name="users" class="h-4 w-4" />
+                @endif
+            @elseif ($otherUser && media_url($otherUser->avatar))
                 <img src="{{ media_url($otherUser->avatar) }}" alt="" class="h-full w-full object-cover" />
             @else
                 {{ mb_substr($otherUser?->name ?? '?', 0, 1) }}
             @endif
         </div>
-        <p class="text-sm font-bold text-foreground">{{ $otherUser?->name ?? 'Unknown member' }}</p>
+        <div class="min-w-0 flex-1">
+            <p class="text-sm font-bold text-foreground truncate">{{ $isGroup ? $conversation->title : ($otherUser?->name ?? 'Unknown member') }}</p>
+            @if ($isGroup)
+                <p class="text-[11px] text-muted-foreground">{{ $participantCount }} {{ $participantCount === 1 ? 'member' : 'members' }}</p>
+            @endif
+        </div>
+        @if ($isGroup)
+            <button
+                type="button"
+                x-on:click="if (confirm('Leave this group?')) { $wire.leaveGroup() }"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-red-50 hover:text-rose-600 transition-colors shrink-0 cursor-pointer"
+                title="Leave group"
+            >
+                <x-icon name="log-out" class="h-4 w-4" />
+            </button>
+            <a href="{{ route('chat.groups.settings', $conversationId) }}" class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-surface transition-colors shrink-0" title="Group settings">
+                <x-icon name="settings" class="h-4 w-4" />
+            </a>
+        @endif
     </div>
 
     @if ($errorMessage)
@@ -33,8 +59,14 @@
         </template>
 
         <template x-for="msg in messages" :key="msg.id">
-            <div class="flex" :class="msg.is_mine ? 'justify-end' : 'justify-start'">
+            <div>
+                <template x-if="msg.message_type === 'system_event'">
+                    <p class="text-center text-[11px] text-muted-foreground italic py-1" x-text="msg.body"></p>
+                </template>
+
+            <div x-show="msg.message_type !== 'system_event'" class="flex" :class="msg.is_mine ? 'justify-end' : 'justify-start'">
                 <div class="max-w-[75%] group">
+                    <p x-show="isGroup && !msg.is_mine" class="text-[10px] font-bold text-muted-foreground px-1 mb-0.5" x-text="msg.sender_name"></p>
                     <div
                         class="rounded-2xl px-3.5 py-2 text-xs"
                         :class="msg.is_mine ? 'bg-primary text-white rounded-br-sm' : 'bg-surface text-foreground rounded-bl-sm'"
@@ -70,6 +102,7 @@
                         </template>
                     </div>
                 </div>
+            </div>
             </div>
         </template>
     </div>

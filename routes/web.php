@@ -40,7 +40,7 @@ Route::get('/forgot-password', [AuthController::class, 'forgotPasswordPage'])->n
 Route::post('/forgot-password/send-otp', [AuthController::class, 'forgotPasswordSendOtp'])->middleware('throttle:3,1')->name('forgot-password.send-otp');
 Route::post('/forgot-password/reset', [AuthController::class, 'forgotPasswordReset'])->middleware('throttle:6,1')->name('forgot-password.reset');
 
-Route::middleware('registration.complete')->group(function () {
+Route::middleware(['auth', 'registration.complete'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/profile/events/{id}', [ProfileController::class, 'eventShow'])->name('profile.events.show');
     Route::get('/profile/events/{id}/ticket.png', [ProfileController::class, 'downloadTicket'])->name('profile.events.ticket');
@@ -48,6 +48,8 @@ Route::middleware('registration.complete')->group(function () {
     Route::view('/profile/meetings/{id}/edit', 'pages.profile-meeting-form')->name('profile.meetings.edit');
 
     Route::view('/chat', 'pages.chat')->name('chat.index');
+    Route::view('/chat/groups/create', 'pages.chat-group-form')->name('chat.groups.create');
+    Route::view('/chat/groups/{id}/settings', 'pages.chat-group-settings')->name('chat.groups.settings');
     Route::view('/chat/{id}', 'pages.chat')->name('chat.show');
 });
 
@@ -96,6 +98,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::view('/trustees', 'pages.admin.trustees')->name('trustees.index');
         Route::view('/trustees/create', 'pages.admin.trustee-form')->name('trustees.create');
         Route::view('/trustees/{id}/edit', 'pages.admin.trustee-form')->name('trustees.edit');
+    });
+    Route::middleware('module:chat')->group(function () {
+        Route::view('/chat', 'pages.admin.chat')->name('chat.index');
+        Route::view('/chat/{id}', 'pages.admin.chat-show')->name('chat.show');
     });
     Route::view('/meetings', 'pages.admin.meetings')->name('meetings.index')->middleware('module:meetings');
     Route::view('/referrals', 'pages.admin.referrals')->name('referrals.index')->middleware('module:referrals');

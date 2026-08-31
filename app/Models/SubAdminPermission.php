@@ -29,6 +29,7 @@ class SubAdminPermission extends Model
         'analytics' => 'Analytics',
         'registrations' => 'Member Registrations',
         'trustees' => 'Trustees',
+        'chat' => 'Chat Moderation',
     ];
 
     public const ABILITIES = ['can_view', 'can_add', 'can_edit', 'can_delete', 'can_approve'];

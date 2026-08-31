@@ -31,8 +31,8 @@ Route::get('/categories', [SabhaController::class, 'getCategories']);
 // User Submitted Business Route
 Route::post('/businesses', [SabhaController::class, 'submitBusiness'])->middleware('auth:sanctum');
 
-// Admin Routes (protected with Sanctum middleware)
-Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+// Admin Routes (protected with Sanctum auth + admin role)
+Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/businesses', [SabhaController::class, 'getAllBusinesses']);
     Route::post('/businesses/{id}/approve', [SabhaController::class, 'approveBusiness']);
     Route::post('/businesses/{id}/reject', [SabhaController::class, 'rejectBusiness']);

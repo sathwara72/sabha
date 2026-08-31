@@ -86,7 +86,7 @@ class ChatService
 
     public function delete(ChatMessage $message, User $user): void
     {
-        if (! $message->deletableBy($user)) {
+        if (! $message->deletableBy($user) && ! $message->deletableByModerator($user)) {
             throw new \RuntimeException('This message can no longer be deleted.');
         }
 
