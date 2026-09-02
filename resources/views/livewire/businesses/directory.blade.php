@@ -125,16 +125,16 @@
         <div class="relative">
             <x-loading-state target="search, category, area, gotoPage, nextPage, previousPage" :message="__('site.directory.searching')" />
 
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ($businesses as $business)
                     @php
                         $locationPart = $business->city ?: ($business->area ?: 'Gujarat');
                         $subline = $locationPart . ($business->category ? ' • ' . $business->category : '');
                     @endphp
                     <a href="/businesses/{{ $business->id }}" class="block h-full cursor-pointer group">
-                        <div class="flex h-full flex-col justify-start rounded-2xl border border-slate-100 bg-white p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-slate-200">
+                        <div class="flex h-full flex-col justify-start rounded-2xl sm:rounded-[25px] border border-slate-100 bg-white p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-slate-200">
                             {{-- Top Logo Box --}}
-                            <div class="h-16 w-16 overflow-hidden rounded-xl border border-slate-100 bg-white p-2 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                            <div class="h-16 w-16 overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                                 <x-safe-image
                                     :src="media_url($business->logo)"
                                     :alt="$business->name"

@@ -42,12 +42,13 @@ export default {
                 ring: 'var(--ring)',
             },
             borderRadius: {
-                lg: 'var(--radius-lg)',
-                md: 'var(--radius-md)',
-                sm: 'var(--radius-sm)',
-                xl: '0.875rem',
-                '2xl': '6px',
-                '3xl': '6px',
+                sm: '0.25rem',
+                md: '0.375rem',
+                lg: '0.5rem',
+                xl: '0.75rem',
+                '2xl': '1rem',
+                '3xl': '1.5rem',
+                '4xl': '2rem',
             },
             boxShadow: {
                 // Every shadow-* utility tinted toward the brand navy instead

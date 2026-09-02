@@ -40,7 +40,7 @@
 
     {{-- Stats Section --}}
     <section class="border-b border-border bg-surface">
-        <div class="mx-auto max-w-7xl px-6 py-4">
+        <div class="mx-auto max-w-7xl px-6 py-3">
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div class="glass-card flex items-start gap-4 p-5 md:col-span-2">
                     <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
@@ -91,18 +91,18 @@
                                             @if (is_video_file($folder->firstItem->image_path))
                                                 <video src="{{ media_url($folder->firstItem->image_path) }}" class="h-full w-full object-cover opacity-80" muted preload="metadata"></video>
                                             @else
-                                                <x-safe-image :src="media_url($folder->firstItem->image_path)" :alt="$folder->event->title" :title="$folder->event->title" fallback-type="gallery" img-class="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
+                                                <x-safe-image :src="media_url($folder->firstItem->image_path)" :alt="$folder->event->title" :title="$folder->event->title" :blur-backdrop="true" fallback-type="gallery" img-class="h-full w-full object-contain" />
                                             @endif
                                         @else
                                             <div class="h-full w-full bg-slate-200 flex items-center justify-center text-muted">{{ __('site.gallery.no_cover') }}</div>
                                         @endif
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                        <div class="absolute top-4 left-4">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-10"></div>
+                                        <div class="absolute top-4 left-4 z-20">
                                             <span class="flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">
                                                 <x-icon name="folder" class="h-[13px] w-[13px] text-primary" /> {{ __('site.gallery.event_folder') }}
                                             </span>
                                         </div>
-                                        <div class="absolute bottom-4 right-4">
+                                        <div class="absolute bottom-4 right-4 z-20">
                                             <span class="text-xs font-semibold text-white bg-primary px-2.5 py-1 rounded-md shadow-sm">{{ $folder->media->count() }} {{ __('site.gallery.items') }}</span>
                                         </div>
                                     </div>
@@ -146,28 +146,28 @@
                         @endphp
                         <div
                             x-on:click="openLightbox({{ $index }})"
-                            class="group relative aspect-square overflow-hidden rounded-2xl border cursor-pointer {{ $isVideo ? 'border-accent/40 shadow-[0_0_15px_rgba(244,63,94,0.08)] bg-slate-950' : 'border-border bg-white shadow-sm' }}"
+                            class="group relative aspect-square overflow-hidden rounded-2xl border cursor-pointer {{ $isVideo ? 'border-accent/40 shadow-[0_0_15px_rgba(244,63,94,0.08)] bg-slate-950' : 'border-border bg-slate-950 shadow-sm' }}"
                         >
                             @if ($isVideo)
                                 <div class="relative w-full h-full flex items-center justify-center bg-black">
                                     <video src="{{ $itemSrc }}" class="w-full h-full object-cover opacity-80" muted preload="metadata"></video>
-                                    <div class="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
-                                    <div class="absolute h-10 w-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <div class="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors z-10"></div>
+                                    <div class="absolute h-10 w-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform z-10">
                                         <x-icon name="play" class="h-[18px] w-[18px] ml-0.5" />
                                     </div>
                                     <span class="absolute bottom-2.5 left-2.5 flex items-center gap-1 text-[12px] font-bold text-white bg-accent px-2 py-0.5 rounded-full z-10 uppercase tracking-wider">
                                         <x-icon name="film" class="h-[9px] w-[9px]" /> {{ __('site.gallery.video') }}
                                     </span>
                                     @if ($item->caption)
-                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end pt-8">
+                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end pt-8 z-20">
                                             <h3 class="text-[12px] font-semibold text-white line-clamp-2">{{ $item->caption }}</h3>
                                         </div>
                                     @endif
                                 </div>
                             @else
-                                <div class="relative w-full h-full">
-                                    <x-safe-image :src="$itemSrc" img-class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" :alt="$caption" :title="$caption" fallback-type="gallery" />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end">
+                                <div class="relative w-full h-full overflow-hidden flex items-center justify-center bg-slate-950">
+                                    <x-safe-image :src="$itemSrc" img-class="h-full w-full object-contain" :alt="$caption" :title="$caption" :blur-backdrop="true" fallback-type="gallery" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end z-20">
                                         <span class="mb-1.5 w-fit rounded-full bg-white/15 px-2 py-0.5 text-[12px] font-bold text-white backdrop-blur-sm uppercase">{{ __('site.gallery.image') }}</span>
                                         @if ($item->caption)
                                             <h3 class="text-xs font-semibold text-white line-clamp-2">{{ $item->caption }}</h3>
