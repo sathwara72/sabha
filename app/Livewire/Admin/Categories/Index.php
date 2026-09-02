@@ -13,6 +13,14 @@ class Index extends Component
 
     public string $search = '';
 
+    // Modal state for Add / Edit
+    public bool $showModal = false;
+
+    public ?int $categoryId = null;
+
+    public string $name = '';
+
+    // Delete Modal State
     public ?int $deletingId = null;
 
     public string $deletingName = '';
@@ -22,6 +30,58 @@ class Index extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+    }
+
+    public function openCreateModal(): void
+    {
+        admin_authorize('categories', 'can_add');
+        $this->resetValidation();
+        $this->categoryId = null;
+        $this->name = '';
+        $this->showModal = true;
+    }
+
+    public function openEditModal(int $id): void
+    {
+        admin_authorize('categories', 'can_edit');
+        $this->resetValidation();
+        $category = BusinessCategory::findOrFail($id);
+        $this->categoryId = $category->id;
+        $this->name = $category->name;
+        $this->showModal = true;
+    }
+
+    public function closeModal(): void
+    {
+        $this->showModal = false;
+        $this->categoryId = null;
+        $this->name = '';
+        $this->resetValidation();
+    }
+
+    public function saveCategory(): void
+    {
+        admin_authorize('categories', $this->categoryId ? 'can_edit' : 'can_add');
+
+        $this->validate([
+            'name' => 'required|string|max:100|unique:business_categories,name,' . $this->categoryId,
+        ]);
+
+        if ($this->categoryId) {
+            $cat = BusinessCategory::findOrFail($this->categoryId);
+            $cat->update(['name' => $this->name]);
+            $this->successMsg = "Category \"{$this->name}\" updated successfully.";
+        } else {
+            $maxOrder = BusinessCategory::max('sort_order') ?? -1;
+            BusinessCategory::create([
+                'name' => $this->name,
+                'sort_order' => $maxOrder + 1,
+                'is_active' => true,
+            ]);
+            $this->successMsg = "Category \"{$this->name}\" created successfully.";
+        }
+
+        $this->closeModal();
     }
 
     public function openDelete(int $id, string $name): void
@@ -42,7 +102,7 @@ class Index extends Component
 
         $name = $this->deletingName;
         BusinessCategory::findOrFail($this->deletingId)->delete();
-        $this->successMsg = "\"{$name}\" category deleted";
+        $this->successMsg = "Category \"{$name}\" deleted.";
         $this->cancelDelete();
     }
 
@@ -54,7 +114,7 @@ class Index extends Component
             $query->where('name', 'like', "%{$this->search}%");
         }
 
-        $categories = $query->paginate(9);
+        $categories = $query->paginate(12);
 
         $counts = Business::whereIn('category', $categories->pluck('name'))
             ->selectRaw('category, count(*) as aggregate')

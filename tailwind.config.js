@@ -45,9 +45,9 @@ export default {
                 lg: 'var(--radius-lg)',
                 md: 'var(--radius-md)',
                 sm: 'var(--radius-sm)',
-                xl: '1.125rem',
-                '2xl': '1.5rem',
-                '3xl': '2rem',
+                xl: '0.875rem',
+                '2xl': '6px',
+                '3xl': '6px',
             },
             boxShadow: {
                 // Every shadow-* utility tinted toward the brand navy instead

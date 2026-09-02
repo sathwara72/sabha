@@ -1,18 +1,23 @@
 @props(['title' => 'Admin | Sabha'])
 
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" class="h-full scroll-smooth antialiased @if(app()->getLocale() === 'gu') lang-gu @endif">
+<html lang="{{ app()->getLocale() }}"
+    class="h-full scroll-smooth antialiased @if(app()->getLocale() === 'gu') lang-gu @endif">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="{{ asset('logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-background font-outfit text-foreground" x-data="{ sidebarOpen: false }" x-init="$watch('sidebarOpen', (v) => document.body.style.overflow = v ? 'hidden' : '')">
-    <div class="min-h-screen bg-background font-outfit text-foreground flex">
+
+<body class="min-h-screen bg-slate-50/60 font-outfit text-slate-900 antialiased" x-data="{ sidebarOpen: false }"
+    x-init="$watch('sidebarOpen', (v) => document.body.style.overflow = v ? 'hidden' : '')">
+    <div class="min-h-screen flex">
 
         @php
             $isFullAdmin = auth()->user()->role === 'admin';
@@ -21,7 +26,7 @@
                 if ($isFullAdmin) {
                     return true;
                 }
-                if (! empty($item['fullAdminOnly'])) {
+                if (!empty($item['fullAdminOnly'])) {
                     return false;
                 }
 
@@ -64,6 +69,7 @@
                 [
                     'label' => 'Network Activity',
                     'items' => [
+                        ['name' => 'Chat', 'icon' => 'message-square', 'href' => route('admin.chat.index'), 'active' => request()->routeIs('admin.chat.*'), 'module' => 'chat'],
                         ['name' => '1-to-1 Meetings', 'icon' => 'users', 'href' => route('admin.meetings.index'), 'active' => request()->routeIs('admin.meetings.*'), 'module' => 'meetings'],
                         ['name' => 'Referrals', 'icon' => 'send', 'href' => route('admin.referrals.index'), 'active' => request()->routeIs('admin.referrals.*'), 'module' => 'referrals'],
                         ['name' => 'Testimonials', 'icon' => 'message-square', 'href' => route('admin.testimonials.index'), 'active' => request()->routeIs('admin.testimonials.*'), 'module' => 'testimonials'],
@@ -73,7 +79,6 @@
                     'label' => 'Insights',
                     'items' => [
                         ['name' => 'Statistics', 'icon' => 'bar-chart-3', 'href' => route('admin.statistics.index'), 'active' => request()->routeIs('admin.statistics.*'), 'module' => 'statistics'],
-                        ['name' => 'Analytics', 'icon' => 'trending-up', 'href' => route('admin.analytics.index'), 'active' => request()->routeIs('admin.analytics.*'), 'module' => 'analytics'],
                     ],
                 ],
                 [
@@ -87,54 +92,51 @@
                 $group['items'] = collect($group['items'])->filter($visible)->values()->all();
 
                 return $group;
-            })->filter(fn ($group) => ! empty($group['items']))->values()->all();
+            })->filter(fn($group) => !empty($group['items']))->values()->all();
         @endphp
 
         {{-- Desktop Sidebar --}}
-        <aside class="hidden lg:flex w-64 border-r border-border bg-white p-5 flex-col fixed h-full z-50">
+        <aside
+            class="hidden lg:flex w-64 shrink-0 border-r border-slate-200/90 bg-white p-4 flex-col sticky top-0 h-screen z-30 shadow-xs">
             @include('components.layouts._admin-sidebar-content', ['menuGroups' => $menuGroups])
         </aside>
 
         {{-- Mobile Drawer Backdrop --}}
-        <div x-show="sidebarOpen" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" x-on:click="sidebarOpen = false"></div>
+        <div x-show="sidebarOpen" x-cloak x-transition.opacity
+            class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm lg:hidden" x-on:click="sidebarOpen = false">
+        </div>
 
         {{-- Mobile Drawer --}}
         <aside
-            class="fixed top-0 left-0 h-full w-72 bg-white border-r border-border p-5 z-50 flex flex-col transition-transform duration-300 lg:hidden"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-        >
+            class="fixed top-0 left-0 h-full w-72 bg-white border-r border-slate-200 p-4 z-50 flex flex-col transition-transform duration-300 lg:hidden shadow-2xl"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" x-cloak>
             @include('components.layouts._admin-sidebar-content', ['menuGroups' => $menuGroups])
         </aside>
 
-        {{-- Content Area --}}
-        <main class="flex-1 lg:ml-64 min-h-screen flex flex-col bg-background">
-            <header class="sticky top-0 z-40 flex items-center justify-between px-4 py-3 lg:px-6 border-b border-border bg-white/90 backdrop-blur-md">
-                <div class="flex items-center gap-3">
-                    <button
-                        x-on:click="sidebarOpen = true"
-                        class="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-muted-foreground hover:bg-surface transition-colors"
-                    >
+        {{-- Main Content Area --}}
+        <main class="flex-1 min-w-0 min-h-screen flex flex-col bg-slate-50/60">
+            {{-- Mobile-only Top Bar (Hidden on Desktop) --}}
+            <div
+                class="lg:hidden sticky top-0 z-20 flex h-14 items-center justify-between px-3 sm:px-4 border-b border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs">
+                <div class="flex items-center gap-2.5">
+                    <button type="button" x-on:click="sidebarOpen = true"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs"
+                        aria-label="Open sidebar">
                         <x-icon name="menu" class="h-4 w-4" />
                     </button>
-
-                    <div class="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                        <x-icon name="shield-check" class="h-3.5 w-3.5" />
-                        <span>Admin</span>
-                    </div>
+                    <span class="text-xs font-bold text-slate-800">SABHA Admin</span>
                 </div>
 
-                <div class="flex items-center gap-2.5">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-xs font-semibold text-foreground leading-tight">{{ auth()->user()->name }}</p>
-                        <p class="text-[12px] text-muted">{{ auth()->user()->email }}</p>
-                    </div>
-                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-soft text-xs font-bold text-primary">
-                        {{ auth()->user()->name ? mb_substr(auth()->user()->name, 0, 1) : 'A' }}
-                    </div>
-                </div>
-            </header>
+                <a href="/" target="_blank"
+                    class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-2xs">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    <span>Live</span>
+                    <x-icon name="arrow-right" class="h-3 w-3 -rotate-45 text-slate-400" />
+                </a>
+            </div>
 
-            <div class="flex-1 p-4 lg:p-5">
+            {{-- Main Page Slot --}}
+            <div class="flex-1 p-3 sm:p-4 lg:p-6">
                 {{ $slot }}
             </div>
         </main>
@@ -142,4 +144,5 @@
 
     @livewireScripts
 </body>
+
 </html>

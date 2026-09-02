@@ -1,26 +1,45 @@
 import './bootstrap';
 
 import collapse from '@alpinejs/collapse';
+import { Html5Qrcode, Html5QrcodeScanner } from 'html5-qrcode';
 
-document.addEventListener('alpine:init', () => {
-    window.Alpine.plugin(collapse);
+window.Html5Qrcode = Html5Qrcode;
+window.Html5QrcodeScanner = Html5QrcodeScanner;
 
-    window.Alpine.store('auth', {
-        loginOpen: false,
-        openLogin() {
-            this.loginOpen = true;
-        },
-        closeLogin() {
-            this.loginOpen = false;
-        },
-    });
+function registerAlpineFeatures() {
+    if (!window.Alpine) return;
+
+    try {
+        window.Alpine.plugin(collapse);
+    } catch (e) {}
+
+    if (!window.Alpine.store('auth')) {
+        window.Alpine.store('auth', {
+            loginOpen: false,
+            openLogin() {
+                window.location.href = '/login';
+            },
+            closeLogin() {
+                this.loginOpen = false;
+            },
+            openRegister() {
+                window.location.href = '/register';
+            },
+        });
+    }
 
     window.Alpine.data('chatThread', (config) => ({
         conversationId: config.conversationId,
         currentUserId: config.currentUserId,
+        isGroup: config.isGroup ?? false,
+        isGroupAdmin: config.isGroupAdmin ?? false,
         messages: config.initialMessages ?? [],
         editingId: null,
         editText: '',
+        messageInput: '',
+        isSending: false,
+        showDeleteModal: false,
+        deleteConfirmId: null,
 
         init() {
             this.$nextTick(() => this.scrollToBottom());
@@ -41,20 +60,58 @@ document.addEventListener('alpine:init', () => {
             if (window.Echo) window.Echo.leave('conversation.' + this.conversationId);
         },
 
+        async sendMessage() {
+            const text = (this.messageInput || '').trim();
+            if (!text || this.isSending) return;
+
+            const tempId = 'temp_' + Date.now();
+            const tempMsg = {
+                id: tempId,
+                is_pending: true,
+                is_mine: true,
+                sender_id: this.currentUserId,
+                body: text,
+                body_html: text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'),
+                created_at_human: 'Sending...',
+                is_edited: false,
+                is_deleted: false,
+                editable: false,
+                deletable: false,
+            };
+
+            this.messages.push(tempMsg);
+            this.messageInput = '';
+            this.isSending = true;
+            this.$nextTick(() => this.scrollToBottom());
+
+            try {
+                await this.$wire.set('body', text);
+                await this.$wire.send();
+            } catch (err) {
+                console.error('Failed to send message:', err);
+            } finally {
+                this.isSending = false;
+                this.messages = this.messages.filter((m) => m.id !== tempId);
+                this.$nextTick(() => this.scrollToBottom());
+            }
+        },
+
         onMessageSent(e) {
             if (this.messages.some((m) => m.id === e.id)) return;
+            const isMine = e.sender_id === this.currentUserId;
             this.messages.push({
                 id: e.id,
                 sender_id: e.sender_id,
                 sender_name: e.sender_name,
                 sender_avatar: e.sender_avatar,
+                message_type: e.message_type,
                 body: e.body,
                 body_html: e.body_html,
-                is_mine: e.sender_id === this.currentUserId,
+                is_mine: isMine,
                 is_edited: e.is_edited,
                 is_deleted: e.is_deleted,
-                editable: e.sender_id === this.currentUserId,
-                deletable: e.sender_id === this.currentUserId,
+                editable: isMine && e.message_type === 'text',
+                deletable: e.message_type === 'text' && (isMine || this.isGroupAdmin),
                 created_at_human: e.created_at_human,
             });
             this.$nextTick(() => this.scrollToBottom());
@@ -82,6 +139,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         mergeMessages(list) {
+            const pending = this.messages.filter((m) => m.is_pending);
             list.forEach((incoming) => {
                 const idx = this.messages.findIndex((m) => m.id === incoming.id);
                 if (idx === -1) {
@@ -90,7 +148,18 @@ document.addEventListener('alpine:init', () => {
                     this.messages[idx] = incoming;
                 }
             });
-            this.messages.sort((a, b) => a.id - b.id);
+            // Re-append pending messages at bottom if any
+            pending.forEach((p) => {
+                if (!this.messages.some((m) => m.id === p.id)) {
+                    this.messages.push(p);
+                }
+            });
+            this.messages.sort((a, b) => {
+                if (typeof a.id === 'string' && a.id.startsWith('temp_')) return 1;
+                if (typeof b.id === 'string' && b.id.startsWith('temp_')) return -1;
+                return a.id - b.id;
+            });
+            this.$nextTick(() => this.scrollToBottom());
         },
 
         startEdit(msg) {
@@ -108,9 +177,26 @@ document.addEventListener('alpine:init', () => {
             this.$wire.saveEdit(this.editingId, this.editText.trim());
         },
 
-        deleteMsg(id) {
-            if (! confirm('Delete this message for everyone?')) return;
+        confirmDelete(id) {
+            this.deleteConfirmId = id;
+            this.showDeleteModal = true;
+        },
+
+        cancelDelete() {
+            this.showDeleteModal = false;
+            this.deleteConfirmId = null;
+        },
+
+        proceedDelete() {
+            if (!this.deleteConfirmId) return;
+            const id = this.deleteConfirmId;
+            this.showDeleteModal = false;
+            this.deleteConfirmId = null;
             this.$wire.deleteMessage(id);
+        },
+
+        deleteMsg(id) {
+            this.confirmDelete(id);
         },
 
         scrollToBottom() {
@@ -123,11 +209,12 @@ document.addEventListener('alpine:init', () => {
         isOpen: false,
         imageSrc: '',
         title: 'Crop Image',
+        componentId: null,
         target: 'logoFile',
         aspectRatio: 1,
         zoom: 1,
         rotation: 0,
-        aspectMode: 'free',
+        aspectMode: 'default',
         naturalSize: { width: 0, height: 0 },
         cropBox: { x: 0, y: 0, w: 100, h: 100 },
         activeHandle: null,
@@ -139,19 +226,20 @@ document.addEventListener('alpine:init', () => {
             window.addEventListener('open-cropper', (e) => this.open(e.detail));
         },
 
-        open({ src, aspectRatio, title, target }) {
+        open({ src, aspectRatio, title, target, componentId }) {
             this.imageSrc = src;
             this.aspectRatio = aspectRatio ?? 1;
-            this.title = title ?? 'Crop Image';
+            this.title = title ?? 'Adjust & Crop Image';
             this.target = target;
+            this.componentId = componentId ?? null;
             this.zoom = 1;
             this.rotation = 0;
-            this.aspectMode = 'free';
+            this.aspectMode = 'default';
             this.isOpen = true;
             setTimeout(() => {
                 this.updateImgBox();
                 this.resetCropBox();
-            }, 60);
+            }, 80);
         },
 
         close() {
@@ -412,19 +500,117 @@ document.addEventListener('alpine:init', () => {
 
             canvas.toBlob((blob) => {
                 if (!blob) return;
-                const file = new File([blob], `cropped_image_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                const file = new File([blob], `cropped_${this.target}_${Date.now()}.jpg`, { type: 'image/jpeg' });
                 this.uploading = true;
-                this.$wire.upload(
-                    this.target,
-                    file,
-                    () => { this.uploading = false; this.close(); },
-                    () => { this.uploading = false; },
-                    () => {},
-                );
+
+                let wire = this.$wire;
+                if (!wire && window.Livewire) {
+                    if (this.componentId) {
+                        wire = window.Livewire.find(this.componentId);
+                    }
+                    if (!wire) {
+                        const allComponents = window.Livewire.all();
+                        if (allComponents && allComponents.length > 0) {
+                            wire = allComponents[0];
+                        }
+                    }
+                }
+
+                if (wire && typeof wire.upload === 'function') {
+                    wire.upload(
+                        this.target,
+                        file,
+                        () => {
+                            this.uploading = false;
+                            this.close();
+                        },
+                        (err) => {
+                            console.error('Cropper Livewire upload error:', err);
+                            this.uploading = false;
+                            alert('Upload failed. Please try again.');
+                        },
+                        () => {}
+                    );
+                } else {
+                    console.error('Livewire component not found for cropper upload.');
+                    this.uploading = false;
+                    this.close();
+                }
             }, 'image/jpeg', 0.93);
         },
     }));
-});
+
+    window.Alpine.data('animatedCounter', (rawValue) => ({
+        displayValue: '0',
+        targetNumber: 0,
+        prefix: '',
+        suffix: '',
+        duration: 1800,
+        hasAnimated: false,
+
+        init() {
+            const str = String(rawValue || '').trim();
+            const match = str.match(/^([^\d]*)(\d+[\d,.]*)(.*)$/);
+            if (match) {
+                this.prefix = match[1] || '';
+                this.suffix = match[3] || '';
+                const numStr = match[2].replace(/,/g, '');
+                this.targetNumber = parseFloat(numStr) || 0;
+                this.displayValue = this.prefix + '0' + this.suffix;
+            } else {
+                this.displayValue = str;
+                return;
+            }
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && !this.hasAnimated) {
+                            this.hasAnimated = true;
+                            this.animate();
+                            observer.disconnect();
+                        }
+                    });
+                }, { threshold: 0.15 });
+
+                observer.observe(this.$el);
+            } else {
+                this.animate();
+            }
+        },
+
+        animate() {
+            const start = 0;
+            const end = this.targetNumber;
+            const startTime = performance.now();
+            const isFloat = String(end).includes('.');
+
+            const step = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / this.duration, 1);
+                // Ease-out cubic curve: 1 - Math.pow(1 - progress, 3)
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const current = start + (end - start) * easeProgress;
+
+                const formatted = isFloat ? current.toFixed(1) : Math.floor(current).toLocaleString();
+                this.displayValue = this.prefix + formatted + this.suffix;
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    this.displayValue = this.prefix + (isFloat ? end.toFixed(1) : Math.floor(end).toLocaleString()) + this.suffix;
+                }
+            };
+
+            requestAnimationFrame(step);
+        }
+    }));
+}
+
+document.addEventListener('alpine:init', registerAlpineFeatures);
+if (window.Alpine) {
+    registerAlpineFeatures();
+}
 
 let activeQrScanner = null;
 

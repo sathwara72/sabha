@@ -50,42 +50,42 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50/90 border-b border-border/70">
-                            <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Giver</th>
-                            <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Receiver</th>
-                            <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Contact</th>
-                            <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                            <th class="px-5 py-3.5 text-[12px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                            <th class="px-3.5 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Giver</th>
+                            <th class="px-3.5 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Receiver</th>
+                            <th class="px-3.5 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Contact</th>
+                            <th class="px-3.5 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                            <th class="px-3.5 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border/60">
                         @foreach ($referrals as $ref)
                             <tr class="transition-colors hover:bg-slate-50/70">
-                                <td class="px-5 py-3.5 text-xs font-extrabold text-slate-900">{{ $ref->giver?->name ?? '—' }}</td>
-                                <td class="px-5 py-3.5 text-xs font-semibold text-slate-700">{{ $ref->receiver?->name ?? '—' }}</td>
-                                <td class="px-5 py-3.5 text-xs text-slate-600">{{ $ref->contact_name }}</td>
-                                <td class="px-5 py-3.5">
-                                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wide {{ $statusColor[$ref->status] ?? $statusColor['pending'] }}">
+                                <td class="px-3.5 py-2 text-xs font-extrabold text-slate-900">{{ $ref->giver?->name ?? '—' }}</td>
+                                <td class="px-3.5 py-2 text-xs font-semibold text-slate-700">{{ $ref->receiver?->name ?? '—' }}</td>
+                                <td class="px-3.5 py-2 text-xs text-slate-600">{{ $ref->contact_name }}</td>
+                                <td class="px-3.5 py-2">
+                                    <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $statusColor[$ref->status] ?? $statusColor['pending'] }}">
                                         {{ str_replace('_', ' ', $ref->status) }}
                                     </span>
                                     @if ($ref->status === 'closed' && $ref->amount)
-                                        <span class="block mt-0.5 text-[12px] font-bold text-emerald-700">₹{{ number_format((float) $ref->amount) }}</span>
+                                        <span class="block mt-0.5 text-[11px] font-bold text-emerald-700">₹{{ number_format((float) $ref->amount) }}</span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-3.5 text-right">
-                                    <div class="flex items-center justify-end gap-2">
+                                <td class="px-3.5 py-2 text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
                                         <button
                                             wire:click="view({{ $ref->id }})"
-                                            class="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer shadow-xs"
+                                            class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-slate-900 active:scale-95 cursor-pointer shadow-2xs"
                                             title="View Referral Details"
                                         >
-                                            <x-icon name="arrow-up-right" class="h-3.5 w-3.5" />
+                                            <x-icon name="arrow-up-right" class="h-3 w-3" />
                                         </button>
                                         <button
                                             wire:click="openDelete({{ $ref->id }})"
-                                            class="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition-all hover:bg-rose-100 active:scale-95 cursor-pointer shadow-xs"
+                                            class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-600 transition-all hover:bg-rose-100 active:scale-95 cursor-pointer shadow-2xs"
                                             title="Delete Referral"
                                         >
-                                            <x-icon name="trash-2" class="h-3.5 w-3.5" />
+                                            <x-icon name="trash-2" class="h-3 w-3" />
                                         </button>
                                     </div>
                                 </td>

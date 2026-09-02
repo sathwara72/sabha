@@ -26,9 +26,8 @@ class EventController extends Controller
 
         $event->load(['galleryImages', 'approvedRegistrations.user']);
 
-        $today = today();
-        $eventDay = $event->date->copy()->startOfDay();
-        $status = $eventDay->eq($today) ? 'current' : ($eventDay->lt($today) ? 'past' : 'upcoming');
+        $bookingStatus = $event->bookingStatus();
+        $isBookingOpen = $event->isBookingOpen();
 
         $members = $event->approvedRegistrations
             ->filter(fn ($reg) => $reg->user)
@@ -37,9 +36,15 @@ class EventController extends Controller
 
         $isVerifiedMember = auth()->check() && optional(auth()->user()->business)->status === 'approved';
 
+        $userRegistration = auth()->check()
+            ? EventRegistration::where('event_id', $event->id)->where('user_id', auth()->id())->first()
+            : null;
+
         return view('pages.event-show', [
             'event' => $event,
-            'status' => $status,
+            'status' => $bookingStatus,
+            'isBookingOpen' => $isBookingOpen,
+            'userRegistration' => $userRegistration,
             'members' => $members,
             'isVerifiedMember' => $isVerifiedMember,
             'priceNormal' => $event->price_normal ?: ($event->type === 'Workshop' ? 'Free' : '₹1,499'),
@@ -49,6 +54,18 @@ class EventController extends Controller
 
     public function reserve(Request $request, Event $event): JsonResponse
     {
+        if (! $event->isBookingOpen()) {
+            $status = $event->bookingStatus();
+            $msg = match ($status) {
+                'upcoming' => 'Ticket booking has not opened yet for this event (' . ($event->booking_start_date ? 'Opens on ' . $event->booking_start_date->format('M j, Y') : 'Starts soon') . ').',
+                'closed' => 'Ticket booking is now closed for this event (' . ($event->booking_end_date ? 'Closed on ' . $event->booking_end_date->format('M j, Y') : 'Ended') . ').',
+                'past' => 'This event has already taken place.',
+                default => 'Booking is currently unavailable for this event.',
+            };
+
+            return response()->json(['message' => $msg], 400);
+        }
+
         $user = $request->user();
 
         $existing = EventRegistration::where('event_id', $event->id)->where('user_id', $user->id)->first();

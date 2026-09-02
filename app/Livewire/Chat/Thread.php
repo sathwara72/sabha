@@ -5,6 +5,7 @@ namespace App\Livewire\Chat;
 use App\Models\ChatMessage;
 use App\Models\Conversation;
 use App\Services\ChatService;
+use App\Services\GroupGovernanceService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -29,7 +30,9 @@ class Thread extends Component
 
         $this->conversationId = $conversation->id;
         $this->conversation = $conversation;
-        $this->otherUser = $conversation->participants->firstWhere('user_id', '!=', Auth::id())?->user;
+        $this->otherUser = $conversation->type === 'direct'
+            ? $conversation->participants->firstWhere('user_id', '!=', Auth::id())?->user
+            : null;
 
         app(ChatService::class)->markRead($conversation, Auth::user());
     }
@@ -75,6 +78,17 @@ class Thread extends Component
         }
     }
 
+    public function leaveGroup()
+    {
+        try {
+            app(GroupGovernanceService::class)->leaveGroup($this->conversation, Auth::user());
+
+            return $this->redirect(route('chat.index'), navigate: false);
+        } catch (\RuntimeException $e) {
+            $this->errorMessage = $e->getMessage();
+        }
+    }
+
     public function pollSync(): void
     {
         $this->dispatch('chat-messages-synced', messages: $this->recentMessagesPayload());
@@ -83,6 +97,7 @@ class Thread extends Component
     private function recentMessagesPayload(): array
     {
         $userId = Auth::id();
+        $user = Auth::user();
 
         return ChatMessage::where('conversation_id', $this->conversationId)
             ->with('sender')
@@ -96,13 +111,14 @@ class Thread extends Component
                 'sender_id' => $m->sender_id,
                 'sender_name' => $m->sender->name,
                 'sender_avatar' => media_url($m->sender->avatar),
+                'message_type' => $m->message_type,
                 'body' => $m->is_deleted ? null : $m->body,
                 'body_html' => $m->is_deleted ? null : linkify_text($m->body),
                 'is_mine' => $m->sender_id === $userId,
                 'is_edited' => $m->is_edited,
                 'is_deleted' => $m->is_deleted,
-                'editable' => $m->editableBy(Auth::user()),
-                'deletable' => $m->deletableBy(Auth::user()),
+                'editable' => $m->editableBy($user),
+                'deletable' => $m->deletableBy($user) || $m->deletableByModerator($user),
                 'created_at_human' => $m->created_at->format('g:i A'),
             ])
             ->all();
@@ -112,6 +128,9 @@ class Thread extends Component
     {
         return view('livewire.chat.thread', [
             'initialMessages' => $this->recentMessagesPayload(),
+            'isGroup' => $this->conversation->type === 'group',
+            'isGroupAdmin' => $this->conversation->type === 'group' && $this->conversation->isGroupAdmin(Auth::user()),
+            'participantCount' => $this->conversation->type === 'group' ? $this->conversation->activeParticipants()->count() : null,
         ]);
     }
 }

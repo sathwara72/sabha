@@ -151,9 +151,19 @@ class Index extends Component
 
     public function render()
     {
-        $status = $this->tab === 'pending_review' ? 'pending_review' : 'pending_payment_review';
+        $query = User::query();
 
-        $query = User::where('registration_status', $status);
+        if ($this->tab === 'pending_review') {
+            $query->where('registration_status', 'pending_review');
+        } elseif ($this->tab === 'pending_payment') {
+            $query->where('registration_status', 'pending_payment_review');
+        } elseif ($this->tab === 'step1_approved') {
+            $query->where('registration_status', 'step1_approved');
+        } elseif ($this->tab === 'active') {
+            $query->where('registration_status', 'active');
+        } elseif ($this->tab === 'all') {
+            $query->whereIn('registration_status', ['pending_review', 'step1_approved', 'pending_payment_review', 'payment_rejected', 'active']);
+        }
 
         if ($this->search !== '') {
             $search = $this->search;
@@ -170,6 +180,9 @@ class Index extends Component
             'applicants' => $applicants,
             'pendingReviewCount' => User::where('registration_status', 'pending_review')->count(),
             'pendingPaymentCount' => User::where('registration_status', 'pending_payment_review')->count(),
+            'step1ApprovedCount' => User::where('registration_status', 'step1_approved')->count(),
+            'activeMembersCount' => User::where('registration_status', 'active')->count(),
+            'allCount' => User::whereIn('registration_status', ['pending_review', 'step1_approved', 'pending_payment_review', 'payment_rejected', 'active'])->count(),
             'viewingUser' => $this->viewingId ? User::find($this->viewingId) : null,
         ]);
     }

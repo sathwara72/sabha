@@ -1,112 +1,206 @@
-<div class="space-y-5 font-outfit">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Network Analytics</h1>
-            <p class="text-xs text-muted">Platform-wide networking activity, referral performance, and leaderboards</p>
+<div class="space-y-4 font-outfit">
+    {{-- Header Banner Card with Date Range Filters --}}
+    <div class="glass-card p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <x-icon name="trending-up" class="h-5 w-5" />
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Network Analytics</h1>
+                <p class="text-xs text-slate-500 font-medium">Platform-wide networking activity, referral performance, and leaderboards</p>
+            </div>
         </div>
+
         <div class="flex items-center gap-2 flex-wrap">
-            <input type="date" wire:model.live="dateFrom" class="rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary" />
-            <span class="text-xs text-muted-foreground">to</span>
-            <input type="date" wire:model.live="dateTo" class="rounded-xl border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary" />
+            <div class="flex items-center gap-1.5 bg-slate-50/80 p-1 rounded-xl border border-slate-200 shadow-2xs">
+                <input
+                    type="date"
+                    wire:model.live="dateFrom"
+                    class="rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none border border-slate-200 focus:border-primary transition-colors"
+                />
+                <span class="text-[11px] font-bold text-slate-400">to</span>
+                <input
+                    type="date"
+                    wire:model.live="dateTo"
+                    class="rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none border border-slate-200 focus:border-primary transition-colors"
+                />
+            </div>
+
             @if ($dateFrom || $dateTo)
-                <button wire:click="resetFilters" class="rounded-xl border border-border bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer">Clear</button>
+                <button
+                    wire:click="resetFilters"
+                    class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 active:scale-95 transition-all cursor-pointer shadow-2xs"
+                >
+                    Clear
+                </button>
             @endif
         </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs text-center">
-            <p class="text-xl font-extrabold text-primary">{{ $totalMembers }}</p>
-            <p class="text-[12px] text-muted-foreground mt-0.5">Members</p>
+    {{-- 6 Metric Cards --}}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs text-center flex flex-col justify-center">
+            <p class="text-xl font-black text-slate-900">{{ number_format($totalMembers) }}</p>
+            <p class="text-[11px] font-bold text-slate-500 mt-0.5">Active Members</p>
         </div>
-        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs text-center">
-            <p class="text-xl font-extrabold text-primary">{{ $totalBusinesses }}</p>
-            <p class="text-[12px] text-muted-foreground mt-0.5">Businesses</p>
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs text-center flex flex-col justify-center">
+            <p class="text-xl font-black text-slate-900">{{ number_format($totalBusinesses) }}</p>
+            <p class="text-[11px] font-bold text-slate-500 mt-0.5">Businesses</p>
         </div>
-        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs text-center">
-            <p class="text-xl font-extrabold text-primary">{{ $totalMeetings }}</p>
-            <p class="text-[12px] text-muted-foreground mt-0.5">1-to-1 Meetings</p>
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs text-center flex flex-col justify-center">
+            <p class="text-xl font-black text-primary">{{ number_format($totalMeetings) }}</p>
+            <p class="text-[11px] font-bold text-slate-500 mt-0.5">1-to-1 Meetings</p>
         </div>
-        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs text-center">
-            <p class="text-xl font-extrabold text-primary">{{ $totalReferrals }}</p>
-            <p class="text-[12px] text-muted-foreground mt-0.5">Referrals</p>
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs text-center flex flex-col justify-center">
+            <p class="text-xl font-black text-primary">{{ number_format($totalReferrals) }}</p>
+            <p class="text-[11px] font-bold text-slate-500 mt-0.5">Total Referrals</p>
         </div>
-        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs text-center">
-            <p class="text-xl font-extrabold text-emerald-600">{{ $closedReferrals }}</p>
-            <p class="text-[12px] text-muted-foreground mt-0.5">Closed Referrals</p>
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs text-center flex flex-col justify-center">
+            <p class="text-xl font-black text-emerald-600">{{ number_format($closedReferrals) }}</p>
+            <p class="text-[11px] font-bold text-slate-500 mt-0.5">Closed Deals</p>
         </div>
-        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs text-center">
-            <p class="text-xl font-extrabold text-emerald-600">₹{{ number_format($businessGenerated) }}</p>
-            <p class="text-[12px] text-muted-foreground mt-0.5">Business Generated</p>
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs text-center flex flex-col justify-center">
+            <p class="text-xl font-black text-emerald-600 truncate" title="₹{{ number_format($businessGenerated) }}">₹{{ number_format($businessGenerated) }}</p>
+            <p class="text-[11px] font-bold text-slate-500 mt-0.5">Business Volume</p>
         </div>
     </div>
 
+    {{-- Charts Section --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="bg-white p-4 rounded-2xl border border-border shadow-xs space-y-3">
-            <h4 class="text-xs font-bold text-foreground">Referrals per Month</h4>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Referrals per Month</h4>
+                <span class="text-[11px] font-semibold text-slate-400">Last 6 months</span>
+            </div>
             <x-charts.bar-chart :labels="$monthLabels" :values="$referralsByMonth" color="primary" />
         </div>
-        <div class="bg-white p-4 rounded-2xl border border-border shadow-xs space-y-3">
-            <h4 class="text-xs font-bold text-foreground">Referral Status Breakdown</h4>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Referral Status Breakdown</h4>
+                <span class="text-[11px] font-semibold text-slate-400">Current selection</span>
+            </div>
             @if (array_sum(array_column($statusSegments, 'value')) > 0)
                 <x-charts.donut-chart :segments="$statusSegments" />
             @else
-                <p class="text-[12px] text-muted-foreground italic">No referrals in this range.</p>
+                <p class="text-xs text-slate-400 italic py-12 text-center">No referrals in this range.</p>
             @endif
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-border shadow-xs">
-        <div class="flex items-center gap-1 p-3 border-b border-border">
-            @foreach (['givers' => 'Top Referral Givers', 'receivers' => 'Top Closers (Business Value)', 'networkers' => 'Top Networkers'] as $tab => $label)
-                <button
-                    wire:click="setLeaderboardTab('{{ $tab }}')"
-                    class="px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer {{ $leaderboardTab === $tab ? 'bg-primary-soft text-primary' : 'text-muted hover:text-foreground' }}"
-                >{{ $label }}</button>
-            @endforeach
+    {{-- All 3 Leaderboards Side-by-Side in 3 Columns --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {{-- Card 1: Top Referral Givers --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-primary border border-blue-100">
+                            <x-icon name="send" class="h-3.5 w-3.5" />
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-900">Top Referral Givers</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Members passing most opportunities</p>
+                        </div>
+                    </div>
+                </div>
+
+                @if ($topGivers->isEmpty())
+                    <p class="py-10 text-center text-xs text-slate-400 italic">No referrals given yet.</p>
+                @else
+                    <div class="space-y-1.5">
+                        @foreach ($topGivers as $i => $u)
+                            <div class="flex items-center justify-between p-2 rounded-xl {{ $i % 2 === 0 ? 'bg-slate-50/80' : 'bg-white' }} hover:bg-blue-50/40 transition-colors">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black {{ $i === 0 ? 'bg-amber-100 text-amber-800' : ($i === 1 ? 'bg-slate-200 text-slate-700' : ($i === 2 ? 'bg-amber-700/15 text-amber-900' : 'text-slate-400')) }}">
+                                        {{ $i + 1 }}
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-800 truncate">{{ $u->name }}</span>
+                                </div>
+                                <span class="text-[11px] font-black text-primary shrink-0 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-lg">
+                                    {{ $u->referrals_given_count }} referrals
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
 
-        <div class="p-4">
-            @if ($leaderboardTab === 'givers')
-                @if ($topGivers->isEmpty())
-                    <p class="py-8 text-center text-xs text-muted-foreground italic">No referrals given in this range yet.</p>
-                @else
-                    <div class="space-y-2">
-                        @foreach ($topGivers as $i => $u)
-                            <div class="flex items-center justify-between px-3 py-2 rounded-xl {{ $i % 2 === 0 ? 'bg-slate-50/60' : '' }}">
-                                <span class="text-xs font-bold text-foreground">#{{ $i + 1 }} {{ $u->name }}</span>
-                                <span class="text-xs font-extrabold text-primary">{{ $u->referrals_given_count }} referrals</span>
-                            </div>
-                        @endforeach
+        {{-- Card 2: Top Closers (Business Value) --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <x-icon name="trending-up" class="h-3.5 w-3.5" />
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-900">Top Closers</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Most business volume closed</p>
+                        </div>
                     </div>
-                @endif
-            @elseif ($leaderboardTab === 'receivers')
+                </div>
+
                 @if ($topReceivers->isEmpty())
-                    <p class="py-8 text-center text-xs text-muted-foreground italic">No closed referrals in this range yet.</p>
+                    <p class="py-10 text-center text-xs text-slate-400 italic">No closed deals yet.</p>
                 @else
-                    <div class="space-y-2">
+                    <div class="space-y-1.5">
                         @foreach ($topReceivers as $i => $u)
-                            <div class="flex items-center justify-between px-3 py-2 rounded-xl {{ $i % 2 === 0 ? 'bg-slate-50/60' : '' }}">
-                                <span class="text-xs font-bold text-foreground">#{{ $i + 1 }} {{ $u->name }}</span>
-                                <span class="text-xs font-extrabold text-emerald-700">₹{{ number_format((float) $u->business_value) }} &middot; {{ $u->closed_referrals_count }} closed</span>
+                            <div class="flex items-center justify-between p-2 rounded-xl {{ $i % 2 === 0 ? 'bg-slate-50/80' : 'bg-white' }} hover:bg-emerald-50/40 transition-colors">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black {{ $i === 0 ? 'bg-amber-100 text-amber-800' : ($i === 1 ? 'bg-slate-200 text-slate-700' : ($i === 2 ? 'bg-amber-700/15 text-amber-900' : 'text-slate-400')) }}">
+                                        {{ $i + 1 }}
+                                    </span>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-bold text-slate-800 truncate">{{ $u->name }}</p>
+                                        <p class="text-[10px] text-slate-400">{{ $u->closed_referrals_count }} closed</p>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] font-black text-emerald-700 shrink-0 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-lg">
+                                    ₹{{ number_format((float) $u->business_value) }}
+                                </span>
                             </div>
                         @endforeach
                     </div>
                 @endif
-            @else
+            </div>
+        </div>
+
+        {{-- Card 3: Top Networkers (1-to-1 Meetings) --}}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            <x-icon name="users" class="h-3.5 w-3.5" />
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-900">Top Networkers</h3>
+                            <p class="text-[10px] text-slate-500 font-medium">Most 1-to-1 meetings completed</p>
+                        </div>
+                    </div>
+                </div>
+
                 @if ($topNetworkers->isEmpty())
-                    <p class="py-8 text-center text-xs text-muted-foreground italic">No meetings logged in this range yet.</p>
+                    <p class="py-10 text-center text-xs text-slate-400 italic">No meetings logged yet.</p>
                 @else
-                    <div class="space-y-2">
+                    <div class="space-y-1.5">
                         @foreach ($topNetworkers as $i => $u)
-                            <div class="flex items-center justify-between px-3 py-2 rounded-xl {{ $i % 2 === 0 ? 'bg-slate-50/60' : '' }}">
-                                <span class="text-xs font-bold text-foreground">#{{ $i + 1 }} {{ $u->name }}</span>
-                                <span class="text-xs font-extrabold text-primary">{{ $u->meetings_count }} meetings</span>
+                            <div class="flex items-center justify-between p-2 rounded-xl {{ $i % 2 === 0 ? 'bg-slate-50/80' : 'bg-white' }} hover:bg-indigo-50/40 transition-colors">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black {{ $i === 0 ? 'bg-amber-100 text-amber-800' : ($i === 1 ? 'bg-slate-200 text-slate-700' : ($i === 2 ? 'bg-amber-700/15 text-amber-900' : 'text-slate-400')) }}">
+                                        {{ $i + 1 }}
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-800 truncate">{{ $u->name }}</span>
+                                </div>
+                                <span class="text-[11px] font-black text-indigo-700 shrink-0 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-lg">
+                                    {{ $u->meetings_count }} meetings
+                                </span>
                             </div>
                         @endforeach
                     </div>
                 @endif
-            @endif
+            </div>
         </div>
     </div>
 </div>

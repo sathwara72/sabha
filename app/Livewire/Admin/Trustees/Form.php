@@ -75,7 +75,7 @@ class Form extends Component
         $candidateValueMap = [];
 
         if (! $this->trusteeId) {
-            foreach (User::whereDoesntHave('trustee')->orderBy('name')->get(['id', 'name', 'email']) as $u) {
+            foreach (User::whereNotIn('role', ['admin', 'sub_admin'])->where('registration_status', 'active')->whereDoesntHave('trustee')->orderBy('name')->get(['id', 'name', 'email']) as $u) {
                 $label = "{$u->name} ({$u->email})";
                 $candidateLabels[] = $label;
                 $candidateValueMap[$label] = $u->id;

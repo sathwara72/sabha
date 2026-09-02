@@ -82,11 +82,13 @@ class Referrals extends Component
         $this->validate([
             'receiverMemberId' => 'required|integer|exists:users,id',
             'contactName' => 'required|string|max:255',
-            'contactNumber' => 'required|string|max:20',
+            'contactNumber' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
             'companyDetails' => 'nullable|string|max:255',
             'businessRequirement' => 'required|string',
             'leadRating' => 'required|in:' . implode(',', self::LEAD_RATINGS),
             'giverComments' => 'nullable|string',
+        ], [
+            'contactNumber.regex' => 'The contact number must be exactly 10 digits.',
         ]);
 
         if ((int) $this->receiverMemberId === Auth::id()) {
@@ -197,7 +199,7 @@ class Referrals extends Component
         $memberLabels = [];
         $memberValueMap = [];
         if ($this->direction === 'given') {
-            foreach (User::where('id', '!=', Auth::id())->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
+            foreach (User::where('id', '!=', Auth::id())->whereNotIn('role', ['admin', 'sub_admin'])->where('is_blocked', false)->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
                 $label = $member->phone ? "{$member->name} ({$member->phone})" : $member->name;
                 $memberLabels[] = $label;
                 $memberValueMap[$label] = $member->id;

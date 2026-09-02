@@ -17,15 +17,14 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    /**
-     * The Next.js app opens login as a global modal on top of whatever page
-     * you're on; /login there is just a redirect-and-open-modal shim. This
-     * mirrors that: bounce to home with a flag the layout uses to auto-open
-     * the modal client-side.
-     */
-    public function loginRedirect(): RedirectResponse
+    public function loginPage(): View|RedirectResponse
     {
-        return redirect('/?login=1');
+        if (Auth::check()) {
+            $user = Auth::user();
+            return redirect($user->canAccessAdminArea() ? '/admin' : '/profile');
+        }
+
+        return view('pages.login');
     }
 
     public function registerPage(): View
@@ -43,21 +42,27 @@ class AuthController extends Controller
         $user = User::where('email', $validated['email'])->first();
 
         if (! $user || ! Hash::check($validated['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'Invalid email or password.'], 401);
         }
 
         if ($user->is_blocked) {
-            return response()->json(['message' => 'you had blocked by admin please contact admin'], 403);
+            return response()->json(['message' => 'Your account has been deactivated. Please contact administrator.'], 403);
         }
 
         if ($user->registration_status === 'pending_review') {
             return response()->json(['message' => 'Your registration application is pending admin review. We\'ll email you once it\'s reviewed.'], 403);
         }
 
-        Auth::login($user);
+        $remember = (bool) $request->input('remember', true);
+        Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return response()->json(['message' => 'Login successful']);
+        $redirectUrl = $user->canAccessAdminArea() ? '/admin' : ($user->isRegistrationComplete() ? '/profile' : '/register');
+
+        return response()->json([
+            'message' => 'Login successful',
+            'redirect' => $redirectUrl,
+        ]);
     }
 
     public function logout(Request $request): RedirectResponse

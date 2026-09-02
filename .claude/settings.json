@@ -87,7 +87,30 @@
       "Bash(lsof -ti:8123 -sTCP:LISTEN)",
       "Bash(xargs -r kill)",
       "Bash(composer require *)",
-      "Bash(lsof -ti:8080 -sTCP:LISTEN)"
+      "Bash(lsof -ti:8080 -sTCP:LISTEN)",
+      "Bash(php -r ' *)",
+      "Bash(awk -F'\\\\t' '{print $1}' /tmp/sweep_guest.txt)",
+      "Bash(awk -F'\\\\t' '{print $1}' /tmp/sweep_member.txt)",
+      "Bash(awk -F'\\\\t' '{print $1}' /tmp/sweep_admin.txt)",
+      "Bash(curl -s -o /dev/null -w \"GUEST /chat -> %{http_code} \\(redirects to: %{redirect_url}\\)\\\\n\" -L --max-redirs 0 -b /tmp/qa-guest.jar \"http://127.0.0.1:8123/chat\")",
+      "Bash(curl -s -o /dev/null -w \"GUEST /profile/meetings/create -> %{http_code} \\(redirects to: %{redirect_url}\\)\\\\n\" -L --max-redirs 0 -b /tmp/qa-guest.jar \"http://127.0.0.1:8123/profile/meetings/create\")",
+      "Bash(curl -s -o /dev/null -w \"GUEST /profile -> %{http_code} \\(redirects to: %{redirect_url}\\)\\\\n\" -L --max-redirs 0 -b /tmp/qa-guest.jar \"http://127.0.0.1:8123/profile\")",
+      "Bash(curl -s -o /dev/null -w \"MEMBER /chat -> %{http_code}\\\\n\" -b /tmp/qa-member.jar \"http://127.0.0.1:8123/chat\")",
+      "Bash(curl -s -o /tmp/qr.png -w \"GET api/qr-code?data=test -> %{http_code} content-type: %{content_type}\\\\n\" \"http://127.0.0.1:8123/api/qr-code?data=test\")",
+      "Bash(curl -s -H 'Authorization: Bearer 1|3fSGeEignMeBp6XdAYmuXlP1aUHIR5mbYHzequO509057e8a' -H 'Accept: application/json' -o /dev/null -w '%{http_code}\\\\n' http://127.0.0.1:8123/api/user)",
+      "Bash(curl -s -H 'Authorization: Bearer 1|3fSGeEignMeBp6XdAYmuXlP1aUHIR5mbYHzequO509057e8a' -H 'Accept: application/json' -o /dev/null -w '%{http_code}\\\\n' http://127.0.0.1:8123/api/user/business)",
+      "Bash(curl -s -H 'Authorization: Bearer 1|3fSGeEignMeBp6XdAYmuXlP1aUHIR5mbYHzequO509057e8a' -H 'Accept: application/json' -o /dev/null -w '%{http_code}\\\\n' http://127.0.0.1:8123/api/user/registrations)",
+      "Bash(curl -s -H 'Authorization: Bearer 2|z3JLyN8u29gWU55HDnd1HgVfAQ2A9KwyzODaO3b2be6ce7bf' -H 'Accept: application/json' -o /dev/null -w '%{http_code}\\\\n' http://127.0.0.1:8123/api/admin/businesses)",
+      "Bash(curl -s -H 'Authorization: Bearer 2|z3JLyN8u29gWU55HDnd1HgVfAQ2A9KwyzODaO3b2be6ce7bf' -H 'Accept: application/json' -o /dev/null -w '%{http_code}\\\\n' http://127.0.0.1:8123/api/admin/categories)",
+      "Bash(curl -s -H 'Authorization: Bearer 1|3fSGeEignMeBp6XdAYmuXlP1aUHIR5mbYHzequO509057e8a' -H 'Accept: application/json' http://127.0.0.1:8123/api/admin/businesses -w '\\\\nHTTP:%{http_code}\\\\n')",
+      "Bash(curl -s -H 'Authorization: Bearer 1|3fSGeEignMeBp6XdAYmuXlP1aUHIR5mbYHzequO509057e8a' -H 'Accept: application/json' -X POST http://127.0.0.1:8123/api/admin/users/18502/toggle-block -w '\\\\nHTTP:%{http_code}\\\\n')",
+      "Bash(curl -s -H 'Authorization: Bearer 2|z3JLyN8u29gWU55HDnd1HgVfAQ2A9KwyzODaO3b2be6ce7bf' -H 'Accept: application/json' http://127.0.0.1:8123/api/admin/businesses -o /dev/null -w 'HTTP:%{http_code}\\\\n')",
+      "Bash(curl -s -H \"Accept: application/json\" \"http://127.0.0.1:8123/api/admin/businesses\" -o /dev/null -w \"HTTP:%{http_code}\\\\n\")",
+      "Bash(curl -s -H 'Accept: application/json' -H 'Content-Type: application/json' -X POST http://127.0.0.1:8123/api/contact -d '{\"name\":\"QA Smoke Tester\",\"email\":\"qa-contact@sabha.test\",\"message\":\"Smoke test message\",\"phone\":\"9000000099\"}' -w '\\\\nHTTP:%{http_code}\\\\n')",
+      "Bash(curl -s -H 'Authorization: Bearer 1|3fSGeEignMeBp6XdAYmuXlP1aUHIR5mbYHzequO509057e8a' -H 'Accept: application/json' -X POST http://127.0.0.1:8123/api/businesses -F 'name=QA Smoke Business' -F 'category=Software Development' -F 'description=Smoke test business' -w '\\\\nHTTP:%{http_code}\\\\n')",
+      "Bash(curl -s -H 'Authorization: Bearer __TRACKED_VAR__' -H 'Accept: application/json' -X POST http://127.0.0.1:8123/api/businesses -F 'name=QA Smoke Business' -F 'category=Software Development' -F 'description=Smoke test business' -F payment_screenshot=@/tmp/qa-payment.png -w '\\\\nHTTP:%{http_code}\\\\n')",
+      "Bash(curl -s -o /dev/null -w \"Reverb HTTP health check: %{http_code}\\\\n\" http://localhost:8080/apps/738139/events)",
+      "Bash(curl -sv http://localhost:8080/)"
     ]
   }
 }

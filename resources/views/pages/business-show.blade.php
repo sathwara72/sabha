@@ -41,7 +41,7 @@
             reviews: {{ Illuminate\Support\Js::from($reviews->map(fn ($r) => ['reviewer' => $r->user->name ?? null, 'role' => null, 'content' => $r->content, 'rating' => $r->rating])) }},
             async submitReview() {
                 @if (!auth()->check())
-                    $store.auth.openLogin();
+                    window.location.href = '/login';
                     return;
                 @endif
                 if (!this.reviewContent.trim() || this.reviewContent.trim().length < 5) {

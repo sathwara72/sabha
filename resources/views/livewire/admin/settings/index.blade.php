@@ -33,7 +33,7 @@
 
     <div class="space-y-3">
         {{-- General Contact --}}
-        <div class="glass-card p-4 space-y-3">
+        <div class="rounded-2xl border border-border/80 bg-white p-4 space-y-3 shadow-2xs">
             <h3 class="text-xs font-bold text-foreground border-b border-border pb-2 flex items-center gap-1.5">
                 <x-icon name="settings" class="h-3.5 w-3.5 text-primary" /> General Contact Info
             </h3>
@@ -58,7 +58,7 @@
         </div>
 
         {{-- Social Links --}}
-        <div class="glass-card p-4 space-y-3">
+        <div class="rounded-2xl border border-border/80 bg-white p-4 space-y-3 shadow-2xs">
             <h3 class="text-xs font-bold text-foreground border-b border-border pb-2 flex items-center gap-1.5">
                 <x-icon name="share-2" class="h-3.5 w-3.5 text-primary" /> Footer Social Media Links
             </h3>
@@ -79,7 +79,7 @@
         </div>
 
         {{-- Coordinators --}}
-        <div class="glass-card p-4 space-y-3">
+        <div class="rounded-2xl border border-border/80 bg-white p-4 space-y-3 shadow-2xs">
             <div class="flex items-center justify-between border-b border-border pb-2">
                 <h3 class="text-xs font-bold text-foreground flex items-center gap-1.5">
                     <x-icon name="mail" class="h-3.5 w-3.5 text-primary" /> Regional Coordinators
@@ -128,7 +128,7 @@
         </div>
 
         {{-- Membership Payment QR/UPI --}}
-        <div class="glass-card p-4 space-y-3">
+        <div class="rounded-2xl border border-border/80 bg-white p-4 space-y-3 shadow-2xs">
             <h3 class="text-xs font-bold text-foreground border-b border-border pb-2 flex items-center gap-1.5">
                 <x-icon name="qr-code" class="h-3.5 w-3.5 text-primary" /> Membership Payment QR/UPI
             </h3>
@@ -153,76 +153,6 @@
                 @endif
                 @error('membershipQrUpiFile') <p class="text-[12px] font-semibold text-rose-600">{{ $message }}</p> @enderror
             </div>
-        </div>
-
-        {{-- Trustees --}}
-        <div class="glass-card p-4 space-y-3">
-            <div class="flex items-center justify-between border-b border-border pb-2">
-                <h3 class="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <x-icon name="users" class="h-3.5 w-3.5 text-primary" /> Trustees & Committee Members
-                </h3>
-                <button type="button" wire:click="addTrustee" class="inline-flex items-center gap-1 text-[12px] font-bold text-primary bg-primary-soft hover:opacity-90 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer">
-                    <x-icon name="plus" class="h-3 w-3" /> Add Trustee
-                </button>
-            </div>
-
-            @if (empty($trustees))
-                <p class="text-xs text-muted italic text-center py-4">No trustees added. Click "Add Trustee" to define one.</p>
-            @else
-                <div class="space-y-2">
-                    @foreach ($trustees as $idx => $trustee)
-                        <div class="p-3 rounded-xl border border-border bg-surface/30 grid grid-cols-2 md:grid-cols-4 gap-2 items-end">
-                            <div>
-                                <div class="flex items-center gap-1 mb-0.5">
-                                    @if (! empty($trustee['avatar']))
-                                        <img src="{{ media_url($trustee['avatar']) ?? $trustee['avatar'] }}" alt="" class="h-3.5 w-3.5 rounded-full object-cover border border-border shrink-0" />
-                                    @endif
-                                    <label class="text-[12px] font-bold text-muted uppercase tracking-wider">Name</label>
-                                </div>
-                                <input type="text" wire:model="trustees.{{ $idx }}.name" class="{{ $inputClass }}" placeholder="e.g. Ravi Sharma" />
-                            </div>
-                            <div>
-                                <label class="{{ $labelClass }}">Role / Title</label>
-                                <input type="text" wire:model="trustees.{{ $idx }}.role" class="{{ $inputClass }}" placeholder="e.g. President & Trustee" />
-                            </div>
-                            <div>
-                                <label class="{{ $labelClass }}">Company / Organization</label>
-                                <input type="text" wire:model="trustees.{{ $idx }}.company" class="{{ $inputClass }}" placeholder="e.g. Founder, Vertex Solutions" />
-                            </div>
-                            <div class="flex gap-1.5 items-end">
-                                <div class="flex-1">
-                                    <label class="{{ $labelClass }}">Avatar URL</label>
-                                    <div class="flex gap-1">
-                                        <input type="text" wire:model="trustees.{{ $idx }}.avatar" class="{{ $inputClass }}" placeholder="e.g. https://images.unsplash.com/..." />
-                                        <label class="h-[30px] px-2 rounded-lg border border-border bg-surface hover:bg-surface/70 text-[12px] font-bold text-muted flex items-center justify-center cursor-pointer transition-colors shrink-0">
-                                            Upload
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                class="hidden"
-                                                x-on:change="
-                                                    const file = $event.target.files[0];
-                                                    if (file) {
-                                                        $wire.upload('trusteeAvatarUpload', file, () => $wire.uploadTrusteeAvatar({{ $idx }}), () => {});
-                                                    }
-                                                "
-                                            />
-                                        </label>
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    wire:click="removeTrustee({{ $idx }})"
-                                    class="h-[30px] w-[30px] shrink-0 rounded-lg bg-red-50 text-red-600 border border-red-100 flex items-center justify-center hover:bg-red-100 transition-colors cursor-pointer mb-px"
-                                    title="Delete Trustee"
-                                >
-                                    <x-icon name="trash-2" class="h-3 w-3" />
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
         </div>
 
         <div class="flex items-center justify-end">
