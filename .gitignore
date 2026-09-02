@@ -29,7 +29,7 @@ Homestead.yaml
 /auth.json
 
 # Production
-build/
+
 dist/
 
 # Misc
