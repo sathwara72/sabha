@@ -277,12 +277,19 @@
                                                 </span>
                                             </div>
                                         @else
-                                            {{-- Image --}}
-                                            <img src="{{ $item['src'] }}" alt="{{ $item['caption'] ?: 'Event photo ' . ($idx + 1) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            {{-- Image: Full Uncropped Image with Ambient Blurred Backdrop --}}
+                                            <x-safe-image
+                                                :src="$item['src']"
+                                                :alt="$item['caption'] ?: 'Event photo ' . ($idx + 1)"
+                                                :title="$item['caption']"
+                                                :blur-backdrop="true"
+                                                fallback-type="gallery"
+                                                img-class="h-full w-full object-contain"
+                                            />
                                         @endif
 
                                         @if ($item['caption'])
-                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                                 <p class="text-[11px] text-white font-semibold truncate">{{ $item['caption'] }}</p>
                                             </div>
                                         @endif

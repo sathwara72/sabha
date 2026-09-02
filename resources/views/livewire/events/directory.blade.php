@@ -1,7 +1,7 @@
 <div class="bg-background font-outfit">
-    <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-4">
+    <div class="mx-auto max-w-7xl px-6 py-4 lg:px-4 space-y-3">
         {{-- Title Row --}}
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-3">
             <div>
                 <div class="mb-1.5 flex items-center gap-2">
                     <span class="h-3.5 w-1.5 rounded-full bg-primary"></span>
@@ -75,14 +75,7 @@
                                         fallback-type="event"
                                     />
 
-                                    {{-- Type Badge --}}
-                                    @if ($event->model->type)
-                                        <div class="absolute left-2.5 top-2.5 z-20">
-                                            <span class="inline-flex items-center rounded-lg bg-white/95 backdrop-blur-md px-2 py-0.5 text-[10px] font-black text-slate-800 shadow-md border border-white/40">
-                                                {{ $event->model->type }}
-                                            </span>
-                                        </div>
-                                    @endif
+
 
                                     {{-- Clean Date Badge --}}
                                     <div class="absolute right-2.5 top-2.5 z-20">

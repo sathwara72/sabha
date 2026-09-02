@@ -13,32 +13,23 @@ class Statistic extends Model
     ];
 
     /**
-     * Refresh member/event-count-derived stat values from live counts and
-     * drop any stale city/mixer stats. Same behavior as the JSON API's
-     * getStatistics() endpoint, kept here since Blade controllers query
-     * Eloquent directly instead of hitting /api/statistics.
+     * Returns statistics saved by admin without overwriting custom numbers.
      */
     public static function syncFromLiveCounts(): \Illuminate\Support\Collection
     {
-        try {
+        $stats = static::orderBy('id')->get();
+
+        if ($stats->isEmpty()) {
             $userCount = User::count();
-            if ($userCount > 0) {
-                static::where('label', 'like', '%Professional%')
-                    ->orWhere('label', 'like', '%Member%')
-                    ->update(['value' => $userCount . '+']);
-            }
-
             $eventCount = Event::count();
-            if ($eventCount > 0) {
-                static::where('label', 'like', '%Event%')->update(['value' => $eventCount . '+']);
-            }
 
-            static::where('label', 'like', '%Cit%')->delete();
-            static::where('label', 'like', '%Mixer%')->delete();
-        } catch (\Exception $e) {
-            Log::error('Failed to dynamically update statistics: ' . $e->getMessage());
+            static::create(['label' => 'Active Members', 'value' => ($userCount > 0 ? $userCount . '+' : '500+')]);
+            static::create(['label' => 'Businesses Registered', 'value' => '1200+']);
+            static::create(['label' => 'Events Hosted', 'value' => ($eventCount > 0 ? $eventCount . '+' : '50+')]);
+
+            $stats = static::orderBy('id')->get();
         }
 
-        return static::all();
+        return $stats;
     }
 }

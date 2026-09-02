@@ -193,12 +193,16 @@
                                     </span>
                                 </div>
                             @else
-                                <img
-                                    src="{{ $photo['src'] }}"
-                                    alt="{{ $photo['caption'] ?: 'Photo ' . ($idx + 1) }}"
-                                    class="w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    loading="lazy"
-                                />
+                                <div class="relative w-full h-full min-h-[220px] flex items-center justify-center overflow-hidden">
+                                    <x-safe-image
+                                        :src="$photo['src']"
+                                        :alt="$photo['caption'] ?: 'Photo ' . ($idx + 1)"
+                                        :title="$photo['caption']"
+                                        :blur-backdrop="true"
+                                        fallback-type="gallery"
+                                        img-class="h-full w-full object-contain"
+                                    />
+                                </div>
                             @endif
 
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4 pointer-events-none">
