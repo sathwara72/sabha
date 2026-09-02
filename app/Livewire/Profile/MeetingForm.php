@@ -92,7 +92,7 @@ class MeetingForm extends Component
     {
         $memberLabels = [];
         $memberValueMap = [];
-        foreach (User::where('id', '!=', Auth::id())->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
+        foreach (User::where('id', '!=', Auth::id())->whereNotIn('role', ['admin', 'sub_admin'])->where('is_blocked', false)->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
             $label = $member->phone ? "{$member->name} ({$member->phone})" : $member->name;
             $memberLabels[] = $label;
             $memberValueMap[$label] = $member->id;

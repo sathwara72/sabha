@@ -53,6 +53,51 @@ class Form extends Component
         }
     }
 
+    public function selectAll(): void
+    {
+        foreach ($this->permissions as $module => $abilities) {
+            foreach ($abilities as $ability => $val) {
+                $this->permissions[$module][$ability] = true;
+            }
+        }
+    }
+
+    public function clearAll(): void
+    {
+        foreach ($this->permissions as $module => $abilities) {
+            foreach ($abilities as $ability => $val) {
+                $this->permissions[$module][$ability] = false;
+            }
+        }
+    }
+
+    public function toggleRow(string $module): void
+    {
+        if (! isset($this->permissions[$module])) {
+            return;
+        }
+
+        $allTrue = ! in_array(false, $this->permissions[$module], true);
+        foreach ($this->permissions[$module] as $ability => $val) {
+            $this->permissions[$module][$ability] = ! $allTrue;
+        }
+    }
+
+    public function toggleColumn(string $ability): void
+    {
+        $allTrue = true;
+        foreach ($this->permissions as $module => $abilities) {
+            if (! ($abilities[$ability] ?? false)) {
+                $allTrue = false;
+                break;
+            }
+        }
+
+        foreach ($this->permissions as $module => $abilities) {
+            $this->permissions[$module][$ability] = ! $allTrue;
+        }
+    }
+
     public function save()
     {
         $targetUserId = $this->userId;

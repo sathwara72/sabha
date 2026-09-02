@@ -20,17 +20,44 @@
                         </div>
                         <label class="absolute -bottom-1.5 -right-1.5 h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer shadow-md transition-opacity hover:opacity-90" title="Upload photo">
                             <x-icon name="camera" class="h-[11px] w-[11px]" />
-                            <input type="file" accept="image/*" wire:model="avatarFile" x-on:change="$wire.set('activeTab', 'profile')" class="hidden" />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                class="hidden"
+                                x-on:change="
+                                    const f = $event.target.files[0];
+                                    if (f) {
+                                        $wire.set('activeTab', 'profile');
+                                        window.dispatchEvent(new CustomEvent('open-cropper', {
+                                            detail: {
+                                                src: URL.createObjectURL(f),
+                                                aspectRatio: 1,
+                                                title: 'Adjust / Crop Profile Photo',
+                                                target: 'avatarFile',
+                                                componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
+                                            }
+                                        }));
+                                        $event.target.value = '';
+                                    }
+                                "
+                            />
                         </label>
                     </div>
                     <h2 class="mt-2 text-sm font-bold text-foreground leading-tight">{{ $user->name }}</h2>
                     <p class="text-[12px] text-muted font-medium truncate max-w-full">{{ $user->email }}</p>
                     <span class="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/10 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-primary">
-                        {{ $user->role === 'admin' ? __('site.profile.administrator') : __('site.profile.member') }}
+                        {{ $user->role === 'admin' ? __('site.profile.administrator') : ($user->role === 'sub_admin' ? 'Sub-Admin' : __('site.profile.member')) }}
                     </span>
                     <x-member-title-badge :title="$user->memberTitle" class="mt-1.5" />
                     @if ($avatarFile)
                         <p class="mt-1 text-[12px] font-semibold text-amber-600">{{ __('site.profile.photo_pending') }}</p>
+                    @endif
+
+                    @if ($user->canAccessAdminArea())
+                        <a href="/admin" class="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#00379D] to-[#082e6e] shadow-md shadow-primary/20 hover:opacity-95 active:scale-95 transition-all mt-3">
+                            <x-icon name="shield-check" class="h-4 w-4" />
+                            <span>Go to Admin Panel</span>
+                        </a>
                     @endif
                 </div>
 
@@ -518,10 +545,11 @@
                                             <div class="space-y-4 border-t border-border pt-4">
                                                 <h4 class="text-sm font-bold text-foreground">{{ __('site.profile.branding_photos') }}</h4>
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    {{-- Business Logo Box --}}
                                                     <div>
                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_logo') }}</label>
                                                         <div
-                                                            class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[140px]"
+                                                            class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[160px]"
                                                             x-data
                                                             x-on:click="$refs.logoPicker.click()"
                                                         >
@@ -533,30 +561,55 @@
                                                                 x-on:change="
                                                                     const f = $event.target.files[0];
                                                                     if (f) {
-                                                                        window.dispatchEvent(new CustomEvent('open-cropper', { detail: { src: URL.createObjectURL(f), aspectRatio: 1, title: 'Crop Logo Image', target: 'logoFile' } }));
+                                                                        window.dispatchEvent(new CustomEvent('open-cropper', {
+                                                                            detail: {
+                                                                                src: URL.createObjectURL(f),
+                                                                                aspectRatio: 1,
+                                                                                title: 'Adjust / Crop Business Logo',
+                                                                                target: 'logoFile',
+                                                                                componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
+                                                                            }
+                                                                        }));
                                                                         $event.target.value = '';
                                                                     }
                                                                 "
                                                             />
-                                                            @if ($logoPreview)
-                                                                <div class="flex flex-col items-center gap-2">
-                                                                    <div class="h-16 w-16 rounded-xl border border-border overflow-hidden bg-white p-1 shadow-sm">
-                                                                        <img src="{{ $logoFile ? $logoFile->temporaryUrl() : $logoPreview }}" alt="Logo Preview" class="h-full w-full object-contain" />
+
+                                                            <div wire:loading wire:target="logoFile" class="flex flex-col items-center gap-2 py-4">
+                                                                <x-icon name="loader-2" class="h-6 w-6 text-primary animate-spin" />
+                                                                <span class="text-xs font-bold text-primary">Applying & uploading logo...</span>
+                                                            </div>
+
+                                                            <div wire:loading.remove wire:target="logoFile" class="w-full flex flex-col items-center">
+                                                                @if ($logoFile)
+                                                                    <div class="flex flex-col items-center gap-2">
+                                                                        <div class="h-20 w-20 rounded-2xl border border-primary/40 overflow-hidden bg-white p-1.5 shadow-sm shrink-0 flex items-center justify-center">
+                                                                            <img src="{{ $logoFile->temporaryUrl() }}" alt="Cropped Logo Preview" class="max-h-full max-w-full object-contain rounded-xl" />
+                                                                        </div>
+                                                                        <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">Logo Adjusted (Click to re-crop)</span>
                                                                     </div>
-                                                                    <span class="text-[12px] font-bold text-primary">Click to change</span>
-                                                                </div>
-                                                            @else
-                                                                <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
-                                                                <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_logo') }}</span>
-                                                                <span class="text-[12px] text-muted-foreground mt-1">{{ __('site.profile.logo_hint') }}</span>
-                                                            @endif
+                                                                @elseif ($logoPreview)
+                                                                    <div class="flex flex-col items-center gap-2">
+                                                                        <div class="h-20 w-20 rounded-2xl border border-border overflow-hidden bg-white p-1.5 shadow-sm shrink-0 flex items-center justify-center">
+                                                                            <img src="{{ $logoPreview }}" alt="Current Logo" class="max-h-full max-w-full object-contain rounded-xl" />
+                                                                        </div>
+                                                                        <span class="text-[11px] font-bold text-slate-600 hover:text-primary">Click to crop & replace</span>
+                                                                    </div>
+                                                                @else
+                                                                    <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
+                                                                    <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_logo') }}</span>
+                                                                    <span class="text-[11px] text-muted mt-1">{{ __('site.profile.logo_hint') }}</span>
+                                                                @endif
+                                                            </div>
                                                         </div>
+                                                        @error('logoFile') <p class="text-[11px] text-rose-600 font-semibold mt-1">{{ $message }}</p> @enderror
                                                     </div>
 
+                                                    {{-- Business Cover Banner Box --}}
                                                     <div>
                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_cover') }}</label>
                                                         <div
-                                                            class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[140px]"
+                                                            class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[160px]"
                                                             x-data
                                                             x-on:click="$refs.coverPicker.click()"
                                                         >
@@ -568,24 +621,48 @@
                                                                 x-on:change="
                                                                     const f = $event.target.files[0];
                                                                     if (f) {
-                                                                        window.dispatchEvent(new CustomEvent('open-cropper', { detail: { src: URL.createObjectURL(f), aspectRatio: 3.2/1, title: 'Crop Cover Banner Image', target: 'coverFile' } }));
+                                                                        window.dispatchEvent(new CustomEvent('open-cropper', {
+                                                                            detail: {
+                                                                                src: URL.createObjectURL(f),
+                                                                                aspectRatio: 3.2 / 1,
+                                                                                title: 'Adjust / Crop Cover Banner',
+                                                                                target: 'coverFile',
+                                                                                componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
+                                                                            }
+                                                                        }));
                                                                         $event.target.value = '';
                                                                     }
                                                                 "
                                                             />
-                                                            @if ($coverPreview)
-                                                                <div class="flex flex-col items-center gap-2 w-full">
-                                                                    <div class="h-20 w-full max-w-[240px] rounded-xl border border-border overflow-hidden bg-slate-900 shadow-sm">
-                                                                        <img src="{{ $coverFile ? $coverFile->temporaryUrl() : $coverPreview }}" alt="Cover Preview" class="h-full w-full object-cover" />
+
+                                                            <div wire:loading wire:target="coverFile" class="flex flex-col items-center gap-2 py-4">
+                                                                <x-icon name="loader-2" class="h-6 w-6 text-primary animate-spin" />
+                                                                <span class="text-xs font-bold text-primary">Applying & uploading cover...</span>
+                                                            </div>
+
+                                                            <div wire:loading.remove wire:target="coverFile" class="w-full flex flex-col items-center">
+                                                                @if ($coverFile)
+                                                                    <div class="flex flex-col items-center gap-2 w-full">
+                                                                        <div class="h-20 w-full max-w-[240px] rounded-2xl border border-primary/40 overflow-hidden bg-slate-900 shadow-sm shrink-0 flex items-center justify-center">
+                                                                            <img src="{{ $coverFile->temporaryUrl() }}" alt="Cropped Cover Preview" class="h-full w-full object-cover" />
+                                                                        </div>
+                                                                        <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">Banner Adjusted (Click to re-crop)</span>
                                                                     </div>
-                                                                    <span class="text-[12px] font-bold text-primary">Click to crop & change</span>
-                                                                </div>
-                                                            @else
-                                                                <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
-                                                                <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_cover') }}</span>
-                                                                <span class="text-[12px] text-muted-foreground mt-1">{{ __('site.profile.cover_hint') }}</span>
-                                                            @endif
+                                                                @elseif ($coverPreview)
+                                                                    <div class="flex flex-col items-center gap-2 w-full">
+                                                                        <div class="h-20 w-full max-w-[240px] rounded-2xl border border-border overflow-hidden bg-slate-900 shadow-sm shrink-0 flex items-center justify-center">
+                                                                            <img src="{{ $coverPreview }}" alt="Current Cover" class="h-full w-full object-cover" />
+                                                                        </div>
+                                                                        <span class="text-[11px] font-bold text-slate-600 hover:text-primary">Click to crop & replace</span>
+                                                                    </div>
+                                                                @else
+                                                                    <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
+                                                                    <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_cover') }}</span>
+                                                                    <span class="text-[11px] text-muted mt-1">{{ __('site.profile.cover_hint') }}</span>
+                                                                @endif
+                                                            </div>
                                                         </div>
+                                                        @error('coverFile') <p class="text-[11px] text-rose-600 font-semibold mt-1">{{ $message }}</p> @enderror
                                                     </div>
                                                 </div>
                                             </div>
@@ -615,59 +692,137 @@
 
                 {{-- Registered Events Section --}}
                 @if ($activeTab === 'events')
-                    <div class="space-y-3">
-                        <div class="glass-card p-4 space-y-4">
-                            <div>
-                                <h2 class="text-sm font-bold text-foreground flex items-center gap-2 border-b border-border pb-2">
-                                    <x-icon name="calendar" class="h-[15px] w-[15px] text-primary" /> {{ __('site.profile.events_title') }}
-                                </h2>
-                                <p class="mt-1 text-xs text-muted">{{ __('site.profile.events_subtitle') }}</p>
+                    <div class="space-y-4">
+                        <div class="glass-card p-4 sm:p-5 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
+                                <div>
+                                    <h2 class="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+                                        <x-icon name="calendar" class="h-4 w-4 text-primary" /> {{ __('site.profile.events_title') }}
+                                        <span class="inline-flex items-center justify-center rounded-full bg-primary-soft text-primary border border-primary/10 px-2 py-0.5 text-[11px] font-bold">
+                                            {{ $registeredEvents->count() }}
+                                        </span>
+                                    </h2>
+                                    <p class="mt-0.5 text-xs text-muted">{{ __('site.profile.events_subtitle') }}</p>
+                                </div>
+                                <a href="/events" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-dark transition-colors self-start sm:self-auto">
+                                    <span>Browse All Events</span>
+                                    <x-icon name="arrow-right" class="h-3.5 w-3.5" />
+                                </a>
                             </div>
 
                             @if ($registeredEvents->isEmpty())
-                                <div class="rounded-xl border border-dashed border-border py-12 text-center text-sm text-muted">{{ __('site.profile.no_events') }}</div>
+                                <div class="rounded-2xl border border-dashed border-border py-12 px-4 text-center space-y-3 bg-surface/20">
+                                    <div class="h-12 w-12 rounded-2xl bg-primary-soft text-primary flex items-center justify-center mx-auto">
+                                        <x-icon name="calendar" class="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-foreground">{{ __('site.profile.no_events') }}</p>
+                                        <p class="text-xs text-muted mt-1">You have not registered for any upcoming events yet.</p>
+                                    </div>
+                                    <a href="/events" class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm hover:opacity-95 transition-all">
+                                        <span>Explore Events</span>
+                                        <x-icon name="arrow-right" class="h-3.5 w-3.5" />
+                                    </a>
+                                </div>
                             @else
-                                <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     @foreach ($registeredEvents as $evt)
-                                        @continue(!$evt->event)
-                                        @php
-                                            $eventDetails = $evt->event;
-                                            $ticketPrice = (float) $evt->amount_paid === 0.0 ? 'Free' : '₹' . number_format((float) $evt->amount_paid);
-                                            $isApproved = in_array($evt->status, ['approved', 'confirmed'], true);
-                                            $isRejected = $evt->status === 'rejected';
-                                        @endphp
-                                        <a href="/profile/events/{{ $evt->id }}" class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-border bg-slate-50/50 hover:bg-white hover:shadow-sm hover:border-primary/20 transition-all group">
-                                            <div class="h-16 w-28 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-border">
-                                                <x-safe-image :src="media_url($eventDetails->image)" :alt="$eventDetails->title" :title="$eventDetails->title" :date="$eventDetails->date" fallback-type="event" img-class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <h4 class="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{{ $eventDetails->title }}</h4>
-                                                <div class="flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-muted font-medium mt-1">
-                                                    <span class="inline-flex items-center gap-1 flex-wrap"><x-icon name="calendar" class="h-3 w-3" /> {{ $eventDetails->date->format('M j, Y') }}</span>
-                                                    <span class="inline-flex items-center gap-1 flex-wrap"><x-icon name="map-pin" class="h-3 w-3" /> {{ $eventDetails->location }}</span>
-                                                    <span class="font-semibold text-foreground">{{ __('site.profile.paid') }}: {{ $ticketPrice }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="shrink-0 flex flex-col sm:items-end gap-2 pt-2 sm:pt-0">
-                                                <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-bold uppercase tracking-wide border {{ $isApproved ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : ($isRejected ? 'bg-red-50 text-red-700 border-red-200/50' : 'bg-amber-50 text-amber-700 border-amber-200/50') }}">
-                                                    @if ($isApproved)
-                                                        <x-icon name="check-circle-2" class="h-3 w-3" /> {{ __('site.profile.event_confirmed') }}
-                                                    @elseif ($isRejected)
-                                                        <x-icon name="x-circle" class="h-3 w-3" /> {{ __('site.bookingDetail.status_rejected') }}
-                                                    @else
-                                                        <x-icon name="clock" class="h-3 w-3" /> {{ __('site.profile.event_pending') }}
-                                                    @endif
-                                                </span>
-                                                @if ($evt->is_attended)
-                                                    <span class="inline-flex items-center gap-0.5 rounded-full bg-emerald-100/70 border border-emerald-200/50 px-2 py-0.5 text-[12px] font-bold text-emerald-800 uppercase tracking-wider self-start sm:self-end">
-                                                        <x-icon name="check-circle-2" class="h-[10px] w-[10px]" /> Attended
-                                                    </span>
-                                                @endif
-                                                <span class="text-[12px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-                                                    {{ __('site.profile.view_details') }} <x-icon name="chevron-right" class="h-3 w-3" />
-                                                </span>
-                                            </div>
-                                        </a>
+                                         @continue(!$evt->event)
+                                         @php
+                                             $eventDetails = $evt->event;
+                                             $ticketPrice = (float) $evt->amount_paid === 0.0 ? 'Free' : '₹' . number_format((float) $evt->amount_paid);
+                                             $isApproved = in_array($evt->status, ['approved', 'confirmed'], true);
+                                             $isRejected = $evt->status === 'rejected';
+                                         @endphp
+                                         <div class="rounded-2xl border border-border bg-white hover:border-primary/40 hover:shadow-sm transition-all duration-200 overflow-hidden flex flex-col justify-between group">
+                                             <div>
+                                                 {{-- Event Image: Compact Height with blur-backdrop and object-contain --}}
+                                                 <div class="relative w-full h-32 sm:h-36 bg-slate-950 overflow-hidden flex items-center justify-center">
+                                                     <x-safe-image
+                                                         :src="media_url($eventDetails->image)"
+                                                         :alt="$eventDetails->title"
+                                                         :title="$eventDetails->title"
+                                                         :date="$eventDetails->date"
+                                                         :blur-backdrop="true"
+                                                         fallback-type="event"
+                                                     />
+
+                                                     {{-- Date Badge Overlay --}}
+                                                     <div class="absolute top-2 left-2 flex flex-col items-center justify-center rounded-md bg-white/95 backdrop-blur-sm border border-white/60 shadow-xs px-1.5 py-0.5 min-w-[36px]">
+                                                         <span class="text-[8px] font-extrabold uppercase tracking-wider text-primary">{{ $eventDetails->date?->format('M') }}</span>
+                                                         <span class="text-xs font-black text-slate-900 leading-none">{{ $eventDetails->date?->format('d') }}</span>
+                                                     </div>
+
+                                                     {{-- Status Badges Floating Top Right --}}
+                                                     <div class="absolute top-2 right-2 flex flex-col items-end gap-1">
+                                                         <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-xs {{ $isApproved ? 'bg-emerald-600 text-white' : ($isRejected ? 'bg-red-600 text-white' : 'bg-amber-500 text-white') }}">
+                                                             @if ($isApproved)
+                                                                 <x-icon name="check-circle-2" class="h-2.5 w-2.5" /> {{ __('site.profile.event_confirmed') }}
+                                                             @elseif ($isRejected)
+                                                                 <x-icon name="x-circle" class="h-2.5 w-2.5" /> {{ __('site.bookingDetail.status_rejected') }}
+                                                             @else
+                                                                 <x-icon name="clock" class="h-2.5 w-2.5" /> {{ __('site.profile.event_pending') }}
+                                                             @endif
+                                                         </span>
+
+                                                         @if ($evt->is_attended)
+                                                             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-xs">
+                                                                 <x-icon name="check-circle-2" class="h-2 w-2 text-emerald-700" /> Attended
+                                                             </span>
+                                                         @endif
+                                                     </div>
+
+                                                     @if ($eventDetails->type)
+                                                         <span class="absolute bottom-2 left-2 inline-flex items-center rounded bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 border border-white/20">
+                                                             {{ $eventDetails->type }}
+                                                         </span>
+                                                     @endif
+                                                 </div>
+
+                                                 {{-- Card Content Body --}}
+                                                 <div class="p-3 space-y-2">
+                                                     <div>
+                                                         <h3 class="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-snug" title="{{ $eventDetails->title }}">
+                                                             {{ $eventDetails->title }}
+                                                         </h3>
+                                                         <p class="text-[10px] text-muted-foreground font-medium mt-0.5">
+                                                             Booked on {{ $evt->created_at?->format('M d, Y') ?? 'Recent' }}
+                                                         </p>
+                                                     </div>
+
+                                                     <div class="grid grid-cols-2 gap-1.5 text-xs">
+                                                         <div class="rounded-lg border border-border/80 bg-surface/40 p-1.5 px-2 space-y-0.5">
+                                                             <span class="text-[9px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+                                                                 <x-icon name="map-pin" class="h-2.5 w-2.5 text-primary" /> Location
+                                                             </span>
+                                                             <p class="text-[11px] font-bold text-foreground truncate" title="{{ $eventDetails->location }}">
+                                                                 {{ $eventDetails->location ?: 'Online / TBA' }}
+                                                             </p>
+                                                         </div>
+
+                                                         <div class="rounded-lg border border-border/80 bg-surface/40 p-1.5 px-2 space-y-0.5">
+                                                             <span class="text-[9px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
+                                                                 <x-icon name="credit-card" class="h-2.5 w-2.5 text-primary" /> Amount
+                                                             </span>
+                                                             <p class="text-[11px] font-extrabold {{ (float) $evt->amount_paid > 0 ? 'text-emerald-600' : 'text-foreground' }}">
+                                                                 {{ $ticketPrice }}
+                                                             </p>
+                                                         </div>
+                                                     </div>
+                                                 </div>
+                                             </div>
+
+                                             {{-- Footer CTA --}}
+                                             <div class="p-3 pt-0">
+                                                 <a
+                                                     href="/profile/events/{{ $evt->id }}"
+                                                     class="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                                                 >
+                                                     <span>{{ __('site.profile.view_details') }} / Pass</span>
+                                                     <x-icon name="arrow-right" class="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                                                 </a>
+                                             </div>
+                                         </div>
                                     @endforeach
                                 </div>
                             @endif

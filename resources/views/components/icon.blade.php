@@ -2,7 +2,7 @@
 
 @php $svgClass = $attributes->get('class', 'h-4 w-4'); @endphp
 
-<svg {{ $attributes->except('class') }} class="{{ $svgClass }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<svg {{ $attributes->except('class') }} class="{{ $svgClass }} shrink-0" style="max-width: 100%; max-height: 100%;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     @switch($name)
         @case('menu')
             <path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" />
@@ -52,6 +52,12 @@
         @case('chevron-right')
             <path d="m9 18 6-6-6-6" />
             @break
+        @case('chevron-down')
+            <path d="m6 9 6 6 6-6" />
+            @break
+        @case('chevron-up')
+            <path d="m18 15-6-6-6 6" />
+            @break
         @case('trending-up')
             <path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" />
             @break
@@ -99,6 +105,12 @@
             @break
         @case('filter')
             <path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z" />
+            @break
+        @case('bell')
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            @break
+        @case('activity')
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
             @break
         @case('arrow-up-right')
             <path d="M7 7h10v10" /><path d="M7 17 17 7" />
@@ -217,8 +229,14 @@
         @case('shield-alert')
             <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="M12 8v4" /><path d="M12 16h.01" />
             @break
+        @case('plus')
+            <path d="M5 12h14" /><path d="M12 5v14" />
+            @break
         @case('plus-circle')
             <circle cx="12" cy="12" r="10" /><path d="M8 12h8" /><path d="M12 8v8" />
+            @break
+        @case('trash-2')
+            <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" />
             @break
         @case('qr-code')
             <rect width="5" height="5" x="3" y="3" rx="1" /><rect width="5" height="5" x="16" y="3" rx="1" /><rect width="5" height="5" x="3" y="16" rx="1" /><path d="M21 16h-3a2 2 0 0 0-2 2v3" /><path d="M21 21v.01" /><path d="M12 7v3a2 2 0 0 1-2 2H7" /><path d="M3 12h.01" /><path d="M12 3h.01" /><path d="M12 16v.01" /><path d="M16 12h1" /><path d="M21 12v.01" /><path d="M12 21v-1" />

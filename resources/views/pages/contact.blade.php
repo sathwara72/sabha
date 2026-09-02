@@ -75,33 +75,42 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3 pt-4 border-t border-border/80">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-foreground">{{ __('site.contact.regional_contacts') }}</h3>
-                        <div class="grid grid-cols-1 gap-2.5">
-                            @foreach ($coordinators as $ch)
-                                @php
-                                    $translationKey = 'site.contact.' . str_replace(' ', '_', strtolower($ch['city']));
-                                    $translated = __($translationKey);
-                                    $cityLabel = $translated === $translationKey ? $ch['city'] : $translated;
-                                @endphp
-                                <div class="rounded-xl border {{ $ch['border'] ?? 'border-border' }} {{ $ch['bg'] ?? 'bg-white' }} p-3 space-y-1.5">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-xs font-extrabold text-foreground">{{ $cityLabel }}</span>
-                                        <span class="inline-flex items-center gap-1 text-[12px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
-                                            {{ __('site.contact.coordinator') }}
-                                        </span>
-                                    </div>
-                                    <div class="space-y-0.5">
-                                        <p class="text-xs font-extrabold text-slate-900">{{ $ch['contact'] }}</p>
-                                        <div class="flex flex-wrap gap-x-3 text-[12px] text-muted font-medium">
-                                            <span class="flex items-center gap-1"><x-icon name="phone" class="h-[11px] w-[11px] text-primary" /> {{ $ch['phone'] }}</span>
-                                            <span class="flex items-center gap-1"><x-icon name="mail" class="h-[11px] w-[11px] text-primary" /> {{ $ch['email'] }}</span>
+                    @if (!empty($coordinators) && count($coordinators) > 0)
+                        <div class="space-y-3 pt-4 border-t border-border/80">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-foreground">{{ __('site.contact.regional_contacts') }}</h3>
+                            <div class="grid grid-cols-1 gap-2.5">
+                                @foreach ($coordinators as $ch)
+                                    @php
+                                        $city = $ch['city'] ?? '';
+                                        $translationKey = 'site.contact.' . str_replace(' ', '_', strtolower($city));
+                                        $translated = __($translationKey);
+                                        $cityLabel = ($city && $translated !== $translationKey) ? $translated : $city;
+                                    @endphp
+                                    <div class="rounded-xl border {{ $ch['border'] ?? 'border-border' }} {{ $ch['bg'] ?? 'bg-white' }} p-3 space-y-1.5">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-extrabold text-foreground">{{ $cityLabel }}</span>
+                                            <span class="inline-flex items-center gap-1 text-[12px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
+                                                {{ __('site.contact.coordinator') }}
+                                            </span>
+                                        </div>
+                                        <div class="space-y-0.5">
+                                            @if (!empty($ch['contact']))
+                                                <p class="text-xs font-extrabold text-slate-900">{{ $ch['contact'] }}</p>
+                                            @endif
+                                            <div class="flex flex-wrap gap-x-3 text-[12px] text-muted font-medium">
+                                                @if (!empty($ch['phone']))
+                                                    <span class="flex items-center gap-1"><x-icon name="phone" class="h-[11px] w-[11px] text-primary" /> {{ $ch['phone'] }}</span>
+                                                @endif
+                                                @if (!empty($ch['email']))
+                                                    <span class="flex items-center gap-1"><x-icon name="mail" class="h-[11px] w-[11px] text-primary" /> {{ $ch['email'] }}</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
                 {{-- Contact form --}}

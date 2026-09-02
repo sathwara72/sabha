@@ -3,6 +3,7 @@
     'description' => 'A community platform where people create accounts, list their businesses, and connect through events and workshops.',
     'image' => null,
     'noindex' => false,
+    'showFooter' => true,
 ])
 
 <!DOCTYPE html>
@@ -40,8 +41,7 @@
     x-data
     x-init="
         if (new URLSearchParams(window.location.search).get('login') === '1') {
-            $store.auth.openLogin();
-            window.history.replaceState({}, '', window.location.pathname);
+            window.location.href = '/login';
         }
     "
 >
@@ -49,8 +49,9 @@
     <main class="flex-1 pt-16">
         {{ $slot }}
     </main>
-    <x-footer />
-    <x-login-modal />
+    @if ($showFooter)
+        <x-footer />
+    @endif
     @livewireScripts
 </body>
 </html>

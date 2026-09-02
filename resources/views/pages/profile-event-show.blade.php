@@ -30,7 +30,7 @@
 @endphp
 
 <x-layouts.app :title="$event->title . ' | Sabha'" :noindex="true">
-    <div class="min-h-screen bg-background font-outfit pb-20" x-data="{ copied: false, copy() { navigator.clipboard.writeText('{{ $registration->ticket_number }}'); this.copied = true; setTimeout(() => this.copied = false, 2000) } }">
+    <div class="min-h-screen bg-background font-outfit " x-data="{ copied: false, copy() { navigator.clipboard.writeText('{{ $registration->ticket_number }}'); this.copied = true; setTimeout(() => this.copied = false, 2000) } }">
         <div class="sticky top-0 z-30 border-b border-border bg-white/90 backdrop-blur-md">
             <div class="mx-auto max-w-5xl px-6 py-4 flex items-center gap-3">
                 <a href="/profile?tab=events" class="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-primary transition-colors">
@@ -41,16 +41,23 @@
             </div>
         </div>
 
-        <div class="mx-auto max-w-5xl px-6 py-10 space-y-8">
-            <div class="relative h-56 sm:h-72 rounded-2xl overflow-hidden border border-border shadow-lg">
-                <img src="{{ $heroImage }}" alt="{{ $event->title }}" class="h-full w-full object-cover" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
+        <div class="mx-auto max-w-7xl px-6 py-5 space-y-2">
+            <div class="relative h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden border border-border shadow-lg bg-slate-950 flex items-center justify-center">
+                <x-safe-image
+                    :src="$heroImage"
+                    :alt="$event->title"
+                    :title="$event->title"
+                    :date="$event->date"
+                    :blur-backdrop="true"
+                    fallback-type="event"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-black/20 pointer-events-none"></div>
+                <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 pointer-events-none">
                     <div>
                         <span class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mb-2">{{ $event->type }}</span>
-                        <h1 class="text-xl sm:text-2xl font-extrabold text-white leading-tight">{{ $event->title }}</h1>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-white leading-tight drop-shadow-sm">{{ $event->title }}</h1>
                     </div>
-                    <div class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold border {{ $status['bg'] }} {{ $status['color'] }} {{ $status['border'] }}">
+                    <div class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold border shadow-sm {{ $status['bg'] }} {{ $status['color'] }} {{ $status['border'] }}">
                         <x-icon :name="$status['icon']" class="h-[13px] w-[13px]" /> {{ $status['label'] }}
                     </div>
                 </div>

@@ -18,6 +18,10 @@ class Form extends Component
 
     public string $date = '';
 
+    public ?string $booking_start_date = '';
+
+    public ?string $booking_end_date = '';
+
     public string $location = '';
 
     public string $type = 'Mixer';
@@ -48,6 +52,8 @@ class Form extends Component
         $this->title = $event->title;
         $this->description = $event->description;
         $this->date = $event->date ? $event->date->format('Y-m-d') : '';
+        $this->booking_start_date = $event->booking_start_date ? $event->booking_start_date->format('Y-m-d') : '';
+        $this->booking_end_date = $event->booking_end_date ? $event->booking_end_date->format('Y-m-d') : '';
         $this->location = $event->location;
         $this->type = $event->type ?: 'Mixer';
         $this->price_normal = $event->price_normal ?: '';
@@ -105,6 +111,8 @@ class Form extends Component
             'title' => 'required|string',
             'description' => 'required|string',
             'date' => 'required|date',
+            'booking_start_date' => 'nullable|date',
+            'booking_end_date' => 'nullable|date|after_or_equal:booking_start_date',
             'location' => 'required|string',
             'type' => 'required|string',
             'price_normal' => 'required|string',
@@ -122,6 +130,8 @@ class Form extends Component
             'title' => $validated['title'],
             'description' => $validated['description'],
             'date' => $validated['date'],
+            'booking_start_date' => ! empty($validated['booking_start_date']) ? $validated['booking_start_date'] : null,
+            'booking_end_date' => ! empty($validated['booking_end_date']) ? $validated['booking_end_date'] : null,
             'location' => $validated['location'],
             'type' => $validated['type'],
             'price_normal' => $validated['price_normal'],

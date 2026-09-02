@@ -38,7 +38,7 @@ class Index extends Component
             });
         }
 
-        $testimonials = $query->paginate(10);
+        $testimonials = $query->paginate(12);
 
         return view('livewire.admin.testimonials.index', [
             'testimonials' => $testimonials,

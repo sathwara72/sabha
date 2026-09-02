@@ -62,7 +62,7 @@ class Index extends Component
                 return ['label' => ucfirst(str_replace('_', ' ', $status)), 'value' => $referralQuery()->where('status', $status)->count(), 'color' => $color];
             })->values()->all();
 
-        $topGivers = User::select('users.id', 'users.name')
+        $topGivers = User::select('users.id', 'users.name', 'users.city', 'users.phone')
             ->selectSub(function ($q) {
                 $this->applyDateRange($q->from('business_referrals')->selectRaw('count(*)')->whereColumn('giver_id', 'users.id'), 'created_at');
             }, 'referrals_given_count')
@@ -71,7 +71,7 @@ class Index extends Component
             ->limit(10)
             ->get();
 
-        $topReceivers = User::select('users.id', 'users.name')
+        $topReceivers = User::select('users.id', 'users.name', 'users.city', 'users.phone')
             ->selectSub(function ($q) {
                 $this->applyDateRange($q->from('business_referrals')->selectRaw('count(*)')->whereColumn('receiver_id', 'users.id')->where('status', 'closed'), 'created_at');
             }, 'closed_referrals_count')
@@ -83,7 +83,7 @@ class Index extends Component
             ->limit(10)
             ->get();
 
-        $topNetworkers = User::select('users.id', 'users.name')
+        $topNetworkers = User::select('users.id', 'users.name', 'users.city', 'users.phone')
             ->selectSub(function ($q) {
                 $this->applyDateRange(
                     $q->from('one_to_one_meetings')->selectRaw('count(*)')

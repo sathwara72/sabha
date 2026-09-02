@@ -1,6 +1,40 @@
+@php
+    $commonItemsJson = $common->map(function ($item, $idx) {
+        $isVideo = is_video_file($item->image_path);
+        return [
+            'id' => $item->id,
+            'src' => media_url($item->image_path),
+            'caption' => $item->caption,
+            'isVideo' => $isVideo,
+            'index' => $idx,
+        ];
+    })->values();
+@endphp
+
 <div
     class="bg-background font-outfit min-h-screen"
-    x-data="{ singleMedia: null }"
+    x-data="{
+        items: {{ Illuminate\Support\Js::from($commonItemsJson) }},
+        lightboxIndex: null,
+        openLightbox(i) { this.lightboxIndex = i },
+        closeLightbox() { this.lightboxIndex = null },
+        prev() {
+            if (this.lightboxIndex !== null && this.lightboxIndex > 0) {
+                this.lightboxIndex--;
+            }
+        },
+        next() {
+            if (this.lightboxIndex !== null && this.lightboxIndex < this.items.length - 1) {
+                this.lightboxIndex++;
+            }
+        }
+    }"
+    x-on:keydown.window="
+        if (lightboxIndex === null) return;
+        if ($event.key === 'ArrowRight') next();
+        if ($event.key === 'ArrowLeft') prev();
+        if ($event.key === 'Escape') closeLightbox();
+    "
 >
     <x-page-header :kicker="__('site.gallery.label')" :title="__('site.gallery.title')" :subtitle="__('site.gallery.subtitle')" />
 
@@ -104,14 +138,14 @@
                 <p class="text-sm text-muted italic">{{ __('site.gallery.no_common') }}</p>
             @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    @foreach ($common as $item)
+                    @foreach ($common as $index => $item)
                         @php
                             $isVideo = is_video_file($item->image_path);
                             $itemSrc = media_url($item->image_path);
                             $caption = $item->caption ?: ($isVideo ? null : 'Gallery image');
                         @endphp
                         <div
-                            x-on:click="singleMedia = { src: {{ Illuminate\Support\Js::from($itemSrc) }}, caption: {{ Illuminate\Support\Js::from($item->caption) }}, isVideo: {{ $isVideo ? 'true' : 'false' }} }"
+                            x-on:click="openLightbox({{ $index }})"
                             class="group relative aspect-square overflow-hidden rounded-2xl border cursor-pointer {{ $isVideo ? 'border-accent/40 shadow-[0_0_15px_rgba(244,63,94,0.08)] bg-slate-950' : 'border-border bg-white shadow-sm' }}"
                         >
                             @if ($isVideo)
@@ -150,31 +184,85 @@
         </div>
     </section>
 
-    {{-- Single Media Lightbox Modal --}}
-    <div x-show="singleMedia" x-cloak class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-6">
-        <div class="flex items-center justify-between text-white border-b border-white/10 pb-4">
-            <div>
-                <h4 class="text-lg font-bold">{{ __('site.gallery.community_gallery') }}</h4>
-                <p class="text-xs text-white/60">{{ __('site.gallery.common_upload') }}</p>
+    {{-- Single Media Lightbox Modal with Next / Prev Navigation (Teleported to <body> for full screen) --}}
+    <template x-teleport="body">
+        <div
+            x-show="lightboxIndex !== null"
+            x-cloak
+            x-on:click="closeLightbox"
+            class="fixed inset-0 z-[99999] w-screen h-screen bg-black/95 backdrop-blur-md flex flex-col justify-between p-4 sm:p-6"
+        >
+            {{-- Top Bar --}}
+            <div class="flex items-center justify-between text-white border-b border-white/10 pb-4 shrink-0" x-on:click.stop="">
+                <div>
+                    <h4 class="text-base sm:text-lg font-bold">{{ __('site.gallery.community_gallery') }}</h4>
+                    <p class="text-xs text-white/60">
+                        <span x-text="lightboxIndex !== null ? (lightboxIndex + 1) + ' of ' + items.length : ''"></span>
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    x-on:click="closeLightbox"
+                    class="h-9 w-9 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center text-white shadow-lg border border-white/20 active:scale-95 transition-all cursor-pointer"
+                    aria-label="Close"
+                >
+                    <x-icon name="x" class="h-5 w-5" />
+                </button>
             </div>
-            <button x-on:click="singleMedia = null" class="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer transition-colors">
-                <x-icon name="x" class="h-5 w-5" />
-            </button>
-        </div>
 
-        <div class="flex-1 flex items-center justify-center py-6">
-            <div class="max-w-4xl w-full h-full max-h-[70vh] rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center">
-                <template x-if="singleMedia && !singleMedia.isVideo">
-                    <img :src="singleMedia?.src" :alt="singleMedia?.caption" class="w-full h-full object-contain rounded-xl" />
-                </template>
-                <template x-if="singleMedia && singleMedia.isVideo">
-                    <video :src="singleMedia?.src" controls autoplay class="w-full h-full max-h-[70vh] object-contain rounded-xl"></video>
-                </template>
+            {{-- Center Content with Left & Right Arrows --}}
+            <div class="flex-1 flex items-center justify-between gap-2 sm:gap-4 py-4 min-h-0" x-on:click.stop="">
+                {{-- Left Arrow --}}
+                <button
+                    type="button"
+                    x-on:click="prev"
+                    :disabled="lightboxIndex === 0"
+                    class="shrink-0 h-12 w-12 rounded-full bg-slate-900/90 hover:bg-[#00379D] disabled:opacity-20 disabled:pointer-events-none flex items-center justify-center text-white shadow-2xl border-2 border-white/40 hover:border-white transition-all cursor-pointer active:scale-95"
+                    title="Previous"
+                >
+                    <x-icon name="chevron-left" class="h-6 w-6 sm:h-7 sm:w-7" />
+                </button>
+
+                {{-- Image / Video Display --}}
+                <div class="flex-1 flex items-center justify-center min-h-0 max-h-[72vh] px-2">
+                    <template x-if="lightboxIndex !== null && !items[lightboxIndex]?.isVideo">
+                        <img
+                            :src="items[lightboxIndex]?.src"
+                            :alt="items[lightboxIndex]?.caption || 'Gallery image'"
+                            class="max-w-full max-h-[72vh] object-contain rounded-2xl shadow-2xl"
+                        />
+                    </template>
+                    <template x-if="lightboxIndex !== null && items[lightboxIndex]?.isVideo">
+                        <video
+                            :src="items[lightboxIndex]?.src"
+                            controls
+                            autoplay
+                            class="max-w-full max-h-[72vh] object-contain rounded-2xl shadow-2xl"
+                        ></video>
+                    </template>
+                </div>
+
+                {{-- Right Arrow --}}
+                <button
+                    type="button"
+                    x-on:click="next"
+                    :disabled="lightboxIndex === items.length - 1"
+                    class="shrink-0 h-12 w-12 rounded-full bg-slate-900/90 hover:bg-[#00379D] disabled:opacity-20 disabled:pointer-events-none flex items-center justify-center text-white shadow-2xl border-2 border-white/40 hover:border-white transition-all cursor-pointer active:scale-95"
+                    title="Next"
+                >
+                    <x-icon name="chevron-right" class="h-6 w-6 sm:h-7 sm:w-7" />
+                </button>
+            </div>
+
+            {{-- Bottom Caption (Only shown if caption exists) --}}
+            <div
+                x-show="lightboxIndex !== null && items[lightboxIndex]?.caption"
+                x-cloak
+                class="text-center text-white py-3 max-w-3xl mx-auto border-t border-white/10 w-full shrink-0"
+                x-on:click.stop=""
+            >
+                <p class="text-sm font-medium text-white/90" x-text="items[lightboxIndex]?.caption"></p>
             </div>
         </div>
-
-        <div class="text-center text-white py-4 max-w-3xl mx-auto border-t border-white/10 w-full">
-            <p class="text-sm font-medium" x-text="singleMedia?.caption || '{{ __('site.gallery.no_description') }}'"></p>
-        </div>
-    </div>
+    </template>
 </div>

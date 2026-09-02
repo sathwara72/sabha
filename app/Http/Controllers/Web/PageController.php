@@ -25,18 +25,20 @@ class PageController extends Controller
             $label = strtolower($s->label);
             return str_contains($label, 'member') || str_contains($label, 'professional');
         });
-        $businessExchanged = $statData->first(fn ($s) => str_contains(strtolower($s->label), 'exchange'));
+        $businessExchanged = $statData->first(function ($s) {
+            $label = strtolower($s->label);
+            return str_contains($label, 'exchange') || str_contains($label, 'crore') || str_contains($label, 'business') || str_contains($label, 'value');
+        });
 
-        $trustees = Setting::where('key', 'trustees')->value('value');
-        $team = $trustees ? (is_string($trustees) ? json_decode($trustees, true) : $trustees) : null;
-        if (empty($team)) {
-            $team = self::FALLBACK_TEAM;
-        }
+        $trustees = Trustee::active()
+            ->with('user.business')
+            ->get();
 
         return view('pages.about', [
             'membersStat' => $members->value ?? '500+',
             'businessExchangedStat' => $businessExchanged->value ?? '₹10Cr+',
-            'team' => $team,
+            'trustees' => $trustees,
+            'fallbackTeam' => self::FALLBACK_TEAM,
         ]);
     }
 

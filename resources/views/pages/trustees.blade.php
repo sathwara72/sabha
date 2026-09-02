@@ -1,57 +1,102 @@
 <x-layouts.app :title="__('site.trustees.title') . ' | Sabha'" :description="__('site.trustees.subtitle')">
     <div class="bg-background font-outfit">
-        <x-page-header :kicker="__('site.trustees.kicker')" :title="__('site.trustees.title')" :subtitle="__('site.trustees.subtitle')" />
+        <div class="mx-auto max-w-7xl px-6 py-8 lg:px-8 space-y-6">
+            {{-- Title Row --}}
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-5">
+                <div>
+                    <div class="mb-1.5 flex items-center gap-2">
+                        <span class="h-3.5 w-1.5 rounded-full bg-primary"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-primary">{{ __('site.trustees.kicker') }}</span>
+                    </div>
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{{ __('site.trustees.title') }}</h1>
+                    <p class="mt-1 text-xs sm:text-sm text-slate-500 font-medium">{{ __('site.trustees.subtitle') }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center rounded-xl bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-primary shadow-2xs">
+                        {{ $trustees->count() }} {{ $trustees->count() === 1 ? 'Trustee' : 'Trustees' }}
+                    </span>
+                </div>
+            </div>
 
-        <section class="mx-auto max-w-7xl px-6 py-20 lg:py-12">
+            {{-- Trustees Grid --}}
             @if ($trustees->isEmpty())
-                <div class="text-center py-20 text-sm text-muted">{{ __('site.trustees.empty') }}</div>
+                <div class="rounded-2xl border border-dashed border-slate-200 py-20 text-center bg-slate-50/50">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mb-3">
+                        <x-icon name="users" class="h-6 w-6" />
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800">{{ __('site.trustees.empty') }}</h3>
+                </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
                     @foreach ($trustees as $trustee)
                         @php
                             $member = $trustee->user;
                             $biz = $member?->business?->status === 'approved' ? $member->business : null;
-                            $avatar = $member && $member->avatar ? media_url($member->avatar) : null;
                         @endphp
-                        <div class="glass-card p-6 border border-border space-y-4">
-                            <div class="flex items-center gap-4">
-                                <div class="h-16 w-16 rounded-full overflow-hidden border-2 border-primary-soft shadow-sm shrink-0 bg-primary-soft flex items-center justify-center">
-                                    @if ($avatar)
-                                        <img src="{{ $avatar }}" alt="{{ $member->name }}" class="h-full w-full object-cover" />
-                                    @else
-                                        <span class="text-xl font-bold text-primary uppercase">{{ $member ? mb_substr($member->name, 0, 1) : '?' }}</span>
-                                    @endif
+                        <div class="glass-card flex h-full flex-col justify-between p-3.5 rounded-2xl border border-slate-200 hover:border-primary/40 hover:shadow-md transition-all duration-300 bg-white space-y-2.5">
+                            {{-- Top Header: Avatar + Details --}}
+                            <div class="flex items-start gap-2.5">
+                                <div class="h-11 w-11 rounded-xl overflow-hidden border border-primary/20 shadow-2xs shrink-0 bg-slate-50 flex items-center justify-center">
+                                    <x-safe-image
+                                        :src="media_url($member?->avatar)"
+                                        :alt="$member?->name ?? 'Trustee'"
+                                        :title="$member?->name ?? 'Trustee'"
+                                        fallback-type="avatar"
+                                        img-class="h-full w-full object-cover"
+                                    />
                                 </div>
-                                <div class="min-w-0">
-                                    <h3 class="text-sm font-extrabold text-foreground truncate">{{ $member?->name ?? '—' }}</h3>
-                                    <span class="inline-flex items-center rounded-full bg-primary-soft border border-primary/10 px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wide text-primary mt-1">
-                                        {{ $trustee->position }}
+
+                                <div class="min-w-0 flex-1 space-y-0.5">
+                                    <span class="inline-flex items-center gap-0.5 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.2 text-[9px] font-black uppercase tracking-wider text-primary">
+                                        <x-icon name="shield-check" class="h-2.5 w-2.5 text-primary" />
+                                        {{ $trustee->position ?: 'Trustee' }}
                                     </span>
+                                    <h3 class="text-sm font-black text-slate-900 tracking-tight truncate">
+                                        {{ $member?->name ?: 'Community Leader' }}
+                                    </h3>
+                                    @if ($member?->city)
+                                        <p class="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
+                                            <x-icon name="map-pin" class="h-2.5 w-2.5 text-slate-400 shrink-0" />
+                                            <span class="truncate">{{ $member->city }}</span>
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
 
-                            <div class="border-t border-border pt-4">
+                            {{-- Business Info Card / Box --}}
+                            <div class="pt-2 border-t border-slate-100">
                                 @if ($biz)
-                                    <a href="/businesses/{{ $biz->id }}" class="flex items-center gap-3 group">
-                                        <div class="h-11 w-11 rounded-xl overflow-hidden border border-border bg-white flex items-center justify-center shrink-0">
-                                            <x-safe-image :src="media_url($biz->logo)" :alt="$biz->name" :title="$biz->name" fallback-type="business" img-class="h-full w-full object-contain" />
+                                    <a href="/businesses/{{ $biz->id }}" class="block p-2 rounded-xl bg-slate-50/80 hover:bg-blue-50/50 border border-slate-200/80 hover:border-primary/30 transition-all group">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <div class="h-8 w-8 rounded-lg overflow-hidden border border-slate-200 bg-white flex items-center justify-center shrink-0 p-0.5">
+                                                    <x-safe-image
+                                                        :src="media_url($biz->logo)"
+                                                        :alt="$biz->name"
+                                                        :title="$biz->name"
+                                                        fallback-type="business"
+                                                        img-class="h-full w-full object-contain"
+                                                    />
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-black text-slate-900 group-hover:text-primary transition-colors truncate">{{ $biz->name }}</p>
+                                                    <p class="text-[10px] text-primary font-bold truncate">{{ $biz->category }}</p>
+                                                </div>
+                                            </div>
+                                            <x-icon name="arrow-right" class="h-3.5 w-3.5 text-slate-400 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
                                         </div>
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">{{ $biz->name }}</p>
-                                            <p class="text-[12px] text-muted-foreground truncate">{{ $biz->category }}</p>
-                                        </div>
-                                        <span class="text-[12px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 shrink-0">
-                                            {{ __('site.trustees.view_business') }} <x-icon name="chevron-right" class="h-3 w-3" />
-                                        </span>
                                     </a>
                                 @else
-                                    <p class="text-[12px] text-muted-foreground italic">{{ __('site.trustees.no_business') }}</p>
+                                    <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                        <x-icon name="award" class="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                                        <span class="truncate">Board Member</span>
+                                    </div>
                                 @endif
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
-        </section>
+        </div>
     </div>
 </x-layouts.app>

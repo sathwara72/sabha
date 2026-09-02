@@ -32,7 +32,7 @@ Route::post('/events/{event}/reserve', [EventController::class, 'reserve'])
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 Route::get('/gallery/event/{id}', [GalleryController::class, 'event'])->name('gallery.event');
 
-Route::get('/login', [AuthController::class, 'loginRedirect'])->name('login');
+Route::get('/login', [AuthController::class, 'loginPage'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 Route::get('/register', [AuthController::class, 'registerPage'])->name('register');
@@ -101,7 +101,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::view('/referrals', 'pages.admin.referrals')->name('referrals.index')->middleware('module:referrals');
     Route::view('/testimonials', 'pages.admin.testimonials')->name('testimonials.index')->middleware('module:testimonials');
     Route::view('/statistics', 'pages.admin.statistics')->name('statistics.index')->middleware('module:statistics');
-    Route::view('/analytics', 'pages.admin.analytics')->name('analytics.index')->middleware('module:analytics');
+    Route::get('/analytics', fn () => redirect()->route('admin.dashboard'))->name('analytics.index');
 
     Route::middleware('full-admin')->group(function () {
         Route::view('/settings', 'pages.admin.settings')->name('settings.index');

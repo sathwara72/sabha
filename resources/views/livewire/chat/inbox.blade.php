@@ -1,25 +1,25 @@
-<div class="bg-background font-outfit">
-    <div class="mx-auto max-w-6xl h-[calc(100vh-4rem)] py-3 px-2">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
+<div class="bg-background font-outfit h-[calc(100dvh-4rem)] overflow-hidden">
+    <div class="mx-auto max-w-6xl h-full py-2.5 sm:py-3 px-2 min-h-0">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full min-h-0">
             {{-- ===== Conversation List ===== --}}
-            <aside class="lg:col-span-4 glass-card p-0 overflow-hidden flex flex-col h-full {{ $activeId ? 'hidden lg:flex' : 'flex' }}">
-                <div class="p-3 border-b border-border space-y-2">
-                    <h1 class="text-sm font-bold text-foreground">Chat</h1>
+            <aside class="lg:col-span-4 glass-card p-0 overflow-hidden flex flex-col h-full min-h-0 {{ $activeId ? 'hidden lg:flex' : 'flex' }}">
+                <div class="p-3 border-b border-border space-y-2 shrink-0">
+                    <h1 class="text-sm font-bold text-foreground">{{ __('site.chat.title') }}</h1>
                     <div class="relative">
                         <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                         <input
                             type="text"
                             wire:model.live.debounce.300ms="search"
-                            placeholder="Search members by name or phone..."
+                            placeholder="{{ __('site.chat.search_placeholder') }}"
                             class="w-full rounded-xl border border-border bg-slate-50/50 py-2 pl-9 pr-3 text-xs font-medium text-slate-900 outline-none transition-all focus:bg-white focus:border-primary"
                         />
                     </div>
                 </div>
 
-                <div class="flex-1 overflow-y-auto">
+                <div class="flex-1 min-h-0 overflow-y-auto">
                     @if (trim($search) !== '')
                         <div class="p-2 space-y-1">
-                            <p class="px-2 py-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Start a chat</p>
+                            <p class="px-2 py-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wide">{{ __('site.chat.start_chat') }}</p>
                             @forelse ($searchResults as $result)
                                 <button
                                     type="button"
@@ -39,13 +39,13 @@
                                     </div>
                                 </button>
                             @empty
-                                <p class="px-2 py-4 text-xs text-muted-foreground italic text-center">No members found.</p>
+                                <p class="px-2 py-4 text-xs text-muted-foreground italic text-center">{{ __('site.chat.no_members_found') }}</p>
                             @endforelse
                         </div>
                     @else
                         @if ($conversations->isEmpty())
                             <div class="p-6 text-center text-xs text-muted-foreground italic">
-                                No conversations yet. Search a member above to start chatting.
+                                {{ __('site.chat.no_conversations') }}
                             </div>
                         @else
                             <div class="divide-y divide-border/60">
@@ -63,14 +63,14 @@
                                         </div>
                                         <div class="min-w-0 flex-1">
                                             <div class="flex items-center justify-between gap-2">
-                                                <p class="text-xs font-bold text-foreground truncate">{{ $conv['other_user']?->name ?? 'Unknown member' }}</p>
+                                                <p class="text-xs font-bold text-foreground truncate">{{ $conv['other_user']?->name ?? __('site.chat.unknown_member') }}</p>
                                                 @if ($conv['last_message'])
                                                     <span class="text-[10px] text-muted-foreground shrink-0">{{ $conv['last_message']->created_at->format('M j') }}</span>
                                                 @endif
                                             </div>
                                             <div class="flex items-center justify-between gap-2 mt-0.5">
                                                 <p class="text-[11px] text-muted-foreground truncate">
-                                                    {{ $conv['last_message'] ? ($conv['last_message']->is_deleted ? 'Message deleted' : Str::limit(strip_tags($conv['last_message']->body), 40)) : 'Say hello!' }}
+                                                    {{ $conv['last_message'] ? ($conv['last_message']->is_deleted ? __('site.chat.message_deleted') : Str::limit(strip_tags($conv['last_message']->body), 40)) : __('site.chat.say_hello') }}
                                                 </p>
                                                 @if ($conv['unread'] > 0)
                                                     <span class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shrink-0">{{ $conv['unread'] }}</span>
@@ -86,14 +86,14 @@
             </aside>
 
             {{-- ===== Active Thread ===== --}}
-            <div class="lg:col-span-8 h-full {{ $activeId ? 'flex' : 'hidden lg:flex' }} flex-col">
+            <div class="lg:col-span-8 h-full min-h-0 {{ $activeId ? 'flex' : 'hidden lg:flex' }} flex-col overflow-hidden">
                 @if ($activeId)
                     @livewire('chat.thread', ['id' => $activeId], 'thread-' . $activeId)
                 @else
                     <div class="glass-card flex-1 flex flex-col items-center justify-center text-center p-8">
                         <x-icon name="message-square" class="h-10 w-10 text-muted-foreground mb-3" />
-                        <p class="text-sm font-semibold text-foreground">Select a conversation</p>
-                        <p class="text-xs text-muted-foreground mt-1">Or search a member to start a new chat.</p>
+                        <p class="text-sm font-semibold text-foreground">{{ __('site.chat.select_conversation') }}</p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ __('site.chat.select_conversation_desc') }}</p>
                     </div>
                 @endif
             </div>
