@@ -5,6 +5,7 @@ namespace App\Livewire\Chat;
 use App\Models\Conversation;
 use App\Models\User;
 use App\Services\ChatService;
+use App\Services\GroupGovernanceService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -23,19 +24,32 @@ class Inbox extends Component
         $this->redirect(route('chat.show', $conversation->id), navigate: false);
     }
 
+    public function joinGroup(int $groupId): void
+    {
+        $group = Conversation::where('type', 'group')->findOrFail($groupId);
+
+        app(GroupGovernanceService::class)->requestToJoin($group, Auth::user());
+
+        if ($group->join_setting === 'direct_join') {
+            $this->redirect(route('chat.show', $group->id), navigate: false);
+        }
+    }
+
     public function render()
     {
         $userId = Auth::id();
 
-        $conversations = Conversation::where('type', 'direct')
-            ->whereHas('participants', fn ($q) => $q->where('user_id', $userId)->where('is_hidden', false))
-            ->with(['participants.user', 'latestMessage'])
+        $conversations = Conversation::where('is_archived', false)
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $userId)->where('status', 'active')->where('is_hidden', false))
+            ->with(['participants.user', 'latestMessage.sender'])
             ->get()
             ->sortByDesc(fn ($c) => $c->latestMessage?->created_at ?? $c->created_at)
             ->values()
             ->map(function ($conversation) use ($userId) {
                 $me = $conversation->participants->firstWhere('user_id', $userId);
-                $other = $conversation->participants->firstWhere('user_id', '!=', $userId);
+                $other = $conversation->type === 'direct'
+                    ? $conversation->participants->firstWhere('user_id', '!=', $userId)?->user
+                    : null;
 
                 $unread = 0;
                 if ($conversation->latestMessage) {
@@ -47,13 +61,17 @@ class Inbox extends Component
 
                 return [
                     'id' => $conversation->id,
-                    'other_user' => $other?->user,
+                    'type' => $conversation->type,
+                    'title' => $conversation->type === 'group' ? $conversation->title : $other?->name,
+                    'avatar' => $conversation->type === 'group' ? $conversation->avatar : $other?->avatar,
+                    'other_user' => $other,
                     'last_message' => $conversation->latestMessage,
                     'unread' => $unread,
                 ];
             });
 
         $searchResults = collect();
+        $groupResults = collect();
         if (trim($this->search) !== '') {
             $term = $this->search;
             $searchResults = User::where('id', '!=', $userId)
@@ -63,13 +81,22 @@ class Inbox extends Component
                         ->orWhere('phone', 'like', "%{$term}%");
                 })
                 ->orderBy('name')
-                ->limit(15)
+                ->limit(10)
+                ->get();
+
+            $groupResults = Conversation::where('type', 'group')
+                ->where('is_archived', false)
+                ->where('title', 'like', "%{$term}%")
+                ->whereDoesntHave('participants', fn ($q) => $q->where('user_id', $userId)->whereIn('status', ['active', 'pending_approval']))
+                ->orderBy('title')
+                ->limit(10)
                 ->get();
         }
 
         return view('livewire.chat.inbox', [
             'conversations' => $conversations,
             'searchResults' => $searchResults,
+            'groupResults' => $groupResults,
         ]);
     }
 }

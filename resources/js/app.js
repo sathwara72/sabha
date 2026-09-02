@@ -31,6 +31,8 @@ function registerAlpineFeatures() {
     window.Alpine.data('chatThread', (config) => ({
         conversationId: config.conversationId,
         currentUserId: config.currentUserId,
+        isGroup: config.isGroup ?? false,
+        isGroupAdmin: config.isGroupAdmin ?? false,
         messages: config.initialMessages ?? [],
         editingId: null,
         editText: '',
@@ -96,18 +98,20 @@ function registerAlpineFeatures() {
 
         onMessageSent(e) {
             if (this.messages.some((m) => m.id === e.id)) return;
+            const isMine = e.sender_id === this.currentUserId;
             this.messages.push({
                 id: e.id,
                 sender_id: e.sender_id,
                 sender_name: e.sender_name,
                 sender_avatar: e.sender_avatar,
+                message_type: e.message_type,
                 body: e.body,
                 body_html: e.body_html,
-                is_mine: e.sender_id === this.currentUserId,
+                is_mine: isMine,
                 is_edited: e.is_edited,
                 is_deleted: e.is_deleted,
-                editable: e.sender_id === this.currentUserId,
-                deletable: e.sender_id === this.currentUserId,
+                editable: isMine && e.message_type === 'text',
+                deletable: e.message_type === 'text' && (isMine || this.isGroupAdmin),
                 created_at_human: e.created_at_human,
             });
             this.$nextTick(() => this.scrollToBottom());

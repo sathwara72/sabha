@@ -42,4 +42,44 @@ class Conversation extends Model
     {
         return $this->hasOne(ChatMessage::class)->latestOfMany();
     }
+
+    public function activeParticipants(): HasMany
+    {
+        return $this->participants()->where('status', 'active');
+    }
+
+    public function pendingParticipants(): HasMany
+    {
+        return $this->participants()->where('status', 'pending_approval');
+    }
+
+    public function mainAdmin(): ?ConversationParticipant
+    {
+        return $this->participants()->where('role', 'main_admin')->first();
+    }
+
+    /**
+     * Always queries fresh rather than reading the (possibly stale, if this
+     * Conversation instance is reused across several governance calls)
+     * cached participants collection — role/status just changed underfoot
+     * is exactly the case this needs to get right.
+     */
+    public function participantRole(User $user): ?string
+    {
+        return $this->participants()->where('user_id', $user->id)->first()?->role;
+    }
+
+    /**
+     * Group governance actions (rename, add/remove members, delete group,
+     * moderate messages) are gated on this — main_admin and admin both
+     * qualify, regular members don't.
+     */
+    public function isGroupAdmin(User $user): bool
+    {
+        $me = $this->participants()->where('user_id', $user->id)->first();
+
+        return $me
+            && $me->status === 'active'
+            && in_array($me->role, ['main_admin', 'admin'], true);
+    }
 }

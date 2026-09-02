@@ -69,6 +69,7 @@
                 [
                     'label' => 'Network Activity',
                     'items' => [
+                        ['name' => 'Chat', 'icon' => 'message-square', 'href' => route('admin.chat.index'), 'active' => request()->routeIs('admin.chat.*'), 'module' => 'chat'],
                         ['name' => '1-to-1 Meetings', 'icon' => 'users', 'href' => route('admin.meetings.index'), 'active' => request()->routeIs('admin.meetings.*'), 'module' => 'meetings'],
                         ['name' => 'Referrals', 'icon' => 'send', 'href' => route('admin.referrals.index'), 'active' => request()->routeIs('admin.referrals.*'), 'module' => 'referrals'],
                         ['name' => 'Testimonials', 'icon' => 'message-square', 'href' => route('admin.testimonials.index'), 'active' => request()->routeIs('admin.testimonials.*'), 'module' => 'testimonials'],

@@ -3,6 +3,8 @@
     x-data="chatThread({
         conversationId: {{ $conversationId }},
         currentUserId: {{ auth()->id() }},
+        isGroup: {{ $isGroup ? 'true' : 'false' }},
+        isGroupAdmin: {{ $isGroupAdmin ? 'true' : 'false' }},
         initialMessages: @js($initialMessages),
     })"
     wire:poll.5s="pollSync"
@@ -13,7 +15,13 @@
             <x-icon name="arrow-left" class="h-4 w-4" />
         </a>
         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary font-bold text-xs overflow-hidden">
-            @if ($otherUser && media_url($otherUser->avatar))
+            @if ($isGroup)
+                @if (media_url($conversation->avatar))
+                    <img src="{{ media_url($conversation->avatar) }}" alt="" class="h-full w-full object-cover" />
+                @else
+                    <x-icon name="users" class="h-4 w-4" />
+                @endif
+            @elseif ($otherUser && media_url($otherUser->avatar))
                 <img src="{{ media_url($otherUser->avatar) }}" alt="" class="h-full w-full object-cover" />
             @else
                 {{ mb_substr($otherUser?->name ?? '?', 0, 1) }}
@@ -33,53 +41,60 @@
         </template>
 
         <template x-for="msg in messages" :key="msg.id">
-            <div class="flex" :class="msg.is_mine ? 'justify-end' : 'justify-start'">
-                <div class="max-w-[75%] group">
-                    <div
-                        class="rounded-2xl px-3.5 py-2 text-xs transition-all"
-                        :class="msg.is_mine ? 'bg-primary text-white rounded-br-sm' : 'bg-surface text-foreground rounded-bl-sm'"
-                        :style="msg.is_pending ? 'opacity: 0.9;' : ''"
-                    >
-                        <div>
-                            <template x-if="editingId === msg.id">
-                                <div class="space-y-1.5 min-w-[180px]">
-                                    <textarea x-model="editText" rows="2" class="w-full rounded-lg border border-white/30 bg-white/10 px-2 py-1 text-xs outline-none" :class="msg.is_mine ? 'text-white placeholder-white/60' : 'text-foreground'"></textarea>
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        <button type="button" x-on:click="cancelEdit()" class="text-[11px] font-semibold opacity-80 hover:opacity-100 cursor-pointer">{{ __('site.chat.cancel') }}</button>
-                                        <button type="button" x-on:click="saveEdit()" class="text-[11px] font-bold underline cursor-pointer">{{ __('site.chat.save') }}</button>
+            <div>
+                <template x-if="msg.message_type === 'system_event'">
+                    <p class="text-center text-[11px] text-muted-foreground italic py-1" x-text="msg.body"></p>
+                </template>
+
+                <div x-show="msg.message_type !== 'system_event'" class="flex" :class="msg.is_mine ? 'justify-end' : 'justify-start'">
+                    <div class="max-w-[75%] group">
+                        <p x-show="isGroup && !msg.is_mine" class="text-[10px] font-bold text-muted-foreground px-1 mb-0.5" x-text="msg.sender_name"></p>
+                        <div
+                            class="rounded-2xl px-3.5 py-2 text-xs transition-all"
+                            :class="msg.is_mine ? 'bg-primary text-white rounded-br-sm' : 'bg-surface text-foreground rounded-bl-sm'"
+                            :style="msg.is_pending ? 'opacity: 0.9;' : ''"
+                        >
+                            <div>
+                                <template x-if="editingId === msg.id">
+                                    <div class="space-y-1.5 min-w-[180px]">
+                                        <textarea x-model="editText" rows="2" class="w-full rounded-lg border border-white/30 bg-white/10 px-2 py-1 text-xs outline-none" :class="msg.is_mine ? 'text-white placeholder-white/60' : 'text-foreground'"></textarea>
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button type="button" x-on:click="cancelEdit()" class="text-[11px] font-semibold opacity-80 hover:opacity-100 cursor-pointer">{{ __('site.chat.cancel') }}</button>
+                                            <button type="button" x-on:click="saveEdit()" class="text-[11px] font-bold underline cursor-pointer">{{ __('site.chat.save') }}</button>
+                                        </div>
                                     </div>
-                                </div>
+                                </template>
+                                <template x-if="editingId !== msg.id">
+                                    <div>
+                                        <template x-if="msg.is_deleted">
+                                            <p class="italic opacity-70">{{ __('site.chat.message_deleted') }}</p>
+                                        </template>
+                                        <template x-if="!msg.is_deleted">
+                                            <p class="whitespace-pre-wrap break-words" x-html="msg.body_html || msg.body"></p>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-0.5 px-1" :class="msg.is_mine ? 'justify-end' : 'justify-start'">
+                            <template x-if="msg.is_pending">
+                                <span class="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
+                                    <x-icon name="clock" class="h-2.5 w-2.5 animate-pulse text-amber-500" /> {{ __('site.chat.sending') }}
+                                </span>
                             </template>
-                            <template x-if="editingId !== msg.id">
-                                <div>
-                                    <template x-if="msg.is_deleted">
-                                        <p class="italic opacity-70">{{ __('site.chat.message_deleted') }}</p>
-                                    </template>
-                                    <template x-if="!msg.is_deleted">
-                                        <p class="whitespace-pre-wrap break-words" x-html="msg.body_html || msg.body"></p>
+                            <template x-if="!msg.is_pending">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[10px] text-muted-foreground" x-text="msg.created_at_human"></span>
+                                    <span class="text-[10px] text-muted-foreground italic" x-show="msg.is_edited && !msg.is_deleted">{{ __('site.chat.edited') }}</span>
+                                    <template x-if="!msg.is_deleted && editingId !== msg.id">
+                                        <span class="hidden group-hover:inline-flex items-center gap-1">
+                                            <button type="button" x-show="msg.editable" x-on:click="startEdit(msg)" class="text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer">{{ __('site.chat.edit') }}</button>
+                                            <button type="button" x-show="msg.deletable" x-on:click="deleteMsg(msg.id)" class="text-[10px] font-semibold text-rose-500 hover:text-rose-700 cursor-pointer">{{ __('site.chat.delete') }}</button>
+                                        </span>
                                     </template>
                                 </div>
                             </template>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 mt-0.5 px-1" :class="msg.is_mine ? 'justify-end' : 'justify-start'">
-                        <template x-if="msg.is_pending">
-                            <span class="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
-                                <x-icon name="clock" class="h-2.5 w-2.5 animate-pulse text-amber-500" /> {{ __('site.chat.sending') }}
-                            </span>
-                        </template>
-                        <template x-if="!msg.is_pending">
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-[10px] text-muted-foreground" x-text="msg.created_at_human"></span>
-                                <span class="text-[10px] text-muted-foreground italic" x-show="msg.is_edited && !msg.is_deleted">{{ __('site.chat.edited') }}</span>
-                                <template x-if="!msg.is_deleted && editingId !== msg.id">
-                                    <span class="hidden group-hover:inline-flex items-center gap-1">
-                                        <button type="button" x-show="msg.editable" x-on:click="startEdit(msg)" class="text-[10px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer">{{ __('site.chat.edit') }}</button>
-                                        <button type="button" x-show="msg.deletable" x-on:click="deleteMsg(msg.id)" class="text-[10px] font-semibold text-rose-500 hover:text-rose-700 cursor-pointer">{{ __('site.chat.delete') }}</button>
-                                    </span>
-                                </template>
-                            </div>
-                        </template>
                     </div>
                 </div>
             </div>

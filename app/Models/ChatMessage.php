@@ -61,4 +61,17 @@ class ChatMessage extends Model
             && ! $this->is_deleted
             && $this->isWithinEditWindow();
     }
+
+    /**
+     * Group admins/main-admins can delete any member's message to moderate
+     * abusive content — no ownership requirement and, unlike deletableBy(),
+     * no 1-hour window (moderation shouldn't expire).
+     */
+    public function deletableByModerator(User $user): bool
+    {
+        return $this->message_type === 'text'
+            && ! $this->is_deleted
+            && $this->conversation->type === 'group'
+            && $this->conversation->isGroupAdmin($user);
+    }
 }
