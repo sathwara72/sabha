@@ -76,20 +76,21 @@
                                         <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider block leading-none">
                                             {{ $direction === 'given' ? __('site.profile.referrals.to') : __('site.profile.referrals.from') }}
                                         </span>
-                                        <h4 class="text-xs font-bold text-slate-900 truncate leading-tight mt-0.5" title="{{ $memberName }}">
-                                            {{ $memberName }}
-                                        </h4>
+                                        <div class="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                            <h4 class="text-xs font-bold text-slate-900 truncate leading-tight" title="{{ $memberName }}">
+                                                {{ $memberName }}
+                                            </h4>
+                                            @if ($direction === 'received' && $memberPhone)
+                                                <a href="tel:{{ $memberPhone }}" class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors shrink-0 shadow-2xs" title="Call Giver ({{ $memberPhone }})">
+                                                    <x-icon name="phone" class="h-2.5 w-2.5" />
+                                                </a>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
-                                {{-- Top Right: Date on top, Contacted pill underneath --}}
-                                <div class="flex flex-col items-end gap-0.5 shrink-0">
-                                    <span class="text-[10px] text-slate-400 font-medium leading-none">{{ $ref->created_at->format('d M, Y') }}</span>
-                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold {{ $ref->contact_status === 'connected' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200' }}">
-                                        <x-icon name="{{ $ref->contact_status === 'connected' ? 'check-circle-2' : 'clock' }}" class="h-2.5 w-2.5" />
-                                        {{ $ref->contact_status === 'connected' ? __('site.profile.referrals.contacted') : __('site.profile.referrals.not_contacted') }}
-                                    </span>
-                                </div>
+                                {{-- Top Right: Date --}}
+                                <span class="text-[10px] text-slate-400 font-medium shrink-0">{{ $ref->created_at->format('d M, Y') }}</span>
                             </div>
 
                             {{-- Small Chips directly inside header --}}
@@ -100,11 +101,6 @@
                                 <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide border {{ $statusBadge[$ref->status] ?? $statusBadge['pending'] }}">
                                     {{ $statusLabel[$ref->status] ?? $ref->status }}
                                 </span>
-                                @if ($direction === 'received' && $memberPhone)
-                                    <a href="tel:{{ $memberPhone }}" class="ml-auto text-[10px] font-semibold text-slate-500 hover:text-primary flex items-center gap-0.5" title="Call Giver">
-                                        <x-icon name="phone" class="h-2.5 w-2.5" /> Call Giver
-                                    </a>
-                                @endif
                             </div>
                         </div>
 
@@ -150,23 +146,32 @@
                         </div>
                     </div>
 
-                    {{-- Bottom Footer: Action Buttons --}}
-                    <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-100">
-                        @if ($direction === 'given')
-                            @if ($ref->status === 'closed')
-                                <button wire:click="openOutcomeModal({{ $ref->id }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer shadow-2xs">
-                                    <x-icon name="eye" class="h-2.5 w-2.5 text-emerald-600" /> View Outcome
-                                </button>
-                            @elseif ($ref->status === 'pending')
-                                <button wire:click="openDelete({{ $ref->id }})" class="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer flex items-center gap-1">
-                                    <x-icon name="trash-2" class="h-3 w-3" /> {{ __('site.profile.referrals.withdraw') }}
+                    {{-- Bottom Footer: Contacted Badge on Left, Actions on Right --}}
+                    <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-100">
+                        {{-- Left: Contacted badge --}}
+                        <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold {{ $ref->contact_status === 'connected' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200' }}">
+                            <x-icon name="{{ $ref->contact_status === 'connected' ? 'check-circle-2' : 'clock' }}" class="h-2.5 w-2.5" />
+                            {{ $ref->contact_status === 'connected' ? __('site.profile.referrals.contacted') : __('site.profile.referrals.not_contacted') }}
+                        </span>
+
+                        {{-- Right: Action Buttons --}}
+                        <div class="flex items-center gap-1.5">
+                            @if ($direction === 'given')
+                                @if ($ref->status === 'closed')
+                                    <button wire:click="openOutcomeModal({{ $ref->id }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer shadow-2xs">
+                                        <x-icon name="eye" class="h-2.5 w-2.5 text-emerald-600" /> View Outcome
+                                    </button>
+                                @elseif ($ref->status === 'pending')
+                                    <button wire:click="openDelete({{ $ref->id }})" class="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer flex items-center gap-1">
+                                        <x-icon name="trash-2" class="h-3 w-3" /> {{ __('site.profile.referrals.withdraw') }}
+                                    </button>
+                                @endif
+                            @elseif ($direction === 'received')
+                                <button wire:click="openUpdate({{ $ref->id }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-100 px-2 py-1 text-[11px] font-bold text-primary hover:bg-blue-100 cursor-pointer shadow-2xs">
+                                    <x-icon name="pencil" class="h-2.5 w-2.5" /> {{ __('site.profile.referrals.update') }}
                                 </button>
                             @endif
-                        @elseif ($direction === 'received')
-                            <button wire:click="openUpdate({{ $ref->id }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-100 px-2 py-1 text-[11px] font-bold text-primary hover:bg-blue-100 cursor-pointer shadow-2xs">
-                                <x-icon name="pencil" class="h-2.5 w-2.5" /> {{ __('site.profile.referrals.update') }}
-                            </button>
-                        @endif
+                        </div>
                     </div>
                 </div>
             @endforeach
