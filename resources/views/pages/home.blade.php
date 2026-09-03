@@ -63,11 +63,32 @@
 
                 <div
                     x-data="{ current: 0, timer: null }"
-                    x-init="timer = setInterval(() => { current = (current + 1) % {{ count($heroImages) }} }, 5000)"
+                    x-init="timer = setInterval(() => { current = (current + 1) % {{ max(1, count($heroImages)) }} }, 5000)"
                     class="relative h-[280px] w-full overflow-hidden rounded-2xl border border-border bg-slate-900 sm:h-[360px] lg:h-[420px] shadow-xl group"
                 >
                     @foreach ($heroImages as $i => $slide)
-                        @if ($slide['link'])
+                        @if (!empty($slide['is_default']))
+                            {{-- Default Premium Brand Slide with SABHA Circular Logo --}}
+                            <div
+                                x-show="current === {{ $i }}"
+                                x-cloak
+                                class="absolute inset-0 h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-[#061727] via-[#0b2440] to-[#040f1a] text-white p-6 relative overflow-hidden select-none"
+                            >
+                                <div class="pointer-events-none absolute -top-16 -left-16 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl"></div>
+                                <div class="pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl"></div>
+                                <div class="pointer-events-none absolute inset-0 opacity-[0.04]" style="background-image: linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px); background-size: 28px 28px;"></div>
+
+                                <div class="relative z-10 flex flex-col items-center text-center space-y-3">
+                                    <div class="h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-white p-2 shadow-2xl ring-4 ring-white/10 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
+                                        <img src="{{ $slide['url'] }}" alt="SABHA" class="h-full w-full object-contain rounded-full" />
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl sm:text-2xl font-black tracking-tight text-white uppercase">SABHA</h3>
+                                        <p class="text-xs sm:text-sm font-semibold text-blue-200/90 tracking-wide mt-0.5">{{ __('site.login_view.network_tag') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif ($slide['link'])
                             <a
                                 href="{{ $slide['link'] }}"
                                 @if ($slide['external']) target="_blank" rel="noopener noreferrer" @endif
@@ -81,12 +102,12 @@
                                 x-transition:leave-end="opacity-0 scale-95"
                                 :class="current === {{ $i }} ? 'z-10 pointer-events-auto' : 'z-0 pointer-events-none'"
                                 class="absolute inset-0 block h-full w-full cursor-pointer overflow-hidden"
-                                title="{{ $slide['title'] ?: 'Click to open link' }}"
+                                title="{{ ($slide['title'] ?? '') ?: 'Click to open link' }}"
                             >
                                 <x-safe-image
                                     :src="$slide['url']"
-                                    :alt="$slide['title'] ?: 'SABHA Highlight'"
-                                    :title="$slide['title']"
+                                    :alt="($slide['title'] ?? '') ?: 'SABHA Highlight'"
+                                    :title="$slide['title'] ?? ''"
                                     :blur-backdrop="true"
                                     fallback-type="banner"
                                 />
@@ -124,8 +145,8 @@
                             >
                                 <x-safe-image
                                     :src="$slide['url']"
-                                    :alt="$slide['title'] ?: 'SABHA Highlight'"
-                                    :title="$slide['title']"
+                                    :alt="($slide['title'] ?? '') ?: 'SABHA Highlight'"
+                                    :title="$slide['title'] ?? ''"
                                     :blur-backdrop="true"
                                     fallback-type="banner"
                                 />
@@ -144,18 +165,20 @@
                         @endif
                     @endforeach
 
-                    {{-- Navigation Dots --}}
-                    <div class="absolute inset-x-0 bottom-4 flex justify-center items-center gap-2 z-30 pointer-events-auto">
-                        @foreach ($heroImages as $i => $image)
-                            <button
-                                type="button"
-                                x-on:click="current = {{ $i }}"
-                                :class="current === {{ $i }} ? 'bg-white w-7 shadow-md' : 'bg-white/50 hover:bg-white/80 w-2'"
-                                class="h-2 rounded-full transition-all duration-300 cursor-pointer"
-                                aria-label="Go to slide {{ $i + 1 }}"
-                            ></button>
-                        @endforeach
-                    </div>
+                    {{-- Navigation Dots (Only if multiple slides) --}}
+                    @if (count($heroImages) > 1)
+                        <div class="absolute inset-x-0 bottom-4 flex justify-center items-center gap-2 z-30 pointer-events-auto">
+                            @foreach ($heroImages as $i => $image)
+                                <button
+                                    type="button"
+                                    x-on:click="current = {{ $i }}"
+                                    :class="current === {{ $i }} ? 'bg-white w-7 shadow-md' : 'bg-white/50 hover:bg-white/80 w-2'"
+                                    class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                                    aria-label="Go to slide {{ $i + 1 }}"
+                                ></button>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>

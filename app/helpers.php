@@ -98,6 +98,38 @@ if (! function_exists('media_url')) {
     }
 }
 
+if (! function_exists('temporary_media_url')) {
+    /**
+     * Safely resolve Livewire temporary upload URL across local & production,
+     * ensuring HTTPS and host matching the current request.
+     */
+    function temporary_media_url($file): ?string
+    {
+        if (! $file || ! method_exists($file, 'temporaryUrl')) {
+            return null;
+        }
+
+        try {
+            $url = $file->temporaryUrl();
+            $currentHost = request()->getSchemeAndHttpHost();
+            if ($currentHost && ! str_contains($currentHost, 'localhost') && ! str_contains($currentHost, '127.0.0.1')) {
+                $parsed = parse_url($url);
+                if (isset($parsed['host']) && in_array($parsed['host'], ['localhost', '127.0.0.1'], true)) {
+                    $pathAndQuery = ($parsed['path'] ?? '') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+                    $url = rtrim($currentHost, '/') . $pathAndQuery;
+                }
+                if (str_starts_with($url, 'http://') && (request()->isSecure() || request()->header('X-Forwarded-Proto') === 'https')) {
+                    $url = 'https://' . substr($url, 7);
+                }
+            }
+
+            return $url;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+}
+
 if (! function_exists('parse_google_maps_iframe_src')) {
     /**
      * Extracts a usable Google Maps embed src from either a pasted
