@@ -24,14 +24,28 @@ class Inbox extends Component
         $this->redirect(route('chat.show', $conversation->id), navigate: false);
     }
 
-    public function joinGroup(int $groupId): void
+    public function deleteConversation(int $convId): void
     {
-        $group = Conversation::where('type', 'group')->findOrFail($groupId);
+        $conversation = Conversation::findOrFail($convId);
+        $userId = Auth::id();
+        $me = $conversation->participants->firstWhere('user_id', $userId);
+        if (! $me || $me->status !== 'active') {
+            return;
+        }
 
-        app(GroupGovernanceService::class)->requestToJoin($group, Auth::user());
+        if ($conversation->type === 'direct') {
+            app(ChatService::class)->hideForUser($conversation, Auth::user());
+        } else {
+            if ($conversation->isMainAdmin(Auth::user())) {
+                app(GroupGovernanceService::class)->deleteGroup($conversation, Auth::user());
+            } else {
+                app(GroupGovernanceService::class)->leaveGroup($conversation, Auth::user());
+            }
+        }
 
-        if ($group->join_setting === 'direct_join') {
-            $this->redirect(route('chat.show', $group->id), navigate: false);
+        if ((int) $this->activeId === (int) $convId) {
+            $this->activeId = null;
+            $this->redirect(route('chat.index'), navigate: false);
         }
     }
 

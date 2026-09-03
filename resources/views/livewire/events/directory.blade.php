@@ -93,16 +93,16 @@
                                         @if ($event->status === 'current')
                                             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 font-black text-emerald-700 uppercase tracking-wide">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                Booking Open
+                                                {{ __('site.events.booking_open') }}
                                             </span>
                                         @elseif ($event->status === 'upcoming')
                                             <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 font-black text-amber-700 uppercase tracking-wide">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                                Upcoming
+                                                {{ __('site.events.upcoming_badge') }}
                                             </span>
                                         @else
                                             <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 font-bold text-slate-500 uppercase tracking-wide">
-                                                Closed
+                                                {{ __('site.events.closed_badge') }}
                                             </span>
                                         @endif
 
@@ -133,7 +133,7 @@
                                 {{-- Ticket Price Box --}}
                                 <div class="rounded-xl border border-slate-200/80 bg-slate-50/80 p-2 flex items-center justify-between gap-2 text-[11px]">
                                     <div class="flex flex-col">
-                                        <span class="text-[9px] uppercase font-bold text-slate-400">Regular</span>
+                                        <span class="text-[9px] uppercase font-bold text-slate-400">{{ __('site.events.standard') }}</span>
                                         <span class="font-black text-slate-800 {{ $hasDiscount ? 'line-through text-slate-400 text-[10px]' : 'text-[11px]' }}">
                                             {{ format_price($event->priceNormal) }}
                                         </span>
@@ -143,7 +143,7 @@
                                         <div class="flex flex-col items-end">
                                             <span class="text-[9px] uppercase font-bold text-emerald-600 flex items-center gap-0.5">
                                                 <x-icon name="shield-check" class="h-2 w-2 text-emerald-600" />
-                                                SABHA Member
+                                                {{ __('site.events.verified') }}
                                             </span>
                                             <span class="inline-flex items-center font-black text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-1.5 py-0.2 rounded text-[10px]">
                                                 {{ format_price($event->priceVerified) }}

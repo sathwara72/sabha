@@ -1,6 +1,6 @@
 <div class="space-y-4 font-outfit w-full">
-    {{-- Header & Create Event Button --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
+    {{-- Top Header & Create Event Button --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Events & Summits</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Manage, monitor, and publish community summits, workshops, and business mixers</p>

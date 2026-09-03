@@ -10,7 +10,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" href="{{ asset('logo.png') }}">
+    <link rel="icon" href="{{ asset('logo2.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -36,12 +36,14 @@
             $menuGroups = collect([
                 [
                     'label' => null,
+                    'icon' => null,
                     'items' => [
                         ['name' => 'Overview', 'icon' => 'layout-dashboard', 'href' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard'), 'module' => null],
                     ],
                 ],
                 [
                     'label' => 'Directory',
+                    'icon' => 'folder',
                     'items' => [
                         ['name' => 'Businesses', 'icon' => 'briefcase', 'href' => route('admin.businesses.index'), 'active' => request()->routeIs('admin.businesses.*'), 'module' => 'businesses'],
                         ['name' => 'Categories', 'icon' => 'tag', 'href' => route('admin.categories.index'), 'active' => request()->routeIs('admin.categories.*'), 'module' => 'categories'],
@@ -50,6 +52,7 @@
                 ],
                 [
                     'label' => 'Events & Bookings',
+                    'icon' => 'calendar',
                     'items' => [
                         ['name' => 'Events', 'icon' => 'calendar', 'href' => route('admin.events.index'), 'active' => request()->routeIs('admin.events.*'), 'module' => 'events'],
                         ['name' => 'Bookings', 'icon' => 'shield-check', 'href' => route('admin.bookings.index'), 'active' => request()->routeIs('admin.bookings.*'), 'module' => 'bookings'],
@@ -59,6 +62,7 @@
                 ],
                 [
                     'label' => 'Members',
+                    'icon' => 'users',
                     'items' => [
                         ['name' => 'Registrations', 'icon' => 'user-check', 'href' => route('admin.registrations.index'), 'active' => request()->routeIs('admin.registrations.*'), 'module' => 'registrations'],
                         ['name' => 'Users', 'icon' => 'users', 'href' => route('admin.users.index'), 'active' => request()->routeIs('admin.users.*'), 'module' => 'users'],
@@ -68,6 +72,7 @@
                 ],
                 [
                     'label' => 'Network Activity',
+                    'icon' => 'activity',
                     'items' => [
                         ['name' => 'Chat', 'icon' => 'message-square', 'href' => route('admin.chat.index'), 'active' => request()->routeIs('admin.chat.*'), 'module' => 'chat'],
                         ['name' => '1-to-1 Meetings', 'icon' => 'users', 'href' => route('admin.meetings.index'), 'active' => request()->routeIs('admin.meetings.*'), 'module' => 'meetings'],
@@ -76,13 +81,8 @@
                     ],
                 ],
                 [
-                    'label' => 'Insights',
-                    'items' => [
-                        ['name' => 'Statistics', 'icon' => 'bar-chart-3', 'href' => route('admin.statistics.index'), 'active' => request()->routeIs('admin.statistics.*'), 'module' => 'statistics'],
-                    ],
-                ],
-                [
                     'label' => 'Administration',
+                    'icon' => 'settings',
                     'items' => [
                         ['name' => 'Sub-Admins', 'icon' => 'key-round', 'href' => route('admin.sub-admins.index'), 'active' => request()->routeIs('admin.sub-admins.*'), 'module' => null, 'fullAdminOnly' => true],
                         ['name' => 'Site Settings', 'icon' => 'settings', 'href' => route('admin.settings.index'), 'active' => request()->routeIs('admin.settings.*'), 'module' => null, 'fullAdminOnly' => true],

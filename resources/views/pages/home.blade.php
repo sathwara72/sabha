@@ -80,10 +80,16 @@
                                 x-transition:leave-start="opacity-100 scale-100"
                                 x-transition:leave-end="opacity-0 scale-95"
                                 :class="current === {{ $i }} ? 'z-10 pointer-events-auto' : 'z-0 pointer-events-none'"
-                                class="absolute inset-0 block h-full w-full cursor-pointer"
+                                class="absolute inset-0 block h-full w-full cursor-pointer overflow-hidden"
                                 title="{{ $slide['title'] ?: 'Click to open link' }}"
                             >
-                                <img src="{{ $slide['url'] }}" alt="{{ $slide['title'] ?: 'SABHA Highlight' }}" class="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
+                                <x-safe-image
+                                    :src="$slide['url']"
+                                    :alt="$slide['title'] ?: 'SABHA Highlight'"
+                                    :title="$slide['title']"
+                                    :blur-backdrop="true"
+                                    fallback-type="banner"
+                                />
                                 
                                 {{-- Subtle External / Event Link Badge in Top Corner --}}
                                 <div class="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 rounded-full bg-slate-900/75 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white shadow-lg border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -93,7 +99,7 @@
 
                                 {{-- Optional Caption Overlay if Present --}}
                                 @if (!empty($slide['title']) || !empty($slide['caption']))
-                                    <div class="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-5 pt-12 text-white">
+                                    <div class="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-slate-950/85 via-slate-950/50 to-transparent p-5 pt-12 text-white">
                                         @if (!empty($slide['title']))
                                             <h3 class="text-base sm:text-lg font-black leading-tight">{{ $slide['title'] }}</h3>
                                         @endif
@@ -114,16 +120,18 @@
                                 x-transition:leave-start="opacity-100 scale-100"
                                 x-transition:leave-end="opacity-0 scale-95"
                                 :class="current === {{ $i }} ? 'z-10 pointer-events-auto' : 'z-0 pointer-events-none'"
-                                class="absolute inset-0 h-full w-full"
+                                class="absolute inset-0 h-full w-full overflow-hidden"
                             >
-                                <img
-                                    src="{{ $slide['url'] }}"
-                                    alt="{{ $slide['title'] ?: 'SABHA Highlight' }}"
-                                    class="h-full w-full object-cover"
+                                <x-safe-image
+                                    :src="$slide['url']"
+                                    :alt="$slide['title'] ?: 'SABHA Highlight'"
+                                    :title="$slide['title']"
+                                    :blur-backdrop="true"
+                                    fallback-type="banner"
                                 />
 
                                 @if (!empty($slide['title']) || !empty($slide['caption']))
-                                    <div class="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-slate-950/80 via-slate-950/40 to-transparent p-5 pt-12 text-white">
+                                    <div class="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-slate-950/85 via-slate-950/50 to-transparent p-5 pt-12 text-white">
                                         @if (!empty($slide['title']))
                                             <h3 class="text-base sm:text-lg font-black leading-tight">{{ $slide['title'] }}</h3>
                                         @endif

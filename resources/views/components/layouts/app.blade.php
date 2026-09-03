@@ -18,9 +18,9 @@
         <meta name="robots" content="noindex, nofollow" />
     @endif
     <link rel="canonical" href="{{ url()->current() }}" />
-    <link rel="icon" href="{{ asset('logo.png') }}" />
-    <link rel="shortcut icon" href="{{ asset('logo.png') }}" />
-    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}" />
+    <link rel="icon" href="{{ asset('logo2.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('logo2.png') }}" />
+    <link rel="apple-touch-icon" href="{{ asset('logo2.png') }}" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Sabha" />

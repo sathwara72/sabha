@@ -11,9 +11,9 @@
     <meta name="description" content="{{ __('site.forgot_view.hero_desc') }}" />
     <meta name="robots" content="noindex, nofollow" />
 
-    <link rel="icon" href="{{ asset('logo.png') }}" />
-    <link rel="shortcut icon" href="{{ asset('logo.png') }}" />
-    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}" />
+    <link rel="icon" href="{{ asset('logo2.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('logo2.png') }}" />
+    <link rel="apple-touch-icon" href="{{ asset('logo2.png') }}" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -131,11 +131,8 @@
 
             {{-- TOP: Brand Header --}}
             <div class="relative z-10">
-                <a href="/" class="group inline-flex items-center gap-3.5">
-                    <div class="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 p-2 ring-1 ring-white/20 backdrop-blur-xl shadow-lg transition-all duration-300 group-hover:scale-105">
-                        <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-9 w-9 rounded-full object-contain" />
-                        <div class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-[#071326]"></div>
-                    </div>
+                <a href="/" class="group inline-flex items-center gap-3">
+                    <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-11 w-11 object-contain transition-all duration-300 group-hover:scale-105" />
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="text-2xl font-black tracking-tight text-white">SABHA</span>
@@ -245,7 +242,7 @@
                 {{-- Mobile Brand Logo Header (shown only on mobile/tablet) --}}
                 <div class="mb-4 text-center lg:hidden">
                     <a href="/" class="inline-flex items-center gap-2.5 mb-1 group">
-                        <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-10 w-10 rounded-full object-contain shadow-md" />
+                        <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-10 w-10 object-contain" />
                         <div class="text-left">
                             <span class="block text-xl font-black tracking-tight text-primary-dark">SABHA</span>
                             <span class="block text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.login_view.network_tag') }}</span>

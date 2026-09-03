@@ -1,14 +1,16 @@
-<div class="space-y-5 font-outfit">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-4 font-outfit">
+    {{-- Top Header & Add Sub-Admin Button --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Sub-Admins</h1>
-            <p class="text-xs text-muted">Grant members limited admin access to specific modules without making them a full admin</p>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Sub-Admins</h1>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Grant members limited admin access to specific modules without making them a full admin</p>
         </div>
         <a
             href="{{ route('admin.sub-admins.create') }}"
-            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-sm self-start sm:self-auto"
+            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#00379D] to-[#082e6e] px-4 py-2 text-xs font-bold text-white transition-all shadow-sm shadow-primary/20 hover:opacity-95 active:scale-[0.98] cursor-pointer self-start sm:self-auto"
         >
-            <x-icon name="plus" class="h-3.5 w-3.5" /> Add Sub-Admin
+            <x-icon name="plus" class="h-3.5 w-3.5" />
+            <span>Add Sub-Admin</span>
         </a>
     </div>
 
@@ -18,14 +20,15 @@
         </div>
     @endif
 
-    <div class="bg-white p-3 rounded-2xl border border-border shadow-xs">
+    {{-- Search Toolbar Card --}}
+    <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/90 shadow-2xs">
         <div class="relative max-w-md">
-            <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
                 placeholder="Search sub-admins by name or email..."
-                class="w-full rounded-xl border border-border bg-slate-50/50 py-2 pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:border-primary"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 pl-9 pr-4 text-xs font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:border-primary shadow-2xs"
             />
         </div>
     </div>

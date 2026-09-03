@@ -1,37 +1,31 @@
 <div class="space-y-4 font-outfit">
-    {{-- Header Banner Card with Search & Stats --}}
-    <div class="glass-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    {{-- Top Header --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <div class="flex items-center gap-2">
-                <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <x-icon name="message-square" class="h-5 w-5" />
-                </div>
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Referral Testimonials</h1>
-                    <p class="text-xs text-slate-500 font-medium">Moderate testimonials left by referral receivers on closed deals</p>
-                </div>
-            </div>
+            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">Referral Testimonials</h1>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Moderate testimonials left by referral receivers on closed deals</p>
         </div>
-
-        <div class="flex items-center flex-wrap gap-2.5 shrink-0">
-            {{-- Search Bar inside Header with Loading Spinner --}}
-            <div class="relative w-full sm:w-64 md:w-72">
-                <x-icon name="search" wire:loading.remove wire:target="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <span wire:loading wire:target="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
-                <input
-                    type="text"
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="Search testimonials or member..."
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2 pl-8 pr-3 text-xs font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:border-primary shadow-2xs"
-                />
-            </div>
-
-            <div class="text-xs font-bold text-slate-700 bg-slate-100/80 rounded-xl px-3 py-2 border border-slate-200 shadow-2xs">
+        <div class="flex items-center gap-2 self-start sm:self-auto">
+            <div class="text-xs font-bold text-slate-700 bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-2xs">
                 Total: <span class="text-primary font-black ml-0.5">{{ $totalCount }}</span>
             </div>
-            <div class="text-xs font-bold text-emerald-800 bg-emerald-50 rounded-xl px-3 py-2 border border-emerald-200 shadow-2xs">
+            <div class="text-xs font-bold text-emerald-800 bg-emerald-50 rounded-xl px-3 py-1.5 border border-emerald-200 shadow-2xs">
                 Visible: <span class="text-emerald-700 font-black ml-0.5">{{ $visibleCount }}</span>
             </div>
+        </div>
+    </div>
+
+    {{-- Search Toolbar Card --}}
+    <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div class="relative max-w-md">
+            <x-icon name="search" wire:loading.remove wire:target="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <span wire:loading wire:target="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
+            <input
+                type="text"
+                wire:model.live.debounce.300ms="search"
+                placeholder="Search testimonials or member..."
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 pl-9 pr-3 text-xs font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:border-primary shadow-2xs"
+            />
         </div>
     </div>
 

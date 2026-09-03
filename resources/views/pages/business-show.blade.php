@@ -146,61 +146,82 @@
             </section>
         </div>
 
-        {{-- Main Grid Content --}}
-        <div class="mx-auto max-w-7xl px-6 py-6">
-            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {{-- Split Body Layout (Matches Event Details Design) --}}
+        <div class="mx-auto max-w-7xl px-6 py-6 lg:px-4">
+            <div class="grid grid-cols-1 gap-2 lg:grid-cols-3">
 
-                {{-- Main Column --}}
-                <div class="space-y-6 lg:col-span-2">
+                {{-- Left Column (Main Content) --}}
+                <div class="space-y-3 lg:col-span-2">
                     @if ($business->description)
-                        <section class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <span class="h-4 w-1 rounded-full bg-primary"></span>
-                                <h2 class="text-base font-bold text-foreground">{{ __('site.businessDetail.about_company') }}</h2>
+                        <section class="glass-card p-4">
+                            <div class="mb-3 flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.businessDetail.about_company') }}</h2>
                             </div>
-                            <p class="text-xs leading-relaxed text-muted break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{{ $business->description }}</p>
+                            <p class="text-xs sm:text-sm leading-relaxed text-muted font-medium break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{{ $business->description }}</p>
                         </section>
                     @endif
 
                     @if ($business->founded || $business->team_size || $business->category)
-                        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 pt-2">
-                            @if ($business->founded)
-                                <div class="glass-card p-3 text-center">
-                                    <span class="text-[12px] font-semibold uppercase tracking-wider text-muted">{{ __('site.businessDetail.founded') }}</span>
-                                    <p class="mt-0.5 text-xs font-bold text-foreground">{{ $business->founded }}</p>
-                                </div>
-                            @endif
-                            @if ($business->team_size)
-                                <div class="glass-card p-3 text-center">
-                                    <span class="text-[12px] font-semibold uppercase tracking-wider text-muted">{{ __('site.businessDetail.team_size') }}</span>
-                                    <p class="mt-0.5 text-xs font-bold text-foreground">{{ $business->team_size }}</p>
-                                </div>
-                            @endif
-                            @if ($business->category)
-                                <div class="glass-card p-3 text-center">
-                                    <span class="text-[12px] font-semibold uppercase tracking-wider text-muted">{{ __('site.businessDetail.industry') }}</span>
-                                    <p class="mt-0.5 text-xs font-bold text-foreground truncate">{{ explode(' & ', $business->category)[0] }}</p>
-                                </div>
-                            @endif
-                        </div>
+                        <section class="glass-card p-4">
+                            <div class="mb-3 flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.businessDetail.company_overview') }}</h2>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                @if ($business->founded)
+                                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                                            <x-icon name="calendar" class="h-4 w-4" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-[11px] font-semibold text-muted uppercase">{{ __('site.businessDetail.founded') }}</p>
+                                            <p class="text-xs font-bold text-foreground leading-tight">{{ $business->founded }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($business->team_size)
+                                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                                            <x-icon name="users" class="h-4 w-4" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-[11px] font-semibold text-muted uppercase">{{ __('site.businessDetail.team_size') }}</p>
+                                            <p class="text-xs font-bold text-foreground leading-tight">{{ $business->team_size }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($business->category)
+                                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                                            <x-icon name="briefcase" class="h-4 w-4" />
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-[11px] font-semibold text-muted uppercase">{{ __('site.businessDetail.industry') }}</p>
+                                            <p class="text-xs font-bold text-foreground truncate leading-tight">{{ explode(' & ', $business->category)[0] }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </section>
                     @endif
 
                     @if ($services->isNotEmpty())
-                        <section class="space-y-2.5">
-                            <div class="flex items-center gap-2">
-                                <span class="h-4 w-1 rounded-full bg-primary"></span>
-                                <h2 class="text-base font-bold text-foreground">{{ __('site.businessDetail.core_services') }}</h2>
+                        <section class="glass-card p-4">
+                            <div class="mb-3 flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.businessDetail.core_services') }}</h2>
                             </div>
-                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                                 @foreach ($services as $service)
-                                    <div class="glass-card flex items-start gap-2.5 p-3">
+                                    <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
                                         <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
-                                            <x-icon name="zap" class="h-[14px] w-[14px]" />
+                                            <x-icon name="zap" class="h-4 w-4" />
                                         </div>
-                                        <div class="space-y-0.5">
+                                        <div class="min-w-0 flex-1 space-y-0.5">
                                             <h3 class="text-xs font-bold text-foreground">{{ $service['title'] }}</h3>
                                             @if ($service['desc'])
-                                                <p class="text-[12px] text-muted leading-normal">{{ $service['desc'] }}</p>
+                                                <p class="text-[12px] text-muted leading-relaxed font-medium">{{ $service['desc'] }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -210,13 +231,20 @@
                     @endif
 
                     {{-- Reviews list & submit review --}}
-                    <section class="space-y-4">
-                        <div class="flex items-center gap-2">
-                            <span class="h-4 w-1 rounded-full bg-primary"></span>
-                            <h2 class="text-base font-bold text-foreground">{{ __('site.businessDetail.member_recommendations') }}</h2>
+                    <section class="glass-card p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.businessDetail.member_recommendations') }}</h2>
+                            </div>
+                            @if ($business->rating)
+                                <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                                    <x-icon name="star" class="h-3 w-3 fill-current text-amber-500" /> {{ $business->rating }} ({{ $business->reviews_count }})
+                                </span>
+                            @endif
                         </div>
 
-                        <div class="glass-card p-4 space-y-3 bg-surface/30">
+                        <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 space-y-3">
                             <h3 class="text-xs font-bold text-foreground inline-flex items-center gap-1.5">
                                 <x-icon name="message-square" class="h-4 w-4 text-primary" /> {{ __('site.businessDetail.recommend_business') }}
                             </h3>
@@ -226,12 +254,12 @@
                             <form x-show="!hasUserReviewed" x-cloak x-on:submit.prevent="submitReview" class="space-y-3">
                                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div class="space-y-1">
-                                        <label class="text-xs font-semibold text-muted">{{ __('site.businessDetail.your_name') }}</label>
-                                        <input type="text" placeholder="John Doe" value="{{ auth()->user()->name ?? '' }}" @disabled(auth()->check()) class="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary disabled:bg-slate-50 disabled:text-muted" />
+                                        <label class="text-[11px] font-bold text-muted uppercase">{{ __('site.businessDetail.your_name') }}</label>
+                                        <input type="text" placeholder="John Doe" value="{{ auth()->user()->name ?? '' }}" @disabled(auth()->check()) class="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary disabled:bg-slate-50 disabled:text-muted font-medium" />
                                     </div>
                                     <div class="space-y-1">
-                                        <label class="text-xs font-semibold text-muted">{{ __('site.businessDetail.rating') }}</label>
-                                        <select x-model="reviewRating" class="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary">
+                                        <label class="text-[11px] font-bold text-muted uppercase">{{ __('site.businessDetail.rating') }}</label>
+                                        <select x-model="reviewRating" class="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary font-medium">
                                             @foreach ([5, 4, 3, 2, 1] as $r)
                                                 <option value="{{ $r }}">{{ $r }} {{ __('site.businessDetail.stars') }}</option>
                                             @endforeach
@@ -239,12 +267,12 @@
                                     </div>
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-xs font-semibold text-muted">{{ __('site.businessDetail.recommendation_text') }}</label>
-                                    <textarea required rows="3" placeholder="{{ __('site.businessDetail.recommendation_placeholder') }}" x-model="reviewContent" class="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none"></textarea>
+                                    <label class="text-[11px] font-bold text-muted uppercase">{{ __('site.businessDetail.recommendation_text') }}</label>
+                                    <textarea required rows="3" placeholder="{{ __('site.businessDetail.recommendation_placeholder') }}" x-model="reviewContent" class="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-foreground outline-none focus:border-primary resize-none font-medium"></textarea>
                                 </div>
                                 <div class="flex flex-col gap-2">
                                     <div class="flex items-center gap-3">
-                                        <button type="submit" :disabled="reviewSubmitting" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50">
+                                        <button type="submit" :disabled="reviewSubmitting" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-sm">
                                             <span x-text="reviewSubmitting ? '{{ __('site.common.loading') }}' : '{{ __('site.businessDetail.submit_review') }}'"></span>
                                         </button>
                                         <span x-show="reviewSubmitted" x-cloak x-transition class="text-xs text-green-600 font-semibold inline-flex items-center gap-1">
@@ -256,52 +284,52 @@
                             </form>
                         </div>
 
-                        <div class="space-y-3.5">
+                        <div class="space-y-2.5 pt-1">
                             <template x-for="(rev, idx) in reviews" :key="idx">
-                                <div class="glass-card p-5 space-y-3">
+                                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2.5">
                                     <div class="flex justify-between items-start">
-                                        <div class="flex items-center gap-3">
-                                            <div class="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-primary shrink-0 select-none" x-text="(rev.reviewer || '{{ __('site.businessDetail.anonymous_member') }}').charAt(0)"></div>
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="h-8 w-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-xs text-primary shrink-0 select-none shadow-2xs" x-text="(rev.reviewer || '{{ __('site.businessDetail.anonymous_member') }}').charAt(0)"></div>
                                             <div>
-                                                <h4 class="text-sm font-bold text-foreground leading-none" x-text="rev.reviewer || '{{ __('site.businessDetail.anonymous_member') }}'"></h4>
-                                                <span class="text-[12px] text-muted leading-none mt-0.5 inline-block" x-text="rev.role || '{{ __('site.businessDetail.verified_member') }}'"></span>
+                                                <h4 class="text-xs font-bold text-foreground leading-tight" x-text="rev.reviewer || '{{ __('site.businessDetail.anonymous_member') }}'"></h4>
+                                                <span class="text-[11px] text-muted leading-tight mt-0.5 inline-block" x-text="rev.role || '{{ __('site.businessDetail.verified_member') }}'"></span>
                                             </div>
                                         </div>
-                                        <div class="flex gap-0.5 text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/30">
+                                        <div class="flex gap-0.5 text-amber-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                                             <template x-for="i in 5" :key="i">
                                                 <x-icon name="star" class="h-3 w-3" x-bind:class="i <= rev.rating ? 'fill-current' : 'text-amber-200'" />
                                             </template>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-muted leading-relaxed font-medium bg-surface/40 p-3 rounded-lg" x-text="'&quot;' + rev.content + '&quot;'"></p>
+                                    <p class="text-xs text-muted leading-relaxed font-medium bg-white p-2.5 rounded-lg border border-slate-100" x-text="'&quot;' + rev.content + '&quot;'"></p>
                                 </div>
                             </template>
                         </div>
                     </section>
 
                     @if ($testimonials->isNotEmpty())
-                        <section class="space-y-4">
+                        <section class="glass-card p-4 space-y-3">
                             <div class="flex items-center gap-2">
-                                <span class="h-4 w-1 rounded-full bg-primary"></span>
-                                <h2 class="text-base font-bold text-foreground">Referral Testimonials</h2>
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Referral Testimonials</h2>
                             </div>
-                            <p class="text-xs text-muted -mt-2">Network-verified feedback from members who received a referral from this business and closed the deal</p>
+                            <p class="text-xs text-muted -mt-1 font-medium">Network-verified feedback from members who received a referral from this business and closed the deal</p>
 
-                            <div class="space-y-3.5">
+                            <div class="space-y-2.5">
                                 @foreach ($testimonials as $t)
-                                    <div class="glass-card p-5 space-y-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="h-9 w-9 rounded-full bg-emerald-50 flex items-center justify-center font-bold text-xs text-emerald-700 shrink-0 select-none">
+                                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-xs text-emerald-800 shrink-0 select-none">
                                                 {{ $t->receiver ? mb_substr($t->receiver->name, 0, 1) : '?' }}
                                             </div>
                                             <div>
-                                                <h4 class="text-sm font-bold text-foreground leading-none">{{ $t->receiver?->name ?? 'SABHA Member' }}</h4>
-                                                <span class="text-[12px] text-emerald-700 leading-none mt-0.5 inline-flex items-center gap-1">
-                                                    <x-icon name="check-circle-2" class="h-2.5 w-2.5" /> Verified Referral Partner
+                                                <h4 class="text-xs font-bold text-foreground leading-tight">{{ $t->receiver?->name ?? 'SABHA Member' }}</h4>
+                                                <span class="text-[11px] text-emerald-700 leading-tight mt-0.5 inline-flex items-center gap-1 font-semibold">
+                                                    <x-icon name="check-circle-2" class="h-3 w-3" /> Verified Referral Partner
                                                 </span>
                                             </div>
                                         </div>
-                                        <p class="text-xs text-muted leading-relaxed font-medium bg-surface/40 p-3 rounded-lg">&quot;{{ $t->testimonial }}&quot;</p>
+                                        <p class="text-xs text-muted leading-relaxed font-medium bg-white p-2.5 rounded-lg border border-slate-100">&quot;{{ $t->testimonial }}&quot;</p>
                                     </div>
                                 @endforeach
                             </div>
@@ -309,144 +337,164 @@
                     @endif
                 </div>
 
-                {{-- Sidebar Column --}}
-                <div class="space-y-4">
+                {{-- Right Column (Sticky Sidebar - Matches Event Details Sidebar) --}}
+                <div class="space-y-4 lg:sticky lg:top-20 h-fit">
                     @if ($business->user)
-                        <div class="glass-card p-4 space-y-3">
-                            <h3 class="border-b border-border pb-2.5 text-xs font-bold text-foreground">{{ __('site.businessDetail.listed_by') }}</h3>
-                            <div class="flex items-center gap-4">
-                                <img src="{{ $memberAvatar }}" alt="{{ $business->user->name }}" class="h-14 w-14 rounded-full object-cover border border-border shadow-sm shrink-0" />
+                        <div class="glass-card p-4">
+                            <div class="mb-3 flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.businessDetail.listed_by') }}</h3>
+                            </div>
+                            <div class="flex items-center gap-3.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                <img src="{{ $memberAvatar }}" alt="{{ $business->user->name }}" class="h-12 w-12 rounded-full object-contain bg-slate-100 border-2 border-primary/20 shadow-xs shrink-0" />
                                 <div class="min-w-0 flex-1">
-                                    <h4 class="text-sm font-bold text-slate-900 truncate">{{ $business->user->name }}</h4>
-                                    <div class="mt-0.5">
-                                        <x-member-title-badge :title="$business->user->memberTitle" fallback="SABHA Member" />
-                                    </div>
-                                    <span class="inline-flex items-center gap-1 text-[12px] text-muted-foreground mt-1">
-                                        <x-icon name="shield-check" class="h-3 w-3 text-green-500" /> {{ __('site.businessDetail.verified_member') }}
-                                    </span>
+                                    <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">{{ $business->user->name }}</h4>
+                                    @if ($business->user->memberTitle)
+                                        <div class="mt-0.5">
+                                            <x-member-title-badge :title="$business->user->memberTitle" />
+                                        </div>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 mt-0.5">
+                                            <x-icon name="shield-check" class="h-3 w-3" /> {{ __('site.businessDetail.verified_member') }}
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     @endif
 
-                    @if ($business->website || $business->business_email || $business->business_phone || $business->linkedin || $business->area)
-                        <div class="glass-card p-4">
-                            <h3 class="border-b border-border pb-2.5 text-xs font-bold text-foreground">{{ __('site.businessDetail.contact_channels') }}</h3>
-                            <div class="mt-4 space-y-3">
+                    @if ($business->website || $business->business_email || $business->business_phone || $business->phone2 || $business->linkedin || $business->instagram || $business->youtube || $business->twitter || $business->whatsapp)
+                        <div class="glass-card p-4 space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.businessDetail.contact_channels') }}</h3>
+                            </div>
+                            <div class="space-y-2">
                                 @if ($business->website)
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="globe" class="h-[18px] w-[18px]" /></div>
-                                        <div class="min-w-0">
-                                            <p class="text-[12px] font-semibold text-muted leading-none">{{ __('site.businessDetail.website') }}</p>
-                                            <a href="{{ $business->website }}" target="_blank" class="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block">
-                                                {{ preg_replace('#^https?://#', '', $business->website) }}
-                                            </a>
+                                    <a href="{{ $business->website }}" target="_blank" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 hover:bg-primary-soft transition-colors group">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-primary border border-slate-200">
+                                            <x-icon name="globe" class="h-4 w-4" />
                                         </div>
-                                    </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[11px] font-semibold text-muted uppercase leading-none">{{ __('site.businessDetail.website') }}</p>
+                                            <p class="mt-0.5 text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                                                {{ preg_replace('#^https?://#', '', $business->website) }}
+                                            </p>
+                                        </div>
+                                    </a>
                                 @endif
                                 @if ($business->business_email)
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="mail" class="h-[18px] w-[18px]" /></div>
-                                        <div class="min-w-0">
-                                            <p class="text-[12px] font-semibold text-muted leading-none">{{ __('site.businessDetail.email_address') }}</p>
-                                            <a href="mailto:{{ $business->business_email }}" class="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block">{{ $business->business_email }}</a>
+                                    <a href="mailto:{{ $business->business_email }}" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 hover:bg-primary-soft transition-colors group">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-primary border border-slate-200">
+                                            <x-icon name="mail" class="h-4 w-4" />
                                         </div>
-                                    </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[11px] font-semibold text-muted uppercase leading-none">{{ __('site.businessDetail.email_address') }}</p>
+                                            <p class="mt-0.5 text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">{{ $business->business_email }}</p>
+                                        </div>
+                                    </a>
                                 @endif
                                 @if ($business->business_phone)
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="phone" class="h-[18px] w-[18px]" /></div>
-                                        <div class="min-w-0">
-                                            <p class="text-[12px] font-semibold text-muted leading-none">{{ __('site.businessDetail.direct_phone') }}</p>
-                                            <a href="tel:{{ $business->business_phone }}" class="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block">{{ $business->business_phone }}</a>
+                                    <a href="tel:{{ $business->business_phone }}" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 hover:bg-primary-soft transition-colors group">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-primary border border-slate-200">
+                                            <x-icon name="phone" class="h-4 w-4" />
                                         </div>
-                                    </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[11px] font-semibold text-muted uppercase leading-none">{{ __('site.businessDetail.direct_phone') }}</p>
+                                            <p class="mt-0.5 text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">{{ $business->business_phone }}</p>
+                                        </div>
+                                    </a>
                                 @endif
                                 @if ($business->phone2)
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="phone" class="h-[18px] w-[18px]" /></div>
-                                        <div class="min-w-0">
-                                            <p class="text-[12px] font-semibold text-muted leading-none">Alternate Phone</p>
-                                            <a href="tel:{{ $business->phone2 }}" class="mt-1 text-xs font-semibold text-foreground transition-colors hover:text-primary truncate block">{{ $business->phone2 }}</a>
+                                    <a href="tel:{{ $business->phone2 }}" class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100 hover:bg-primary-soft transition-colors group">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-primary border border-slate-200">
+                                            <x-icon name="phone" class="h-4 w-4" />
                                         </div>
-                                    </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[11px] font-semibold text-muted uppercase leading-none">{{ __('site.businessDetail.alternate_phone') }}</p>
+                                            <p class="mt-0.5 text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate">{{ $business->phone2 }}</p>
+                                        </div>
+                                    </a>
                                 @endif
                                 @if ($business->linkedin)
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="share-2" class="h-[18px] w-[18px]" /></div>
-                                        <div class="min-w-0">
-                                            <p class="text-[12px] font-semibold text-muted leading-none">{{ __('site.businessDetail.linkedin_url') }}</p>
-                                            <span class="mt-1 text-xs font-semibold text-foreground block truncate">{{ $business->linkedin }}</span>
+                                    <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-primary border border-slate-200">
+                                            <x-icon name="share-2" class="h-4 w-4" />
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[11px] font-semibold text-muted uppercase leading-none">{{ __('site.businessDetail.linkedin_url') }}</p>
+                                            <span class="mt-0.5 text-xs font-bold text-foreground block truncate">{{ $business->linkedin }}</span>
                                         </div>
                                     </div>
                                 @endif
                             </div>
 
                             @if ($business->instagram || $business->youtube || $business->twitter || $business->linkedin || $business->whatsapp)
-                                <div class="mt-5 border-t border-border pt-4">
-                                    <p class="text-[12px] font-semibold text-muted mb-3 uppercase tracking-wider">{{ __('site.businessDetail.social_channels') }}</p>
-                                    <div class="flex flex-wrap items-center gap-2.5">
+                                <div class="pt-2.5 border-t border-slate-100">
+                                    <p class="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">{{ __('site.businessDetail.social_channels') }}</p>
+                                    <div class="flex flex-wrap items-center gap-2">
                                         @if ($business->instagram)
-                                            <a href="{{ $business->instagram }}" target="_blank" rel="noreferrer" class="h-10 w-10 rounded-xl bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="Instagram">
-                                                <x-brand-icon name="instagram" class="h-[18px] w-[18px]" />
+                                            <a href="{{ $business->instagram }}" target="_blank" rel="noreferrer" class="h-8 w-8 rounded-lg bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 text-white flex items-center justify-center transition-transform hover:scale-110 shadow-xs" title="Instagram">
+                                                <x-brand-icon name="instagram" class="h-4 w-4" />
                                             </a>
                                         @endif
                                         @if ($business->youtube)
-                                            <a href="{{ $business->youtube }}" target="_blank" rel="noreferrer" class="h-10 w-10 rounded-xl bg-red-600 text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="Youtube">
-                                                <x-brand-icon name="youtube" class="h-[18px] w-[18px]" />
+                                            <a href="{{ $business->youtube }}" target="_blank" rel="noreferrer" class="h-8 w-8 rounded-lg bg-red-600 text-white flex items-center justify-center transition-transform hover:scale-110 shadow-xs" title="YouTube">
+                                                <x-brand-icon name="youtube" class="h-4 w-4" />
                                             </a>
                                         @endif
                                         @if ($business->twitter)
-                                            <a href="{{ $business->twitter }}" target="_blank" rel="noreferrer" class="h-10 w-10 rounded-xl bg-black text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="Twitter / X">
-                                                <x-brand-icon name="twitter" class="h-[18px] w-[18px]" />
+                                            <a href="{{ $business->twitter }}" target="_blank" rel="noreferrer" class="h-8 w-8 rounded-lg bg-black text-white flex items-center justify-center transition-transform hover:scale-110 shadow-xs" title="Twitter / X">
+                                                <x-brand-icon name="twitter" class="h-4 w-4" />
                                             </a>
                                         @endif
                                         @if ($business->linkedin)
-                                            <a href="{{ $business->linkedin }}" target="_blank" rel="noreferrer" class="h-10 w-10 rounded-xl bg-[#0A66C2] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="LinkedIn">
-                                                <x-brand-icon name="linkedin" class="h-[18px] w-[18px]" />
+                                            <a href="{{ $business->linkedin }}" target="_blank" rel="noreferrer" class="h-8 w-8 rounded-lg bg-[#0A66C2] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-xs" title="LinkedIn">
+                                                <x-brand-icon name="linkedin" class="h-4 w-4" />
                                             </a>
                                         @endif
                                         @if ($business->whatsapp)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $business->whatsapp) }}" target="_blank" rel="noreferrer" class="h-10 w-10 rounded-xl bg-[#25D366] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-sm" title="WhatsApp">
-                                                <x-brand-icon name="whatsapp" class="h-[18px] w-[18px]" />
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $business->whatsapp) }}" target="_blank" rel="noreferrer" class="h-8 w-8 rounded-lg bg-[#25D366] text-white flex items-center justify-center transition-transform hover:scale-110 shadow-xs" title="WhatsApp">
+                                                <x-brand-icon name="whatsapp" class="h-4 w-4" />
                                             </a>
                                         @endif
                                     </div>
                                 </div>
                             @endif
+                        </div>
+                    @endif
 
-                            @if ($hasAddressDetails)
-                                <div class="mt-6 border-t border-border pt-5 space-y-3">
-                                    <p class="text-[12px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
-                                        <x-icon name="map-pin" class="h-[14px] w-[14px] text-primary" /> {{ __('site.businessDetail.geographic_location') }}
-                                    </p>
-                                    @if ($fullAddr)
-                                        <div class="flex items-start gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
-                                            <x-icon name="map-pin" class="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                                            <div class="space-y-0.5">
-                                                <p class="text-xs font-extrabold text-slate-900 leading-snug">{{ $fullAddr }}</p>
-                                            </div>
-                                        </div>
-                                    @endif
-                                    @if ($mapSrc)
-                                        <div class="h-52 w-full rounded-xl border border-border overflow-hidden relative shadow-sm bg-slate-900">
-                                            <iframe src="{{ $mapSrc }}" class="w-full h-full border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                                        </div>
-                                    @endif
+                    @if ($hasAddressDetails)
+                        <div class="glass-card p-4 space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">{{ __('site.businessDetail.geographic_location') }}</h3>
+                            </div>
+                            @if ($fullAddr)
+                                <div class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <x-icon name="map-pin" class="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                    <p class="text-xs font-bold text-slate-900 leading-snug">{{ $fullAddr }}</p>
+                                </div>
+                            @endif
+                            @if ($mapSrc)
+                                <div class="h-44 w-full rounded-xl border border-border overflow-hidden relative shadow-2xs bg-slate-900">
+                                    <iframe src="{{ $mapSrc }}" class="w-full h-full border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                                 </div>
                             @endif
                         </div>
                     @endif
 
-                    <div class="rounded-2xl border border-border bg-primary p-5 text-white space-y-3.5">
+                    <div class="rounded-2xl p-4 bg-gradient-to-br from-[#0F3459] to-[#00379D] text-white border border-blue-900/30 shadow-md space-y-2.5">
                         <div class="flex items-center gap-2">
-                            <x-icon name="award" class="h-5 w-5 text-white" />
-                            <h4 class="text-sm font-bold">{{ __('site.businessDetail.vetted_member') }}</h4>
+                            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-white/20 text-white">
+                                <x-icon name="shield-check" class="h-4 w-4" />
+                            </div>
+                            <h4 class="text-xs font-extrabold text-white">{{ __('site.businessDetail.vetted_member') }}</h4>
                         </div>
-                        <p class="text-xs leading-relaxed text-white/80">{{ __('site.businessDetail.vetted_desc') }}</p>
-                        <div class="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5">
-                            <x-icon name="shield-check" class="h-4 w-4 text-white" />
-                            <span class="text-[12px] font-bold">{{ __('site.businessDetail.verified_profile') }}</span>
+                        <p class="text-[11px] leading-relaxed text-white/90 font-medium">{{ __('site.businessDetail.vetted_desc') }}</p>
+                        <div class="inline-flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-[11px] font-bold text-white">
+                            <x-icon name="check-circle-2" class="h-3.5 w-3.5 text-emerald-300" />
+                            <span>{{ __('site.businessDetail.verified_profile') }}</span>
                         </div>
                     </div>
                 </div>

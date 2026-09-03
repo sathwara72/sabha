@@ -1,20 +1,26 @@
-<div class="space-y-3">
+<div class="space-y-4 font-outfit">
+    {{-- Top Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex flex-col">
-            <div class="flex items-center gap-2">
-                <h1 class="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">Members</h1>
-                <span class="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary">{{ $users->total() }}</span>
+        <div>
+            <div class="flex items-center gap-2.5">
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Members & Users</h1>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-primary border border-blue-200/60">
+                    {{ $users->total() }} Total
+                </span>
             </div>
-            <p class="text-xs text-muted">Manage community members</p>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Manage community members, view profile details, and handle account status</p>
         </div>
+    </div>
 
-        <div class="relative w-full sm:w-72">
-            <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+    {{-- Search Toolbar Card --}}
+    <div class="bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div class="relative max-w-md">
+            <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
             <input
                 type="text"
                 wire:model.live.debounce.400ms="search"
-                placeholder="Search by name, email..."
-                class="w-full rounded-xl border border-border bg-white py-1.5 pl-9 pr-4 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                placeholder="Search by name, email, phone..."
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 pl-9 pr-4 text-xs font-semibold text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:bg-white focus:border-primary shadow-2xs"
             />
         </div>
     </div>

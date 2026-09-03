@@ -1,6 +1,6 @@
 <div class="space-y-4 font-outfit w-full">
-    {{-- Header with Navigation & City Summary --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
+    {{-- Top Header with Navigation & City Summary --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-3">
             <a
                 href="{{ route('admin.locations.index') }}"
@@ -10,14 +10,9 @@
                 <x-icon name="arrow-left" class="h-4 w-4" />
             </a>
             <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                    <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">
-                        Areas in {{ $city->name }}
-                    </h1>
-                    <!-- <span class="rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
-                        Gujarat City
-                    </span> -->
-                </div>
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">
+                    Areas in {{ $city->name }}
+                </h1>
                 <p class="text-xs text-slate-500 font-medium mt-0.5">
                     Manage locality & sector zones used in member profiles and business directory listings
                 </p>

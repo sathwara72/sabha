@@ -906,7 +906,7 @@ class MembershipFormSeeder extends Seeder
         "timestamp": "2026-05-03 07:17:25",
         "birth_date": "1996-10-08",
         "anniversary_date": "2019-01-01",
-        "native_city": "AS Wealth Solutions"
+        "native_city": null
     },
     {
         "full_name": "KANTIBHAI KANJIBHAI Dabhi",
