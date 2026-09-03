@@ -2,7 +2,7 @@
     $inputClass = 'w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold';
     $labelClass = 'text-[12px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5 block';
     $savedAvatarSrc = media_url($user->avatar);
-    $previewAvatarSrc = $avatarFile ? $avatarFile->temporaryUrl() : $savedAvatarSrc;
+    $previewAvatarSrc = $avatarFile ? (temporary_media_url($avatarFile) ?: $savedAvatarSrc) : $savedAvatarSrc;
 @endphp
 
 <div class="bg-background font-outfit py-3 px-2">
@@ -634,7 +634,7 @@
                                                                  @if ($logoFile)
                                                                      <div class="flex flex-col items-center gap-2">
                                                                          <div class="h-20 w-20 rounded-2xl border border-primary/40 overflow-hidden bg-white p-1.5 shadow-sm shrink-0 flex items-center justify-center">
-                                                                             <img src="{{ $logoFile->temporaryUrl() }}" alt="Cropped Logo Preview" class="max-h-full max-w-full object-contain rounded-xl" />
+                                                                             <img src="{{ temporary_media_url($logoFile) ?: $logoPreview }}" alt="Cropped Logo Preview" class="max-h-full max-w-full object-contain rounded-xl" />
                                                                          </div>
                                                                          <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">{{ __('site.profile.logo_adjusted') }}</span>
                                                                      </div>
@@ -694,7 +694,7 @@
                                                                  @if ($coverFile)
                                                                      <div class="flex flex-col items-center gap-2 w-full">
                                                                          <div class="h-20 w-full max-w-[240px] rounded-2xl border border-primary/40 overflow-hidden bg-slate-900 shadow-sm shrink-0 flex items-center justify-center">
-                                                                             <img src="{{ $coverFile->temporaryUrl() }}" alt="Cropped Cover Preview" class="h-full w-full object-cover" />
+                                                                             <img src="{{ temporary_media_url($coverFile) ?: $coverPreview }}" alt="Cropped Cover Preview" class="h-full w-full object-cover" />
                                                                          </div>
                                                                          <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">{{ __('site.profile.banner_adjusted') }}</span>
                                                                      </div>
