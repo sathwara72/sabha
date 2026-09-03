@@ -7,7 +7,6 @@
             </div>
             <div>
                 <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Network Analytics</h1>
-                <p class="text-xs text-slate-500 font-medium">Platform-wide networking activity, referral performance, and leaderboards</p>
             </div>
         </div>
 

@@ -45,11 +45,13 @@
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
                     </span>
                     <span class="text-xs font-black uppercase tracking-wider text-primary">{{ __('site.event_popup.upcoming_badge') }}</span>
+                    {{-- Event Category: Commented Out
                     @if ($event->type)
                         <span class="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
                             {{ $event->type }}
                         </span>
                     @endif
+                    --}}
                 </div>
 
                 <button

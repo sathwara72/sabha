@@ -57,79 +57,113 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             @foreach ($referrals as $ref)
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        {{-- Top: User & Badges --}}
-                        <div class="border-b border-slate-100 pb-2.5 space-y-2">
-                            <div class="flex items-center gap-2">
-                                <div class="h-8 w-8 rounded-xl bg-primary-soft text-primary border border-primary/10 flex items-center justify-center font-bold text-xs shrink-0">
-                                    @php
-                                        $memberName = $direction === 'given' ? ($ref->receiver?->name ?? 'Member') : ($ref->giver?->name ?? 'Member');
-                                    @endphp
-                                    {{ mb_substr($memberName, 0, 1) }}
+                @php
+                    $memberObj = $direction === 'given' ? $ref->receiver : $ref->giver;
+                    $memberName = $memberObj?->name ?? 'Member';
+                    $memberBiz = $memberObj?->business?->name;
+                    $memberPhone = $memberObj?->phone;
+                @endphp
+                <div class="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex flex-col justify-between space-y-2">
+                    <div class="space-y-2">
+                        {{-- Top Header: Member Info, Small Chips, Date & Contacted --}}
+                        <div class="border-b border-slate-100 pb-2 space-y-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0 flex-1">
+                                    <div class="h-7 w-7 rounded-lg bg-primary-soft text-primary border border-primary/10 flex items-center justify-center font-bold text-[11px] shrink-0">
+                                        {{ mb_substr($memberName, 0, 1) }}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider block leading-none">
+                                            {{ $direction === 'given' ? __('site.profile.referrals.to') : __('site.profile.referrals.from') }}
+                                        </span>
+                                        <h4 class="text-xs font-bold text-slate-900 truncate leading-tight mt-0.5" title="{{ $memberName }}">
+                                            {{ $memberName }}
+                                        </h4>
+                                    </div>
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">
-                                        {{ $direction === 'given' ? __('site.profile.referrals.to') : __('site.profile.referrals.from') }}
+
+                                {{-- Top Right: Date on top, Contacted pill underneath --}}
+                                <div class="flex flex-col items-end gap-0.5 shrink-0">
+                                    <span class="text-[10px] text-slate-400 font-medium leading-none">{{ $ref->created_at->format('d M, Y') }}</span>
+                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold {{ $ref->contact_status === 'connected' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200' }}">
+                                        <x-icon name="{{ $ref->contact_status === 'connected' ? 'check-circle-2' : 'clock' }}" class="h-2.5 w-2.5" />
+                                        {{ $ref->contact_status === 'connected' ? __('site.profile.referrals.contacted') : __('site.profile.referrals.not_contacted') }}
                                     </span>
-                                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 truncate" title="{{ $memberName }}">
-                                        {{ $memberName }}
-                                    </h4>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $ratingBadge[$ref->lead_rating] ?? $ratingBadge['warm'] }}">{{ $ratingLabel[$ref->lead_rating] ?? $ref->lead_rating }}</span>
-                                <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $statusBadge[$ref->status] ?? $statusBadge['pending'] }}">{{ $statusLabel[$ref->status] ?? $ref->status }}</span>
+
+                            {{-- Small Chips directly inside header --}}
+                            <div class="flex items-center gap-1 flex-wrap">
+                                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide border {{ $ratingBadge[$ref->lead_rating] ?? $ratingBadge['warm'] }}">
+                                    {{ $ref->lead_rating === 'hot' ? '🔥 ' : ($ref->lead_rating === 'warm' ? '🟡 ' : '❄️ ') }}{{ $ratingLabel[$ref->lead_rating] ?? $ref->lead_rating }}
+                                </span>
+                                <span class="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide border {{ $statusBadge[$ref->status] ?? $statusBadge['pending'] }}">
+                                    {{ $statusLabel[$ref->status] ?? $ref->status }}
+                                </span>
+                                @if ($direction === 'received' && $memberPhone)
+                                    <a href="tel:{{ $memberPhone }}" class="ml-auto text-[10px] font-semibold text-slate-500 hover:text-primary flex items-center gap-0.5" title="Call Giver">
+                                        <x-icon name="phone" class="h-2.5 w-2.5" /> Call Giver
+                                    </a>
+                                @endif
                             </div>
                         </div>
 
-                        {{-- Lead Info --}}
-                        <div class="rounded-xl bg-slate-50/80 p-2.5 space-y-1.5 border border-slate-100">
-                            <div class="flex items-center justify-between text-xs font-semibold text-slate-850 gap-2">
-                                <span class="truncate">{{ $ref->contact_name }}</span>
-                                <span class="text-[11px] text-slate-500 shrink-0 font-medium">{{ $ref->contact_number }}</span>
+                        {{-- ALL LEAD DETAILS TOGETHER IN ONE INNER CARD --}}
+                        <div class="rounded-xl bg-slate-50/80 p-2 space-y-1 border border-slate-100 text-xs">
+                            {{-- Line 1: Contact Name & Phone --}}
+                            <div class="flex items-center justify-between gap-2 font-semibold">
+                                <span class="truncate font-bold text-slate-900 text-xs flex items-center gap-1">
+                                    <x-icon name="user" class="h-2.5 w-2.5 text-slate-400" /> {{ $ref->contact_name }}
+                                </span>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <a href="tel:{{ $ref->contact_number }}" class="text-[10px] font-semibold text-primary hover:underline flex items-center gap-0.5" title="Call Lead">
+                                        <x-icon name="phone" class="h-2 w-2" /> {{ $ref->contact_number }}
+                                    </a>
+                                    <a href="https://wa.me/91{{ preg_replace('/[^0-9]/', '', $ref->contact_number) }}" target="_blank" rel="noopener" class="text-emerald-600 hover:opacity-80 flex items-center" title="WhatsApp Lead">
+                                        <x-icon name="message-circle" class="h-2.5 w-2.5" />
+                                    </a>
+                                </div>
                             </div>
+
+                            {{-- Line 2: Company Details --}}
                             @if ($ref->company_details)
-                                <div class="flex items-center justify-between text-[11px] gap-2 pt-0.5 border-t border-slate-200/50">
+                                <div class="flex items-center justify-between text-[10px] gap-2 pt-0.5 border-t border-slate-200/50">
                                     <span class="text-slate-500 font-medium shrink-0">{{ __('site.profile.referrals.company_label') }}</span>
                                     <span class="text-slate-800 font-semibold truncate text-right">{{ $ref->company_details }}</span>
                                 </div>
                             @endif
-                        </div>
 
-                        {{-- Requirement --}}
-                        <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed" title="{{ $ref->business_requirement }}">
-                            {{ $ref->business_requirement }}
-                        </p>
-
-                        @if ($ref->giver_comments)
-                            <p class="text-[11px] text-slate-400 italic line-clamp-1">"{{ $ref->giver_comments }}"</p>
-                        @endif
-
-                        @if ($ref->status === 'closed' && $ref->amount)
-                            <div class="rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-bold text-emerald-700 flex items-center justify-between">
-                                <span>{{ __('site.profile.referrals.closed_amount') }}:</span>
-                                <span>₹{{ number_format((float) $ref->amount) }}</span>
+                            {{-- Line 3: Requirement --}}
+                            <div class="pt-0.5 border-t border-slate-200/50 space-y-0.5">
+                                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">Requirement</span>
+                                <p class="text-[11px] text-slate-700 font-normal line-clamp-2 leading-tight">
+                                    {{ $ref->business_requirement }}
+                                </p>
                             </div>
-                        @endif
-                        @if ($ref->receiver_comments)
-                            <p class="text-[11px] text-slate-500 line-clamp-1"><span class="font-bold text-slate-700">{{ __('site.profile.referrals.receiver_notes') }}:</span> {{ $ref->receiver_comments }}</p>
-                        @endif
+
+                            {{-- Line 4: Giver Note (if any) --}}
+                            @if ($ref->giver_comments)
+                                <div class="pt-0.5 border-t border-slate-200/50 text-[10px] text-slate-500 italic truncate">
+                                    <span class="font-bold text-slate-600 not-italic">Note:</span> "{{ $ref->giver_comments }}"
+                                </div>
+                            @endif
+                        </div>
                     </div>
 
-                    {{-- Bottom Footer --}}
-                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
-                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold {{ $ref->contact_status === 'connected' ? 'text-emerald-600' : 'text-slate-400' }}">
-                            <x-icon name="{{ $ref->contact_status === 'connected' ? 'check-circle-2' : 'clock' }}" class="h-3 w-3" />
-                            {{ $ref->contact_status === 'connected' ? __('site.profile.referrals.contacted') : __('site.profile.referrals.not_contacted') }}
-                        </span>
-
-                        @if ($direction === 'given' && $ref->status === 'pending')
-                            <button wire:click="openDelete({{ $ref->id }})" class="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer flex items-center gap-1">
-                                <x-icon name="trash-2" class="h-3 w-3" /> {{ __('site.profile.referrals.withdraw') }}
-                            </button>
+                    {{-- Bottom Footer: Action Buttons --}}
+                    <div class="flex items-center justify-end gap-1.5 pt-1.5 border-t border-slate-100">
+                        @if ($direction === 'given')
+                            @if ($ref->status === 'closed')
+                                <button wire:click="openOutcomeModal({{ $ref->id }})" class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer shadow-2xs">
+                                    <x-icon name="eye" class="h-2.5 w-2.5 text-emerald-600" /> View Outcome
+                                </button>
+                            @elseif ($ref->status === 'pending')
+                                <button wire:click="openDelete({{ $ref->id }})" class="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer flex items-center gap-1">
+                                    <x-icon name="trash-2" class="h-3 w-3" /> {{ __('site.profile.referrals.withdraw') }}
+                                </button>
+                            @endif
                         @elseif ($direction === 'received')
-                            <button wire:click="openUpdate({{ $ref->id }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-100 px-2.5 py-1 text-[11px] font-bold text-primary hover:bg-blue-100 cursor-pointer shadow-2xs">
+                            <button wire:click="openUpdate({{ $ref->id }})" class="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-100 px-2 py-1 text-[11px] font-bold text-primary hover:bg-blue-100 cursor-pointer shadow-2xs">
                                 <x-icon name="pencil" class="h-2.5 w-2.5" /> {{ __('site.profile.referrals.update') }}
                             </button>
                         @endif
@@ -381,14 +415,6 @@
                                     placeholder="{{ __('site.profile.referrals.testimonial_placeholder') }}"
                                     class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 px-3 text-xs font-semibold text-slate-900 outline-none focus:bg-white focus:border-primary transition-colors resize-none"
                                 ></textarea>
-                                <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pt-0.5">
-                                    <input
-                                        type="checkbox"
-                                        wire:model="updateDisplayTestimonial"
-                                        class="rounded border-slate-300 text-primary focus:ring-primary h-3.5 w-3.5"
-                                    />
-                                    <span class="text-[11px]">{{ __('site.profile.referrals.display_testimonial_label') }}</span>
-                                </label>
                             </div>
                         @endif
 
@@ -409,6 +435,164 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </template>
+    @endif
+
+    {{-- Giver Testimonial Modal (in Referrals Given for closed deals) --}}
+    @if ($giverTestimonialId !== null)
+        <template x-teleport="body">
+            <div
+                class="fixed inset-0 z-[99999] overflow-y-auto p-3 sm:p-4 flex min-h-full items-center justify-center font-outfit"
+                x-on:keydown.escape.window="$wire.cancelGiverTestimonial()"
+            >
+                <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" wire:click="cancelGiverTestimonial"></div>
+
+                <div class="relative z-10 w-full max-w-lg bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 my-auto flex flex-col space-y-4">
+                    {{-- Modal Header --}}
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
+                                <x-icon name="message-square" class="h-4 w-4" />
+                            </div>
+                            <div>
+                                <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">Referral Testimonial</h3>
+                                <p class="text-[11px] text-slate-500 font-medium">Add or edit testimonial for this completed referral</p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            wire:click="cancelGiverTestimonial"
+                            class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 border border-slate-200 text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors cursor-pointer shadow-2xs"
+                            title="Close"
+                        >
+                            <x-icon name="x" class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+
+                    <form wire:submit="saveGiverTestimonial" class="space-y-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-0.5 block">
+                                Testimonial / Feedback <span class="text-rose-500">*</span>
+                            </label>
+                            <textarea
+                                rows="3"
+                                wire:model="giverTestimonialText"
+                                placeholder="Share your experience and feedback on this referral deal..."
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 px-3 text-xs font-semibold text-slate-900 outline-none focus:bg-white focus:border-primary transition-colors resize-none"
+                            ></textarea>
+                            @error('giverTestimonialText') <p class="mt-0.5 text-[10px] font-semibold text-rose-600">{{ $message }}</p> @enderror
+                        </div>
+
+                        <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer pt-0.5">
+                            <input
+                                type="checkbox"
+                                wire:model="giverDisplayTestimonial"
+                                class="rounded border-slate-300 text-primary focus:ring-primary h-3.5 w-3.5"
+                            />
+                            <span class="text-[11px]">Display this testimonial publicly on business page</span>
+                        </label>
+
+                        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                            <button
+                                type="button"
+                                wire:click="cancelGiverTestimonial"
+                                class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                            >
+                                {{ __('site.profile.referrals.cancel') }}
+                            </button>
+                            <button
+                                type="submit"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2 text-xs font-bold text-white shadow-sm hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shrink-0"
+                            >
+                                <span wire:loading.remove wire:target="saveGiverTestimonial">Save Testimonial</span>
+                                <span wire:loading wire:target="saveGiverTestimonial">Saving...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+    @endif
+
+    {{-- Referral Outcome Modal (Closed Value & Testimonial popup) --}}
+    @if ($outcomeModalId !== null && $selectedOutcomeRef)
+        <template x-teleport="body">
+            <div
+                class="fixed inset-0 z-[99999] overflow-y-auto p-3 sm:p-4 flex min-h-full items-center justify-center font-outfit"
+                x-on:keydown.escape.window="$wire.closeOutcomeModal()"
+            >
+                <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" wire:click="closeOutcomeModal"></div>
+
+                <div class="relative z-10 w-full max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 my-auto flex flex-col space-y-4">
+                    {{-- Modal Header --}}
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                                <x-icon name="check-circle-2" class="h-4 w-4 text-emerald-600" />
+                            </div>
+                            <div>
+                                <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">Referral Outcome</h3>
+                                <p class="text-[11px] text-slate-500 font-medium">{{ $selectedOutcomeRef->contact_name }} • {{ $selectedOutcomeRef->receiver?->name }}</p>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            wire:click="closeOutcomeModal"
+                            class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 border border-slate-200 text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors cursor-pointer shadow-2xs"
+                            title="Close"
+                        >
+                            <x-icon name="x" class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div class="space-y-3">
+                        {{-- Closed Deal Amount --}}
+                        <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5 flex items-center justify-between shadow-2xs">
+                            <span class="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                                <x-icon name="trending-up" class="h-3.5 w-3.5 text-emerald-600" /> {{ __('site.profile.referrals.closed_amount') }}
+                            </span>
+                            <span class="text-base font-black text-emerald-700">₹{{ number_format((float) ($selectedOutcomeRef->amount ?? 0)) }}</span>
+                        </div>
+
+                        {{-- Testimonial --}}
+                        @if ($selectedOutcomeRef->testimonial)
+                            <div class="rounded-2xl bg-amber-50/90 border border-amber-200/80 p-3.5 space-y-2 text-xs shadow-2xs">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1">
+                                        <x-icon name="message-square" class="h-3.5 w-3.5 text-amber-600" /> Testimonial
+                                    </span>
+                                    <button
+                                        type="button"
+                                        wire:click="toggleWebsiteDisplay({{ $selectedOutcomeRef->id }})"
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border transition-all cursor-pointer {{ $selectedOutcomeRef->display_testimonial ? 'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200' }}"
+                                        title="Click to toggle display on public website"
+                                    >
+                                        <x-icon name="{{ $selectedOutcomeRef->display_testimonial ? 'globe' : 'eye-off' }}" class="h-2.5 w-2.5" />
+                                        {{ $selectedOutcomeRef->display_testimonial ? 'Website: Yes' : 'Website: No' }}
+                                    </button>
+                                </div>
+                                <p class="text-xs text-slate-700 font-medium italic leading-relaxed">"{{ $selectedOutcomeRef->testimonial }}"</p>
+                            </div>
+                        @else
+                            <div class="rounded-2xl bg-slate-50 border border-slate-200/70 p-3 text-center text-xs text-slate-500 italic">
+                                No testimonial has been provided for this referral.
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div class="flex items-center justify-end pt-2 border-t border-slate-100">
+                        <button
+                            type="button"
+                            wire:click="closeOutcomeModal"
+                            class="px-4 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
             </div>
         </template>

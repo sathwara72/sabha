@@ -13,9 +13,6 @@
                 <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">
                     Areas in {{ $city->name }}
                 </h1>
-                <p class="text-xs text-slate-500 font-medium mt-0.5">
-                    Manage locality & sector zones used in member profiles and business directory listings
-                </p>
             </div>
         </div>
 

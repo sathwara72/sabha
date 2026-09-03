@@ -8,7 +8,6 @@
                     {{ $totalCount }} {{ Str::plural('Trustee', $totalCount) }}
                 </span>
             </div>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Select members to feature on the public Trustees page with their business details shown automatically</p>
         </div>
         <button
             type="button"

@@ -5,16 +5,16 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 1. Business Categories
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (1, 'Finance & Insurance', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (5, 'Industrial & Manufacturing', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (6, 'Construction & Real Estate', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (7, 'IT & Software Services', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (10, 'Automotive Services', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (98, 'MOBILE SHOP', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (99, 'Cold storage and warehousing', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (100, 'Retail & Garments', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (101, 'Tulsi icecream & Matho', '', 1, NOW(), NOW());
-INSERT IGNORE INTO `business_categories` (`id`, `name`, `slug`, `is_active`, `created_at`, `updated_at`) VALUES (102, 'Physiotherapist', '', 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (1, 'Finance & Insurance', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (5, 'Industrial & Manufacturing', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (6, 'Construction & Real Estate', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (7, 'IT & Software Services', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (10, 'Automotive Services', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (98, 'MOBILE SHOP', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (99, 'Cold storage and warehousing', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (100, 'Retail & Garments', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (101, 'Tulsi icecream & Matho', 0, 1, NOW(), NOW());
+INSERT IGNORE INTO `business_categories` (`id`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (102, 'Physiotherapist', 0, 1, NOW(), NOW());
 
 -- 2. New Members (Users)
 INSERT IGNORE INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `registration_status`, `city`, `native_city`, `birth_date`, `anniversary_date`, `residence_address`, `avatar`, `email_verified_at`, `created_at`, `updated_at`) VALUES (18510, 'BUMTARIYA HARSH SHASHIKANT', 'harshbumtaria12@gmail.com', '7096342863', '$2y$12$xxsYwvOXJF18uC1.WGAyKu70yR80zUya7ub3Q/mcbTZeXZlS7WZEq', 'business_owner', 'active', 'Ahmedabad', NULL, '1993-12-09', NULL, 'Hill town recidency bhakti circle road nikol', 'https://drive.google.com/open?id=1r2rSZDFpge7SEkpAIfp0kMmfmLpFM6FH', NOW(), '2026-09-03 07:39:30', '2026-09-03 07:39:30');

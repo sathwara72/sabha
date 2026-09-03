@@ -114,7 +114,7 @@ class Index extends Component
             $query->where('name', 'like', "%{$this->search}%");
         }
 
-        $categories = $query->paginate(12);
+        $categories = $query->paginate(24);
 
         $counts = Business::whereIn('category', $categories->pluck('name'))
             ->selectRaw('category, count(*) as aggregate')

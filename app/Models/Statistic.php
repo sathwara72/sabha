@@ -9,27 +9,50 @@ class Statistic extends Model
 {
     protected $fillable = [
         'label',
-        'value',
+        'value',    
     ];
 
     /**
-     * Returns statistics saved by admin without overwriting custom numbers.
+     * Returns real dynamic statistics computed directly from database records.
      */
     public static function syncFromLiveCounts(): \Illuminate\Support\Collection
     {
-        $stats = static::orderBy('id')->get();
+        $activeMembers = User::where('registration_status', 'active')->count() ?: User::count();
+        $approvedBusinesses = Business::where('status', 'approved')->count() ?: Business::count();
+        $eventsHosted = Event::count();
 
-        if ($stats->isEmpty()) {
-            $userCount = User::count();
-            $eventCount = Event::count();
+        static::updateOrCreate(
+            ['id' => 1],
+            ['label' => 'Active Members', 'value' => $activeMembers . '+']
+        );
+        static::updateOrCreate(
+            ['id' => 2],
+            ['label' => 'Businesses Registered', 'value' => $approvedBusinesses . '+']
+        );
+        static::updateOrCreate(
+            ['id' => 3],
+            ['label' => 'Events Hosted', 'value' => $eventsHosted . '+']
+        );
 
-            static::create(['label' => 'Active Members', 'value' => ($userCount > 0 ? $userCount . '+' : '500+')]);
-            static::create(['label' => 'Businesses Registered', 'value' => '1200+']);
-            static::create(['label' => 'Events Hosted', 'value' => ($eventCount > 0 ? $eventCount . '+' : '50+')]);
+        return static::orderBy('id')->get();
+    }
 
-            $stats = static::orderBy('id')->get();
+    /**
+     * Returns real monetary business exchanged amount from closed business referrals.
+     */
+    public static function realBusinessExchangedFormatted(): string
+    {
+        $referralTotal = (float) BusinessReferral::where('status', 'closed')->sum('amount');
+        if ($referralTotal >= 10000000) {
+            return '₹' . round($referralTotal / 10000000, 1) . 'Cr+';
+        }
+        if ($referralTotal >= 100000) {
+            return '₹' . round($referralTotal / 100000, 1) . 'L+';
+        }
+        if ($referralTotal > 0) {
+            return '₹' . number_format($referralTotal) . '+';
         }
 
-        return $stats;
+        return '₹0+';
     }
 }

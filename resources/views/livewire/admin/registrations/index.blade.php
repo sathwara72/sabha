@@ -8,7 +8,6 @@
                     {{ $pendingReviewCount + $pendingPaymentCount }} Pending
                 </span>
             </div>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Review new applications, verify KYC documents & payments, and activate members</p>
         </div>
 
         {{-- Search Input --}}

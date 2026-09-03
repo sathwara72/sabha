@@ -33,10 +33,6 @@ class Index extends Component
 
     public array $trustees = [];
 
-    public array $editStats = [];
-
-    public ?int $updatingStatId = null;
-
     public string $successMsg = '';
 
     public string $errorMsg = '';
@@ -60,13 +56,16 @@ class Index extends Component
 
     public function mount(): void
     {
+        if ($this->activeTab === 'statistics') {
+            $this->activeTab = 'general';
+        }
         $this->loadData();
         $this->testEmail = auth()->user()?->email ?? 'info@sabhaglobal.org';
     }
 
     public function setTab(string $tab): void
     {
-        $this->activeTab = $tab;
+        $this->activeTab = $tab === 'statistics' ? 'general' : $tab;
     }
 
     public function loadData(): void
@@ -94,39 +93,6 @@ class Index extends Component
         $this->trustees = $this->decodeJson($settings['trustees'] ?? null);
         $this->membershipQrUpiImage = $settings['membership_qr_upi_image'] ?? '';
 
-        $this->loadStats();
-    }
-
-    public function loadStats(): void
-    {
-        $this->editStats = Statistic::all()->mapWithKeys(function ($stat) {
-            return [$stat->id => ['label' => $stat->label, 'value' => $stat->value]];
-        })->all();
-    }
-
-    public function updateStat(int $id): void
-    {
-        $this->errorMsg = '';
-        $this->successMsg = '';
-
-        $data = $this->editStats[$id] ?? null;
-
-        if (empty($data['label']) || empty($data['value'])) {
-            $this->errorMsg = 'Stat label and value cannot be empty.';
-            return;
-        }
-
-        $this->updatingStatId = $id;
-
-        $statistic = Statistic::findOrFail($id);
-        $statistic->update([
-            'label' => $data['label'],
-            'value' => $data['value'],
-        ]);
-
-        $this->successMsg = "\"{$data['label']}\" updated successfully!";
-        $this->loadStats();
-        $this->updatingStatId = null;
     }
 
     public function uploadMembershipQrUpi(): void
@@ -319,8 +285,6 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.admin.settings.index', [
-            'stats' => Statistic::all(),
-        ]);
+        return view('livewire.admin.settings.index');
     }
 }

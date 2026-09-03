@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Events & Summits</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Manage, monitor, and publish community summits, workshops, and business mixers</p>
         </div>
         <a
             href="{{ route('admin.events.create') }}"
@@ -34,10 +33,11 @@
                                 <td class="px-4 py-3">
                                     <div>
                                         <p class="text-xs font-bold text-slate-900 group-hover:text-primary transition-colors">{{ $evt->title }}</p>
-                                        <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                                            {{-- Event Category: Commented Out
                                             <span class="inline-block rounded-full bg-blue-50 border border-blue-200/60 px-2 py-0.5 text-[10px] font-bold text-primary">
-                                                {{ $evt->type }}
+                                                 {{ $evt->type }}
                                             </span>
+                                            --}}
                                             @if ($evt->is_popup)
                                                 <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-700">
                                                     <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>

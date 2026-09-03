@@ -19,9 +19,6 @@
                     <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">
                         {{ $eventId ? 'Edit Event' : 'Create New Event' }}
                     </h1>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">
-                        {{ $eventId ? 'Update schedules, speakers, and ticketing for this event' : 'Fill in event details, speakers, agenda, and media to publish across SABHA' }}
-                    </p>
                 </div>
             </div>
 
@@ -97,10 +94,7 @@
                             <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
                                 <x-icon name="clock" class="h-3.5 w-3.5" />
                             </div>
-                            <div>
-                                <h2 class="text-sm font-bold text-slate-900">Program Agenda & Schedule</h2>
-                                <p class="text-[11px] text-slate-500 font-medium">Add sequential timeline sessions</p>
-                            </div>
+                            <h2 class="text-sm font-bold text-slate-900">Program Agenda & Schedule</h2>
                         </div>
                         <button
                             type="button"
@@ -151,10 +145,7 @@
                             <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
                                 <x-icon name="users" class="h-3.5 w-3.5" />
                             </div>
-                            <div>
-                                <h2 class="text-sm font-bold text-slate-900">Featured Speakers & Panelists</h2>
-                                <p class="text-[11px] text-slate-500 font-medium">Guest dignitaries and industry leaders</p>
-                            </div>
+                            <h2 class="text-sm font-bold text-slate-900">Featured Speakers & Panelists</h2>
                         </div>
                         <button
                             type="button"
@@ -228,10 +219,7 @@
                             <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
                                 <x-icon name="play" class="h-3.5 w-3.5" />
                             </div>
-                            <div>
-                                <h2 class="text-sm font-bold text-slate-900">YouTube Video Highlights</h2>
-                                <p class="text-[11px] text-slate-500 font-medium">Embed past recap videos or promo trailers</p>
-                            </div>
+                            <h2 class="text-sm font-bold text-slate-900">YouTube Video Highlights</h2>
                         </div>
                         <button
                             type="button"
@@ -311,6 +299,26 @@
                         </div>
 
                         <div class="space-y-1">
+                            <label class="{{ $labelClass }}">
+                                Google Maps Embed Iframe / Map URL
+                            </label>
+                            <textarea
+                                rows="2"
+                                wire:model.blur="map_iframe"
+                                placeholder='Paste Google Maps embed <iframe> code or map share link'
+                                class="{{ $inputClass }} font-mono text-[11px] resize-none"
+                            ></textarea>
+                            @error('map_iframe') <p class="text-[11px] text-rose-600 font-semibold mt-0.5">{{ $message }}</p> @enderror
+
+                            @if (parse_google_maps_iframe_src($map_iframe))
+                                <div class="mt-2 rounded-xl border border-slate-200 overflow-hidden bg-slate-900 h-36 w-full shadow-2xs">
+                                    <iframe src="{{ parse_google_maps_iframe_src($map_iframe) }}" class="w-full h-full border-0" allowfullscreen loading="lazy"></iframe>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Event Category: Commented Out
+                        <div class="space-y-1">
                             <label class="{{ $labelClass }}">Event Category</label>
                             <select wire:model="type" class="{{ $inputClass }}">
                                 <option value="Mixer">Mixer & Networking</option>
@@ -319,6 +327,7 @@
                                 <option value="Awards">Awards & Felicitation</option>
                             </select>
                         </div>
+                        --}}
                     </div>
                 </div>
 
@@ -328,10 +337,7 @@
                         <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
                             <x-icon name="calendar" class="h-3.5 w-3.5" />
                         </div>
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-900">Booking Schedule Dates</h3>
-                            <p class="text-[11px] text-slate-500 font-medium">When can members start and stop booking tickets</p>
-                        </div>
+                        <h3 class="text-sm font-bold text-slate-900">Booking Schedule Dates</h3>
                     </div>
 
                     <div class="space-y-3">
@@ -344,7 +350,6 @@
                                 wire:model="booking_start_date"
                                 class="{{ $inputClass }}"
                             />
-                            <p class="text-[10px] text-slate-400 font-medium">Date when ticket booking opens for attendees</p>
                             @error('booking_start_date') <p class="text-[11px] text-rose-600 font-semibold mt-0.5">{{ $message }}</p> @enderror
                         </div>
 
@@ -357,7 +362,6 @@
                                 wire:model="booking_end_date"
                                 class="{{ $inputClass }}"
                             />
-                            <p class="text-[10px] text-slate-400 font-medium">Last date for booking tickets before event</p>
                             @error('booking_end_date') <p class="text-[11px] text-rose-600 font-semibold mt-0.5">{{ $message }}</p> @enderror
                         </div>
                     </div>

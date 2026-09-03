@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Site Settings</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Manage website contact details, social links, statistics, and coordinators</p>
         </div>
         <button
             wire:click="loadData"
@@ -50,16 +49,6 @@
         >
             <x-icon name="share-2" class="h-3.5 w-3.5" />
             <span>Social Links</span>
-        </button>
-
-        <button
-            type="button"
-            wire:click="setTab('statistics')"
-            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all cursor-pointer whitespace-nowrap {{ $activeTab === 'statistics' ? 'bg-primary text-white shadow-sm' : 'bg-white border border-border text-slate-600 hover:bg-slate-50' }}"
-        >
-            <x-icon name="bar-chart-3" class="h-3.5 w-3.5" />
-            <span>Website Statistics</span>
-            <span class="inline-flex items-center justify-center px-1.5 py-0.2 rounded-full text-[10px] {{ $activeTab === 'statistics' ? 'bg-white/20 text-white' : 'bg-primary-soft text-primary' }}">{{ count($stats) }}</span>
         </button>
 
         <button
@@ -157,80 +146,7 @@
         </div>
     @endif
 
-    {{-- Tab 3: Website Statistics --}}
-    @if ($activeTab === 'statistics')
-        <div class="space-y-3">
-            <div class="rounded-2xl border border-border/80 bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
-                <div>
-                    <h3 class="text-xs font-bold text-foreground flex items-center gap-1.5">
-                        <x-icon name="bar-chart-3" class="h-3.5 w-3.5 text-primary" /> Key Counters & Statistics
-                    </h3>
-                    <p class="text-[11px] text-muted">Manage the counters and labels displayed on the website homepage and banner sections</p>
-                </div>
-                <button
-                    wire:click="loadStats"
-                    class="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary-soft hover:opacity-90 px-2.5 py-1.5 rounded-lg transition-all cursor-pointer self-start sm:self-auto"
-                >
-                    <x-icon name="refresh-cw" class="h-3 w-3" /> Refresh Stats
-                </button>
-            </div>
 
-            @if ($stats->isEmpty())
-                <div class="glass-card py-16 text-center text-muted border border-dashed border-border rounded-2xl text-xs">
-                    No statistics found. Run database seeders to populate defaults.
-                </div>
-            @else
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
-                    @foreach ($stats as $stat)
-                        <div wire:key="stat-setting-card-{{ $stat->id }}" class="glass-card p-4 flex flex-col gap-3 rounded-2xl border border-border/80 bg-white shadow-2xs">
-                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                                <span class="flex items-center gap-1 text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-md">
-                                    <x-icon name="layers" class="h-2.5 w-2.5" /> Stat #{{ $stat->id }}
-                                </span>
-                                <span class="text-[11px] text-muted-foreground font-semibold truncate max-w-[150px]">
-                                    Live: <span class="text-foreground font-bold">{{ $stat->value }}</span> — {{ $stat->label }}
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-0.5">
-                                    <label class="text-[11px] font-bold text-muted uppercase tracking-wider block">Label</label>
-                                    <input
-                                        type="text"
-                                        wire:model="editStats.{{ $stat->id }}.label"
-                                        class="w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors focus:border-primary font-semibold"
-                                        placeholder="e.g. Active Members"
-                                    />
-                                </div>
-                                <div class="space-y-0.5">
-                                    <label class="text-[11px] font-bold text-muted uppercase tracking-wider block">Value</label>
-                                    <input
-                                        type="text"
-                                        wire:model="editStats.{{ $stat->id }}.value"
-                                        class="w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors focus:border-primary font-semibold"
-                                        placeholder="e.g. 500+"
-                                    />
-                                </div>
-                            </div>
-
-                            <div class="flex justify-end pt-1">
-                                <button
-                                    wire:click="updateStat({{ $stat->id }})"
-                                    wire:loading.attr="disabled"
-                                    wire:target="updateStat({{ $stat->id }})"
-                                    class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
-                                >
-                                    <x-icon name="save" class="h-3 w-3" />
-                                    <span wire:loading.remove wire:target="updateStat({{ $stat->id }})">Save Stat #{{ $stat->id }}</span>
-                                    <span wire:loading wire:target="updateStat({{ $stat->id }})">Saving...</span>
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-    @endif
 
     {{-- Tab 5: Membership Payment QR/UPI --}}
     @if ($activeTab === 'membership_qr')

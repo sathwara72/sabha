@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">Dashboard Overview</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Platform-wide networking activity, referral performance, and leaderboards</p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">

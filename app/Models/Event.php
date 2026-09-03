@@ -15,6 +15,7 @@ class Event extends Model
         'booking_end_date',
         'location',
         'google_map_link',
+        'map_iframe',
         'type',
         'image',
         'youtube_urls',

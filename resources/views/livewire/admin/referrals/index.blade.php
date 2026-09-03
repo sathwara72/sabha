@@ -12,7 +12,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Business Referrals</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Oversight of member-to-member business referrals and closed deals</p>
         </div>
     </div>
 

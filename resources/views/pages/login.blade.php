@@ -76,7 +76,7 @@
             {{-- TOP: Brand Header --}}
             <div class="relative z-10">
                 <a href="/" class="group inline-flex items-center gap-3">
-                    <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-11 w-11 object-contain transition-all duration-300 group-hover:scale-105" />
+                    <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-11 w-11 rounded-full object-contain transition-all duration-300 group-hover:scale-105 shadow-sm" />
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="text-2xl font-black tracking-tight text-white">SABHA</span>
@@ -162,7 +162,7 @@
                 {{-- Mobile Brand Logo Header (shown only on mobile/tablet) --}}
                 <div class="mb-4 text-center lg:hidden">
                     <a href="/" class="inline-flex items-center gap-2.5 mb-1 group">
-                        <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-10 w-10 object-contain" />
+                        <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-10 w-10 rounded-full object-contain shadow-xs" />
                         <div class="text-left">
                             <span class="block text-xl font-black tracking-tight text-primary-dark">SABHA</span>
                             <span class="block text-[10px] font-bold text-muted uppercase tracking-wider">{{ __('site.login_view.network_tag') }}</span>
