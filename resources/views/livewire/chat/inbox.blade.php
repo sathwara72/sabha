@@ -1,4 +1,24 @@
-<div class="bg-background font-outfit h-[calc(100dvh-4rem)] overflow-hidden">
+<div
+    x-data="{
+        showDeleteConvModal: false,
+        convToDelete: null,
+        confirmDelete(id) {
+            this.convToDelete = id;
+            this.showDeleteConvModal = true;
+        },
+        cancelDelete() {
+            this.showDeleteConvModal = false;
+            this.convToDelete = null;
+        },
+        proceedDelete() {
+            if (this.convToDelete) {
+                $wire.deleteConversation(this.convToDelete);
+            }
+            this.cancelDelete();
+        }
+    }"
+    class="bg-background font-outfit h-[calc(100dvh-4rem)] overflow-hidden"
+>
     <div class="mx-auto max-w-6xl h-full py-2.5 sm:py-3 px-2 min-h-0">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full min-h-0">
             {{-- ===== Conversation List ===== --}}
@@ -135,8 +155,7 @@
                                         </a>
                                         <button
                                             type="button"
-                                            wire:click="deleteConversation({{ $conv['id'] }})"
-                                            wire:confirm="{{ __('site.chat.delete_chat_desc') }}"
+                                            x-on:click.stop="confirmDelete({{ $conv['id'] }})"
                                             class="absolute right-2 top-3 hidden group-hover/item:flex h-6 w-6 items-center justify-center rounded-lg bg-white/95 border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 shadow-2xs transition-all cursor-pointer"
                                             title="{{ __('site.chat.delete_chat') }}"
                                         >
@@ -164,4 +183,77 @@
             </div>
         </div>
     </div>
+
+    {{-- Custom Delete Conversation Confirmation Modal --}}
+    <template x-teleport="body">
+        <div
+            x-show="showDeleteConvModal"
+            x-cloak
+            x-on:keydown.escape.window="cancelDelete()"
+            class="fixed inset-0 z-[99999] overflow-y-auto p-4 flex min-h-full items-center justify-center font-outfit"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div
+                x-show="showDeleteConvModal"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm"
+                x-on:click="cancelDelete()"
+            ></div>
+
+            <div
+                x-show="showDeleteConvModal"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+                class="relative z-10 w-full max-w-sm rounded-3xl bg-white p-5 sm:p-6 shadow-2xl border border-slate-200 my-auto flex flex-col space-y-4"
+            >
+                <button
+                    type="button"
+                    x-on:click="cancelDelete()"
+                    class="absolute top-4 right-4 flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 border border-slate-200 text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors cursor-pointer shadow-2xs"
+                    aria-label="{{ __('site.chat.cancel') }}"
+                >
+                    <x-icon name="x" class="h-3.5 w-3.5" />
+                </button>
+
+                <div class="flex flex-col items-center text-center gap-2.5 pt-1">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 shadow-2xs">
+                        <x-icon name="trash-2" class="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 leading-tight">{{ __('site.chat.delete_chat') }}</h2>
+                        <p class="mt-1 text-xs text-slate-500 font-medium leading-relaxed">
+                            {{ __('site.chat.delete_chat_desc') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 pt-2 border-t border-slate-100">
+                    <button
+                        type="button"
+                        x-on:click="cancelDelete()"
+                        class="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                    >
+                        {{ __('site.chat.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        x-on:click="proceedDelete()"
+                        class="flex-1 rounded-xl px-4 py-2.5 text-xs font-bold active:scale-[0.98] transition-all cursor-pointer bg-gradient-to-r from-rose-600 to-red-700 hover:opacity-95 text-white shadow-md shadow-rose-600/20"
+                    >
+                        {{ __('site.chat.delete_chat_confirm') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
