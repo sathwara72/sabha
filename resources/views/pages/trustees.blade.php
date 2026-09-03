@@ -54,12 +54,20 @@
                                     <h3 class="text-sm font-black text-slate-900 tracking-tight truncate">
                                         {{ $member?->name ?: 'Community Leader' }}
                                     </h3>
-                                    @if ($member?->city)
-                                        <p class="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
-                                            <x-icon name="map-pin" class="h-2.5 w-2.5 text-slate-400 shrink-0" />
-                                            <span class="truncate">{{ $member->city }}</span>
-                                        </p>
-                                    @endif
+                                    <div class="space-y-0.5 pt-0.5">
+                                        @if ($member?->city)
+                                            <p class="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
+                                                <x-icon name="map-pin" class="h-2.5 w-2.5 text-slate-400 shrink-0" />
+                                                <span class="truncate">{{ $member->city }}</span>
+                                            </p>
+                                        @endif
+                                        @if ($member?->phone)
+                                            <p class="text-[10px] text-slate-600 font-bold flex items-center gap-1">
+                                                <x-icon name="phone" class="h-2.5 w-2.5 text-primary shrink-0" />
+                                                <a href="tel:{{ $member->phone }}" class="hover:text-primary transition-colors">{{ $member->phone }}</a>
+                                            </p>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 

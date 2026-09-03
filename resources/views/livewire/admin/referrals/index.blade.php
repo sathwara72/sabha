@@ -7,32 +7,34 @@
     ];
 @endphp
 
-<div class="space-y-5 font-outfit">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-4 font-outfit">
+    {{-- Top Header --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Business Referrals</h1>
-            <p class="text-xs text-muted">Oversight of member-to-member business referrals and closed deals</p>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Business Referrals</h1>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Oversight of member-to-member business referrals and closed deals</p>
         </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    {{-- Search & Status Filter Toolbar Card --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/90 shadow-2xs">
         <div class="relative flex-1 max-w-md">
-            <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
                 placeholder="Search by contact, giver, or receiver name..."
-                class="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-primary"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 pl-9 pr-4 text-xs font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:border-primary shadow-2xs"
             />
         </div>
-        <div class="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border self-start sm:self-auto justify-center flex-wrap">
+        <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 self-start sm:self-auto justify-center flex-wrap">
             @foreach (['all', 'pending', 'in_progress', 'closed', 'rejected'] as $status)
                 <button
                     wire:click="setStatusFilter('{{ $status }}')"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg capitalize transition-all cursor-pointer {{ $statusFilter === $status ? 'bg-white text-foreground shadow-sm' : 'text-muted hover:text-foreground' }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg capitalize transition-all cursor-pointer {{ $statusFilter === $status ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     {{ str_replace('_', ' ', $status) }}
-                    <span class="px-1.5 py-0.5 text-[12px] rounded-full font-bold transition-colors {{ $statusFilter === $status ? 'bg-primary-soft text-primary' : 'bg-slate-200/60 text-slate-500' }}">
+                    <span class="px-1.5 py-0.2 text-[10px] rounded-full font-bold transition-colors {{ $statusFilter === $status ? 'bg-primary-soft text-primary' : 'bg-slate-200/80 text-slate-600' }}">
                         {{ $counts[$status] ?? 0 }}
                     </span>
                 </button>

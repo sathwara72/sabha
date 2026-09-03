@@ -221,28 +221,7 @@
                             {{ __('site.about.contact_subtitle') }}
                         </p>
 
-                        {{-- Quick Info Badges --}}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                            <div class="flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3.5">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-sky-300">
-                                    <x-icon name="mail" class="h-5 w-5" />
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-300">{{ __('site.about.contact_email_label') }}</p>
-                                    <a href="mailto:contact@sabha.org" class="text-xs sm:text-sm font-extrabold text-white truncate hover:underline block">contact@sabha.org</a>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3.5">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 text-emerald-300">
-                                    <x-icon name="map-pin" class="h-5 w-5" />
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-300">{{ __('site.about.contact_location_label') }}</p>
-                                    <p class="text-xs sm:text-sm font-extrabold text-white truncate">{{ __('site.about.contact_location_val') }}</p>
-                                </div>
-                            </div>
-                        </div>
+                    
 
                         {{-- Feature Pills --}}
                         <div class="flex flex-wrap items-center gap-2 pt-1 text-xs font-semibold text-slate-200">

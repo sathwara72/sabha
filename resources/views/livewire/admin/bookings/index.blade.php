@@ -1,6 +1,6 @@
 <div class="space-y-4 font-outfit w-full" x-data="{ previewImage: null }">
     {{-- Top Header & Action Buttons --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Event Bookings & Tickets</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Review seat reservations, verify payment receipts, and manage attendee check-ins</p>
@@ -45,13 +45,13 @@
         <button
             type="button"
             wire:click="$set('statusFilter', 'all')"
-            class="group flex items-center justify-between rounded-xl border p-3.5 text-left transition-all {{ $statusFilter === 'all' ? 'border-primary bg-primary/5 shadow-xs' : 'border-slate-200/90 bg-white hover:border-slate-300 shadow-2xs' }}"
+            class="group flex items-center justify-between rounded-2xl border p-3.5 text-left transition-all cursor-pointer {{ $statusFilter === 'all' ? 'border-primary ring-2 ring-primary/40 bg-blue-100/90 shadow-sm' : 'border-blue-200/70 bg-blue-50/60 hover:bg-blue-100/70 hover:border-blue-300 shadow-2xs' }}"
         >
             <div>
-                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Bookings</p>
-                <h3 class="mt-1 text-xl sm:text-2xl font-black text-slate-900 leading-none">{{ $total }}</h3>
+                <p class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Total Bookings</p>
+                <h3 class="mt-1 text-xl sm:text-2xl font-black text-blue-950 leading-none">{{ $total }}</h3>
             </div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-primary border border-blue-200 shadow-2xs">
                 <x-icon name="calendar" class="h-4.5 w-4.5" />
             </div>
         </button>
@@ -59,13 +59,13 @@
         <button
             type="button"
             wire:click="$set('statusFilter', 'pending')"
-            class="group flex items-center justify-between rounded-xl border p-3.5 text-left transition-all {{ $statusFilter === 'pending' ? 'border-amber-400 bg-amber-50/50 shadow-xs' : 'border-slate-200/90 bg-white hover:border-amber-200 shadow-2xs' }}"
+            class="group flex items-center justify-between rounded-2xl border p-3.5 text-left transition-all cursor-pointer {{ $statusFilter === 'pending' ? 'border-amber-500 ring-2 ring-amber-400/40 bg-amber-100/90 shadow-sm' : 'border-amber-200/70 bg-amber-50/60 hover:bg-amber-100/70 hover:border-amber-300 shadow-2xs' }}"
         >
             <div>
-                <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Pending Review</p>
-                <h3 class="mt-1 text-xl sm:text-2xl font-black text-amber-700 leading-none">{{ $pendingCount }}</h3>
+                <p class="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Pending Review</p>
+                <h3 class="mt-1 text-xl sm:text-2xl font-black text-amber-950 leading-none">{{ $pendingCount }}</h3>
             </div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-amber-600 border border-amber-200 shadow-2xs">
                 <x-icon name="clock" class="h-4.5 w-4.5" />
             </div>
         </button>
@@ -73,13 +73,13 @@
         <button
             type="button"
             wire:click="$set('statusFilter', 'approved')"
-            class="group flex items-center justify-between rounded-xl border p-3.5 text-left transition-all {{ $statusFilter === 'approved' ? 'border-emerald-400 bg-emerald-50/50 shadow-xs' : 'border-slate-200/90 bg-white hover:border-emerald-200 shadow-2xs' }}"
+            class="group flex items-center justify-between rounded-2xl border p-3.5 text-left transition-all cursor-pointer {{ $statusFilter === 'approved' ? 'border-emerald-500 ring-2 ring-emerald-400/40 bg-emerald-100/90 shadow-sm' : 'border-emerald-200/70 bg-emerald-50/60 hover:bg-emerald-100/70 hover:border-emerald-300 shadow-2xs' }}"
         >
             <div>
-                <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Approved Seats</p>
-                <h3 class="mt-1 text-xl sm:text-2xl font-black text-emerald-700 leading-none">{{ $approvedCount }}</h3>
+                <p class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Approved Seats</p>
+                <h3 class="mt-1 text-xl sm:text-2xl font-black text-emerald-950 leading-none">{{ $approvedCount }}</h3>
             </div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-emerald-600 border border-emerald-200 shadow-2xs">
                 <x-icon name="shield-check" class="h-4.5 w-4.5" />
             </div>
         </button>
@@ -87,13 +87,13 @@
         <button
             type="button"
             wire:click="$set('statusFilter', 'attended')"
-            class="group flex items-center justify-between rounded-xl border p-3.5 text-left transition-all {{ $statusFilter === 'attended' ? 'border-blue-400 bg-blue-50/50 shadow-xs' : 'border-slate-200/90 bg-white hover:border-blue-200 shadow-2xs' }}"
+            class="group flex items-center justify-between rounded-2xl border p-3.5 text-left transition-all cursor-pointer {{ $statusFilter === 'attended' ? 'border-purple-500 ring-2 ring-purple-400/40 bg-purple-100/90 shadow-sm' : 'border-purple-200/70 bg-purple-50/60 hover:bg-purple-100/70 hover:border-purple-300 shadow-2xs' }}"
         >
             <div>
-                <p class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Attended / Present</p>
-                <h3 class="mt-1 text-xl sm:text-2xl font-black text-blue-700 leading-none">{{ $attendedCount }}</h3>
+                <p class="text-[11px] font-bold text-purple-700 uppercase tracking-wider">Attended / Present</p>
+                <h3 class="mt-1 text-xl sm:text-2xl font-black text-purple-950 leading-none">{{ $attendedCount }}</h3>
             </div>
-            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-purple-600 border border-purple-200 shadow-2xs">
                 <x-icon name="user-check" class="h-4.5 w-4.5" />
             </div>
         </button>

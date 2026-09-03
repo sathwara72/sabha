@@ -1,41 +1,37 @@
-<div x-data="{ paymentModalUrl: null }">
-    <div class="space-y-4">
-        <div class="flex flex-col">
-            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Business Approvals</h1>
-            <p class="text-sm text-muted">Review and approve member businesses</p>
+<div class="space-y-4 font-outfit" x-data="{ paymentModalUrl: null }">
+    {{-- Top Header --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Business Directory & Approvals</h1>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Review, approve, and manage registered businesses in the directory</p>
         </div>
+    </div>
 
-        <div class="flex items-center gap-3 rounded-xl bg-primary-soft p-3">
-            <x-icon name="info" class="h-5 w-5 shrink-0 text-primary" />
-            <p class="text-sm font-semibold text-foreground">
-                Review each business carefully before approving it for the community.
-            </p>
+    {{-- Search & Filter Toolbar --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div class="relative flex-1 max-w-md">
+            <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <input
+                type="text"
+                wire:model.live.debounce.400ms="search"
+                placeholder="Search by name, category, or description..."
+                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 pl-9 pr-4 text-xs font-semibold text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:bg-white focus:border-primary shadow-2xs"
+            />
         </div>
-
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="relative flex-1 max-w-md">
-                <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                    type="text"
-                    wire:model.live.debounce.400ms="search"
-                    placeholder="Search by name, category, or description..."
-                    class="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-4 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                />
-            </div>
-            <div class="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border self-start sm:self-auto justify-center">
-                @foreach (['all', 'pending', 'approved', 'rejected'] as $status)
-                    <button
-                        wire:click="setStatusFilter('{{ $status }}')"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg capitalize transition-all cursor-pointer {{ $statusFilter === $status ? 'bg-white text-foreground shadow-sm' : 'text-muted hover:text-foreground' }}"
-                    >
-                        {{ $status }}
-                        <span class="px-1.5 py-0.5 text-[12px] rounded-full font-bold transition-colors {{ $statusFilter === $status ? 'bg-primary-soft text-primary' : 'bg-slate-200/60 text-slate-500' }}">
-                            {{ $counts[$status] ?? 0 }}
-                        </span>
-                    </button>
-                @endforeach
-            </div>
+        <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 self-start sm:self-auto justify-center">
+            @foreach (['all', 'pending', 'approved', 'rejected'] as $status)
+                <button
+                    wire:click="setStatusFilter('{{ $status }}')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg capitalize transition-all cursor-pointer {{ $statusFilter === $status ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                >
+                    {{ $status }}
+                    <span class="px-1.5 py-0.2 text-[10px] rounded-full font-bold transition-colors {{ $statusFilter === $status ? 'bg-primary-soft text-primary' : 'bg-slate-200/80 text-slate-600' }}">
+                        {{ $counts[$status] ?? 0 }}
+                    </span>
+                </button>
+            @endforeach
         </div>
+    </div>
 
         @if ($businesses->isEmpty())
             <div class="rounded-xl border border-dashed border-border py-20 text-center text-muted">
@@ -150,7 +146,6 @@
                 <x-pagination :paginator="$businesses" item-label="businesses" />
             </div>
         @endif
-    </div>
 
     <x-admin.prompt-modal
         :show="$rejectingId !== null"

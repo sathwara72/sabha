@@ -92,46 +92,57 @@
                         @else
                             <div class="divide-y divide-border/60">
                                 @foreach ($conversations as $conv)
-                                    <a
-                                        href="{{ route('chat.show', $conv['id']) }}"
-                                        class="flex items-center gap-2.5 p-3 hover:bg-surface transition-colors {{ $activeId === $conv['id'] ? 'bg-primary-soft' : '' }}"
-                                    >
-                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary font-bold text-sm overflow-hidden">
-                                            @if (media_url($conv['avatar']))
-                                                <img src="{{ media_url($conv['avatar']) }}" alt="" class="h-full w-full object-cover" />
-                                            @elseif ($conv['type'] === 'group')
-                                                <x-icon name="users" class="h-4 w-4" />
-                                            @else
-                                                {{ mb_substr($conv['title'] ?? '?', 0, 1) }}
-                                            @endif
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center justify-between gap-2">
-                                                <p class="text-xs font-bold text-foreground truncate">{{ $conv['title'] ?? __('site.chat.unknown_member') }}</p>
-                                                @if ($conv['last_message'])
-                                                    <span class="text-[10px] text-muted-foreground shrink-0">{{ $conv['last_message']->created_at->format('M j') }}</span>
+                                    <div class="relative group/item">
+                                        <a
+                                            href="{{ route('chat.show', $conv['id']) }}"
+                                            class="flex items-center gap-2.5 p-3 pr-8 hover:bg-surface transition-colors {{ $activeId === $conv['id'] ? 'bg-primary-soft' : '' }}"
+                                        >
+                                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary font-bold text-sm overflow-hidden border border-slate-200/60 shadow-2xs">
+                                                @if (media_url($conv['avatar']))
+                                                    <img src="{{ media_url($conv['avatar']) }}" alt="" class="h-full w-full object-cover" />
+                                                @elseif ($conv['type'] === 'group')
+                                                    <x-icon name="users" class="h-4 w-4" />
+                                                @else
+                                                    {{ mb_substr($conv['title'] ?? '?', 0, 1) }}
                                                 @endif
                                             </div>
-                                            <div class="flex items-center justify-between gap-2 mt-0.5">
-                                                <p class="text-[11px] text-muted-foreground truncate">
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <p class="text-xs font-bold text-foreground truncate">{{ $conv['title'] ?? __('site.chat.unknown_member') }}</p>
                                                     @if ($conv['last_message'])
-                                                        @if ($conv['last_message']->is_deleted)
-                                                            {{ __('site.chat.message_deleted') }}
-                                                        @elseif ($conv['last_message']->message_type === 'system_event')
-                                                            <span class="italic">{{ Str::limit($conv['last_message']->body, 40) }}</span>
-                                                        @else
-                                                            {{ $conv['type'] === 'group' && $conv['last_message']->sender ? $conv['last_message']->sender->name . ': ' : '' }}{{ Str::limit(strip_tags($conv['last_message']->body), 40) }}
-                                                        @endif
-                                                    @else
-                                                        {{ __('site.chat.say_hello') }}
+                                                        <span class="text-[10px] text-muted-foreground shrink-0">{{ $conv['last_message']->created_at->format('M j') }}</span>
                                                     @endif
-                                                </p>
-                                                @if ($conv['unread'] > 0)
-                                                    <span class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shrink-0">{{ $conv['unread'] }}</span>
-                                                @endif
+                                                </div>
+                                                <div class="flex items-center justify-between gap-2 mt-0.5">
+                                                    <p class="text-[11px] text-muted-foreground truncate">
+                                                        @if ($conv['last_message'])
+                                                            @if ($conv['last_message']->is_deleted)
+                                                                {{ __('site.chat.message_deleted') }}
+                                                            @elseif ($conv['last_message']->message_type === 'system_event')
+                                                                <span class="italic">{{ Str::limit($conv['last_message']->body, 40) }}</span>
+                                                            @else
+                                                                {{ $conv['type'] === 'group' && $conv['last_message']->sender ? $conv['last_message']->sender->name . ': ' : '' }}{{ Str::limit(strip_tags($conv['last_message']->body), 40) }}
+                                                            @endif
+                                                        @else
+                                                            {{ __('site.chat.say_hello') }}
+                                                        @endif
+                                                    </p>
+                                                    @if ($conv['unread'] > 0)
+                                                        <span class="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white shrink-0">{{ $conv['unread'] }}</span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                        </div>
-                                    </a>
+                                        </a>
+                                        <button
+                                            type="button"
+                                            wire:click="deleteConversation({{ $conv['id'] }})"
+                                            wire:confirm="{{ __('site.chat.delete_chat_desc') }}"
+                                            class="absolute right-2 top-3 hidden group-hover/item:flex h-6 w-6 items-center justify-center rounded-lg bg-white/95 border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 shadow-2xs transition-all cursor-pointer"
+                                            title="{{ __('site.chat.delete_chat') }}"
+                                        >
+                                            <x-icon name="trash-2" class="h-3 w-3" />
+                                        </button>
+                                    </div>
                                 @endforeach
                             </div>
                         @endif
@@ -141,8 +152,8 @@
 
             {{-- ===== Active Thread ===== --}}
             <div class="lg:col-span-8 h-full min-h-0 {{ $activeId ? 'flex' : 'hidden lg:flex' }} flex-col overflow-hidden">
-                @if ($activeId)
-                    @livewire('chat.thread', ['id' => $activeId], 'thread-' . $activeId)
+                @if ($activeId && $conversations->contains('id', (int) $activeId))
+                    @livewire('chat.thread', ['id' => (int) $activeId], 'thread-' . $activeId)
                 @else
                     <div class="glass-card flex-1 flex flex-col items-center justify-center text-center p-8">
                         <x-icon name="message-square" class="h-10 w-10 text-muted-foreground mb-3" />

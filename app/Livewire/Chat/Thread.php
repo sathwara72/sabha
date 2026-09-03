@@ -23,10 +23,18 @@ class Thread extends Component
 
     public function mount(int $id): void
     {
-        $conversation = Conversation::with('participants.user')->findOrFail($id);
+        $conversation = Conversation::where('is_archived', false)->with('participants.user')->find($id);
+
+        if (! $conversation) {
+            $this->redirect(route('chat.index'), navigate: false);
+            return;
+        }
 
         $me = $conversation->participants->firstWhere('user_id', Auth::id());
-        abort_unless($me && $me->status === 'active', 403);
+        if (! $me || $me->status !== 'active' || $me->is_hidden) {
+            $this->redirect(route('chat.index'), navigate: false);
+            return;
+        }
 
         $this->conversationId = $conversation->id;
         $this->conversation = $conversation;
@@ -78,6 +86,27 @@ class Thread extends Component
         }
     }
 
+    public function deleteConversation()
+    {
+        $this->errorMessage = '';
+
+        try {
+            if ($this->conversation->type === 'direct') {
+                app(ChatService::class)->hideForUser($this->conversation, Auth::user());
+            } else {
+                if ($this->conversation->isMainAdmin(Auth::user())) {
+                    app(GroupGovernanceService::class)->deleteGroup($this->conversation, Auth::user());
+                } else {
+                    app(GroupGovernanceService::class)->leaveGroup($this->conversation, Auth::user());
+                }
+            }
+
+            return $this->redirect(route('chat.index'), navigate: false);
+        } catch (\RuntimeException $e) {
+            $this->errorMessage = $e->getMessage();
+        }
+    }
+
     public function leaveGroup()
     {
         try {
@@ -91,6 +120,18 @@ class Thread extends Component
 
     public function pollSync(): void
     {
+        $conversation = Conversation::find($this->conversationId);
+        if (! $conversation || $conversation->is_archived) {
+            $this->redirect(route('chat.index'), navigate: false);
+            return;
+        }
+
+        $me = $conversation->participants()->where('user_id', Auth::id())->first();
+        if (! $me || $me->status !== 'active' || $me->is_hidden) {
+            $this->redirect(route('chat.index'), navigate: false);
+            return;
+        }
+
         $this->dispatch('chat-messages-synced', messages: $this->recentMessagesPayload());
     }
 
@@ -130,6 +171,7 @@ class Thread extends Component
             'initialMessages' => $this->recentMessagesPayload(),
             'isGroup' => $this->conversation->type === 'group',
             'isGroupAdmin' => $this->conversation->type === 'group' && $this->conversation->isGroupAdmin(Auth::user()),
+            'isMainAdmin' => $this->conversation->type === 'group' && $this->conversation->isMainAdmin(Auth::user()),
             'participantCount' => $this->conversation->type === 'group' ? $this->conversation->activeParticipants()->count() : null,
         ]);
     }

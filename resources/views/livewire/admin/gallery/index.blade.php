@@ -33,16 +33,16 @@
         if ($event.key === 'Escape') closeLightbox();
     "
 >
-    {{-- Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
-        <div class="flex flex-col">
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Gallery Management</h1>
+    {{-- Top Header & Add Gallery Button --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Gallery Management</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Upload, preview, and manage photos and videos for the community gallery</p>
         </div>
         <button
             type="button"
             wire:click="openAddModal"
-            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#00379D] to-[#082e6e] px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.98] whitespace-nowrap self-start sm:self-auto cursor-pointer"
+            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#00379D] to-[#082e6e] px-4 py-2 text-xs font-bold text-white shadow-sm shadow-primary/20 transition-all hover:opacity-95 active:scale-[0.98] whitespace-nowrap self-start sm:self-auto cursor-pointer"
         >
             <x-icon name="plus" class="h-3.5 w-3.5" />
             <span>Add Gallery</span>

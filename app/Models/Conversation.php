@@ -82,4 +82,11 @@ class Conversation extends Model
             && $me->status === 'active'
             && in_array($me->role, ['main_admin', 'admin'], true);
     }
+
+    public function isMainAdmin(User $user): bool
+    {
+        $me = $this->participants()->where('user_id', $user->id)->first();
+
+        return $me && $me->status === 'active' && $me->role === 'main_admin';
+    }
 }

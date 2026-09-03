@@ -1,9 +1,9 @@
 <div class="space-y-4 font-outfit">
-    {{-- Top Header Card --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
-        <div class="flex flex-col">
+    {{-- Top Header & Add Trustee Button --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
             <div class="flex items-center gap-2.5">
-                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Trustees</h1>
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Trustees</h1>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-primary border border-blue-200/60">
                     {{ $totalCount }} {{ Str::plural('Trustee', $totalCount) }}
                 </span>
@@ -13,9 +13,9 @@
         <button
             type="button"
             wire:click="openCreate"
-            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#00379D] to-[#082e6e] px-4 py-2.5 text-xs font-bold text-white transition-all shadow-md shadow-primary/20 hover:opacity-95 active:scale-[0.98] cursor-pointer self-start sm:self-auto"
+            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#00379D] to-[#082e6e] px-4 py-2 text-xs font-bold text-white transition-all shadow-sm shadow-primary/20 hover:opacity-95 active:scale-[0.98] cursor-pointer self-start sm:self-auto"
         >
-            <x-icon name="plus" class="h-4 w-4" />
+            <x-icon name="plus" class="h-3.5 w-3.5" />
             <span>Add Trustee</span>
         </button>
     </div>

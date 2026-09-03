@@ -9,59 +9,77 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
             {{-- ===== Side Menu ===== --}}
             <aside class="lg:col-span-3 lg:sticky lg:top-20 space-y-3">
-                <div class="glass-card p-4 flex flex-col items-center text-center">
-                    <div class="relative">
-                        <div class="h-16 w-16 rounded-xl overflow-hidden bg-primary/10 border border-border flex items-center justify-center shadow-sm">
-                            @if ($avatarSrc)
-                                <img src="{{ $avatarSrc }}" alt="Profile" class="h-full w-full object-cover" />
-                            @else
-                                <span class="text-2xl font-bold text-primary uppercase">{{ mb_substr($user->name ?? '?', 0, 1) }}</span>
-                            @endif
+                <div class="glass-card p-3.5 space-y-2.5">
+                    <div class="flex items-center gap-3">
+                        {{-- Left Side: Avatar / Logo --}}
+                        <div class="relative shrink-0">
+                            <div class="h-16 w-16 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/90 flex items-center justify-center shadow-2xs">
+                                @if ($avatarSrc)
+                                    <img src="{{ $avatarSrc }}" alt="Profile" class="h-full w-full object-contain" />
+                                @else
+                                    <span class="text-xl font-black text-primary uppercase">{{ mb_substr($user->name ?? '?', 0, 1) }}</span>
+                                @endif
+                            </div>
+                            <label class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer shadow-md transition-opacity hover:opacity-90" title="Upload photo">
+                                <x-icon name="camera" class="h-2.5 w-2.5" />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    class="hidden"
+                                    x-on:change="
+                                        const f = $event.target.files[0];
+                                        if (f) {
+                                            $wire.set('activeTab', 'profile');
+                                            window.dispatchEvent(new CustomEvent('open-cropper', {
+                                                detail: {
+                                                    src: URL.createObjectURL(f),
+                                                    aspectRatio: 1,
+                                                    title: 'Adjust / Crop Profile Photo',
+                                                    target: 'avatarFile',
+                                                    componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
+                                                }
+                                            }));
+                                            $event.target.value = '';
+                                        }
+                                    "
+                                />
+                            </label>
                         </div>
-                        <label class="absolute -bottom-1.5 -right-1.5 h-6 w-6 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer shadow-md transition-opacity hover:opacity-90" title="Upload photo">
-                            <x-icon name="camera" class="h-[11px] w-[11px]" />
-                            <input
-                                type="file"
-                                accept="image/*"
-                                class="hidden"
-                                x-on:change="
-                                    const f = $event.target.files[0];
-                                    if (f) {
-                                        $wire.set('activeTab', 'profile');
-                                        window.dispatchEvent(new CustomEvent('open-cropper', {
-                                            detail: {
-                                                src: URL.createObjectURL(f),
-                                                aspectRatio: 1,
-                                                title: 'Adjust / Crop Profile Photo',
-                                                target: 'avatarFile',
-                                                componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
-                                            }
-                                        }));
-                                        $event.target.value = '';
-                                    }
-                                "
-                            />
-                        </label>
+
+                        {{-- Right Side: Details --}}
+                        <div class="min-w-0 flex-1 text-left">
+                            <h2 class="text-sm font-bold text-foreground leading-snug truncate">{{ $user->name }}</h2>
+                            <p class="text-[11px] text-muted font-medium truncate mt-0.5">{{ $user->email }}</p>
+                            <div class="flex items-center gap-1.5 flex-wrap mt-1.5">
+                                <span class="inline-flex items-center rounded-full bg-primary-soft border border-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                                    {{ $user->role === 'admin' ? __('site.profile.administrator') : ($user->role === 'sub_admin' ? 'Sub-Admin' : __('site.profile.member')) }}
+                                </span>
+                                @if ($user->memberTitle)
+                                    <x-member-title-badge :title="$user->memberTitle" />
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    <h2 class="mt-2 text-sm font-bold text-foreground leading-tight">{{ $user->name }}</h2>
-                    <p class="text-[12px] text-muted font-medium truncate max-w-full">{{ $user->email }}</p>
-                    <span class="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/10 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-primary">
-                        {{ $user->role === 'admin' ? __('site.profile.administrator') : ($user->role === 'sub_admin' ? 'Sub-Admin' : __('site.profile.member')) }}
-                    </span>
-                    <x-member-title-badge :title="$user->memberTitle" class="mt-1.5" />
+
                     @if ($avatarFile)
-                        <p class="mt-1 text-[12px] font-semibold text-amber-600">{{ __('site.profile.photo_pending') }}</p>
+                        <p class="text-[11px] font-semibold text-amber-600 bg-amber-50 rounded-lg px-2 py-1 border border-amber-200/60 text-center">{{ __('site.profile.photo_pending') }}</p>
                     @endif
 
                     @if ($user->canAccessAdminArea())
-                        <a href="/admin" class="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#00379D] to-[#082e6e] shadow-md shadow-primary/20 hover:opacity-95 active:scale-95 transition-all mt-3">
-                            <x-icon name="shield-check" class="h-4 w-4" />
+                        <a href="/admin" class="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-[#00379D] to-[#082e6e] shadow-md shadow-primary/20 hover:opacity-95 active:scale-95 transition-all">
+                            <x-icon name="shield-check" class="h-3.5 w-3.5" />
                             <span>Go to Admin Panel</span>
                         </a>
                     @endif
                 </div>
 
                 <nav class="glass-card p-1.5 space-y-0.5">
+                    <button type="button" wire:click="setTab('overview')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ in_array($activeTab, ['overview', 'analytics'], true) ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
+                        <x-icon name="layout-dashboard" class="h-[14px] w-[14px] {{ in_array($activeTab, ['overview', 'analytics'], true) ? 'text-white' : 'text-primary' }}" />
+                        <span class="flex-1 text-left">{{ __('site.profile.tab_overview') }}</span>
+                        <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ in_array($activeTab, ['overview', 'analytics'], true) ? 'text-white/80' : 'text-muted-foreground' }}" />
+                    </button>
+
                     <button type="button" wire:click="setTab('profile')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'profile' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
                         <x-icon name="user" class="h-[14px] w-[14px] {{ $activeTab === 'profile' ? 'text-white' : 'text-primary' }}" />
                         <span class="flex-1 text-left">{{ __('site.profile.tab_profile') }}</span>
@@ -88,12 +106,6 @@
                         <x-icon name="ticket" class="h-[14px] w-[14px] {{ $activeTab === 'visitor-pass' ? 'text-white' : 'text-primary' }}" />
                         <span class="flex-1 text-left">Visitor Pass</span>
                         <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'visitor-pass' ? 'text-white/80' : 'text-muted-foreground' }}" />
-                    </button>
-
-                    <button type="button" wire:click="setTab('analytics')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'analytics' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
-                        <x-icon name="trending-up" class="h-[14px] w-[14px] {{ $activeTab === 'analytics' ? 'text-white' : 'text-primary' }}" />
-                        <span class="flex-1 text-left">{{ __('site.profile.tab_analytics') }}</span>
-                        <x-icon name="chevron-right" class="h-[13px] w-[13px] {{ $activeTab === 'analytics' ? 'text-white/80' : 'text-muted-foreground' }}" />
                     </button>
 
                     <button type="button" wire:click="setTab('meetings')" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer {{ $activeTab === 'meetings' ? 'bg-primary text-white shadow-sm' : 'text-foreground hover:bg-surface' }}">
@@ -147,7 +159,7 @@
                             <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-center text-xs font-semibold text-emerald-600">{{ $profileSuccess }}</div>
                         @endif
 
-                        <form wire:submit="updateProfile" class="space-y-3">
+                        <form wire:submit="updateProfile" x-on:keydown.enter="$event.target.tagName !== 'TEXTAREA' && $event.preventDefault()" class="space-y-3">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="{{ $labelClass }}">{{ __('site.profile.full_name') }}</label>
@@ -181,8 +193,8 @@
                                         class="{{ $inputClass }}"
                                     />
                                 </div>
-                                <div>
-                                    <label class="{{ $labelClass }}">Native City (વતન)</label>
+                                 <div>
+                                    <label class="{{ $labelClass }}">{{ __('site.profile.native_city') }}</label>
                                     <x-searchable-select
                                         wire-model="profileNativeCity"
                                         :options="$cityOptions"
@@ -192,16 +204,16 @@
                                     />
                                 </div>
                                 <div>
-                                    <label class="{{ $labelClass }}">Birth Date (જન્મ તારીખ)</label>
+                                    <label class="{{ $labelClass }}">{{ __('site.profile.birth_date') }}</label>
                                     <input type="date" wire:model.blur="profileBirthDate" class="{{ $inputClass }}" />
                                 </div>
                                 <div>
-                                    <label class="{{ $labelClass }}">Marriage / Anniversary Date</label>
+                                    <label class="{{ $labelClass }}">{{ __('site.profile.anniversary_date') }}</label>
                                     <input type="date" wire:model.blur="profileAnniversaryDate" class="{{ $inputClass }}" />
                                 </div>
                                 <div>
-                                    <label class="{{ $labelClass }}">Residence Address Area / Location</label>
-                                    <input type="text" wire:model.blur="profileResidenceAddress" placeholder="e.g. Nikol, Ahmedabad" class="{{ $inputClass }}" />
+                                    <label class="{{ $labelClass }}">{{ __('site.profile.residence_address') }}</label>
+                                    <input type="text" wire:model.blur="profileResidenceAddress" placeholder="{{ __('site.profile.residence_address_placeholder') }}" class="{{ $inputClass }}" />
                                 </div>
                             </div>
 
@@ -209,7 +221,7 @@
                                 <label class="{{ $labelClass }}">{{ __('site.profile.password') }}</label>
                                 <div class="relative">
                                     <x-icon name="lock" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                                    <input type="password" placeholder="New password" wire:model.blur="profilePassword" class="{{ $inputClass }} pl-8" />
+                                    <input type="password" placeholder="{{ __('site.profile.new_password_placeholder') }}" wire:model.blur="profilePassword" class="{{ $inputClass }} pl-8" />
                                 </div>
                             </div>
 
@@ -286,8 +298,11 @@
                                     @if ($business && $business->status === 'approved' && !$isEditingBusiness)
                                         {{-- View mode --}}
                                         <div class="space-y-8">
+                                            @php
+                                                $bizBanner = category_cover_image(media_url($business->cover_image), $business->category);
+                                            @endphp
                                             <div class="relative rounded-2xl overflow-hidden border border-border aspect-[3.2/1] max-h-[320px] min-h-[160px] bg-slate-900 shadow-sm">
-                                                <x-safe-image :src="media_url($business->cover_image)" alt="Business Cover" :title="$business->name" fallback-type="banner" img-class="h-full w-full object-cover opacity-85" />
+                                                <x-safe-image :src="$bizBanner" alt="Business Cover" :title="$business->name" fallback-type="banner" img-class="h-full w-full object-cover opacity-85" />
                                                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                                                 <div class="absolute bottom-4 left-6 flex items-end gap-4">
                                                     <div class="h-16 w-16 sm:h-20 sm:w-20 rounded-xl bg-white border border-border p-1.5 shadow-md flex items-center justify-center overflow-hidden shrink-0">
@@ -341,14 +356,14 @@
                                         </div>
                                     @else
                                         {{-- Edit form --}}
-                                        <form wire:submit="submitBusiness" class="space-y-6">
+                                        <form wire:submit="submitBusiness" x-on:keydown.enter="$event.target.tagName !== 'TEXTAREA' && $event.preventDefault()" class="space-y-6">
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div>
                                                     <label class="{{ $labelClass }}">{{ __('site.profile.biz_name') }}</label>
                                                     <input type="text" required wire:model.blur="bizName" placeholder="E.g. Vertex Solutions" class="{{ $inputClass }}" />
                                                 </div>
                                                 <div>
-                                                    <label class="{{ $labelClass }}">Designation in Business</label>
+                                                    <label class="{{ $labelClass }}">{{ __('site.profile.biz_designation') }}</label>
                                                     <input type="text" wire:model.blur="bizDesignation" placeholder="E.g. Managing Director / Owner" class="{{ $inputClass }}" />
                                                 </div>
                                             </div>
@@ -373,16 +388,16 @@
 
                                             <div class="space-y-4 border-t border-border pt-4">
                                                 <h4 class="text-xs font-extrabold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                                    <x-icon name="map-pin" class="h-3.5 w-3.5 text-primary" /> Address & Location Details
+                                                    <x-icon name="map-pin" class="h-3.5 w-3.5 text-primary" /> {{ __('site.profile.biz_address_section') }}
                                                 </h4>
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
-                                                        <label class="{{ $labelClass }}">Street / Building Address</label>
+                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_street') }}</label>
                                                         <input type="text" wire:model.blur="bizAddress" placeholder="e.g. 402, Wall Street Business Park" class="{{ $inputClass }}" />
                                                     </div>
                                                     <div>
-                                                        <label class="{{ $labelClass }}">City</label>
+                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_city') }}</label>
                                                         <x-searchable-select
                                                             wire-model="bizCity"
                                                             :options="$cityOptions"
@@ -395,13 +410,13 @@
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
-                                                        <label class="{{ $labelClass }}">Area / Landmark</label>
+                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_area') }}</label>
                                                         <x-searchable-select
                                                             wire-model="bizArea"
                                                             :options="$areaOptions"
                                                             :value="$bizArea"
                                                             :wire-key="'biz-area-' . $bizCity"
-                                                            placeholder="{{ $bizCity ? 'e.g. Navrangpura' : 'Select a city first' }}"
+                                                            placeholder="{{ $bizCity ? 'e.g. Navrangpura' : __('site.profile.select_city_first') }}"
                                                             class="{{ $inputClass }}"
                                                         />
                                                     </div>
@@ -409,19 +424,19 @@
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
-                                                        <label class="{{ $labelClass }}">State</label>
-                                                        <input type="text" wire:model.blur="bizState" placeholder="e.g. Gujarat" class="{{ $inputClass }}" />
+                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_state') }}</label>
+                                                        <input type="text" wire:model="bizState" value="Gujarat" readonly class="{{ $inputClass }} bg-slate-50 text-slate-600 font-bold cursor-not-allowed select-none" />
                                                     </div>
                                                     <div>
-                                                        <label class="{{ $labelClass }}">Pincode</label>
+                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_pincode') }}</label>
                                                         <input type="text" wire:model.live="bizPincode" placeholder="e.g. 380009" class="{{ $inputClass }}" />
                                                     </div>
                                                 </div>
 
                                                 <div>
-                                                    <label class="{{ $labelClass }}">Google Maps Embed Iframe Code or Map URL</label>
+                                                    <label class="{{ $labelClass }}">{{ __('site.profile.biz_map_iframe') }}</label>
                                                     <textarea rows="3" wire:model.blur="bizMapIframe" placeholder='Paste Google Maps Embed HTML iframe code or map URL' class="{{ $inputClass }} resize-none font-mono text-[12px]"></textarea>
-                                                    <p class="text-[12px] text-muted-foreground mt-1 font-medium">💡 Tip: Open Google Maps &gt; Search your location &gt; Share &gt; Embed a map &gt; Copy HTML and paste it here!</p>
+                                                    <p class="text-[12px] text-muted-foreground mt-1 font-medium">{{ __('site.profile.biz_map_tip') }}</p>
                                                     @if (parse_google_maps_iframe_src($bizMapIframe))
                                                         <div class="mt-2.5 rounded-xl border border-border overflow-hidden bg-slate-900 h-44 w-full shadow-sm">
                                                             <iframe src="{{ parse_google_maps_iframe_src($bizMapIframe) }}" class="w-full h-full border-0" allowfullscreen loading="lazy"></iframe>
@@ -459,228 +474,228 @@
                                             </div>
 
                                             <div class="space-y-1.5">
-                                                <label class="{{ $labelClass }}">{{ __('site.profile.about_company') }}</label>
-                                                <textarea rows="4" required wire:model.blur="bizDescription" placeholder="Provide a comprehensive summary of your services, goals, and history..." class="{{ $inputClass }} resize-none"></textarea>
-                                            </div>
+                                                 <label class="{{ $labelClass }}">{{ __('site.profile.about_company') }}</label>
+                                                 <textarea rows="4" required wire:model.blur="bizDescription" placeholder="{{ __('site.profile.biz_desc_placeholder') }}" class="{{ $inputClass }} resize-none"></textarea>
+                                             </div>
 
-                                            <div class="space-y-3">
-                                                <div class="flex justify-between items-center">
-                                                    <label class="{{ $labelClass }}">{{ __('site.profile.biz_services') }} (Max 4)</label>
-                                                    @if (count($bizServices) < 4)
-                                                        <button type="button" wire:click="addService" class="inline-flex items-center gap-1 text-[12px] font-extrabold text-primary hover:opacity-85">
-                                                            <x-icon name="plus" class="h-3 w-3" /> {{ __('site.profile.add_service') }}
-                                                        </button>
-                                                    @endif
-                                                </div>
+                                             <div class="space-y-3">
+                                                 <div class="flex justify-between items-center">
+                                                     <label class="{{ $labelClass }}">{{ __('site.profile.biz_services') }} (Max 4)</label>
+                                                     @if (count($bizServices) < 4)
+                                                         <button type="button" wire:click="addService" class="inline-flex items-center gap-1 text-[12px] font-extrabold text-primary hover:opacity-85">
+                                                             <x-icon name="plus" class="h-3 w-3" /> {{ __('site.profile.add_service') }}
+                                                         </button>
+                                                     @endif
+                                                 </div>
 
-                                                @if (empty($bizServices))
-                                                    <div class="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground font-medium">
-                                                        No services added yet. Click "Add Service" above to list your core services.
-                                                    </div>
-                                                @else
-                                                    <div class="space-y-3">
-                                                        @foreach ($bizServices as $idx => $service)
-                                                            <div class="glass-card p-3 border border-border/60 relative space-y-2">
-                                                                <button type="button" wire:click="removeService({{ $idx }})" class="absolute right-3 top-3 text-muted hover:text-red-500 transition-colors" title="Remove Service">
-                                                                    <x-icon name="trash-2" class="h-[13px] w-[13px]" />
-                                                                </button>
-                                                                <div class="grid grid-cols-1 gap-2 pr-6">
-                                                                    <div>
-                                                                        <label class="text-[12px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Title</label>
-                                                                        <input type="text" required wire:model.blur="bizServices.{{ $idx }}.title" placeholder="e.g. Cloud Migration" class="{{ $inputClass }}" />
-                                                                    </div>
-                                                                    <div>
-                                                                        <label class="text-[12px] font-bold text-muted-foreground uppercase mb-0.5 block">Service Description</label>
-                                                                        <textarea rows="2" wire:model.blur="bizServices.{{ $idx }}.desc" placeholder="e.g. End-to-end cloud strategy and deployment services." class="{{ $inputClass }} resize-none"></textarea>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @endif
-                                            </div>
+                                                 @if (empty($bizServices))
+                                                     <div class="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground font-medium">
+                                                         {{ __('site.profile.biz_no_services') }}
+                                                     </div>
+                                                 @else
+                                                     <div class="space-y-3">
+                                                         @foreach ($bizServices as $idx => $service)
+                                                             <div class="glass-card p-3 border border-border/60 relative space-y-2">
+                                                                 <button type="button" wire:click="removeService({{ $idx }})" class="absolute right-3 top-3 text-muted hover:text-red-500 transition-colors" title="Remove Service">
+                                                                     <x-icon name="trash-2" class="h-[13px] w-[13px]" />
+                                                                 </button>
+                                                                 <div class="grid grid-cols-1 gap-2 pr-6">
+                                                                     <div>
+                                                                         <label class="text-[12px] font-bold text-muted-foreground uppercase mb-0.5 block">{{ __('site.profile.service_title') }}</label>
+                                                                         <input type="text" required wire:model.blur="bizServices.{{ $idx }}.title" placeholder="e.g. Cloud Migration" class="{{ $inputClass }}" />
+                                                                     </div>
+                                                                     <div>
+                                                                         <label class="text-[12px] font-bold text-muted-foreground uppercase mb-0.5 block">{{ __('site.profile.service_description') }}</label>
+                                                                         <textarea rows="2" wire:model.blur="bizServices.{{ $idx }}.desc" placeholder="e.g. End-to-end cloud strategy and deployment services." class="{{ $inputClass }} resize-none"></textarea>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         @endforeach
+                                                     </div>
+                                                 @endif
+                                             </div>
 
-                                            <div class="space-y-4 border-t border-border pt-4">
-                                                <h4 class="text-sm font-bold text-foreground">{{ __('site.profile.contact_channels') }}</h4>
-                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">Business Email</label>
-                                                        <input type="email" wire:model.blur="bizEmail" placeholder="{{ $user->email ?: 'e.g. contact@vertex.solutions' }}" class="{{ $inputClass }}" />
-                                                    </div>
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">Business Phone</label>
-                                                        <input type="text" maxlength="10" wire:model.live="bizPhone" placeholder="{{ $user->phone ?: '10-digit mobile number' }}" class="{{ $inputClass }}" />
-                                                    </div>
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">Alternate Phone</label>
-                                                        <input type="text" maxlength="10" wire:model.live="bizPhone2" placeholder="Optional 2nd number" class="{{ $inputClass }}" />
-                                                    </div>
-                                                </div>
-                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_instagram') }}</label>
-                                                        <div class="relative"><x-brand-icon name="instagram" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizInstagram" placeholder="https://instagram.com/handle" class="{{ $inputClass }} pl-10" /></div>
-                                                    </div>
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_youtube') }}</label>
-                                                        <div class="relative"><x-brand-icon name="youtube" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizYoutube" placeholder="https://youtube.com/c/channel" class="{{ $inputClass }} pl-10" /></div>
-                                                    </div>
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_twitter') }}</label>
-                                                        <div class="relative"><x-brand-icon name="twitter" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizTwitter" placeholder="https://twitter.com/handle" class="{{ $inputClass }} pl-10" /></div>
-                                                    </div>
-                                                </div>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_linkedin') }}</label>
-                                                        <div class="relative"><x-brand-icon name="linkedin" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizLinkedin" placeholder="https://linkedin.com/company/name" class="{{ $inputClass }} pl-10" /></div>
-                                                    </div>
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">WhatsApp Number</label>
-                                                        <div class="relative"><x-icon name="message-circle" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="text" maxlength="10" wire:model.live="bizWhatsapp" placeholder="10-digit WhatsApp number" class="{{ $inputClass }} pl-10" /></div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                             <div class="space-y-4 border-t border-border pt-4">
+                                                 <h4 class="text-sm font-bold text-foreground">{{ __('site.profile.contact_channels') }}</h4>
+                                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_email_label') }}</label>
+                                                         <input type="email" wire:model.blur="bizEmail" placeholder="{{ $user->email ?: 'e.g. contact@vertex.solutions' }}" class="{{ $inputClass }}" />
+                                                     </div>
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_phone_label') }}</label>
+                                                         <input type="text" maxlength="10" wire:model.live="bizPhone" placeholder="{{ $user->phone ?: __('site.profile.digit_mobile_number') }}" class="{{ $inputClass }}" />
+                                                     </div>
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_phone2_label') }}</label>
+                                                         <input type="text" maxlength="10" wire:model.live="bizPhone2" placeholder="{{ __('site.profile.optional_2nd_number') }}" class="{{ $inputClass }}" />
+                                                     </div>
+                                                 </div>
+                                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_instagram') }}</label>
+                                                         <div class="relative"><x-brand-icon name="instagram" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizInstagram" placeholder="https://instagram.com/handle" class="{{ $inputClass }} pl-10" /></div>
+                                                     </div>
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_youtube') }}</label>
+                                                         <div class="relative"><x-brand-icon name="youtube" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizYoutube" placeholder="https://youtube.com/c/channel" class="{{ $inputClass }} pl-10" /></div>
+                                                     </div>
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_twitter') }}</label>
+                                                         <div class="relative"><x-brand-icon name="twitter" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizTwitter" placeholder="https://twitter.com/handle" class="{{ $inputClass }} pl-10" /></div>
+                                                     </div>
+                                                 </div>
+                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_linkedin') }}</label>
+                                                         <div class="relative"><x-brand-icon name="linkedin" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="url" wire:model.blur="bizLinkedin" placeholder="https://linkedin.com/company/name" class="{{ $inputClass }} pl-10" /></div>
+                                                     </div>
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_whatsapp_label') }}</label>
+                                                         <div class="relative"><x-brand-icon name="whatsapp" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><input type="text" maxlength="10" wire:model.live="bizWhatsapp" placeholder="{{ __('site.profile.digit_whatsapp_number') }}" class="{{ $inputClass }} pl-10" /></div>
+                                                     </div>
+                                                 </div>
+                                             </div>
 
-                                            <div class="space-y-4 border-t border-border pt-4">
-                                                <h4 class="text-sm font-bold text-foreground">{{ __('site.profile.branding_photos') }}</h4>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                    {{-- Business Logo Box --}}
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_logo') }}</label>
-                                                        <div
-                                                            class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[160px]"
-                                                            x-data
-                                                            x-on:click="$refs.logoPicker.click()"
-                                                        >
-                                                            <input
-                                                                x-ref="logoPicker"
-                                                                type="file"
-                                                                accept="image/*"
-                                                                class="hidden"
-                                                                x-on:change="
-                                                                    const f = $event.target.files[0];
-                                                                    if (f) {
-                                                                        window.dispatchEvent(new CustomEvent('open-cropper', {
-                                                                            detail: {
-                                                                                src: URL.createObjectURL(f),
-                                                                                aspectRatio: 1,
-                                                                                title: 'Adjust / Crop Business Logo',
-                                                                                target: 'logoFile',
-                                                                                componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
-                                                                            }
-                                                                        }));
-                                                                        $event.target.value = '';
-                                                                    }
-                                                                "
-                                                            />
+                                             <div class="space-y-4 border-t border-border pt-4">
+                                                 <h4 class="text-sm font-bold text-foreground">{{ __('site.profile.branding_photos') }}</h4>
+                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                     {{-- Business Logo Box --}}
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_logo') }}</label>
+                                                         <div
+                                                             class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[160px]"
+                                                             x-data
+                                                             x-on:click="$refs.logoPicker.click()"
+                                                         >
+                                                             <input
+                                                                 x-ref="logoPicker"
+                                                                 type="file"
+                                                                 accept="image/*"
+                                                                 class="hidden"
+                                                                 x-on:change="
+                                                                     const f = $event.target.files[0];
+                                                                     if (f) {
+                                                                         window.dispatchEvent(new CustomEvent('open-cropper', {
+                                                                             detail: {
+                                                                                 src: URL.createObjectURL(f),
+                                                                                 aspectRatio: 1,
+                                                                                 title: 'Adjust / Crop Business Logo',
+                                                                                 target: 'logoFile',
+                                                                                 componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
+                                                                             }
+                                                                         }));
+                                                                         $event.target.value = '';
+                                                                     }
+                                                                 "
+                                                             />
 
-                                                            <div wire:loading wire:target="logoFile" class="flex flex-col items-center gap-2 py-4">
-                                                                <x-icon name="loader-2" class="h-6 w-6 text-primary animate-spin" />
-                                                                <span class="text-xs font-bold text-primary">Applying & uploading logo...</span>
-                                                            </div>
+                                                             <div wire:loading wire:target="logoFile" class="flex flex-col items-center gap-2 py-4">
+                                                                 <x-icon name="loader-2" class="h-6 w-6 text-primary animate-spin" />
+                                                                 <span class="text-xs font-bold text-primary">Applying & uploading logo...</span>
+                                                             </div>
 
-                                                            <div wire:loading.remove wire:target="logoFile" class="w-full flex flex-col items-center">
-                                                                @if ($logoFile)
-                                                                    <div class="flex flex-col items-center gap-2">
-                                                                        <div class="h-20 w-20 rounded-2xl border border-primary/40 overflow-hidden bg-white p-1.5 shadow-sm shrink-0 flex items-center justify-center">
-                                                                            <img src="{{ $logoFile->temporaryUrl() }}" alt="Cropped Logo Preview" class="max-h-full max-w-full object-contain rounded-xl" />
-                                                                        </div>
-                                                                        <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">Logo Adjusted (Click to re-crop)</span>
-                                                                    </div>
-                                                                @elseif ($logoPreview)
-                                                                    <div class="flex flex-col items-center gap-2">
-                                                                        <div class="h-20 w-20 rounded-2xl border border-border overflow-hidden bg-white p-1.5 shadow-sm shrink-0 flex items-center justify-center">
-                                                                            <img src="{{ $logoPreview }}" alt="Current Logo" class="max-h-full max-w-full object-contain rounded-xl" />
-                                                                        </div>
-                                                                        <span class="text-[11px] font-bold text-slate-600 hover:text-primary">Click to crop & replace</span>
-                                                                    </div>
-                                                                @else
-                                                                    <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
-                                                                    <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_logo') }}</span>
-                                                                    <span class="text-[11px] text-muted mt-1">{{ __('site.profile.logo_hint') }}</span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        @error('logoFile') <p class="text-[11px] text-rose-600 font-semibold mt-1">{{ $message }}</p> @enderror
-                                                    </div>
+                                                             <div wire:loading.remove wire:target="logoFile" class="w-full flex flex-col items-center">
+                                                                 @if ($logoFile)
+                                                                     <div class="flex flex-col items-center gap-2">
+                                                                         <div class="h-20 w-20 rounded-2xl border border-primary/40 overflow-hidden bg-white p-1.5 shadow-sm shrink-0 flex items-center justify-center">
+                                                                             <img src="{{ $logoFile->temporaryUrl() }}" alt="Cropped Logo Preview" class="max-h-full max-w-full object-contain rounded-xl" />
+                                                                         </div>
+                                                                         <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">{{ __('site.profile.logo_adjusted') }}</span>
+                                                                     </div>
+                                                                 @elseif ($logoPreview)
+                                                                     <div class="flex flex-col items-center gap-2">
+                                                                         <div class="h-20 w-20 rounded-2xl border border-border overflow-hidden bg-white p-1.5 shadow-sm shrink-0 flex items-center justify-center">
+                                                                             <img src="{{ $logoPreview }}" alt="Current Logo" class="max-h-full max-w-full object-contain rounded-xl" />
+                                                                         </div>
+                                                                         <span class="text-[11px] font-bold text-slate-600 hover:text-primary">{{ __('site.profile.click_to_crop_replace') }}</span>
+                                                                     </div>
+                                                                 @else
+                                                                     <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
+                                                                     <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_logo') }}</span>
+                                                                     <span class="text-[11px] text-muted mt-1">{{ __('site.profile.logo_hint') }}</span>
+                                                                 @endif
+                                                             </div>
+                                                         </div>
+                                                         @error('logoFile') <p class="text-[11px] text-rose-600 font-semibold mt-1">{{ $message }}</p> @enderror
+                                                     </div>
 
-                                                    {{-- Business Cover Banner Box --}}
-                                                    <div>
-                                                        <label class="{{ $labelClass }}">{{ __('site.profile.biz_cover') }}</label>
-                                                        <div
-                                                            class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[160px]"
-                                                            x-data
-                                                            x-on:click="$refs.coverPicker.click()"
-                                                        >
-                                                            <input
-                                                                x-ref="coverPicker"
-                                                                type="file"
-                                                                accept="image/*"
-                                                                class="hidden"
-                                                                x-on:change="
-                                                                    const f = $event.target.files[0];
-                                                                    if (f) {
-                                                                        window.dispatchEvent(new CustomEvent('open-cropper', {
-                                                                            detail: {
-                                                                                src: URL.createObjectURL(f),
-                                                                                aspectRatio: 3.2 / 1,
-                                                                                title: 'Adjust / Crop Cover Banner',
-                                                                                target: 'coverFile',
-                                                                                componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
-                                                                            }
-                                                                        }));
-                                                                        $event.target.value = '';
-                                                                    }
-                                                                "
-                                                            />
+                                                     {{-- Business Cover Banner Box --}}
+                                                     <div>
+                                                         <label class="{{ $labelClass }}">{{ __('site.profile.biz_cover') }}</label>
+                                                         <div
+                                                             class="mt-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 bg-surface/35 hover:bg-surface/65 transition-colors cursor-pointer relative min-h-[160px]"
+                                                             x-data
+                                                             x-on:click="$refs.coverPicker.click()"
+                                                         >
+                                                             <input
+                                                                 x-ref="coverPicker"
+                                                                 type="file"
+                                                                 accept="image/*"
+                                                                 class="hidden"
+                                                                 x-on:change="
+                                                                     const f = $event.target.files[0];
+                                                                     if (f) {
+                                                                         window.dispatchEvent(new CustomEvent('open-cropper', {
+                                                                             detail: {
+                                                                                 src: URL.createObjectURL(f),
+                                                                                 aspectRatio: 3.2 / 1,
+                                                                                 title: 'Adjust / Crop Cover Banner',
+                                                                                 target: 'coverFile',
+                                                                                 componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
+                                                                             }
+                                                                         }));
+                                                                         $event.target.value = '';
+                                                                     }
+                                                                 "
+                                                             />
 
-                                                            <div wire:loading wire:target="coverFile" class="flex flex-col items-center gap-2 py-4">
-                                                                <x-icon name="loader-2" class="h-6 w-6 text-primary animate-spin" />
-                                                                <span class="text-xs font-bold text-primary">Applying & uploading cover...</span>
-                                                            </div>
+                                                             <div wire:loading wire:target="coverFile" class="flex flex-col items-center gap-2 py-4">
+                                                                 <x-icon name="loader-2" class="h-6 w-6 text-primary animate-spin" />
+                                                                 <span class="text-xs font-bold text-primary">Applying & uploading cover...</span>
+                                                             </div>
 
-                                                            <div wire:loading.remove wire:target="coverFile" class="w-full flex flex-col items-center">
-                                                                @if ($coverFile)
-                                                                    <div class="flex flex-col items-center gap-2 w-full">
-                                                                        <div class="h-20 w-full max-w-[240px] rounded-2xl border border-primary/40 overflow-hidden bg-slate-900 shadow-sm shrink-0 flex items-center justify-center">
-                                                                            <img src="{{ $coverFile->temporaryUrl() }}" alt="Cropped Cover Preview" class="h-full w-full object-cover" />
-                                                                        </div>
-                                                                        <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">Banner Adjusted (Click to re-crop)</span>
-                                                                    </div>
-                                                                @elseif ($coverPreview)
-                                                                    <div class="flex flex-col items-center gap-2 w-full">
-                                                                        <div class="h-20 w-full max-w-[240px] rounded-2xl border border-border overflow-hidden bg-slate-900 shadow-sm shrink-0 flex items-center justify-center">
-                                                                            <img src="{{ $coverPreview }}" alt="Current Cover" class="h-full w-full object-cover" />
-                                                                        </div>
-                                                                        <span class="text-[11px] font-bold text-slate-600 hover:text-primary">Click to crop & replace</span>
-                                                                    </div>
-                                                                @else
-                                                                    <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
-                                                                    <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_cover') }}</span>
-                                                                    <span class="text-[11px] text-muted mt-1">{{ __('site.profile.cover_hint') }}</span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        @error('coverFile') <p class="text-[11px] text-rose-600 font-semibold mt-1">{{ $message }}</p> @enderror
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                             <div wire:loading.remove wire:target="coverFile" class="w-full flex flex-col items-center">
+                                                                 @if ($coverFile)
+                                                                     <div class="flex flex-col items-center gap-2 w-full">
+                                                                         <div class="h-20 w-full max-w-[240px] rounded-2xl border border-primary/40 overflow-hidden bg-slate-900 shadow-sm shrink-0 flex items-center justify-center">
+                                                                             <img src="{{ $coverFile->temporaryUrl() }}" alt="Cropped Cover Preview" class="h-full w-full object-cover" />
+                                                                         </div>
+                                                                         <span class="text-[11px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-full">{{ __('site.profile.banner_adjusted') }}</span>
+                                                                     </div>
+                                                                 @elseif ($coverPreview)
+                                                                     <div class="flex flex-col items-center gap-2 w-full">
+                                                                         <div class="h-20 w-full max-w-[240px] rounded-2xl border border-border overflow-hidden bg-slate-900 shadow-sm shrink-0 flex items-center justify-center">
+                                                                             <img src="{{ $coverPreview }}" alt="Current Cover" class="h-full w-full object-cover" />
+                                                                         </div>
+                                                                         <span class="text-[11px] font-bold text-slate-600 hover:text-primary">{{ __('site.profile.click_to_crop_replace') }}</span>
+                                                                     </div>
+                                                                 @else
+                                                                     <x-icon name="upload" class="h-6 w-6 text-primary mb-2" />
+                                                                     <span class="text-[12px] font-semibold text-foreground text-center">{{ __('site.profile.choose_cover') }}</span>
+                                                                     <span class="text-[11px] text-muted mt-1">{{ __('site.profile.cover_hint') }}</span>
+                                                                 @endif
+                                                             </div>
+                                                         </div>
+                                                         @error('coverFile') <p class="text-[11px] text-rose-600 font-semibold mt-1">{{ $message }}</p> @enderror
+                                                     </div>
+                                                 </div>
+                                             </div>
 
-                                            <div class="flex gap-4 pt-4 border-t border-border">
-                                                @if ($business && $business->status === 'approved')
-                                                    <button type="button" wire:click="$set('isEditingBusiness', false)" class="flex-1 rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer">
-                                                        {{ __('site.profile.biz_cancel') }}
-                                                    </button>
-                                                @endif
-                                                <button type="submit" wire:loading.attr="disabled" wire:target="submitBusiness" class="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer">
-                                                    <span wire:loading.remove wire:target="submitBusiness">
-                                                        @if ($business && $business->status === 'approved') {{ __('site.profile.biz_save_details') }}
-                                                        @elseif ($business && $business->status === 'rejected') Resubmit for Review
-                                                        @else Submit for Review @endif
-                                                    </span>
-                                                    <span wire:loading wire:target="submitBusiness">{{ __('site.profile.biz_saving') }}</span>
-                                                </button>
+                                             <div class="flex gap-4 pt-4 border-t border-border">
+                                                 @if ($business && $business->status === 'approved')
+                                                     <button type="button" wire:click="$set('isEditingBusiness', false)" class="flex-1 rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface cursor-pointer">
+                                                         {{ __('site.profile.biz_cancel') }}
+                                                     </button>
+                                                 @endif
+                                                 <button type="submit" wire:loading.attr="disabled" wire:target="submitBusiness" class="flex-[2] inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 cursor-pointer">
+                                                     <span wire:loading.remove wire:target="submitBusiness">
+                                                         @if ($business && $business->status === 'approved') {{ __('site.profile.biz_save_details') }}
+                                                         @elseif ($business && $business->status === 'rejected') {{ __('site.profile.resubmit_review') }}
+                                                         @else {{ __('site.profile.submit_review') }} @endif
+                                                     </span>
+                                                     <span wire:loading wire:target="submitBusiness">{{ __('site.profile.biz_saving') }}</span>
+                                                 </button>
                                             </div>
                                         </form>
                                     @endif
@@ -837,8 +852,8 @@
                     </div>
                 @endif
 
-                {{-- My Analytics Section --}}
-                @if ($activeTab === 'analytics')
+                {{-- My Overview Section --}}
+                @if ($activeTab === 'overview' || $activeTab === 'analytics')
                     <div class="glass-card p-4">
                         @livewire('profile.analytics')
                     </div>

@@ -109,61 +109,104 @@
             },
         }"
     >
-        {{-- Hero Section with Full Uncropped Image and Ambient Backdrop --}}
-        <section class="relative overflow-hidden bg-slate-950 py-6 lg:py-8 text-white min-h-[280px] lg:min-h-[340px] flex items-center border-b border-border">
-            @if ($eventImage)
-                {{-- Ambient blurred backdrop --}}
-                <img
-                    src="{{ $eventImage }}"
-                    alt=""
-                    aria-hidden="true"
-                    class="absolute inset-0 h-full w-full object-cover blur-2xl scale-125 opacity-45 filter pointer-events-none"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/70 to-slate-950/50 pointer-events-none"></div>
-            @else
-                <div class="absolute inset-0 bg-gradient-to-br from-[#00379D] via-[#0F3459] to-[#091E36] pointer-events-none"></div>
-            @endif
-
-            <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 w-full">
-                <a href="/events" class="group mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 transition-colors hover:text-white cursor-pointer bg-white/10 backdrop-blur-sm px-3 py-1 rounded-xl border border-white/10">
-                    <x-icon name="arrow-left" class="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-                    {{ __('site.eventDetail.back_all_events') }}
-                </a>
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                    {{-- Text / Details Column --}}
-                    <div class="{{ $eventImage ? 'lg:col-span-7' : 'lg:col-span-12' }} space-y-3.5">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="rounded-full bg-white px-3 py-0.5 text-xs font-semibold text-primary shadow-sm">{{ $event->type }}</span>
-                            <span class="inline-flex items-center gap-1.5 text-xs text-slate-900 bg-white px-2.5 py-0.5 rounded-full shadow-sm font-medium">
-                                <x-icon name="users" class="h-3.5 w-3.5 text-primary animate-pulse" /> {{ $attendeesCount }} {{ __('site.eventDetail.registered') }}
-                            </span>
-                        </div>
-
-                        <h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl drop-shadow-md">{{ $event->title }}</h1>
-
-                        <div class="flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-white/90 pt-1">
-                            <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-xl border border-white/10"><x-icon name="calendar" class="h-3.5 w-3.5 text-white" /> {{ $event->date->format('M j, Y') }}</span>
-                            <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-xl border border-white/10"><x-icon name="clock" class="h-3.5 w-3.5 text-white" /> {{ $event->date->format('g:i A') }}</span>
-                            <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-xl border border-white/10"><x-icon name="map-pin" class="h-3.5 w-3.5 text-white" /> {{ $event->location }}</span>
-                        </div>
+        {{-- Cover Banner with Profile Bar (Matches Business Details Style with Full Uncropped Image) --}}
+        <div class="mx-auto max-w-7xl sm:px-6 sm:pt-6">
+            <section class="relative w-full min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] sm:rounded-3xl overflow-hidden bg-slate-950 flex items-center justify-center shadow-lg border border-border/40">
+                @if ($eventImage)
+                    {{-- Ambient blurred backdrop --}}
+                    <img
+                        src="{{ $eventImage }}"
+                        alt=""
+                        aria-hidden="true"
+                        class="absolute inset-0 h-full w-full object-cover blur-2xl scale-125 opacity-40 filter pointer-events-none"
+                    />
+                    {{-- Full uncropped image centered --}}
+                    <div class="absolute inset-0 flex items-center justify-center p-6 sm:p-10 pointer-events-none">
+                        <img
+                            src="{{ $eventImage }}"
+                            alt="{{ $event->title }}"
+                            class="max-h-[260px] sm:max-h-[320px] lg:max-h-[350px] w-auto max-w-full object-contain rounded-2xl shadow-2xl drop-shadow-2xl"
+                        />
                     </div>
+                @endif
 
-                    {{-- Full Uncropped Image Showcase Column --}}
-                    @if ($eventImage)
-                        <div class="lg:col-span-5 flex items-center justify-center lg:justify-end">
-                            <div class="relative max-h-[320px] rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 bg-slate-900/60 backdrop-blur-md p-1.5 flex items-center justify-center">
-                                <img
-                                    src="{{ $eventImage }}"
-                                    alt="{{ $event->title }}"
-                                    class="max-h-[290px] w-auto max-w-full object-contain rounded-xl shadow-lg"
-                                />
+                {{-- Back to Events Button --}}
+                <div class="absolute top-6 left-6 z-10">
+                    <a href="/events" class="group inline-flex items-center gap-1.5 rounded-lg bg-black/40 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-black/60 cursor-pointer border border-white/10">
+                        <x-icon name="arrow-left" class="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                        {{ __('site.eventDetail.back_all_events') }}
+                    </a>
+                </div>
+
+                {{-- Bottom Overlay Info Bar --}}
+                <div class="absolute bottom-0 left-0 right-0 z-10">
+                    <div class="px-6 pb-6">
+                        <div class="flex flex-col md:flex-row md:items-end gap-5">
+                            {{-- Event Date/Icon Badge Box --}}
+                            <div class="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-white text-primary flex flex-col items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm p-2 text-center">
+                                @if ($eventImage)
+                                    <x-safe-image :src="$eventImage" :alt="$event->title" :title="$event->title" fallback-type="event" img-class="h-full w-full object-contain rounded-xl" />
+                                @else
+                                    <span class="text-[12px] font-black uppercase text-primary tracking-wider">{{ $event->date->format('M') }}</span>
+                                    <span class="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-none">{{ $event->date->format('d') }}</span>
+                                    <span class="text-[11px] font-bold text-slate-500">{{ $event->date->format('Y') }}</span>
+                                @endif
+                            </div>
+
+                            {{-- Title and Meta --}}
+                            <div class="flex-1 space-y-1.5 md:pb-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[12px] font-bold text-white border border-white/20">
+                                        <x-icon name="tag" class="h-3 w-3" /> {{ $event->type }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 text-[12px] font-bold text-emerald-300 bg-emerald-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-emerald-400/20">
+                                        <x-icon name="users" class="h-3 w-3 text-emerald-400 animate-pulse" /> {{ $attendeesCount }} {{ __('site.eventDetail.registered') }}
+                                    </span>
+                                </div>
+
+                                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg">{{ $event->title }}</h1>
+
+                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-white/80 font-medium">
+                                    <span class="inline-flex items-center gap-1"><x-icon name="calendar" class="h-3 w-3 text-white/90" /> {{ $event->date->format('M j, Y') }}</span>
+                                    <span class="inline-flex items-center gap-1"><x-icon name="clock" class="h-3 w-3 text-white/90" /> {{ $event->date->format('g:i A') }}</span>
+                                    @if ($event->location)
+                                        <span class="inline-flex items-center gap-1"><x-icon name="map-pin" class="h-3 w-3 text-white/90" /> {{ $event->location }}</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Quick Action Button --}}
+                            <div class="flex gap-2 shrink-0 md:pb-1">
+                                @if ($userRegistration)
+                                    <a
+                                        href="/profile?tab=events"
+                                        class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] cursor-pointer"
+                                    >
+                                        <x-icon name="check-circle-2" class="h-4 w-4" /> {{ $userRegistration->status === 'approved' ? __('site.eventDetail.registered') : ucfirst($userRegistration->status) }}
+                                    </a>
+                                @elseif ($isBookingOpen)
+                                    <button
+                                        type="button"
+                                        x-on:click="openModal"
+                                        class="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-3 text-xs font-bold text-slate-900 shadow-lg transition-all hover:bg-primary hover:text-white active:scale-[0.98] cursor-pointer"
+                                    >
+                                        <x-icon name="ticket" class="h-3.5 w-3.5" /> {{ __('site.eventDetail.reserve_seat') }}
+                                    </button>
+                                @elseif ($status === 'upcoming')
+                                    <span class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-4 py-3 text-xs font-bold text-amber-300">
+                                        <x-icon name="clock" class="h-3.5 w-3.5" /> {{ __('site.eventDetail.booking_soon') }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-4 py-3 text-xs font-bold text-slate-300">
+                                        {{ __('site.eventDetail.booking_closed') }}
+                                    </span>
+                                @endif
                             </div>
                         </div>
-                    @endif
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
         {{-- Split Body Layout --}}
         <div class="mx-auto max-w-7xl px-6 py-6 lg:px-4">
@@ -631,7 +674,7 @@
                                 {{-- Standard Tier --}}
                                 <div class="p-3 rounded-2xl border transition-all {{ !$isVerifiedMember ? 'border-primary bg-primary/5 shadow-2xs ring-1 ring-primary/20' : 'border-slate-200 bg-slate-50/50 opacity-70' }}">
                                     <div class="flex items-center justify-between">
-                                        <span class="text-[11px] font-bold uppercase tracking-wider {{ !$isVerifiedMember ? 'text-primary' : 'text-slate-500' }}">Standard</span>
+                                        <span class="text-[11px] font-bold uppercase tracking-wider {{ !$isVerifiedMember ? 'text-primary' : 'text-slate-500' }}">{{ __('site.eventDetail.standard') }}</span>
                                         @if (!$isVerifiedMember)
                                             <div class="h-4 w-4 rounded-full border-2 border-primary bg-primary flex items-center justify-center shadow-xs">
                                                 <div class="h-1.5 w-1.5 rounded-full bg-white"></div>
@@ -645,7 +688,7 @@
                                 <div class="p-3 rounded-2xl border transition-all {{ $isVerifiedMember ? 'border-emerald-500 bg-emerald-50/40 shadow-2xs ring-1 ring-emerald-500/20' : 'border-slate-200 bg-white' }}">
                                     <div class="flex items-center justify-between">
                                         <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
-                                            <x-icon name="shield-check" class="h-3 w-3" /> Sabha Member
+                                            <x-icon name="shield-check" class="h-3 w-3" /> {{ __('site.eventDetail.verified') }}
                                         </span>
                                         @if ($isVerifiedMember)
                                             <div class="h-4 w-4 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center shadow-xs">

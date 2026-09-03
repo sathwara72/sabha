@@ -11,17 +11,19 @@
     ];
 @endphp
 
-<div class="space-y-5 font-outfit">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="space-y-4 font-outfit">
+    {{-- Top Header & Add Member Title Button --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Member Titles</h1>
-            <p class="text-xs text-muted">Manage display titles/badges (e.g. Leadership Team, Founding Member) assignable to members</p>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Member Titles</h1>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Manage display titles/badges (e.g. Leadership Team, Founding Member) assignable to members</p>
         </div>
         <a
             href="{{ route('admin.member-titles.create') }}"
-            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-sm self-start sm:self-auto"
+            class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#00379D] to-[#082e6e] px-4 py-2 text-xs font-bold text-white transition-all shadow-sm shadow-primary/20 hover:opacity-95 active:scale-[0.98] cursor-pointer self-start sm:self-auto"
         >
-            <x-icon name="plus" class="h-3.5 w-3.5" /> Add Member Title
+            <x-icon name="plus" class="h-3.5 w-3.5" />
+            <span>Add Member Title</span>
         </a>
     </div>
 
@@ -31,8 +33,8 @@
         </div>
     @endif
 
-    <div class="space-y-4">
-        <div class="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-border shadow-xs">
+    <div class="space-y-3.5">
+        <div class="flex items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-xl border border-slate-200/90 shadow-2xs">
             <div class="relative flex-1 max-w-md">
                 <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input

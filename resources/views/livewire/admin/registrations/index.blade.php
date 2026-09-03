@@ -1,9 +1,9 @@
 <div class="space-y-4 font-outfit">
-    {{-- Top Header Card --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
-        <div class="flex flex-col">
+    {{-- Top Header --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
             <div class="flex items-center gap-2.5">
-                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Member Registrations</h1>
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Member Registrations</h1>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-primary border border-blue-200/60">
                     {{ $pendingReviewCount + $pendingPaymentCount }} Pending
                 </span>
@@ -13,12 +13,12 @@
 
         {{-- Search Input --}}
         <div class="relative w-full sm:w-72 self-start sm:self-auto">
-            <x-icon name="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
                 placeholder="Search name, email, phone..."
-                class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-9 text-xs font-semibold text-slate-900 outline-none focus:border-primary focus:bg-white transition-colors placeholder:text-slate-400 shadow-2xs"
+                class="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-9 pr-8 text-xs font-semibold text-slate-900 outline-none focus:border-primary focus:bg-white transition-colors placeholder:text-slate-400 shadow-2xs"
             />
             @if ($search)
                 <button

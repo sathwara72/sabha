@@ -1,28 +1,23 @@
 <div class="space-y-4 font-outfit">
-    {{-- Header Banner Card with Date Range Filters --}}
-    <div class="glass-card p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-2.5">
-            <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <x-icon name="trending-up" class="h-5 w-5" />
-            </div>
-            <div>
-                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Dashboard Overview</h1>
-                <p class="text-xs text-slate-500 font-medium">Platform-wide networking activity, referral performance, and leaderboards</p>
-            </div>
+    {{-- Top Header & Date Range Filters --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">Dashboard Overview</h1>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">Platform-wide networking activity, referral performance, and leaderboards</p>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
-            <div class="flex items-center gap-1.5 bg-slate-50/80 p-1 rounded-xl border border-slate-200 shadow-2xs">
+        <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+            <div class="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200/90 shadow-2xs">
                 <input
                     type="date"
                     wire:model.live="dateFrom"
-                    class="rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none border border-slate-200 focus:border-primary transition-colors"
+                    class="rounded-lg bg-slate-50/50 px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none border border-slate-200 focus:bg-white focus:border-primary transition-colors"
                 />
                 <span class="text-[11px] font-bold text-slate-400">to</span>
                 <input
                     type="date"
                     wire:model.live="dateTo"
-                    class="rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none border border-slate-200 focus:border-primary transition-colors"
+                    class="rounded-lg bg-slate-50/50 px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none border border-slate-200 focus:bg-white focus:border-primary transition-colors"
                 />
             </div>
 

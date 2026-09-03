@@ -40,6 +40,7 @@ function registerAlpineFeatures() {
         isSending: false,
         showDeleteModal: false,
         deleteConfirmId: null,
+        showDeleteChatModal: false,
 
         init() {
             this.$nextTick(() => this.scrollToBottom());
@@ -70,6 +71,7 @@ function registerAlpineFeatures() {
                 is_pending: true,
                 is_mine: true,
                 sender_id: this.currentUserId,
+                sender_name: 'You',
                 body: text,
                 body_html: text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'),
                 created_at_human: 'Sending...',
@@ -193,6 +195,20 @@ function registerAlpineFeatures() {
             this.showDeleteModal = false;
             this.deleteConfirmId = null;
             this.$wire.deleteMessage(id);
+        },
+
+        confirmDeleteChat() {
+            this.showDeleteChatModal = true;
+        },
+
+        cancelDeleteChat() {
+            this.showDeleteChatModal = false;
+        },
+
+        async proceedDeleteChat() {
+            this.showDeleteChatModal = false;
+            await this.$wire.deleteConversation();
+            window.location.href = '/chat';
         },
 
         deleteMsg(id) {

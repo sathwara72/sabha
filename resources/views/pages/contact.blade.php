@@ -2,7 +2,6 @@
     <div
         class="bg-background"
         x-data="{
-            inquiryType: 'Membership',
             formSubmitted: false,
             isSubmitting: false,
             submitError: '',
@@ -25,7 +24,6 @@
                             email: this.form.email,
                             subject: this.form.subject,
                             message: this.form.message,
-                            category: this.inquiryType,
                         }),
                     });
                     const data = await res.json();
@@ -46,7 +44,7 @@
         <div class="mx-auto max-w-7xl px-6 py-5 lg:py-4">
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-5">
 
-                {{-- Contact details & Chapters info --}}
+                {{-- Contact details info --}}
                 <div class="lg:col-span-5 space-y-6">
                     <div>
                         <span class="text-xs font-bold uppercase tracking-wider text-primary">{{ __('site.contact.get_in_touch') }}</span>
@@ -74,43 +72,6 @@
                             </div>
                         </div>
                     </div>
-
-                    @if (!empty($coordinators) && count($coordinators) > 0)
-                        <div class="space-y-3 pt-4 border-t border-border/80">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-foreground">{{ __('site.contact.regional_contacts') }}</h3>
-                            <div class="grid grid-cols-1 gap-2.5">
-                                @foreach ($coordinators as $ch)
-                                    @php
-                                        $city = $ch['city'] ?? '';
-                                        $translationKey = 'site.contact.' . str_replace(' ', '_', strtolower($city));
-                                        $translated = __($translationKey);
-                                        $cityLabel = ($city && $translated !== $translationKey) ? $translated : $city;
-                                    @endphp
-                                    <div class="rounded-xl border {{ $ch['border'] ?? 'border-border' }} {{ $ch['bg'] ?? 'bg-white' }} p-3 space-y-1.5">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs font-extrabold text-foreground">{{ $cityLabel }}</span>
-                                            <span class="inline-flex items-center gap-1 text-[12px] font-bold bg-white text-primary border border-border px-2 py-0.5 rounded-full">
-                                                {{ __('site.contact.coordinator') }}
-                                            </span>
-                                        </div>
-                                        <div class="space-y-0.5">
-                                            @if (!empty($ch['contact']))
-                                                <p class="text-xs font-extrabold text-slate-900">{{ $ch['contact'] }}</p>
-                                            @endif
-                                            <div class="flex flex-wrap gap-x-3 text-[12px] text-muted font-medium">
-                                                @if (!empty($ch['phone']))
-                                                    <span class="flex items-center gap-1"><x-icon name="phone" class="h-[11px] w-[11px] text-primary" /> {{ $ch['phone'] }}</span>
-                                                @endif
-                                                @if (!empty($ch['email']))
-                                                    <span class="flex items-center gap-1"><x-icon name="mail" class="h-[11px] w-[11px] text-primary" /> {{ $ch['email'] }}</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                 </div>
 
                 {{-- Contact form --}}
@@ -120,25 +81,6 @@
                         <p class="text-xs text-muted font-medium mt-0.5">{{ __('site.contact.send_subtitle') }}</p>
 
                         <form x-on:submit.prevent="submit" class="mt-4 space-y-3">
-
-                            <div class="space-y-1.5">
-                                <label class="text-[12px] font-bold uppercase tracking-wider text-muted">{{ __('site.contact.inquiry_category') }}</label>
-                                <div class="flex flex-wrap gap-1.5">
-                                    @foreach ([
-                                        ['value' => 'Membership', 'label' => __('site.contact.inquiry_membership')],
-                                        ['value' => 'Sponsorship', 'label' => __('site.contact.inquiry_sponsorship')],
-                                        ['value' => 'Event hosting', 'label' => __('site.contact.inquiry_event')],
-                                        ['value' => 'Technical Support', 'label' => __('site.contact.inquiry_support')],
-                                    ] as $opt)
-                                        <button
-                                            type="button"
-                                            x-on:click="inquiryType = '{{ $opt['value'] }}'"
-                                            :class="inquiryType === '{{ $opt['value'] }}' ? 'border-primary bg-primary text-white shadow-sm' : 'border-border bg-white text-muted hover:bg-surface hover:text-foreground'"
-                                            class="rounded-lg border px-3 py-1.5 text-xs font-bold transition-all"
-                                        >{{ $opt['label'] }}</button>
-                                    @endforeach
-                                </div>
-                            </div>
 
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div class="space-y-1">

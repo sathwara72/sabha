@@ -45,6 +45,12 @@ class MeetingForm extends Component
         $this->meetingImagePreview = media_url($meeting->image) ?? '';
     }
 
+    public function removePhoto(): void
+    {
+        $this->meetingImageFile = null;
+        $this->meetingImagePreview = '';
+    }
+
     public function saveMeeting()
     {
         $validated = $this->validate([
