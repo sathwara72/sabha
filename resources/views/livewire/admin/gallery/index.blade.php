@@ -37,7 +37,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Gallery Management</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Upload, preview, and manage photos and videos for the community gallery</p>
         </div>
         <button
             type="button"
@@ -95,32 +94,39 @@
                 </button>
             </div>
         @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 @foreach ($gallery as $index => $item)
                     @php $isVideo = is_video_file($item->image_path); @endphp
                     <div
                         x-on:click="openLightbox({{ $index }})"
                         class="bg-white p-0 overflow-hidden group relative cursor-pointer rounded-2xl border border-slate-200/90 hover:shadow-md transition-all shadow-2xs"
                     >
-                        <div class="relative h-48 w-full bg-slate-900 overflow-hidden">
+                        <div class="relative aspect-[4/3] w-full bg-slate-950 overflow-hidden flex items-center justify-center p-0.5">
                             @if (media_url($item->image_path))
                                 @if ($isVideo)
-                                    <video src="{{ media_url($item->image_path) }}" class="h-full w-full object-cover" muted preload="metadata"></video>
+                                    <video src="{{ media_url($item->image_path) }}" class="h-full w-full object-contain" muted preload="metadata"></video>
                                 @else
-                                    <img src="{{ media_url($item->image_path) }}" alt="{{ $item->caption ?: 'Gallery image' }}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    <img
+                                        src="{{ media_url($item->image_path) }}"
+                                        alt=""
+                                        class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                        onerror="this.style.opacity='0.25'"
+                                    />
                                 @endif
                             @endif
 
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-all duration-300 flex items-center justify-center">
-                                <x-icon name="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-7 w-7 drop-shadow-md" />
+                                <x-icon name="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-6 w-6 drop-shadow-md" />
                             </div>
 
-                            <div class="absolute top-2.5 left-2.5 z-10">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border {{ $isVideo ? 'bg-white/95 text-amber-700 border-amber-200/80' : 'bg-white/95 text-primary border-primary/20' }}">
+                            <div class="absolute top-2 left-2 z-10">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase shadow-md {{ $isVideo ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white ring-1 ring-white/30' : 'bg-slate-950/85 backdrop-blur-md text-sky-300 ring-1 ring-white/20' }}">
                                     @if ($isVideo)
-                                        <x-icon name="film" class="h-3 w-3 text-amber-500" /> Video
+                                        <x-icon name="film" class="h-2.5 w-2.5 text-white" />
+                                        <span>VIDEO</span>
                                     @else
-                                        <x-icon name="image" class="h-3 w-3 text-primary" /> Image
+                                        <x-icon name="image" class="h-2.5 w-2.5 text-sky-300" />
+                                        <span>IMAGE</span>
                                     @endif
                                 </span>
                             </div>
@@ -128,10 +134,10 @@
                             <button
                                 type="button"
                                 x-on:click.stop="$wire.openDelete({{ $item->id }})"
-                                class="absolute top-2.5 right-2.5 z-20 rounded-xl bg-white/95 border border-slate-200 p-2 text-slate-500 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200 cursor-pointer"
+                                class="absolute top-2 right-2 z-20 rounded-lg bg-black/60 backdrop-blur-sm border border-white/20 p-1.5 text-white hover:bg-rose-600 hover:border-rose-600 transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200 cursor-pointer"
                                 title="Delete media"
                             >
-                                <x-icon name="trash-2" class="h-3.5 w-3.5" />
+                                <x-icon name="trash-2" class="h-3 w-3" />
                             </button>
                         </div>
                     </div>

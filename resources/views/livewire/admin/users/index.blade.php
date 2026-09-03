@@ -8,7 +8,6 @@
                     {{ $users->total() }} Total
                 </span>
             </div>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Manage community members, view profile details, and handle account status</p>
         </div>
     </div>
 

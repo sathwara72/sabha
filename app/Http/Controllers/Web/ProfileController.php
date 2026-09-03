@@ -18,10 +18,6 @@ class ProfileController extends Controller
             return redirect('/?login=1');
         }
 
-        if (Auth::user()->canAccessAdminArea()) {
-            return redirect('/admin');
-        }
-
         return view('pages.profile');
     }
 

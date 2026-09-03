@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">1-to-1 Meetings</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Oversight of member networking meetings logged across the platform</p>
         </div>
         <div class="text-xs font-bold text-slate-700 bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-2xs shrink-0 self-start sm:self-auto">
             Total Meetings: <span class="text-primary font-black ml-0.5">{{ $totalCount }}</span>

@@ -1,7 +1,8 @@
 @php
     $inputClass = 'w-full rounded-lg border border-border bg-white px-3 py-1.5 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary font-semibold';
     $labelClass = 'text-[12px] font-bold text-muted-foreground uppercase tracking-wide mb-0.5 block';
-    $avatarSrc = $avatarFile ? $avatarFile->temporaryUrl() : media_url($user->avatar);
+    $savedAvatarSrc = media_url($user->avatar);
+    $previewAvatarSrc = $avatarFile ? $avatarFile->temporaryUrl() : $savedAvatarSrc;
 @endphp
 
 <div class="bg-background font-outfit py-3 px-2">
@@ -11,39 +12,15 @@
             <aside class="lg:col-span-3 lg:sticky lg:top-20 space-y-3">
                 <div class="glass-card p-3.5 space-y-2.5">
                     <div class="flex items-center gap-3">
-                        {{-- Left Side: Avatar / Logo --}}
-                        <div class="relative shrink-0">
+                        {{-- Left Side: Avatar / Logo (Remains Fixed to Saved Photo Until Saved) --}}
+                        <div class="shrink-0">
                             <div class="h-16 w-16 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/90 flex items-center justify-center shadow-2xs">
-                                @if ($avatarSrc)
-                                    <img src="{{ $avatarSrc }}" alt="Profile" class="h-full w-full object-contain" />
+                                @if ($savedAvatarSrc)
+                                    <img src="{{ $savedAvatarSrc }}" alt="Profile" class="h-full w-full object-contain" />
                                 @else
                                     <span class="text-xl font-black text-primary uppercase">{{ mb_substr($user->name ?? '?', 0, 1) }}</span>
                                 @endif
                             </div>
-                            <label class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer shadow-md transition-opacity hover:opacity-90" title="Upload photo">
-                                <x-icon name="camera" class="h-2.5 w-2.5" />
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    class="hidden"
-                                    x-on:change="
-                                        const f = $event.target.files[0];
-                                        if (f) {
-                                            $wire.set('activeTab', 'profile');
-                                            window.dispatchEvent(new CustomEvent('open-cropper', {
-                                                detail: {
-                                                    src: URL.createObjectURL(f),
-                                                    aspectRatio: 1,
-                                                    title: 'Adjust / Crop Profile Photo',
-                                                    target: 'avatarFile',
-                                                    componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
-                                                }
-                                            }));
-                                            $event.target.value = '';
-                                        }
-                                    "
-                                />
-                            </label>
                         </div>
 
                         {{-- Right Side: Details --}}
@@ -60,10 +37,6 @@
                             </div>
                         </div>
                     </div>
-
-                    @if ($avatarFile)
-                        <p class="text-[11px] font-semibold text-amber-600 bg-amber-50 rounded-lg px-2 py-1 border border-amber-200/60 text-center">{{ __('site.profile.photo_pending') }}</p>
-                    @endif
 
                     @if ($user->canAccessAdminArea())
                         <a href="/admin" class="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-[#00379D] to-[#082e6e] shadow-md shadow-primary/20 hover:opacity-95 active:scale-95 transition-all">
@@ -159,7 +132,69 @@
                             <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-center text-xs font-semibold text-emerald-600">{{ $profileSuccess }}</div>
                         @endif
 
-                        <form wire:submit="updateProfile" x-on:keydown.enter="$event.target.tagName !== 'TEXTAREA' && $event.preventDefault()" class="space-y-3">
+                        <form wire:submit="updateProfile" x-on:keydown.enter="$event.target.tagName !== 'TEXTAREA' && $event.preventDefault()" class="space-y-4">
+                            {{-- Profile Photo Upload Section --}}
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-3.5 rounded-2xl border border-slate-200/90 bg-slate-50/60">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="relative shrink-0 h-16 w-16 rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center">
+                                        @if ($previewAvatarSrc)
+                                            <img src="{{ $previewAvatarSrc }}" alt="Profile Photo" class="h-full w-full object-contain" />
+                                        @else
+                                            <span class="text-xl font-black text-primary uppercase">{{ mb_substr($user->name ?? '?', 0, 1) }}</span>
+                                        @endif
+
+                                        <div wire:loading wire:target="avatarFile" class="absolute inset-0 bg-white/90 backdrop-blur-xs flex items-center justify-center">
+                                            <x-icon name="loader-2" class="h-5 w-5 text-primary animate-spin" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-foreground">Profile Photo</h4>
+                                        <p class="text-[11px] text-muted mt-0.5">JPG, PNG or WEBP (Max 5MB). Recommended square photo.</p>
+                                        @if ($avatarFile)
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60 mt-1">
+                                                <x-icon name="clock" class="h-2.5 w-2.5" /> Photo selected (click Save below to apply)
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 self-start sm:self-center">
+                                    <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-bold hover:opacity-90 active:scale-95 transition-all shadow-2xs cursor-pointer">
+                                        <x-icon name="camera" class="h-3.5 w-3.5" />
+                                        <span>{{ $previewAvatarSrc ? 'Change Photo' : 'Upload Photo' }}</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            class="hidden"
+                                            x-on:change="
+                                                const f = $event.target.files[0];
+                                                if (f) {
+                                                    window.dispatchEvent(new CustomEvent('open-cropper', {
+                                                        detail: {
+                                                            src: URL.createObjectURL(f),
+                                                            aspectRatio: 1,
+                                                            title: 'Adjust / Crop Profile Photo',
+                                                            target: 'avatarFile',
+                                                            componentId: $el.closest('[wire\\:id]')?.getAttribute('wire:id')
+                                                        }
+                                                    }));
+                                                    $event.target.value = '';
+                                                }
+                                            "
+                                        />
+                                    </label>
+                                    @if ($avatarFile)
+                                        <button
+                                            type="button"
+                                            wire:click="$set('avatarFile', null)"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-rose-600 hover:border-rose-200 text-xs font-semibold transition-colors cursor-pointer"
+                                            title="Cancel new photo"
+                                        >
+                                            <x-icon name="x" class="h-3 w-3" /> Cancel
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label class="{{ $labelClass }}">{{ __('site.profile.full_name') }}</label>
@@ -787,11 +822,13 @@
                                                          @endif
                                                      </div>
 
-                                                     @if ($eventDetails->type)
-                                                         <span class="absolute bottom-2 left-2 inline-flex items-center rounded bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 border border-white/20">
-                                                             {{ $eventDetails->type }}
-                                                         </span>
-                                                     @endif
+                                                     {{-- Event Category: Commented Out
+                                                      @if ($eventDetails->type)
+                                                          <span class="absolute bottom-2 left-2 inline-flex items-center rounded bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 border border-white/20">
+                                                              {{ $eventDetails->type }}
+                                                          </span>
+                                                      @endif
+                                                      --}}
                                                  </div>
 
                                                  {{-- Card Content Body --}}

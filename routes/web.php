@@ -106,7 +106,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::view('/meetings', 'pages.admin.meetings')->name('meetings.index')->middleware('module:meetings');
     Route::view('/referrals', 'pages.admin.referrals')->name('referrals.index')->middleware('module:referrals');
     Route::view('/testimonials', 'pages.admin.testimonials')->name('testimonials.index')->middleware('module:testimonials');
-    Route::get('/statistics', fn () => redirect('/admin/settings?tab=statistics'))->name('statistics.index');
+    Route::get('/statistics', fn () => redirect('/admin/settings'))->name('statistics.index');
     Route::get('/analytics', fn () => redirect()->route('admin.dashboard'))->name('analytics.index');
 
     Route::middleware('full-admin')->group(function () {

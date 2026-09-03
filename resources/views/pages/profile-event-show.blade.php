@@ -54,7 +54,9 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-black/20 pointer-events-none"></div>
                 <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 pointer-events-none">
                     <div>
+                        {{-- Event Category: Commented Out
                         <span class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mb-2">{{ $event->type }}</span>
+                        --}}
                         <h1 class="text-xl sm:text-2xl font-extrabold text-white leading-tight drop-shadow-sm">{{ $event->title }}</h1>
                     </div>
                     <div class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold border shadow-sm {{ $status['bg'] }} {{ $status['color'] }} {{ $status['border'] }}">

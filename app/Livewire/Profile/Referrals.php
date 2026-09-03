@@ -53,13 +53,32 @@ class Referrals extends Component
 
     public bool $updateDisplayTestimonial = false;
 
+    // ---- Giver Testimonial (direction: given on closed referrals) ----
+    public ?int $giverTestimonialId = null;
+
+    public string $giverTestimonialText = '';
+
+    public bool $giverDisplayTestimonial = true;
+
     public ?int $deletingId = null;
+
+    public ?int $outcomeModalId = null;
 
     public string $successMsg = '';
 
     public function mount(string $direction = 'given'): void
     {
         $this->direction = in_array($direction, ['given', 'received'], true) ? $direction : 'given';
+    }
+
+    public function openOutcomeModal(int $id): void
+    {
+        $this->outcomeModalId = $id;
+    }
+
+    public function closeOutcomeModal(): void
+    {
+        $this->outcomeModalId = null;
     }
 
     // ───────────────────────── Give ─────────────────────────
@@ -179,16 +198,66 @@ class Referrals extends Component
             'amount' => $this->updateStatus === 'closed' ? $this->updateAmount : null,
             'receiver_comments' => $this->updateReceiverComments ?: null,
             'testimonial' => $this->updateStatus === 'closed' ? ($this->updateTestimonial ?: null) : null,
-            'display_testimonial' => $this->updateStatus === 'closed' && $this->updateTestimonial ? $this->updateDisplayTestimonial : false,
+            'display_testimonial' => $this->updateStatus === 'closed' && $this->updateTestimonial ? ($referral->display_testimonial ?? true) : false,
         ]);
 
         $this->successMsg = __('site.profile.referrals.success_updated');
         $this->updatingId = null;
     }
 
+    public function toggleWebsiteDisplay(int $id): void
+    {
+        $referral = BusinessReferral::where(function ($q) {
+            $q->where('giver_id', Auth::id())
+              ->orWhere('receiver_id', Auth::id());
+        })->findOrFail($id);
+
+        $referral->update([
+            'display_testimonial' => ! $referral->display_testimonial,
+        ]);
+
+        $this->successMsg = $referral->display_testimonial
+            ? 'Testimonial is now set to display on website.'
+            : 'Testimonial is now hidden from website.';
+    }
+
+    // ───────────────────────── Giver Testimonial ─────────────────────────
+
+    public function openGiverTestimonial(int $id): void
+    {
+        $referral = BusinessReferral::where('giver_id', Auth::id())->where('status', 'closed')->findOrFail($id);
+
+        $this->giverTestimonialId = $referral->id;
+        $this->giverTestimonialText = $referral->testimonial ?? '';
+        $this->giverDisplayTestimonial = (bool) ($referral->display_testimonial ?? true);
+        $this->resetErrorBag();
+    }
+
+    public function cancelGiverTestimonial(): void
+    {
+        $this->giverTestimonialId = null;
+    }
+
+    public function saveGiverTestimonial(): void
+    {
+        $this->validate([
+            'giverTestimonialText' => 'required|string|min:3|max:1000',
+        ]);
+
+        $referral = BusinessReferral::where('giver_id', Auth::id())->where('status', 'closed')->findOrFail($this->giverTestimonialId);
+
+        $referral->update([
+            'testimonial' => $this->giverTestimonialText,
+            'display_testimonial' => $this->giverDisplayTestimonial,
+        ]);
+
+        $this->successMsg = 'Testimonial saved successfully.';
+        $this->giverTestimonialId = null;
+    }
+
     public function render()
     {
-        $query = BusinessReferral::with(['giver', 'receiver']);
+        $query = BusinessReferral::with(['giver.business', 'receiver.business']);
 
         $query = $this->direction === 'given'
             ? $query->where('giver_id', Auth::id())
@@ -210,6 +279,7 @@ class Referrals extends Component
             'referrals' => $referrals,
             'memberLabels' => $memberLabels,
             'memberValueMap' => $memberValueMap,
+            'selectedOutcomeRef' => $this->outcomeModalId ? BusinessReferral::find($this->outcomeModalId) : null,
         ]);
     }
 }

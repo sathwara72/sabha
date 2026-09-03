@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Sub-Admins</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Grant members limited admin access to specific modules without making them a full admin</p>
         </div>
         <a
             href="{{ route('admin.sub-admins.create') }}"

@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Business Directory & Approvals</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Review, approve, and manage registered businesses in the directory</p>
         </div>
     </div>
 
@@ -47,34 +46,31 @@
             @endphp
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 @foreach ($businesses as $biz)
-                    <div class="glass-card p-0 flex flex-col rounded-2xl border border-border">
-                        <div class="relative h-28 w-full overflow-hidden rounded-t-2xl shrink-0">
-                            @if (media_url($biz->cover_image))
-                                <img src="{{ media_url($biz->cover_image) }}" alt="{{ $biz->name }}" class="w-full h-full object-cover" />
-                            @else
-                                <div class="w-full h-full bg-gradient-to-br from-primary/10 via-primary/5 to-slate-100"></div>
-                            @endif
-                            <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[12px] font-bold border {{ $statusColor[$biz->status] ?? 'bg-surface text-muted border-border' }}">
-                                {{ ucfirst($biz->status) }}
-                            </span>
-                        </div>
-
-                        <div class="px-4 pb-4 flex flex-col gap-2.5 flex-1">
-                            <div class="flex items-center gap-3 -mt-7">
-                                <div class="relative z-10 shrink-0 h-14 w-14 rounded-xl border-2 border-white shadow-lg bg-white overflow-hidden flex items-center justify-center p-1">
+                    <div class="glass-card p-4 flex flex-col gap-2.5 rounded-2xl border border-border">
+                        {{-- Top Header: Direct Logo, Name & Status Badge --}}
+                        <div class="flex items-start justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div class="shrink-0 h-11 w-11 flex items-center justify-center">
                                     @if (media_url($biz->logo))
-                                        <img src="{{ media_url($biz->logo) }}" alt="{{ $biz->name }}" class="w-full h-full object-contain" />
+                                        <img src="{{ media_url($biz->logo) }}" alt="{{ $biz->name }}" class="h-11 w-11 object-contain" />
                                     @else
-                                        <span class="text-xl font-bold text-primary">{{ $biz->name ? mb_substr($biz->name, 0, 1) : '?' }}</span>
+                                        <span class="h-10 w-10 rounded-xl bg-primary-soft text-primary font-bold text-base flex items-center justify-center border border-primary/20">
+                                            {{ $biz->name ? mb_substr($biz->name, 0, 1) : '?' }}
+                                        </span>
                                     @endif
                                 </div>
-                                <div class="flex-1 mt-8">
-                                    <h3 class="text-sm font-bold text-foreground leading-tight line-clamp-1">{{ $biz->name }}</h3>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-sm font-bold text-foreground leading-tight truncate" title="{{ $biz->name }}">{{ $biz->name }}</h3>
                                     @if ($biz->tagline)
-                                        <p class="text-[12px] text-muted italic line-clamp-1 mt-0.5">{{ $biz->tagline }}</p>
+                                        <p class="text-[11px] text-muted italic truncate mt-0.5">{{ $biz->tagline }}</p>
                                     @endif
                                 </div>
                             </div>
+
+                            <span class="shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-bold border {{ $statusColor[$biz->status] ?? 'bg-surface text-muted border-border' }}">
+                                {{ ucfirst($biz->status) }}
+                            </span>
+                        </div>
 
                             <div class="flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-muted font-medium">
                                 <span class="flex items-center gap-1 text-primary font-semibold">{{ $biz->category }}</span>
@@ -138,7 +134,6 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
                 @endforeach
             </div>
 

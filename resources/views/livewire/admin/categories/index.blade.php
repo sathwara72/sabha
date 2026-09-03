@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Business Categories</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Manage directory categories displayed in member registrations and search filters</p>
         </div>
         <button
             type="button"

@@ -130,37 +130,66 @@
                     @php
                         $locationPart = $business->city ?: ($business->area ?: 'Gujarat');
                         $subline = $locationPart . ($business->category ? ' • ' . $business->category : '');
+                        $hasCover = !empty($business->cover_image) && media_url($business->cover_image);
                     @endphp
                     <a href="/businesses/{{ $business->id }}" class="block h-full cursor-pointer group">
-                        <div class="flex h-full flex-col justify-start rounded-2xl sm:rounded-[25px] border border-slate-100 bg-white p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-slate-200">
-                            {{-- Top Logo Box --}}
-                            <div class="h-16 w-16 overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-                                <x-safe-image
-                                    :src="media_url($business->logo)"
-                                    :alt="$business->name"
-                                    :title="$business->name"
-                                    fallback-type="business"
-                                    img-class="h-full w-full object-contain"
-                                />
-                            </div>
+                        <div class="flex h-full flex-col justify-start rounded-2xl sm:rounded-[25px] border border-slate-100 bg-white overflow-hidden shadow-xs transition-all duration-200 hover:shadow-md hover:border-slate-200">
+                            @if ($hasCover)
+                                {{-- Background Cover Image --}}
+                                <div class="relative h-28 sm:h-32 w-full overflow-hidden bg-slate-900 shrink-0">
+                                    <img
+                                        src="{{ media_url($business->cover_image) }}"
+                                        alt="{{ $business->name }}"
+                                        class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        loading="lazy"
+                                    />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"></div>
 
-                            {{-- Business Title --}}
-                            <h3 class="mt-5 text-base sm:text-lg font-bold text-slate-900 tracking-tight transition-colors group-hover:text-primary">
-                                {{ $business->name }}
-                            </h3>
-
-                            {{-- Location & Category Line --}}
-                            <div class="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                                <x-icon name="map-pin" class="h-3.5 w-3.5 text-primary shrink-0" />
-                                <span class="truncate">{{ $subline }}</span>
-                            </div>
-
-                            {{-- Description (Multi-line clamp) --}}
-                            @if (!empty($business->description))
-                                <p class="mt-3.5 text-xs text-slate-600 leading-relaxed line-clamp-3 font-normal">
-                                    {{ $business->description }}
-                                </p>
+                                    {{-- Logo Box Overlapping Cover --}}
+                                    <div class="absolute -bottom-3 left-6 h-16 w-16 overflow-hidden rounded-2xl border-2 border-white bg-white p-2 flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform z-10">
+                                        <x-safe-image
+                                            :src="media_url($business->logo)"
+                                            :alt="$business->name"
+                                            :title="$business->name"
+                                            fallback-type="business"
+                                            img-class="h-full w-full object-contain"
+                                        />
+                                    </div>
+                                </div>
                             @endif
+
+                            <div class="flex flex-col flex-1 p-6 {{ $hasCover ? 'pt-6' : '' }}">
+                                @if (! $hasCover)
+                                    {{-- Top Logo Box for Cards without Cover --}}
+                                    <div class="h-16 w-16 overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                                        <x-safe-image
+                                            :src="media_url($business->logo)"
+                                            :alt="$business->name"
+                                            :title="$business->name"
+                                            fallback-type="business"
+                                            img-class="h-full w-full object-contain"
+                                        />
+                                    </div>
+                                @endif
+
+                                {{-- Business Title --}}
+                                <h3 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight transition-colors group-hover:text-primary {{ $hasCover ? 'mt-1' : 'mt-5' }}">
+                                    {{ $business->name }}
+                                </h3>
+
+                                {{-- Location & Category Line --}}
+                                <div class="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                                    <x-icon name="map-pin" class="h-3.5 w-3.5 text-primary shrink-0" />
+                                    <span class="truncate">{{ $subline }}</span>
+                                </div>
+
+                                {{-- Description (Multi-line clamp) --}}
+                                @if (!empty($business->description))
+                                    <p class="mt-3.5 text-xs text-slate-600 leading-relaxed line-clamp-3 font-normal">
+                                        {{ $business->description }}
+                                    </p>
+                                @endif
+                            </div>
                         </div>
                     </a>
                 @endforeach

@@ -25,10 +25,8 @@ class PageController extends Controller
             $label = strtolower($s->label);
             return str_contains($label, 'member') || str_contains($label, 'professional');
         });
-        $businessExchanged = $statData->first(function ($s) {
-            $label = strtolower($s->label);
-            return str_contains($label, 'exchange') || str_contains($label, 'crore') || str_contains($label, 'business') || str_contains($label, 'value');
-        });
+
+        $businessExchangedStat = Statistic::realBusinessExchangedFormatted();
 
         $trustees = Trustee::active()
             ->with('user.business')
@@ -36,7 +34,7 @@ class PageController extends Controller
 
         return view('pages.about', [
             'membersStat' => $members->value ?? '500+',
-            'businessExchangedStat' => $businessExchanged->value ?? '₹10Cr+',
+            'businessExchangedStat' => $businessExchangedStat,
             'trustees' => $trustees,
             'fallbackTeam' => self::FALLBACK_TEAM,
         ]);

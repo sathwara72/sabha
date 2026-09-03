@@ -3,7 +3,6 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">Chat Moderation</h1>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">Review and moderate direct messages and community groups</p>
         </div>
         <div class="text-xs font-bold text-slate-700 bg-white rounded-xl px-3 py-1.5 border border-slate-200 shadow-2xs shrink-0 self-start sm:self-auto">
             Total: <span class="text-primary font-black">{{ $totalCount }}</span>

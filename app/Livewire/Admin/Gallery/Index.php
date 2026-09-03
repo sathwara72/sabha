@@ -111,7 +111,7 @@ class Index extends Component
 
     public function render()
     {
-        $gallery = GalleryImage::whereNull('event_id')->latest()->paginate(12);
+        $gallery = GalleryImage::whereNull('event_id')->latest()->paginate(36);
 
         return view('livewire.admin.gallery.index', [
             'gallery' => $gallery,

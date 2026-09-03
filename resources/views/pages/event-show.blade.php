@@ -43,6 +43,19 @@
 
     $galleryJson = $galleryItems->values();
     $metaDescription = \Illuminate\Support\Str::limit(strip_tags((string) $event->description), 160);
+
+    $mapEmbedSrc = parse_google_maps_iframe_src($event->map_iframe ?: $event->google_map_link);
+    if (! $mapEmbedSrc && filled($event->location)) {
+        $mapEmbedSrc = 'https://maps.google.com/maps?q=' . urlencode($event->location) . '&output=embed';
+    }
+
+    $mapDirectUrl = null;
+    $rawMapLink = trim((string) ($event->google_map_link ?: $event->map_iframe));
+    if ($rawMapLink !== '' && ! str_contains($rawMapLink, '<iframe') && preg_match('#^https?://#i', $rawMapLink)) {
+        $mapDirectUrl = $rawMapLink;
+    } elseif (filled($event->location)) {
+        $mapDirectUrl = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($event->location);
+    }
 @endphp
 
 <x-layouts.app
@@ -110,77 +123,86 @@
         }"
     >
         {{-- Cover Banner with Profile Bar (Matches Business Details Style with Full Uncropped Image) --}}
-        <div class="mx-auto max-w-7xl sm:px-6 sm:pt-6">
-            <section class="relative w-full min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] sm:rounded-3xl overflow-hidden bg-slate-950 flex items-center justify-center shadow-lg border border-border/40">
+        <div class="mx-auto max-w-7xl sm:px-6 sm:pt-4">
+            <section class="relative w-full min-h-[280px] sm:min-h-[330px] lg:min-h-[360px] sm:rounded-3xl overflow-hidden bg-slate-950 flex items-center justify-center shadow-lg border border-border/40">
                 @if ($eventImage)
                     {{-- Ambient blurred backdrop --}}
                     <img
                         src="{{ $eventImage }}"
                         alt=""
                         aria-hidden="true"
-                        class="absolute inset-0 h-full w-full object-cover blur-2xl scale-125 opacity-40 filter pointer-events-none"
+                        class="absolute inset-0 h-full w-full object-cover blur-2xl scale-125 opacity-35 filter pointer-events-none"
                     />
                     {{-- Full uncropped image centered --}}
-                    <div class="absolute inset-0 flex items-center justify-center p-6 sm:p-10 pointer-events-none">
+                    <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-6 pb-24 sm:pb-26 pointer-events-none">
                         <img
                             src="{{ $eventImage }}"
                             alt="{{ $event->title }}"
-                            class="max-h-[260px] sm:max-h-[320px] lg:max-h-[350px] w-auto max-w-full object-contain rounded-2xl shadow-2xl drop-shadow-2xl"
+                            class="max-h-[180px] sm:max-h-[220px] lg:max-h-[240px] w-auto max-w-full object-contain rounded-2xl shadow-2xl drop-shadow-2xl"
                         />
                     </div>
                 @endif
 
                 {{-- Back to Events Button --}}
-                <div class="absolute top-6 left-6 z-10">
-                    <a href="/events" class="group inline-flex items-center gap-1.5 rounded-lg bg-black/40 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-black/60 cursor-pointer border border-white/10">
-                        <x-icon name="arrow-left" class="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                <div class="absolute top-4 left-4 sm:top-5 sm:left-5 z-10">
+                    <a href="/events" class="group inline-flex items-center gap-1.5 rounded-lg bg-black/40 backdrop-blur-md px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-black/60 cursor-pointer border border-white/10">
+                        <x-icon name="arrow-left" class="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
                         {{ __('site.eventDetail.back_all_events') }}
                     </a>
                 </div>
 
                 {{-- Bottom Overlay Info Bar --}}
                 <div class="absolute bottom-0 left-0 right-0 z-10">
-                    <div class="px-6 pb-6">
-                        <div class="flex flex-col md:flex-row md:items-end gap-5">
-                            {{-- Event Date/Icon Badge Box --}}
-                            <div class="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-white text-primary flex flex-col items-center justify-center border-4 border-white/20 shadow-2xl shrink-0 select-none backdrop-blur-sm p-2 text-center">
-                                @if ($eventImage)
-                                    <x-safe-image :src="$eventImage" :alt="$event->title" :title="$event->title" fallback-type="event" img-class="h-full w-full object-contain rounded-xl" />
-                                @else
-                                    <span class="text-[12px] font-black uppercase text-primary tracking-wider">{{ $event->date->format('M') }}</span>
-                                    <span class="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-none">{{ $event->date->format('d') }}</span>
-                                    <span class="text-[11px] font-bold text-slate-500">{{ $event->date->format('Y') }}</span>
-                                @endif
+                    <div class="px-5 pb-4 sm:px-6 sm:pb-4.5">
+                        <div class="flex flex-col md:flex-row md:items-end gap-3.5 sm:gap-4">
+                            {{-- Event Date Badge Box --}}
+                            <div class="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-xl overflow-hidden bg-white text-primary flex flex-col items-center justify-center border-2 border-white/30 shadow-xl shrink-0 select-none backdrop-blur-sm p-1.5 text-center">
+                                <span class="text-[10px] sm:text-[11px] font-black uppercase text-primary tracking-wider leading-tight">{{ $event->date->format('M') }}</span>
+                                <span class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none my-0.5">{{ $event->date->format('d') }}</span>
+                                <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 leading-tight">{{ $event->date->format('Y') }}</span>
                             </div>
 
                             {{-- Title and Meta --}}
-                            <div class="flex-1 space-y-1.5 md:pb-1">
+                            <div class="flex-1 space-y-1 md:pb-0.5">
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-0.5 text-[12px] font-bold text-white border border-white/20">
-                                        <x-icon name="tag" class="h-3 w-3" /> {{ $event->type }}
+                                    {{-- Event Category: Commented Out
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2 py-0.5 text-[11px] font-bold text-white border border-white/20">
+                                        <x-icon name="tag" class="h-2.5 w-2.5" /> {{ $event->type }}
                                     </span>
-                                    <span class="inline-flex items-center gap-1.5 text-[12px] font-bold text-emerald-300 bg-emerald-500/15 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-emerald-400/20">
-                                        <x-icon name="users" class="h-3 w-3 text-emerald-400 animate-pulse" /> {{ $attendeesCount }} {{ __('site.eventDetail.registered') }}
+                                    --}}
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-500/15 backdrop-blur-sm px-2 py-0.5 rounded-full border border-emerald-400/20">
+                                        <x-icon name="users" class="h-2.5 w-2.5 text-emerald-400 animate-pulse" /> {{ $attendeesCount }} {{ __('site.eventDetail.registered') }}
                                     </span>
                                 </div>
 
-                                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg">{{ $event->title }}</h1>
+                                <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight drop-shadow-lg">{{ $event->title }}</h1>
 
-                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-white/80 font-medium">
-                                    <span class="inline-flex items-center gap-1"><x-icon name="calendar" class="h-3 w-3 text-white/90" /> {{ $event->date->format('M j, Y') }}</span>
+                                <div class="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[11px] sm:text-xs text-white/80 font-medium">
                                     <span class="inline-flex items-center gap-1"><x-icon name="clock" class="h-3 w-3 text-white/90" /> {{ $event->date->format('g:i A') }}</span>
                                     @if ($event->location)
                                         <span class="inline-flex items-center gap-1"><x-icon name="map-pin" class="h-3 w-3 text-white/90" /> {{ $event->location }}</span>
+                                        @if ($mapDirectUrl)
+                                            <a
+                                                href="{{ $mapDirectUrl }}"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="inline-flex items-center gap-1 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-white transition-all shadow-2xs border border-white/25 cursor-pointer"
+                                                title="View location on Google Maps"
+                                            >
+                                                <x-icon name="navigation" class="h-2.5 w-2.5 text-sky-300" />
+                                                <span>View Map</span>
+                                            </a>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
 
                             {{-- Quick Action Button --}}
-                            <div class="flex gap-2 shrink-0 md:pb-1">
+                            <div class="flex gap-2 shrink-0 md:pb-0.5">
                                 @if ($userRegistration)
                                     <a
                                         href="/profile?tab=events"
-                                        class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] cursor-pointer"
+                                        class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] cursor-pointer"
                                     >
                                         <x-icon name="check-circle-2" class="h-4 w-4" /> {{ $userRegistration->status === 'approved' ? __('site.eventDetail.registered') : ucfirst($userRegistration->status) }}
                                     </a>
@@ -188,16 +210,16 @@
                                     <button
                                         type="button"
                                         x-on:click="openModal"
-                                        class="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-5 py-3 text-xs font-bold text-slate-900 shadow-lg transition-all hover:bg-primary hover:text-white active:scale-[0.98] cursor-pointer"
+                                        class="group inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-slate-900 shadow-lg transition-all hover:bg-primary hover:text-white active:scale-[0.98] cursor-pointer"
                                     >
                                         <x-icon name="ticket" class="h-3.5 w-3.5" /> {{ __('site.eventDetail.reserve_seat') }}
                                     </button>
                                 @elseif ($status === 'upcoming')
-                                    <span class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-4 py-3 text-xs font-bold text-amber-300">
+                                    <span class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-3.5 py-2.5 text-xs font-bold text-amber-300">
                                         <x-icon name="clock" class="h-3.5 w-3.5" /> {{ __('site.eventDetail.booking_soon') }}
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-4 py-3 text-xs font-bold text-slate-300">
+                                    <span class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-3.5 py-2.5 text-xs font-bold text-slate-300">
                                         {{ __('site.eventDetail.booking_closed') }}
                                     </span>
                                 @endif
@@ -209,7 +231,7 @@
         </div>
 
         {{-- Split Body Layout --}}
-        <div class="mx-auto max-w-7xl px-6 py-6 lg:px-4">
+        <div class="mx-auto max-w-7xl px-6 py-4 sm:py-5 lg:px-4">
             <div class="grid grid-cols-1 gap-2 lg:grid-cols-3">
                 {{-- Left Column --}}
                 <div class="space-y-3 lg:col-span-2">
@@ -339,6 +361,57 @@
                                     </div>
                                 @endforeach
                             </div>
+                        </section>
+                    @endif
+
+                    {{-- Event Venue & Google Map Section --}}
+                    @if ($mapEmbedSrc)
+                        <section class="glass-card p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="h-4 w-[3px] rounded-full bg-primary"></span>
+                                    <h2 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Event Venue & Location Map</h2>
+                                </div>
+                                @if ($mapDirectUrl)
+                                    <a
+                                        href="{{ $mapDirectUrl }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline cursor-pointer"
+                                    >
+                                        <span>Open in Google Maps</span>
+                                        <x-icon name="arrow-up-right" class="h-3 w-3" />
+                                    </a>
+                                @endif
+                            </div>
+                            <div class="rounded-2xl overflow-hidden border border-border bg-slate-900 h-56 sm:h-64 w-full shadow-2xs">
+                                <iframe
+                                    src="{{ $mapEmbedSrc }}"
+                                    class="w-full h-full border-0"
+                                    allowfullscreen
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                ></iframe>
+                            </div>
+                            @if ($event->location)
+                                <div class="flex items-center justify-between gap-2 pt-0.5">
+                                    <p class="text-[11px] text-muted font-medium flex items-center gap-1.5 min-w-0 truncate">
+                                        <x-icon name="map-pin" class="h-3.5 w-3.5 text-primary shrink-0" />
+                                        <span class="truncate">{{ $event->location }}</span>
+                                    </p>
+                                    @if ($mapDirectUrl)
+                                        <a
+                                            href="{{ $mapDirectUrl }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="inline-flex items-center gap-1 rounded-lg bg-primary-soft text-primary px-2.5 py-1 text-[10px] font-bold shrink-0 hover:bg-primary hover:text-white transition-all cursor-pointer"
+                                        >
+                                            <x-icon name="navigation" class="h-2.5 w-2.5" />
+                                            <span>Get Directions</span>
+                                        </a>
+                                    @endif
+                                </div>
+                            @endif
                         </section>
                     @endif
                 </div>
@@ -477,11 +550,23 @@
                         <div class="space-y-3 pt-3">
                             <div class="flex gap-2.5">
                                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="map-pin" class="h-3.5 w-3.5" /></div>
-                                <div>
+                                <div class="flex-1 min-w-0">
                                     <p class="text-[12px] font-semibold text-muted">{{ __('site.eventDetail.location') }}</p>
-                                    <p class="mt-0.5 text-xs font-medium text-foreground">{{ $event->location }}</p>
+                                    <p class="mt-0.5 text-xs font-medium text-foreground leading-snug">{{ $event->location }}</p>
+                                    @if ($mapDirectUrl)
+                                        <a
+                                            href="{{ $mapDirectUrl }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-primary text-white hover:opacity-90 px-3 py-1.5 text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                                        >
+                                            <x-icon name="navigation" class="h-3 w-3" />
+                                            <span>Open in Google Maps</span>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
+                            {{-- Event Format / Type: Commented Out
                             <div class="flex gap-2.5">
                                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><x-icon name="zap" class="h-3.5 w-3.5" /></div>
                                 <div>
@@ -489,6 +574,7 @@
                                     <p class="mt-0.5 text-xs font-medium text-foreground">{{ $event->type }} {{ __('site.eventDetail.interactive') }}</p>
                                 </div>
                             </div>
+                            --}}
                         </div>
 
                         <div class="mt-4 space-y-2">
@@ -583,9 +669,11 @@
                 <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[#00379D] to-[#082e6e] text-white shrink-0">
                     <div class="min-w-0 pr-2">
                         <div class="flex items-center gap-2">
+                            {{-- Event Category: Commented Out
                             <span class="rounded-full bg-white/20 border border-white/30 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
                                 {{ $event->type ?: 'Event' }}
                             </span>
+                            --}}
                             <h3 class="text-sm font-bold text-white truncate">Reserve Your Seat</h3>
                         </div>
                         <p class="text-xs text-white/80 font-medium truncate mt-0.5" title="{{ $event->title }}">{{ $event->title }}</p>

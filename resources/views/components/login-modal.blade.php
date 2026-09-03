@@ -49,7 +49,7 @@
         </button>
 
         <div class="mb-4 text-center">
-            <img src="{{ asset('logo2.png') }}" alt="SABHA" class="mx-auto h-11 w-11 object-contain mb-2.5" />
+            <img src="{{ asset('logo2.png') }}" alt="SABHA" class="mx-auto h-11 w-11 rounded-full object-contain mb-2.5 shadow-xs" />
             <h2 class="text-base font-bold text-foreground">{{ __('site.auth.login_title') }}</h2>
             <p class="mt-0.5 text-xs text-muted">{{ __('site.auth.login_subtitle') }}</p>
         </div>

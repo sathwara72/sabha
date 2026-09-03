@@ -24,6 +24,10 @@ class Form extends Component
 
     public string $location = '';
 
+    public string $google_map_link = '';
+
+    public string $map_iframe = '';
+
     public string $type = 'Mixer';
 
     public string $price_normal = '';
@@ -55,6 +59,8 @@ class Form extends Component
         $this->booking_start_date = $event->booking_start_date ? $event->booking_start_date->format('Y-m-d') : '';
         $this->booking_end_date = $event->booking_end_date ? $event->booking_end_date->format('Y-m-d') : '';
         $this->location = $event->location;
+        $this->google_map_link = $event->google_map_link ?? '';
+        $this->map_iframe = $event->map_iframe ?: ($event->google_map_link ?? '');
         $this->type = $event->type ?: 'Mixer';
         $this->price_normal = $event->price_normal ?: '';
         $this->price_verified = $event->price_verified ?: '';
@@ -114,6 +120,8 @@ class Form extends Component
             'booking_start_date' => 'nullable|date',
             'booking_end_date' => 'nullable|date|after_or_equal:booking_start_date',
             'location' => 'required|string',
+            'google_map_link' => 'nullable|string',
+            'map_iframe' => 'nullable|string',
             'type' => 'required|string',
             'price_normal' => 'required|string',
             'price_verified' => 'required|string',
@@ -126,6 +134,21 @@ class Form extends Component
         $speakers = array_values(array_filter($this->speakers, fn ($s) => trim((string) ($s['name'] ?? '')) !== ''));
         $youtubeUrls = array_values(array_filter($this->youtube_urls, fn ($url) => trim((string) $url) !== ''));
 
+        $mapIframeInput = trim((string) ($validated['map_iframe'] ?? ''));
+        $mapLinkInput = trim((string) ($validated['google_map_link'] ?? ''));
+
+        // If google_map_link wasn't explicitly given but map_iframe has a URL or iframe
+        if ($mapLinkInput === '' && $mapIframeInput !== '') {
+            if (preg_match('#^https?://#i', $mapIframeInput)) {
+                $mapLinkInput = $mapIframeInput;
+            } elseif (preg_match('/src=["\']([^"\']+)["\']/i', $mapIframeInput, $matches)) {
+                $mapLinkInput = $matches[1];
+            }
+        }
+        if ($mapLinkInput === '' && ! empty($validated['location'])) {
+            $mapLinkInput = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($validated['location']);
+        }
+
         $data = [
             'title' => $validated['title'],
             'description' => $validated['description'],
@@ -133,6 +156,8 @@ class Form extends Component
             'booking_start_date' => ! empty($validated['booking_start_date']) ? $validated['booking_start_date'] : null,
             'booking_end_date' => ! empty($validated['booking_end_date']) ? $validated['booking_end_date'] : null,
             'location' => $validated['location'],
+            'google_map_link' => $mapLinkInput ?: null,
+            'map_iframe' => $mapIframeInput ?: null,
             'type' => $validated['type'],
             'price_normal' => $validated['price_normal'],
             'price_verified' => $validated['price_verified'],

@@ -13,9 +13,6 @@
                 <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                     {{ $userId ? 'Manage Sub-Admin Permissions' : 'Add New Sub-Admin' }}
                 </h1>
-                <p class="text-xs text-slate-500 font-medium">
-                    {{ $userId ? 'Configure granular access permissions for ' . $subAdminUser?->name : 'Promote a registered member and grant specific module capabilities' }}
-                </p>
             </div>
         </div>
 
