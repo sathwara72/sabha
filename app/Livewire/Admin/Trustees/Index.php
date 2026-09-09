@@ -151,7 +151,7 @@ class Index extends Component
 
         $candidateUsers = [];
         if ($this->isFormModalOpen && ! $this->editingId) {
-            $candidateUsers = User::whereNotIn('role', ['admin', 'sub_admin'])
+            $candidateUsers = User::nonAdmin()
                 ->where('registration_status', 'active')
                 ->whereDoesntHave('trustee')
                 ->orderBy('name')

@@ -151,7 +151,7 @@ class Index extends Component
 
     public function render()
     {
-        $query = User::query();
+        $query = User::nonAdmin();
 
         if ($this->tab === 'pending_review') {
             $query->where('registration_status', 'pending_review');
@@ -178,12 +178,12 @@ class Index extends Component
 
         return view('livewire.admin.registrations.index', [
             'applicants' => $applicants,
-            'pendingReviewCount' => User::where('registration_status', 'pending_review')->count(),
-            'pendingPaymentCount' => User::where('registration_status', 'pending_payment_review')->count(),
-            'step1ApprovedCount' => User::where('registration_status', 'step1_approved')->count(),
-            'activeMembersCount' => User::where('registration_status', 'active')->count(),
-            'allCount' => User::whereIn('registration_status', ['pending_review', 'step1_approved', 'pending_payment_review', 'payment_rejected', 'active'])->count(),
-            'viewingUser' => $this->viewingId ? User::find($this->viewingId) : null,
+            'pendingReviewCount' => User::nonAdmin()->where('registration_status', 'pending_review')->count(),
+            'pendingPaymentCount' => User::nonAdmin()->where('registration_status', 'pending_payment_review')->count(),
+            'step1ApprovedCount' => User::nonAdmin()->where('registration_status', 'step1_approved')->count(),
+            'activeMembersCount' => User::nonAdmin()->where('registration_status', 'active')->count(),
+            'allCount' => User::nonAdmin()->whereIn('registration_status', ['pending_review', 'step1_approved', 'pending_payment_review', 'payment_rejected', 'active'])->count(),
+            'viewingUser' => $this->viewingId ? User::nonAdmin()->find($this->viewingId) : null,
         ]);
     }
 }

@@ -88,7 +88,7 @@ class Inbox extends Component
         $groupResults = collect();
         if (trim($this->search) !== '') {
             $term = $this->search;
-            $searchResults = User::where('id', '!=', $userId)
+            $searchResults = User::nonAdmin()->where('id', '!=', $userId)
                 ->where('registration_status', 'active')
                 ->where(function ($q) use ($term) {
                     $q->where('name', 'like', "%{$term}%")
