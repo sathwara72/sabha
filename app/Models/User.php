@@ -122,4 +122,13 @@ class User extends Authenticatable
     {
         return $this->registration_status === 'active';
     }
+
+    /**
+     * Scope a query to only include members/users (excluding only the full admin).
+     * Sub-admins are community members with administrative responsibilities.
+     */
+    public function scopeNonAdmin($query)
+    {
+        return $query->where('role', '!=', 'admin');
+    }
 }

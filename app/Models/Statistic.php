@@ -17,7 +17,7 @@ class Statistic extends Model
      */
     public static function syncFromLiveCounts(): \Illuminate\Support\Collection
     {
-        $activeMembers = User::where('registration_status', 'active')->count() ?: User::count();
+        $activeMembers = User::nonAdmin()->where('registration_status', 'active')->count() ?: User::nonAdmin()->count();
         $approvedBusinesses = Business::where('status', 'approved')->count() ?: Business::count();
         $eventsHosted = Event::count();
 

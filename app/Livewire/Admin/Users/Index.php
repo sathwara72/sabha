@@ -36,8 +36,8 @@ class Index extends Component
 
     public function openBlock(int $id): void
     {
-        $user = User::find($id);
-        if (! $user || $user->role === 'admin') {
+        $user = User::nonAdmin()->find($id);
+        if (! $user) {
             return;
         }
         $this->blockingUserId = $id;
@@ -52,7 +52,7 @@ class Index extends Component
     {
         admin_authorize('users', 'can_edit');
 
-        $user = User::findOrFail($this->blockingUserId);
+        $user = User::nonAdmin()->findOrFail($this->blockingUserId);
         $user->is_blocked = ! $user->is_blocked;
         $user->save();
 
@@ -65,8 +65,8 @@ class Index extends Component
 
     public function openDelete(int $id): void
     {
-        $user = User::find($id);
-        if (! $user || $user->role === 'admin') {
+        $user = User::nonAdmin()->find($id);
+        if (! $user) {
             return;
         }
         $this->deletingUserId = $id;
@@ -81,7 +81,7 @@ class Index extends Component
     {
         admin_authorize('users', 'can_delete');
 
-        $user = User::findOrFail($this->deletingUserId);
+        $user = User::nonAdmin()->findOrFail($this->deletingUserId);
 
         if ($user->business) {
             $user->business()->delete();
@@ -101,12 +101,12 @@ class Index extends Component
     {
         admin_authorize('users', 'can_edit');
 
-        User::findOrFail($userId)->update(['member_title_id' => $titleId ?: null]);
+        User::nonAdmin()->findOrFail($userId)->update(['member_title_id' => $titleId ?: null]);
     }
 
     public function render()
     {
-        $query = User::with(['business', 'memberTitle'])->orderByDesc('created_at')->orderByDesc('id');
+        $query = User::nonAdmin()->with(['business', 'memberTitle'])->orderByDesc('created_at')->orderByDesc('id');
 
         if ($this->search !== '') {
             $search = $this->search;

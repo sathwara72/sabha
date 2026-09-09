@@ -268,7 +268,7 @@ class Referrals extends Component
         $memberLabels = [];
         $memberValueMap = [];
         if ($this->direction === 'given') {
-            foreach (User::where('id', '!=', Auth::id())->whereNotIn('role', ['admin', 'sub_admin'])->where('is_blocked', false)->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
+            foreach (User::where('id', '!=', Auth::id())->nonAdmin()->where('is_blocked', false)->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
                 $label = $member->phone ? "{$member->name} ({$member->phone})" : $member->name;
                 $memberLabels[] = $label;
                 $memberValueMap[$label] = $member->id;
