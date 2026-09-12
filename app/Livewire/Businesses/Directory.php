@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Livewire\Businesses;
+
+use App\Models\Business;
+use App\Models\BusinessCategory;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class Directory extends Component
+{
+    use WithPagination;
+
+    private const ITEMS_PER_PAGE = 12;
+
+    private const FALLBACK_CATEGORIES = [
+        'Software Development',
+        'Supply Chain',
+        'Digital Marketing',
+        'Construction',
+        'Financial Services',
+        'Renewables',
+        'Creative Agency',
+        'Venture Capital',
+    ];
+
+    #[Url]
+    public string $search = '';
+
+    #[Url]
+    public string $category = 'All Categories';
+
+    #[Url]
+    public string $area = 'All Areas';
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedCategory(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedArea(): void
+    {
+        $this->resetPage();
+    }
+
+    public function categories(): array
+    {
+        $cats = BusinessCategory::active()->pluck('name')->all();
+
+        return array_merge(['All Categories'], empty($cats) ? self::FALLBACK_CATEGORIES : $cats);
+    }
+
+    /**
+     * Sourced from areas actually present on approved businesses (not the
+     * full city/area reference list) so the filter never offers an area
+     * with zero matching results.
+     */
+    public function areas(): array
+    {
+        $areas = Business::where('status', 'approved')
+            ->whereNotNull('area')
+            ->where('area', '!=', '')
+            ->distinct()
+            ->orderBy('area')
+            ->pluck('area')
+            ->all();
+
+        return array_merge(['All Areas'], $areas);
+    }
+
+    public function render()
+    {
+        $query = Business::where('status', 'approved')
+            ->with(['user', 'businessCategory'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->orderBy('id', 'asc');
+
+        if ($this->category !== '' && $this->category !== 'All' && $this->category !== 'All Categories') {
+            $query->where('category', $this->category);
+        }
+
+        if ($this->area !== '' && $this->area !== 'All' && $this->area !== 'All Areas') {
+            $query->where('area', $this->area);
+        }
+
+        if ($this->search !== '') {
+            $search = trim($this->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('area', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        return view('livewire.businesses.directory', [
+            'businesses' => $query->paginate(self::ITEMS_PER_PAGE),
+            'categories' => $this->categories(),
+            'areas' => $this->areas(),
+        ]);
+    }
+}

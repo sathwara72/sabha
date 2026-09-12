@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Http\Controllers\Web;
+
+use App\Http\Controllers\Controller;
+use App\Mail\OtpMail;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
+
+class AuthController extends Controller
+{
+    public function loginPage(): View|RedirectResponse
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            return redirect($user->canAccessAdminArea() ? '/admin' : '/profile');
+        }
+
+        return view('pages.login');
+    }
+
+    public function registerPage(): View
+    {
+        return view('pages.register');
+    }
+
+    public function login(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user || ! Hash::check($validated['password'], $user->password)) {
+            return response()->json(['message' => 'Invalid email or password.'], 401);
+        }
+
+        if ($user->is_blocked) {
+            return response()->json(['message' => 'Your account has been deactivated. Please contact administrator.'], 403);
+        }
+
+        if ($user->registration_status === 'pending_review') {
+            return response()->json(['message' => 'Your registration application is pending admin review. We\'ll email you once it\'s reviewed.'], 403);
+        }
+
+        $remember = (bool) $request->input('remember', true);
+        Auth::login($user, $remember);
+        $request->session()->regenerate();
+
+        $redirectUrl = $user->canAccessAdminArea() ? '/admin' : ($user->isRegistrationComplete() ? '/profile' : '/register');
+
+        return response()->json([
+            'message' => 'Login successful',
+            'redirect' => $redirectUrl,
+        ]);
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
+    }
+
+    public function forgotPasswordPage(): View
+    {
+        return view('pages.forgot-password');
+    }
+
+    public function forgotPasswordSendOtp(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user) {
+            return response()->json(['message' => 'We could not find an account with that email address.'], 404);
+        }
+
+        $otp = (string) mt_rand(100000, 999999);
+
+        Cache::put('reset_otp_' . $validated['email'], [
+            'email' => $validated['email'],
+            'otp' => $otp,
+        ], 900);
+
+        try {
+            Mail::to($validated['email'])->send(new OtpMail($otp, $user->name, 'reset_password'));
+        } catch (\Exception $e) {
+            Log::error("SABHA Password Reset OTP email failed for {$validated['email']}: " . $e->getMessage());
+
+            return response()->json(['message' => 'Could not send verification email. Please check your email configuration and try again.'], 500);
+        }
+
+        return response()->json([
+            'message' => 'Password reset verification code has been sent to your email.',
+            'email' => $validated['email'],
+        ]);
+    }
+
+    public function forgotPasswordReset(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $cached = Cache::get('reset_otp_' . $validated['email']);
+
+        if (! $cached || $cached['otp'] !== $validated['otp']) {
+            return response()->json(['message' => 'Invalid or expired OTP verification code.'], 400);
+        }
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user) {
+            return response()->json(['message' => 'User account not found.'], 404);
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        Cache::forget('reset_otp_' . $validated['email']);
+
+        return response()->json(['message' => 'Your password has been reset successfully. Please log in with your new password.']);
+    }
+}

@@ -1,0 +1,129 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Api\SabhaController;
+
+// Public Routes
+Route::post('/register', [SabhaController::class, 'register']);
+Route::post('/register/send-otp', [SabhaController::class, 'registerSendOtp']);
+Route::post('/register/confirm', [SabhaController::class, 'registerConfirm']);
+Route::post('/login', [SabhaController::class, 'login']);
+Route::post('/demo-login', [SabhaController::class, 'demoLogin']);
+Route::post('/forgot-password', [SabhaController::class, 'forgotPasswordSendOtp']);
+Route::post('/forgot-password/send-otp', [SabhaController::class, 'forgotPasswordSendOtp']);
+Route::post('/forgot-password/reset', [SabhaController::class, 'forgotPasswordReset']);
+Route::post('/forgot-password/confirm', [SabhaController::class, 'forgotPasswordReset']);
+Route::get('/businesses', [SabhaController::class, 'getBusinesses']);
+Route::get('/businesses/{id}/reviews', [SabhaController::class, 'getReviews']);
+Route::post('/businesses/{id}/reviews', [SabhaController::class, 'submitReview'])->middleware('auth:sanctum');
+Route::post('/businesses/{id}/inquiry', [SabhaController::class, 'submitBusinessInquiry']);
+Route::get('/events', [SabhaController::class, 'getEvents']);
+Route::get('/statistics', [SabhaController::class, 'getStatistics']);
+Route::get('/gallery', [SabhaController::class, 'getGalleryImages']);
+Route::get('/settings', [SabhaController::class, 'getSettings']);
+Route::get('/hero-images', [SabhaController::class, 'getHeroImages']);
+Route::get('/qr-code', [SabhaController::class, 'generateQrCode']);
+Route::post('/contact', [SabhaController::class, 'submitContactInquiry']);
+Route::get('/categories', [SabhaController::class, 'getCategories']);
+
+// User Submitted Business Route
+Route::post('/businesses', [SabhaController::class, 'submitBusiness'])->middleware('auth:sanctum');
+
+// Admin Routes (protected with Sanctum auth + admin role)
+Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/businesses', [SabhaController::class, 'getAllBusinesses']);
+    Route::post('/businesses/{id}/approve', [SabhaController::class, 'approveBusiness']);
+    Route::post('/businesses/{id}/reject', [SabhaController::class, 'rejectBusiness']);
+    Route::delete('/businesses/{id}', [SabhaController::class, 'deleteBusiness']);
+    Route::post('/events', [SabhaController::class, 'storeEvent']);
+    Route::post('/events/{id}', [SabhaController::class, 'updateEvent']);
+    Route::delete('/events/{id}', [SabhaController::class, 'deleteEvent']);
+    Route::get('/users', [SabhaController::class, 'getUsers']);
+    Route::post('/users/{id}/toggle-block', [SabhaController::class, 'toggleUserBlock']);
+    Route::delete('/users/{id}', [SabhaController::class, 'deleteUser']);
+    Route::post('/gallery/upload', [SabhaController::class, 'uploadGalleryImage']);
+    Route::delete('/gallery/{id}', [SabhaController::class, 'deleteGalleryImage']);
+    Route::post('/statistics/{id}', [SabhaController::class, 'updateStatistic']);
+    Route::post('/settings', [SabhaController::class, 'updateSettings']);
+    
+    // Hero Slider Images Management for Admin
+    Route::post('/hero-images', [SabhaController::class, 'storeHeroImage']);
+    Route::delete('/hero-images/{id}', [SabhaController::class, 'deleteHeroImage']);
+    
+    // Event Booking Management for Admin
+    Route::get('/registrations', [SabhaController::class, 'getAllEventRegistrations']);
+    Route::post('/registrations/{id}/approve', [SabhaController::class, 'approveEventRegistration']);
+    Route::post('/registrations/{id}/reject', [SabhaController::class, 'rejectEventRegistration']);
+    Route::post('/registrations/{id}/toggle-attendance', [SabhaController::class, 'toggleAttendance']);
+    Route::post('/registrations/check-in', [SabhaController::class, 'checkInTicket']);
+
+    // Business Category Management
+    Route::get('/categories', [SabhaController::class, 'getAllCategories']);
+    Route::post('/categories', [SabhaController::class, 'storeCategory']);
+    Route::put('/categories/{id}', [SabhaController::class, 'updateCategory']);
+    Route::delete('/categories/{id}', [SabhaController::class, 'deleteCategory']);
+});
+
+Route::get('/user', function (Request $request) {
+    $user = $request->user();
+    if ($user && $user->is_blocked) {
+        $user->tokens()->delete();
+        return response()->json(['message' => 'you had blocked by admin please contact admin'], 403);
+    }
+    return $user;
+})->middleware('auth:sanctum');
+
+Route::get('/user/business', [SabhaController::class, 'getUserBusiness'])->middleware('auth:sanctum');
+Route::post('/user/profile', [SabhaController::class, 'updateProfile'])->middleware('auth:sanctum');
+
+// User Authenticated Event Reservation & Registrations
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/events/{id}/reserve', [SabhaController::class, 'reserveEventSpot']);
+    Route::get('/user/registrations', [SabhaController::class, 'getUserRegistrations']);
+    Route::post('/events/{id}/upload-photos', [SabhaController::class, 'uploadEventPhotos']);
+    Route::post('/gallery/upload', [SabhaController::class, 'uploadGalleryImage']);
+});
+
+// Programmatic Migration & Seeding Runners (to bypass terminal command permissions)
+Route::get('/migrate', function() {
+    try {
+        Schema::table('businesses', function (Illuminate\Database\Schema\Blueprint $table) {
+            if (!Schema::hasColumn('businesses', 'address')) {
+                $table->text('address')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'area')) {
+                $table->string('area')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'city')) {
+                $table->string('city')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'state')) {
+                $table->string('state')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'pincode')) {
+                $table->string('pincode')->nullable();
+            }
+            if (!Schema::hasColumn('businesses', 'map_iframe')) {
+                $table->text('map_iframe')->nullable();
+            }
+        });
+        return response()->json(['message' => 'Business address & map_iframe columns added successfully!']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()]);
+    }
+});
+
+Route::get('/seed', function() {
+    try {
+        Artisan::call('db:seed', [
+            '--class' => 'MembershipFormSeeder',
+            '--force' => true
+        ]);
+        return response()->json(['message' => 'MembershipFormSeeder ran successfully!', 'output' => Artisan::output()]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()]);
+    }
+});
+
