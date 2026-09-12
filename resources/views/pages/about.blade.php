@@ -112,57 +112,6 @@
             </div>
         </section>
 
-        {{-- Leadership Board --}}
-        <section class="mx-auto max-w-7xl px-6 py-20 lg:py-5">
-            <div class="mb-3 text-center max-w-2xl mx-auto">
-                <span class="text-xs font-bold uppercase tracking-wider text-primary">{{ __('site.about.leadership_label') }}</span>
-                <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{{ __('site.about.leadership_title') }}</h2>
-                <p class="mt-4 text-xs text-muted font-medium">{{ __('site.about.leadership_subtitle') }}</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                @if ($trustees->isNotEmpty())
-                    @foreach ($trustees as $trustee)
-                        <div class="glass-card p-5 text-center flex flex-col items-center border border-slate-200 rounded-2xl bg-white shadow-2xs hover:shadow-md transition-all">
-                            <div class="h-20 w-20 rounded-full overflow-hidden border-2 border-primary/20 shadow-sm mb-3">
-                                <x-safe-image
-                                    :src="media_url($trustee->user?->avatar)"
-                                    :alt="$trustee->user?->name ?? 'Trustee'"
-                                    :title="$trustee->user?->name ?? 'Trustee'"
-                                    fallback-type="avatar"
-                                    img-class="h-full w-full object-cover"
-                                />
-                            </div>
-                            <h3 class="text-sm font-extrabold text-slate-900 line-clamp-1">{{ $trustee->user?->name ?: 'Community Leader' }}</h3>
-                            <p class="text-xs font-bold text-primary mt-0.5">{{ $trustee->position ?: 'Trustee' }}</p>
-                            <p class="text-xs text-slate-500 font-semibold mt-1 truncate max-w-full">
-                                {{ $trustee->user?->business?->name ?: ($trustee->user?->city ?: 'SABHA Network') }}
-                            </p>
-                        </div>
-                    @endforeach
-                @else
-                    @foreach ($fallbackTeam as $member)
-                        @php
-                            $hasKey = !empty($member['tKey'] ?? null);
-                            $name = $hasKey ? __('site.about.' . $member['tKey'] . '_name') : ($member['name'] ?? '');
-                            $role = $hasKey ? __('site.about.' . $member['tKey'] . '_role') : ($member['role'] ?? '');
-                            $company = $hasKey ? __('site.about.' . $member['tKey'] . '_org') : ($member['company'] ?? $member['org'] ?? '');
-                        @endphp
-                        <div class="glass-card p-5 text-center flex flex-col items-center border border-slate-200 rounded-2xl bg-white shadow-2xs">
-                            <img
-                                src="{{ media_url($member['avatar'] ?? null) }}"
-                                alt="{{ $name }}"
-                                class="h-20 w-20 rounded-full object-cover border-2 border-primary/20 shadow-sm mb-3"
-                            />
-                            <h3 class="text-sm font-extrabold text-slate-900">{{ $name }}</h3>
-                            <p class="text-xs font-bold text-primary mt-0.5">{{ $role }}</p>
-                            <p class="text-xs text-slate-500 font-semibold mt-1 truncate max-w-full">{{ $company }}</p>
-                        </div>
-                    @endforeach
-                @endif
-            </div>
-        </section>
-
         {{-- Interactive FAQ Section --}}
         <section class="mx-auto max-w-4xl px-6 py-12 border-t border-border" x-data="{ activeFaq: null }">
             <div class="text-center mb-8">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\GalleryImage;
 use App\Models\HeroImage;
 use App\Models\Statistic;
 use Illuminate\View\View;
@@ -15,6 +16,8 @@ class HomeController extends Controller
         $events = Event::orderBy('date', 'desc')->take(3)->get();
 
         $popupEvent = Event::where('is_popup', true)->first();
+
+        $galleryImages = GalleryImage::latest()->take(8)->get();
 
         $stats = Statistic::syncFromLiveCounts();
         if ($stats->isEmpty()) {
@@ -78,6 +81,7 @@ class HomeController extends Controller
             'stats' => $stats->take(3),
             'heroImages' => $heroImages,
             'popupEvent' => $popupEvent,
+            'galleryImages' => $galleryImages,
         ]);
     }
 }

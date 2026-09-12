@@ -322,6 +322,59 @@
             </div>
         </section>
 
+        {{-- Gallery Preview --}}
+        <section class="mx-auto max-w-7xl px-6 py-9 lg:py-8 border-b border-border">
+            <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                <div class="max-w-2xl">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                        <x-icon name="camera" class="h-3.5 w-3.5" />
+                        {{ __('site.home.gallery_label') }}
+                    </span>
+                    <h2 class="mt-2 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">{{ __('site.home.gallery_title') }}</h2>
+                    <p class="mt-3 text-sm text-muted">{{ __('site.home.gallery_subtitle') }}</p>
+                </div>
+                <a href="/gallery" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-primary transition-colors hover:opacity-80 group shrink-0">
+                    {{ __('site.home.gallery_view_all') }}
+                    <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </a>
+            </div>
+
+            @if ($galleryImages->isEmpty())
+                <div class="rounded-2xl border border-dashed border-border py-16 text-center text-muted">
+                    {{ __('site.home.gallery_none') }}
+                </div>
+            @else
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    @foreach ($galleryImages as $item)
+                        @php
+                            $isVideo = is_video_file($item->image_path);
+                            $itemSrc = media_url($item->image_path);
+                            $caption = $item->caption ?: ($isVideo ? null : 'Gallery image');
+                        @endphp
+                        <a
+                            href="/gallery"
+                            class="group relative aspect-square overflow-hidden rounded-2xl border {{ $isVideo ? 'border-accent/40 bg-slate-950' : 'border-border bg-slate-950' }} shadow-sm block"
+                        >
+                            @if ($isVideo)
+                                <div class="relative w-full h-full flex items-center justify-center bg-black">
+                                    <video src="{{ $itemSrc }}" class="w-full h-full object-cover opacity-80" muted preload="metadata"></video>
+                                    <div class="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors z-10"></div>
+                                    <div class="absolute h-10 w-10 rounded-full bg-accent text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform z-10">
+                                        <x-icon name="play" class="h-[18px] w-[18px] ml-0.5" />
+                                    </div>
+                                </div>
+                            @else
+                                <div class="relative w-full h-full overflow-hidden flex items-center justify-center bg-slate-950">
+                                    <x-safe-image :src="$itemSrc" img-class="h-full w-full object-cover" :alt="$caption" :title="$caption" fallback-type="gallery" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-20"></div>
+                                </div>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </section>
+
         {{-- How it works --}}
         <section class="mx-auto max-w-7xl px-6 py-9 lg:py-8">
             <div class="mb-6 max-w-2xl">

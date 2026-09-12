@@ -127,16 +127,14 @@
         </div>
 
         {{-- 2. Common Gallery --}}
-        <div class="space-y-3 pt-4 border-t border-border">
-            <div class="flex items-center gap-3">
-                <div class="h-8 w-1 rounded-full bg-accent"></div>
-                <h2 class="text-2xl font-bold text-foreground">{{ __('site.gallery.common_gallery') }}</h2>
-            </div>
-            <p class="text-sm text-muted">{{ __('site.gallery.common_gallery_desc') }}</p>
+        @if ($common->isNotEmpty())
+            <div class="space-y-3 pt-4 border-t border-border">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-1 rounded-full bg-accent"></div>
+                    <h2 class="text-2xl font-bold text-foreground">{{ __('site.gallery.common_gallery') }}</h2>
+                </div>
+                <p class="text-sm text-muted">{{ __('site.gallery.common_gallery_desc') }}</p>
 
-            @if ($common->isEmpty())
-                <p class="text-sm text-muted italic">{{ __('site.gallery.no_common') }}</p>
-            @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     @foreach ($common as $index => $item)
                         @php
@@ -180,8 +178,8 @@
                 </div>
 
                 <x-pagination :paginator="$common" item-label="items" />
-            @endif
-        </div>
+            </div>
+        @endif
     </section>
 
     {{-- Single Media Lightbox Modal with Next / Prev Navigation (Teleported to <body> for full screen) --}}
