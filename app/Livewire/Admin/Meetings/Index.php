@@ -14,9 +14,30 @@ class Index extends Component
 
     public ?int $deletingId = null;
 
+    public ?int $viewingId = null;
+
+    public ?OneToOneMeeting $viewingMeeting = null;
+
     public function updatedSearch(): void
     {
         $this->resetPage();
+    }
+
+    public function openView(int $id): void
+    {
+        $this->viewingId = $id;
+        $this->viewingMeeting = OneToOneMeeting::with([
+            'user.business',
+            'user.memberTitle',
+            'withMember.business',
+            'withMember.memberTitle',
+        ])->find($id);
+    }
+
+    public function closeView(): void
+    {
+        $this->viewingId = null;
+        $this->viewingMeeting = null;
     }
 
     public function openDelete(int $id): void

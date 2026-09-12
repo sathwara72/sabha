@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\EventRegistration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Url;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -22,7 +23,8 @@ class Show extends Component
         'Financial Services', 'Renewables', 'Creative Agency', 'Venture Capital',
     ];
 
-    public string $activeTab = 'profile';
+    #[Url(as: 'tab', history: true)]
+    public string $activeTab = 'overview';
 
     public array $categories = [];
 
@@ -64,7 +66,7 @@ class Show extends Component
     public string $bizAddress = '';
     public string $bizCity = '';
     public string $bizArea = '';
-    public string $bizState = '';
+    public string $bizState = 'Gujarat';
     public string $bizPincode = '';
     public string $bizMapIframe = '';
     public string $bizHours = '';
@@ -85,8 +87,13 @@ class Show extends Component
     {
         $user = Auth::user();
 
-        $validTabs = ['profile', 'business', 'events', 'visitor-pass', 'analytics', 'meetings', 'referrals-given', 'referrals-received'];
-        $this->activeTab = in_array(request('tab'), $validTabs, true) ? request('tab') : 'profile';
+        $validTabs = ['overview', 'profile', 'business', 'events', 'visitor-pass', 'analytics', 'meetings', 'referrals-given', 'referrals-received'];
+        if (request()->has('tab') && in_array(request('tab'), $validTabs, true)) {
+            $tab = request('tab');
+            $this->activeTab = $tab === 'analytics' ? 'overview' : $tab;
+        } elseif (! in_array($this->activeTab, $validTabs, true)) {
+            $this->activeTab = 'overview';
+        }
 
         $this->profileName = $user->name;
         $this->profileEmail = $user->email ?? '';
@@ -125,7 +132,7 @@ class Show extends Component
         $this->bizAddress = $b->address ?? '';
         $this->bizCity = $b->city ?? '';
         $this->bizArea = $b->area ?? '';
-        $this->bizState = $b->state ?? '';
+        $this->bizState = $b->state ?: 'Gujarat';
         $this->bizPincode = $b->pincode ?? '';
         $this->bizMapIframe = $b->map_iframe ?? '';
         $this->bizHours = $b->hours ?? '';
@@ -282,7 +289,7 @@ class Show extends Component
                 'address' => $this->bizAddress ?: null,
                 'city' => $this->bizCity ?: null,
                 'area' => $this->bizArea ?: null,
-                'state' => $this->bizState ?: null,
+                'state' => $this->bizState ?: 'Gujarat',
                 'pincode' => $this->bizPincode ?: null,
                 'map_iframe' => $this->bizMapIframe ?: null,
                 'description' => $this->bizDescription ?: null,

@@ -39,22 +39,22 @@
                     <p class="text-sm leading-relaxed text-muted font-medium">{{ __('site.about.mission_desc') }}</p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border/80">
-                        <div class="glass-card flex items-center gap-4 p-5 rounded-2xl border border-border bg-surface/50 shadow-sm transition-all hover:border-primary/20">
+                        <div x-data="animatedCounter('{{ $membersStat }}')" class="glass-card flex items-center gap-4 p-5 rounded-2xl border border-border bg-surface/50 shadow-sm transition-all hover:border-primary/20">
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                                 <x-icon name="users" class="h-6 w-6" />
                             </div>
                             <div>
-                                <p class="text-2xl font-extrabold text-foreground sm:text-3xl leading-none">{{ $membersStat }}</p>
+                                <p class="text-2xl font-extrabold text-foreground sm:text-3xl leading-none" x-text="displayValue">{{ $membersStat }}</p>
                                 <p class="mt-1.5 text-xs font-bold text-muted uppercase tracking-wider">{{ __('site.about.verified_members') }}</p>
                             </div>
                         </div>
 
-                        <div class="glass-card flex items-center gap-4 p-5 rounded-2xl border border-border bg-surface/50 shadow-sm transition-all hover:border-primary/20">
+                        <div x-data="animatedCounter('{{ $businessExchangedStat }}')" class="glass-card flex items-center gap-4 p-5 rounded-2xl border border-border bg-surface/50 shadow-sm transition-all hover:border-primary/20">
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                                 <x-icon name="trending-up" class="h-6 w-6" />
                             </div>
                             <div>
-                                <p class="text-2xl font-extrabold text-foreground sm:text-3xl leading-none">{{ $businessExchangedStat }}</p>
+                                <p class="text-2xl font-extrabold text-foreground sm:text-3xl leading-none" x-text="displayValue">{{ $businessExchangedStat }}</p>
                                 <p class="mt-1.5 text-xs font-bold text-muted uppercase tracking-wider">{{ __('site.about.business_exchanged') }}</p>
                             </div>
                         </div>
@@ -120,42 +120,185 @@
                 <p class="mt-4 text-xs text-muted font-medium">{{ __('site.about.leadership_subtitle') }}</p>
             </div>
 
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ($team as $member)
-                    @php
-                        $hasKey = !empty($member['tKey'] ?? null);
-                        $name = $hasKey ? __('site.about.' . $member['tKey'] . '_name') : ($member['name'] ?? '');
-                        $role = $hasKey ? __('site.about.' . $member['tKey'] . '_role') : ($member['role'] ?? '');
-                        $company = $hasKey ? __('site.about.' . $member['tKey'] . '_org') : ($member['company'] ?? $member['org'] ?? '');
-                    @endphp
-                    <div class="glass-card p-5 text-center flex flex-col items-center border border-border">
-                        <img
-                            src="{{ media_url($member['avatar'] ?? null) }}"
-                            alt="{{ $name }}"
-                            class="h-20 w-20 rounded-full object-cover border-2 border-primary-soft shadow-sm mb-4"
-                        />
-                        <h3 class="text-sm font-extrabold text-foreground">{{ $name }}</h3>
-                        <p class="text-[12px] font-bold text-primary mt-0.5">{{ $role }}</p>
-                        <p class="text-[12px] text-muted font-semibold mt-1 truncate max-w-full">{{ $company }}</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                @if ($trustees->isNotEmpty())
+                    @foreach ($trustees as $trustee)
+                        <div class="glass-card p-5 text-center flex flex-col items-center border border-slate-200 rounded-2xl bg-white shadow-2xs hover:shadow-md transition-all">
+                            <div class="h-20 w-20 rounded-full overflow-hidden border-2 border-primary/20 shadow-sm mb-3">
+                                <x-safe-image
+                                    :src="media_url($trustee->user?->avatar)"
+                                    :alt="$trustee->user?->name ?? 'Trustee'"
+                                    :title="$trustee->user?->name ?? 'Trustee'"
+                                    fallback-type="avatar"
+                                    img-class="h-full w-full object-cover"
+                                />
+                            </div>
+                            <h3 class="text-sm font-extrabold text-slate-900 line-clamp-1">{{ $trustee->user?->name ?: 'Community Leader' }}</h3>
+                            <p class="text-xs font-bold text-primary mt-0.5">{{ $trustee->position ?: 'Trustee' }}</p>
+                            <p class="text-xs text-slate-500 font-semibold mt-1 truncate max-w-full">
+                                {{ $trustee->user?->business?->name ?: ($trustee->user?->city ?: 'SABHA Network') }}
+                            </p>
+                        </div>
+                    @endforeach
+                @else
+                    @foreach ($fallbackTeam as $member)
+                        @php
+                            $hasKey = !empty($member['tKey'] ?? null);
+                            $name = $hasKey ? __('site.about.' . $member['tKey'] . '_name') : ($member['name'] ?? '');
+                            $role = $hasKey ? __('site.about.' . $member['tKey'] . '_role') : ($member['role'] ?? '');
+                            $company = $hasKey ? __('site.about.' . $member['tKey'] . '_org') : ($member['company'] ?? $member['org'] ?? '');
+                        @endphp
+                        <div class="glass-card p-5 text-center flex flex-col items-center border border-slate-200 rounded-2xl bg-white shadow-2xs">
+                            <img
+                                src="{{ media_url($member['avatar'] ?? null) }}"
+                                alt="{{ $name }}"
+                                class="h-20 w-20 rounded-full object-cover border-2 border-primary/20 shadow-sm mb-3"
+                            />
+                            <h3 class="text-sm font-extrabold text-slate-900">{{ $name }}</h3>
+                            <p class="text-xs font-bold text-primary mt-0.5">{{ $role }}</p>
+                            <p class="text-xs text-slate-500 font-semibold mt-1 truncate max-w-full">{{ $company }}</p>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </section>
+
+        {{-- Interactive FAQ Section --}}
+        <section class="mx-auto max-w-4xl px-6 py-12 border-t border-border" x-data="{ activeFaq: null }">
+            <div class="text-center mb-8">
+                <span class="text-xs font-bold uppercase tracking-wider text-primary">{{ __('site.about.faq_label') }}</span>
+                <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{{ __('site.about.faq_title') }}</h2>
+            </div>
+
+            <div class="space-y-3.5">
+                @foreach ([
+                    ['q' => __('site.about.faq_1_q'), 'a' => __('site.about.faq_1_a')],
+                    ['q' => __('site.about.faq_2_q'), 'a' => __('site.about.faq_2_a')],
+                    ['q' => __('site.about.faq_3_q'), 'a' => __('site.about.faq_3_a')],
+                    ['q' => __('site.about.faq_4_q'), 'a' => __('site.about.faq_4_a')],
+                ] as $i => $item)
+                    <div class="glass-card overflow-hidden border border-slate-200/90 rounded-2xl bg-white shadow-2xs transition-all hover:border-primary/30">
+                        <button
+                            type="button"
+                            x-on:click="activeFaq = activeFaq === {{ $i }} ? null : {{ $i }}"
+                            class="w-full flex items-center justify-between p-4 sm:p-5 text-left font-bold text-sm sm:text-base text-slate-900 outline-none cursor-pointer"
+                        >
+                            <span>{{ $item['q'] }}</span>
+                            <span class="text-primary font-black text-xl transition-transform duration-200 shrink-0 ml-3" :class="activeFaq === {{ $i }} ? 'rotate-45' : ''">+</span>
+                        </button>
+                        <div x-show="activeFaq === {{ $i }}" x-collapse x-cloak>
+                            <div class="p-4 sm:p-5 pt-0 border-t border-slate-100 text-xs sm:text-sm leading-relaxed text-slate-600 font-medium bg-slate-50/40">
+                                {{ $item['a'] }}
+                            </div>
+                        </div>
                     </div>
                 @endforeach
             </div>
         </section>
 
-        {{-- CTA --}}
-        <section class="mx-auto max-w-7xl px-6 pb-5">
-            <div class="rounded-2xl border border-border bg-primary px-8 py-14 text-center text-white lg:px-16 shadow-lg">
-                <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">{{ __('site.about.cta_title') }}</h2>
-                <p class="mx-auto mt-3 max-w-xl text-sm text-white/80 leading-relaxed">{{ __('site.about.cta_subtitle') }}</p>
-                @auth
-                    <a href="/profile" class="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-md transition-all hover:opacity-90 active:scale-[0.98]">
-                        {{ __('site.nav.profile') }} <x-icon name="arrow-right" class="h-4 w-4" />
-                    </a>
-                @else
-                    <button type="button" x-on:click="$store.auth.openRegister()" class="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-primary shadow-md transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer">
-                        {{ __('site.about.cta_btn') }} <x-icon name="arrow-right" class="h-4 w-4" />
-                    </button>
-                @endauth
+        {{-- Contact & Connect Section --}}
+        <section class="mx-auto max-w-7xl px-6 pb-12 pt-4">
+            <div class="relative overflow-hidden rounded-3xl sm:rounded-[32px] border border-white/10 bg-gradient-to-br from-[#0F3459] via-[#00379D] to-[#091E36] p-6 sm:p-10 lg:p-12 text-white shadow-2xl">
+                {{-- Ambient Decorative Lighting Orbs & Grid Mesh --}}
+                <div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: radial-gradient(circle, #fff 1.5px, transparent 1.5px); background-size: 24px 24px;"></div>
+                <div class="absolute -top-24 -right-24 h-80 w-80 rounded-full bg-[#1d4ed8]/40 blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-[#CD0E1B]/20 blur-3xl pointer-events-none"></div>
+                <div class="absolute top-1/2 left-1/3 h-64 w-64 rounded-full bg-[#00379D]/30 blur-2xl pointer-events-none"></div>
+
+                <div class="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10 items-center">
+                    {{-- Left Column: Brand Pitch & Contact Touchpoints --}}
+                    <div class="lg:col-span-7 space-y-5">
+                        <div class="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-sky-300 border border-white/15 shadow-sm">
+                            <span class="h-2 w-2 rounded-full bg-sky-400 animate-pulse"></span>
+                            <span>{{ __('site.about.contact_tag') }}</span>
+                        </div>
+
+                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-md">
+                            {{ __('site.about.contact_title') }}
+                        </h2>
+
+                        <p class="text-sm sm:text-base leading-relaxed text-slate-200/90 font-medium max-w-xl">
+                            {{ __('site.about.contact_subtitle') }}
+                        </p>
+
+                    
+
+                        {{-- Feature Pills --}}
+                        <div class="flex flex-wrap items-center gap-2 pt-1 text-xs font-semibold text-slate-200">
+                            <span class="inline-flex items-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-3 py-1">
+                                <x-icon name="shield-check" class="h-3.5 w-3.5 text-emerald-400" />
+                                {{ __('site.about.benefit_vetted') }}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-3 py-1">
+                                <x-icon name="calendar" class="h-3.5 w-3.5 text-sky-400" />
+                                {{ __('site.about.benefit_mixers') }}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-3 py-1">
+                                <x-icon name="users" class="h-3.5 w-3.5 text-amber-400" />
+                                {{ __('site.about.benefit_network') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Right Column: Interactive Frosted Action Card --}}
+                    <div class="lg:col-span-5">
+                        <div class="rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 p-6 sm:p-8 shadow-2xl flex flex-col space-y-4">
+                            <div class="space-y-1.5">
+                                <h3 class="text-lg sm:text-xl font-black text-white tracking-tight">
+                                    {{ __('site.about.contact_card_title') }}
+                                </h3>
+                                <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                    {{ __('site.about.contact_card_desc') }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-2.5 pt-2">
+                                @auth
+                                    <a
+                                        href="/profile"
+                                        class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-extrabold text-[#0F3459] shadow-lg hover:bg-slate-50 active:scale-[0.98] transition-all cursor-pointer"
+                                    >
+                                        <x-icon name="user" class="h-4 w-4 text-[#00379D]" />
+                                        <span>{{ __('site.nav.profile') }}</span>
+                                        <x-icon name="arrow-right" class="h-4 w-4 ml-auto" />
+                                    </a>
+                                @else
+                                    <a
+                                        href="/register"
+                                        class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-white via-slate-100 to-white px-5 py-3.5 text-sm font-extrabold text-[#0F3459] shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer"
+                                    >
+                                        <x-icon name="sparkles" class="h-4 w-4 text-primary" />
+                                        <span>{{ __('site.about.cta_btn') }}</span>
+                                        <x-icon name="arrow-right" class="h-4 w-4 ml-auto text-primary" />
+                                    </a>
+                                @endauth
+
+                                <a
+                                    href="/contact"
+                                    class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 px-5 py-3 text-xs sm:text-sm font-bold text-white backdrop-blur-sm transition-all active:scale-[0.98] cursor-pointer"
+                                >
+                                    <x-icon name="message-square" class="h-4 w-4 text-sky-300" />
+                                    <span>{{ __('site.about.contact_us_btn') }}</span>
+                                    <x-icon name="arrow-right" class="h-3.5 w-3.5 ml-auto text-white/70" />
+                                </a>
+
+                                <a
+                                    href="/businesses"
+                                    class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-transparent hover:bg-white/10 border border-white/15 px-5 py-2.5 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer"
+                                >
+                                    <x-icon name="building" class="h-3.5 w-3.5 text-slate-400" />
+                                    <span>{{ __('site.about.explore_businesses_btn') }}</span>
+                                </a>
+                            </div>
+
+                            <div class="pt-3 border-t border-white/10 text-center">
+                                <p class="text-[11px] text-slate-300/80 font-medium">
+                                    {{ __('site.about.contact_members_badge') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </div>

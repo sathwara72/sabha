@@ -8,7 +8,7 @@
 @php $centered = $align === 'center'; @endphp
 
 <section class="hero-surface relative border-b border-border">
-    <div class="mx-auto max-w-7xl px-6 py-9 lg:px-8 lg:py-6">
+    <div class="mx-auto max-w-7xl px-6 py-3 lg:px-8 lg:py-6">
         <div class="{{ $centered ? 'flex flex-col items-center text-center' : 'flex flex-col gap-5 md:flex-row md:items-end md:justify-between' }}">
             <div class="max-w-2xl animate-fade-in">
                 @if ($kicker)

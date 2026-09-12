@@ -29,21 +29,47 @@ class HomeController extends Controller
             $link = null;
             $external = false;
 
-            if ($h->link_type === 'event' && $h->event) {
-                $link = route('events.show', $h->event->id);
-            } elseif ($h->link_type === 'external' && $h->external_url) {
-                $link = $h->external_url;
+            if ($h->link_type === 'event' && $h->event_id) {
+                $link = route('events.show', $h->event_id);
+            } elseif ($h->link_type === 'external' && ! empty($h->external_url)) {
+                $rawUrl = trim($h->external_url);
+                if (str_starts_with($rawUrl, '/')) {
+                    $link = $rawUrl;
+                    $external = false;
+                } elseif (str_starts_with(strtolower($rawUrl), 'http://') || str_starts_with(strtolower($rawUrl), 'https://')) {
+                    $link = $rawUrl;
+                    $external = true;
+                } else {
+                    $link = 'https://' . $rawUrl;
+                    $external = true;
+                }
+            } elseif (! empty($h->external_url)) {
+                $rawUrl = trim($h->external_url);
+                $link = (str_starts_with(strtolower($rawUrl), 'http://') || str_starts_with(strtolower($rawUrl), 'https://')) ? $rawUrl : 'https://' . $rawUrl;
                 $external = true;
+            } elseif (! empty($h->event_id)) {
+                $link = route('events.show', $h->event_id);
             }
 
-            return ['url' => media_url($h->image_path), 'link' => $link, 'external' => $external];
+            return [
+                'title' => $h->title ?? '',
+                'caption' => $h->caption ?? '',
+                'url' => media_url($h->image_path),
+                'link' => $link,
+                'external' => $external,
+                'is_default' => false,
+            ];
         });
         if ($heroImages->isEmpty()) {
             $heroImages = collect([
-                ['url' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop', 'link' => null, 'external' => false],
-                ['url' => 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=2000&auto=format&fit=crop', 'link' => null, 'external' => false],
-                ['url' => 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop', 'link' => null, 'external' => false],
-                ['url' => 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000&auto=format&fit=crop', 'link' => null, 'external' => false],
+                [
+                    'title' => 'SABHA',
+                    'caption' => 'Business Network',
+                    'url' => asset('logo.png'),
+                    'link' => null,
+                    'external' => false,
+                    'is_default' => true,
+                ],
             ]);
         }
 

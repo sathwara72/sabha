@@ -62,8 +62,8 @@ if (! function_exists('has_media_file')) {
 if (! function_exists('media_url')) {
     /**
      * Resolve a backend-stored media path (or already-absolute URL) to an
-     * absolute URL. Mirrors the frontend's assetUrl() helper now that
-     * Blade views are served same-origin with the storage disk.
+     * absolute URL. Verifies existence of local files so missing media
+     * seamlessly falls back to brand placeholders instead of 404 broken images.
      */
     function media_url(?string $path): ?string
     {
@@ -71,9 +71,62 @@ if (! function_exists('media_url')) {
             return null;
         }
 
-        return str_starts_with($path, 'http://') || str_starts_with($path, 'https://')
-            ? $path
-            : asset($path);
+        $trimmed = trim($path);
+
+        // Convert Google Drive view/open URLs to direct public CDN image thumbnails
+        if (preg_match('#(?:drive\.google\.com/(?:file/d/|open\?(?:.*&)?id=|uc\?(?:.*&)?id=)|docs\.google\.com/uc\?(?:.*&)?id=)([a-zA-Z0-9_-]{25,})#i', $trimmed, $m)) {
+            return 'https://lh3.googleusercontent.com/d/' . $m[1];
+        }
+
+        if (str_starts_with($trimmed, 'http://') || str_starts_with($trimmed, 'https://')) {
+            return $trimmed;
+        }
+
+        $cleanPath = ltrim($trimmed, '/');
+        if (file_exists(public_path($cleanPath))) {
+            return asset($cleanPath);
+        }
+
+        if (str_starts_with($cleanPath, 'storage/')) {
+            $relative = substr($cleanPath, 8);
+            if (file_exists(storage_path('app/public/' . $relative))) {
+                return asset($cleanPath);
+            }
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('temporary_media_url')) {
+    /**
+     * Safely resolve Livewire temporary upload URL across local & production,
+     * ensuring HTTPS and host matching the current request.
+     */
+    function temporary_media_url($file): ?string
+    {
+        if (! $file || ! method_exists($file, 'temporaryUrl')) {
+            return null;
+        }
+
+        try {
+            $url = $file->temporaryUrl();
+            $currentHost = request()->getSchemeAndHttpHost();
+            if ($currentHost && ! str_contains($currentHost, 'localhost') && ! str_contains($currentHost, '127.0.0.1')) {
+                $parsed = parse_url($url);
+                if (isset($parsed['host']) && in_array($parsed['host'], ['localhost', '127.0.0.1'], true)) {
+                    $pathAndQuery = ($parsed['path'] ?? '') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+                    $url = rtrim($currentHost, '/') . $pathAndQuery;
+                }
+                if (str_starts_with($url, 'http://') && (request()->isSecure() || request()->header('X-Forwarded-Proto') === 'https')) {
+                    $url = 'https://' . substr($url, 7);
+                }
+            }
+
+            return $url;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }
 
@@ -106,6 +159,49 @@ if (! function_exists('parse_google_maps_iframe_src')) {
     }
 }
 
+if (! function_exists('youtube_video_id')) {
+    /**
+     * Extracts YouTube video ID from any format URL (watch, shorts, embed, youtu.be).
+     */
+    function youtube_video_id(?string $url): ?string
+    {
+        $str = trim((string) $url);
+        if ($str === '') {
+            return null;
+        }
+
+        if (preg_match('#youtube(?:-nocookie)?\.com/embed/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return $m[1];
+        }
+
+        if (preg_match('#youtu\.be/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return $m[1];
+        }
+
+        if (preg_match('#youtube\.com/shorts/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return $m[1];
+        }
+
+        if (preg_match('#[?&]v=([A-Za-z0-9_-]{6,})#i', $str, $m)) {
+            return $m[1];
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('youtube_thumbnail_url')) {
+    /**
+     * Returns high-quality YouTube thumbnail URL for a YouTube URL.
+     */
+    function youtube_thumbnail_url(?string $url): ?string
+    {
+        $id = youtube_video_id($url);
+
+        return $id ? "https://img.youtube.com/vi/{$id}/hqdefault.jpg" : null;
+    }
+}
+
 if (! function_exists('youtube_embed_url')) {
     /**
      * Extracts a YouTube video ID from a watch/short/embed URL and returns
@@ -115,28 +211,9 @@ if (! function_exists('youtube_embed_url')) {
      */
     function youtube_embed_url(?string $url): ?string
     {
-        $str = trim((string) $url);
-        if ($str === '') {
-            return null;
-        }
+        $id = youtube_video_id($url);
 
-        if (preg_match('#youtube(?:-nocookie)?\.com/embed/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
-            return 'https://www.youtube.com/embed/' . $m[1];
-        }
-
-        if (preg_match('#youtu\.be/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
-            return 'https://www.youtube.com/embed/' . $m[1];
-        }
-
-        if (preg_match('#youtube\.com/shorts/([A-Za-z0-9_-]{6,})#i', $str, $m)) {
-            return 'https://www.youtube.com/embed/' . $m[1];
-        }
-
-        if (preg_match('#[?&]v=([A-Za-z0-9_-]{6,})#i', $str, $m)) {
-            return 'https://www.youtube.com/embed/' . $m[1];
-        }
-
-        return null;
+        return $id ? 'https://www.youtube.com/embed/' . $id : null;
     }
 }
 
@@ -191,15 +268,61 @@ if (! function_exists('category_cover_image')) {
 
         $map = [
             'Software Development' => 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1400&auto=format&fit=crop',
+            'IT & Software' => 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1400&auto=format&fit=crop',
             'Supply Chain' => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1400&auto=format&fit=crop',
             'Digital Marketing' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1400&auto=format&fit=crop',
             'Construction' => 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1400&auto=format&fit=crop',
             'Financial Services' => 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1400&auto=format&fit=crop',
+            'Finance & Insurance' => 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1400&auto=format&fit=crop',
+            'Finance' => 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1400&auto=format&fit=crop',
             'Renewables' => 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1400&auto=format&fit=crop',
             'Creative Agency' => 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?q=80&w=1400&auto=format&fit=crop',
             'Venture Capital' => 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=1400&auto=format&fit=crop',
+            'Healthcare' => 'https://images.unsplash.com/photo-1538108149393-fbbd81895907?q=80&w=1400&auto=format&fit=crop',
+            'Real Estate' => 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1400&auto=format&fit=crop',
+            'Manufacturing' => 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1400&auto=format&fit=crop',
+            'Education' => 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1400&auto=format&fit=crop',
+            'Retail' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1400&auto=format&fit=crop',
         ];
 
         return $map[$category] ?? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1400&auto=format&fit=crop';
     }
 }
+
+if (! function_exists('format_price')) {
+    /**
+     * Formats an event ticket or registration price cleanly:
+     * - "Free" / "0" -> "Free"
+     * - "2500" -> "₹2,500"
+     * - "₹1500" -> "₹1,500"
+     * - null / empty -> "N/A"
+     */
+    function format_price(?string $price): string
+    {
+        if (blank($price)) {
+            return 'N/A';
+        }
+
+        $trimmed = trim($price);
+        if (strtolower($trimmed) === 'free' || $trimmed === '0') {
+            return 'Free';
+        }
+
+        // Clean out any existing currency symbols or commas to isolate numeric part
+        $cleanNumber = preg_replace('/[^\d.]/', '', $trimmed);
+        if ($cleanNumber !== '' && is_numeric($cleanNumber)) {
+            $formatted = number_format((float) $cleanNumber);
+            // Check if there was any trailing unit text e.g. "/ person"
+            $unit = trim(preg_replace('/^[₹\s\d,.]+/', '', $trimmed));
+            return '₹' . $formatted . ($unit ? ' ' . $unit : '');
+        }
+
+        // If it starts with ₹ already
+        if (str_starts_with($trimmed, '₹')) {
+            return $trimmed;
+        }
+
+        return '₹' . $trimmed;
+    }
+}
+

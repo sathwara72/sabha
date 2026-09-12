@@ -9,7 +9,7 @@
         ['name' => 'Facebook', 'url' => $settings->get('facebook_url'), 'hover' => 'hover:text-blue-600 hover:border-blue-500'],
     ];
 
-    $configuredSocials = collect($rawSocials)->filter(fn ($s) => filled($s['url']))->values();
+    $configuredSocials = collect($rawSocials)->filter(fn($s) => filled($s['url']))->values();
 
     $activeSocials = $configuredSocials->isNotEmpty() ? $configuredSocials : collect([
         ['name' => 'Instagram', 'url' => 'https://instagram.com', 'hover' => 'hover:text-pink-600 hover:border-pink-500'],
@@ -28,7 +28,7 @@
             {{-- Brand --}}
             <div class="space-y-4">
                 <a href="/" class="flex items-center gap-2.5">
-                    <img src="{{ asset('logo.png') }}" alt="SABHA" class="h-10 w-10 rounded-full object-contain" />
+                    <img src="{{ asset('logo2.png') }}" alt="SABHA" class="h-11 w-11 object-contain" />
                     <span class="text-xl font-bold tracking-tight text-primary-dark">SABHA</span>
                 </a>
                 <p class="max-w-xs text-sm leading-relaxed text-muted">
@@ -42,7 +42,9 @@
                                 $targetUrl = 'https://' . $targetUrl;
                             }
                         @endphp
-                        <a href="{{ $targetUrl }}" target="_blank" rel="noopener noreferrer" class="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted transition-all duration-200 {{ $item['hover'] }} hover:scale-105" aria-label="{{ $item['name'] }}" title="{{ $item['name'] }}">
+                        <a href="{{ $targetUrl }}" target="_blank" rel="noopener noreferrer"
+                            class="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted transition-all duration-200 {{ $item['hover'] }} hover:scale-105"
+                            aria-label="{{ $item['name'] }}" title="{{ $item['name'] }}">
                             <x-social-icon :name="$item['name']" class="h-4 w-4" />
                         </a>
                     @endforeach
@@ -54,13 +56,14 @@
                 <h3 class="text-sm font-semibold text-foreground">{{ __('site.footer.platform') }}</h3>
                 <ul class="space-y-3">
                     @foreach ([
-                        ['name' => __('site.footer.link_businesses'), 'href' => '/businesses'],
-                        ['name' => __('site.footer.link_events'), 'href' => '/events'],
-                        ['name' => __('site.footer.link_gallery'), 'href' => '/gallery'],
-                        ['name' => __('site.footer.link_about'), 'href' => '/about'],
-                    ] as $link)
+                            ['name' => __('site.footer.link_businesses'), 'href' => '/businesses'],
+                            ['name' => __('site.footer.link_events'), 'href' => '/events'],
+                            ['name' => __('site.footer.link_gallery'), 'href' => '/gallery'],
+                            ['name' => __('site.footer.link_about'), 'href' => '/about'],
+                        ] as $link)
                         <li>
-                            <a href="{{ $link['href'] }}" class="text-sm text-muted transition-colors hover:text-primary">{{ $link['name'] }}</a>
+                            <a href="{{ $link['href'] }}"
+                                class="text-sm text-muted transition-colors hover:text-primary">{{ $link['name'] }}</a>
                         </li>
                     @endforeach
                 </ul>
@@ -76,17 +79,20 @@
                     </li>
                     <li class="flex items-center gap-3">
                         <x-icon name="phone" class="h-4 w-4 shrink-0 text-primary" />
-                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}" class="hover:text-primary transition-colors">{{ $contactPhone }}</a>
+                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}"
+                            class="hover:text-primary transition-colors">{{ $contactPhone }}</a>
                     </li>
                     <li class="flex items-center gap-3">
                         <x-icon name="mail" class="h-4 w-4 shrink-0 text-primary" />
-                        <a href="mailto:{{ $contactEmail }}" class="hover:text-primary transition-colors">{{ $contactEmail }}</a>
+                        <a href="mailto:{{ $contactEmail }}"
+                            class="hover:text-primary transition-colors">{{ $contactEmail }}</a>
                     </li>
                 </ul>
             </div>
         </div>
 
-        <div class="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-sm text-muted md:flex-row">
+        <div
+            class="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-sm text-muted md:flex-row">
             <p>{{ str_replace('2026', (string) now()->year, __('site.footer.copyright')) }}</p>
             <div class="flex gap-6">
                 <a href="/privacy" class="transition-colors hover:text-primary">{{ __('site.footer.privacy') }}</a>

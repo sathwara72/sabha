@@ -29,7 +29,6 @@
                 </a>
                 <div>
                     <h1 class="text-lg font-black text-slate-800 tracking-tight">Business Profile Review</h1>
-                    <p class="text-[12px] text-slate-400">Detailed verification and approval workspace</p>
                 </div>
             </div>
 

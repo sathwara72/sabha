@@ -10,11 +10,15 @@ class Areas extends Component
 {
     public City $city;
 
+    public string $search = '';
+
     public string $addAreaName = '';
 
     public ?int $deletingAreaId = null;
 
     public string $deletingAreaName = '';
+
+    public string $successMsg = '';
 
     public function mount(int $id): void
     {
@@ -27,10 +31,17 @@ class Areas extends Component
 
         $this->validate([
             'addAreaName' => 'required|string|max:100|unique:areas,name,NULL,id,city_id,' . $this->city->id,
+        ], [
+            'addAreaName.required' => 'Please enter an area name.',
+            'addAreaName.unique' => 'This area name already exists in ' . $this->city->name . '.',
         ]);
 
-        Area::create(['city_id' => $this->city->id, 'name' => $this->addAreaName]);
+        Area::create([
+            'city_id' => $this->city->id,
+            'name' => trim($this->addAreaName),
+        ]);
 
+        $this->successMsg = "Area \"{$this->addAreaName}\" added successfully.";
         $this->addAreaName = '';
         $this->resetErrorBag('addAreaName');
     }
@@ -51,14 +62,26 @@ class Areas extends Component
     {
         admin_authorize('locations', 'can_delete');
 
+        $name = $this->deletingAreaName;
         Area::findOrFail($this->deletingAreaId)->delete();
+        $this->successMsg = "Area \"{$name}\" deleted.";
         $this->cancelDeleteArea();
     }
 
     public function render()
     {
+        $query = $this->city->areas()->orderBy('name');
+
+        if ($this->search !== '') {
+            $query->where('name', 'like', "%{$this->search}%");
+        }
+
+        $areas = $query->get();
+        $totalCount = $this->city->areas()->count();
+
         return view('livewire.admin.locations.areas', [
-            'areas' => $this->city->areas()->orderBy('name')->get(),
+            'areas' => $areas,
+            'totalCount' => $totalCount,
         ]);
     }
 }

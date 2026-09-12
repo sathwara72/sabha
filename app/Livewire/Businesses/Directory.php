@@ -12,7 +12,7 @@ class Directory extends Component
 {
     use WithPagination;
 
-    private const ITEMS_PER_PAGE = 9;
+    private const ITEMS_PER_PAGE = 12;
 
     private const FALLBACK_CATEGORIES = [
         'Software Development',
@@ -29,10 +29,10 @@ class Directory extends Component
     public string $search = '';
 
     #[Url]
-    public string $category = 'All';
+    public string $category = 'All Categories';
 
     #[Url]
-    public string $area = 'All';
+    public string $area = 'All Areas';
 
     public function updatedSearch(): void
     {
@@ -53,7 +53,7 @@ class Directory extends Component
     {
         $cats = BusinessCategory::active()->pluck('name')->all();
 
-        return array_merge(['All'], empty($cats) ? self::FALLBACK_CATEGORIES : $cats);
+        return array_merge(['All Categories'], empty($cats) ? self::FALLBACK_CATEGORIES : $cats);
     }
 
     /**
@@ -71,7 +71,7 @@ class Directory extends Component
             ->pluck('area')
             ->all();
 
-        return array_merge(['All'], $areas);
+        return array_merge(['All Areas'], $areas);
     }
 
     public function render()
@@ -80,22 +80,23 @@ class Directory extends Component
             ->with(['user', 'businessCategory'])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
-            ->latest();
+            ->orderBy('id', 'asc');
 
-        if ($this->category !== 'All') {
+        if ($this->category !== '' && $this->category !== 'All' && $this->category !== 'All Categories') {
             $query->where('category', $this->category);
         }
 
-        if ($this->area !== 'All') {
+        if ($this->area !== '' && $this->area !== 'All' && $this->area !== 'All Areas') {
             $query->where('area', $this->area);
         }
 
         if ($this->search !== '') {
-            $search = $this->search;
+            $search = trim($this->search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('category', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('area', 'like', "%{$search}%")
                     ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"));
             });
         }

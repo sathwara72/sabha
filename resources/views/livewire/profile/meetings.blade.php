@@ -23,46 +23,88 @@
             {{ __('site.profile.meetings.empty') }}
         </div>
     @else
-        <div class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             @foreach ($meetings as $meeting)
-                @php $isMine = $meeting->user_id === auth()->id(); @endphp
-                <div class="glass-card p-4 flex items-start gap-3">
-                    @if ($meeting->image)
-                        <img src="{{ media_url($meeting->image) }}" alt="Meeting photo" class="h-14 w-14 rounded-xl object-cover border border-border shrink-0" />
-                    @else
-                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                            <x-icon name="users" class="h-5 w-5" />
-                        </div>
-                    @endif
-                    <div class="min-w-0 flex-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <h4 class="text-xs font-bold text-foreground">
-                                {{ $isMine ? __('site.profile.meetings.you_met') . ' ' . $meeting->withMember?->name : $meeting->user?->name . ' ' . __('site.profile.meetings.logged_with_you') }}
-                            </h4>
-                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-bold text-slate-600">
-                                {{ $meeting->meeting_at?->format('M j, Y g:i A') }}
-                            </span>
-                        </div>
-                        <p class="mt-1 flex items-center gap-1 text-[12px] text-muted-foreground">
-                            <x-icon name="map-pin" class="h-2.5 w-2.5" /> {{ $meeting->location }}
-                        </p>
-                        @if ($meeting->points_of_discussion)
-                            <p class="mt-1.5 text-xs text-foreground">{{ $meeting->points_of_discussion }}</p>
+                @php
+                    $isMine = $meeting->user_id === auth()->id();
+                    $otherUser = $isMine ? $meeting->withMember : $meeting->user;
+                    $otherName = $otherUser?->name ?? 'Member';
+                    $otherAvatar = $otherUser?->avatar ? media_url($otherUser->avatar) : null;
+                @endphp
+                <div class="rounded-2xl border border-border bg-white hover:border-primary/40 hover:shadow-sm transition-all duration-200 overflow-hidden flex flex-col justify-between group">
+                    <div>
+                        {{-- Top Image (if meeting photo uploaded) --}}
+                        @if ($meeting->image)
+                            <div class="relative w-full h-32 sm:h-36 bg-slate-950 overflow-hidden flex items-center justify-center">
+                                <x-safe-image
+                                    :src="media_url($meeting->image)"
+                                    alt="Meeting photo"
+                                    title="1-to-1 Meeting with {{ $otherName }}"
+                                    :date="$meeting->meeting_at"
+                                    :blur-backdrop="true"
+                                    fallback-type="generic"
+                                />
+                            </div>
                         @endif
-                        @if ($meeting->comments)
-                            <p class="mt-1 text-[12px] text-muted-foreground italic">{{ $meeting->comments }}</p>
-                        @endif
+
+                        {{-- Card Content Body --}}
+                        <div class="p-3 space-y-2">
+                            {{-- Header with Participant --}}
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <div class="h-8 w-8 rounded-lg overflow-hidden bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                                        @if ($otherAvatar)
+                                            <img src="{{ $otherAvatar }}" alt="{{ $otherName }}" class="h-full w-full object-cover" />
+                                        @else
+                                            {{ mb_substr($otherName, 0, 1) }}
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-xs sm:text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                                            {{ $isMine ? __('site.profile.meetings.you_met') . ' ' . $otherName : $otherName . ' ' . __('site.profile.meetings.logged_with_you') }}
+                                        </h4>
+                                        <p class="text-[10px] text-muted font-medium flex items-center gap-1 truncate">
+                                            <x-icon name="calendar" class="h-2.5 w-2.5 text-primary shrink-0" />
+                                            <span>{{ $meeting->meeting_at?->format('M j, Y • g:i A') }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                @if ($isMine)
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <a href="{{ route('profile.meetings.edit', $meeting->id) }}" class="h-6 w-6 rounded-md border border-amber-200 bg-amber-50 text-amber-700 flex items-center justify-center transition-all hover:bg-amber-100 active:scale-95 cursor-pointer" title="{{ __('site.profile.meetings.edit') }}">
+                                            <x-icon name="pencil" class="h-2.5 w-2.5" />
+                                        </a>
+                                        <button wire:click="openDelete({{ $meeting->id }})" class="h-6 w-6 rounded-md border border-rose-200 bg-rose-50 text-rose-600 flex items-center justify-center transition-all hover:bg-rose-100 active:scale-95 cursor-pointer" title="{{ __('site.profile.meetings.delete') }}">
+                                            <x-icon name="trash-2" class="h-2.5 w-2.5" />
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Location Box --}}
+                            @if ($meeting->location)
+                                <div class="rounded-lg border border-border/70 bg-surface/40 px-2 py-1 flex items-center gap-1.5 text-[11px] text-foreground font-medium truncate">
+                                    <x-icon name="map-pin" class="h-2.5 w-2.5 text-primary shrink-0" />
+                                    <span class="truncate">{{ $meeting->location }}</span>
+                                </div>
+                            @endif
+
+                            {{-- Discussion Snippet --}}
+                            @if ($meeting->points_of_discussion)
+                                <div class="rounded-lg bg-slate-50 border border-slate-100 p-2">
+                                    <p class="text-[9px] font-bold text-muted uppercase tracking-wider mb-0.5">Discussion Points</p>
+                                    <p class="text-[11px] text-slate-700 leading-relaxed line-clamp-2">{{ $meeting->points_of_discussion }}</p>
+                                </div>
+                            @endif
+
+                            @if ($meeting->comments)
+                                <p class="text-[10px] text-muted italic line-clamp-1">
+                                    Note: {{ $meeting->comments }}
+                                </p>
+                            @endif
+                        </div>
                     </div>
-                    @if ($isMine)
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <a href="{{ route('profile.meetings.edit', $meeting->id) }}" class="h-7 w-7 rounded-xl border border-amber-200/80 bg-amber-50 text-amber-700 flex items-center justify-center transition-all hover:bg-amber-100 active:scale-[0.95] cursor-pointer" title="{{ __('site.profile.meetings.edit') }}">
-                                <x-icon name="pencil" class="h-3 w-3" />
-                            </a>
-                            <button wire:click="openDelete({{ $meeting->id }})" class="h-7 w-7 rounded-xl border border-rose-200/80 bg-rose-50 text-rose-600 flex items-center justify-center transition-all hover:bg-rose-100 active:scale-[0.95] cursor-pointer" title="{{ __('site.profile.meetings.delete') }}">
-                                <x-icon name="trash-2" class="h-3 w-3" />
-                            </button>
-                        </div>
-                    @endif
                 </div>
             @endforeach
         </div>

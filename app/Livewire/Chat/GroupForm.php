@@ -71,7 +71,7 @@ class GroupForm extends Component
         $memberResults = collect();
         if (trim($this->memberSearch) !== '') {
             $term = $this->memberSearch;
-            $memberResults = User::where('id', '!=', Auth::id())
+            $memberResults = User::nonAdmin()->where('id', '!=', Auth::id())
                 ->whereNotIn('id', $this->selectedMemberIds)
                 ->where('registration_status', 'active')
                 ->where(function ($q) use ($term) {

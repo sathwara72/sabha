@@ -12,7 +12,7 @@ class Index extends Component
 {
     use WithPagination;
 
-    private const ITEMS_PER_PAGE = 10;
+    private const ITEMS_PER_PAGE = 36;
 
     public function render()
     {

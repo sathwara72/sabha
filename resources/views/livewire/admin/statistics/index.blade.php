@@ -33,7 +33,7 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             @foreach ($stats as $stat)
-                <div class="glass-card p-4 flex flex-col gap-3">
+                <div wire:key="stat-card-{{ $stat->id }}" class="glass-card p-4 flex flex-col gap-3">
                     <div class="flex items-center justify-between">
                         <span class="flex items-center gap-1 text-[12px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded-md">
                             <x-icon name="layers" class="h-2.5 w-2.5" /> Stat #{{ $stat->id }}

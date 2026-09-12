@@ -127,7 +127,7 @@ class SabhaController extends Controller
     {
         try {
             // Count registered users
-            $userCount = User::count();
+            $userCount = User::nonAdmin()->where('registration_status', 'active')->count() ?: User::nonAdmin()->count();
             if ($userCount > 0) {
                 Statistic::where('label', 'like', '%Professional%')
                     ->orWhere('label', 'like', '%Member%')
@@ -301,7 +301,7 @@ class SabhaController extends Controller
 
     public function getUsers(Request $request)
     {
-        $query = User::with('business')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+        $query = User::nonAdmin()->with('business')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
 
         if ($request->filled('search')) {
             $search = $request->search;

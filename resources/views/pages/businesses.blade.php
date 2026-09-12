@@ -10,12 +10,12 @@
                     <p class="mx-auto mt-2 max-w-xs text-sm text-muted">
                         Log in to browse the business directory and connect with members.
                     </p>
-                    <button type="button" x-on:click="$store.auth.openLogin()" class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer">
+                    <a href="/login" class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer">
                         Log in to continue
-                    </button>
+                    </a>
                     <p class="mt-4 text-sm text-muted">
                         Don't have an account?
-                        <button type="button" x-on:click="$store.auth.openRegister()" class="font-semibold text-primary hover:opacity-80 cursor-pointer">Create one</button>
+                        <a href="/register" class="font-semibold text-primary hover:opacity-80 cursor-pointer">Create one</a>
                     </p>
                 </div>
             </div>

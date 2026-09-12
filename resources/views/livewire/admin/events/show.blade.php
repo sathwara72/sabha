@@ -18,9 +18,11 @@
         {{-- Event Overview --}}
         <div class="glass-card p-5 rounded-2xl border border-border bg-white shadow-sm flex flex-col md:flex-row gap-5">
             @if (media_url($event->image))
-                <div class="w-full md:w-56 h-40 rounded-xl overflow-hidden bg-slate-900 shrink-0 relative">
-                    <img src="{{ media_url($event->image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover" />
+                <div class="w-full md:w-64 max-h-64 rounded-xl overflow-hidden bg-slate-950 border border-slate-200 shrink-0 relative flex items-center justify-center p-1">
+                    <img src="{{ media_url($event->image) }}" alt="{{ $event->title }}" class="w-full max-h-60 object-contain rounded-lg shadow-sm" />
+                    {{-- Event Category: Commented Out
                     <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[12px] font-bold bg-primary text-white">{{ $event->type ?: 'Event' }}</span>
+                    --}}
                 </div>
             @endif
 
@@ -202,9 +204,8 @@
                 <div class="flex items-center justify-between border-b border-border pb-3">
                     <div>
                         <h2 class="text-sm font-bold text-foreground">Event Gallery Photos & Videos</h2>
-                        <p class="text-xs text-muted">Upload and manage media specifically for "{{ $event->title }}"</p>
                     </div>
-                    <button wire:click="openUploadModal" class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-sm">
+                    <button wire:click="openUploadModal" class="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-sm cursor-pointer">
                         <x-icon name="plus" class="h-3.5 w-3.5" /> Add Event Media
                     </button>
                 </div>
@@ -215,30 +216,37 @@
                     </div>
                 @else
                     <div class="space-y-6">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                             @foreach ($gallery as $item)
                                 @php $isVideo = is_video_file($item->image_path); @endphp
                                 <div
                                     x-on:click="lightbox = { src: {{ Illuminate\Support\Js::from(media_url($item->image_path)) }}, caption: {{ Illuminate\Support\Js::from($item->caption) }}, isVideo: {{ $isVideo ? 'true' : 'false' }} }"
-                                    class="glass-card p-0 overflow-hidden flex flex-col group relative cursor-pointer border border-border hover:border-primary/50 transition-all rounded-xl shadow-sm"
+                                    class="glass-card p-0 overflow-hidden flex flex-col group relative cursor-pointer border border-border hover:border-primary/50 transition-all rounded-xl shadow-sm bg-white"
                                 >
-                                    <div class="relative h-40 w-full bg-slate-900 overflow-hidden">
+                                    <div class="relative aspect-[4/3] w-full bg-slate-950 overflow-hidden flex items-center justify-center p-0.5">
                                         @if ($isVideo)
-                                            <video src="{{ media_url($item->image_path) }}" class="h-full w-full object-cover" muted preload="metadata"></video>
+                                            <video src="{{ media_url($item->image_path) }}" class="h-full w-full object-contain" muted preload="metadata"></video>
                                         @else
-                                            <img src="{{ media_url($item->image_path) }}" alt="{{ $item->caption ?: 'Event photo' }}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <img
+                                                src="{{ media_url($item->image_path) }}"
+                                                alt=""
+                                                class="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                                onerror="this.style.opacity='0.25'"
+                                            />
                                         @endif
 
                                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                                            <x-icon name="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-7 w-7" />
+                                            <x-icon name="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-6 w-6" />
                                         </div>
 
                                         <div class="absolute top-2 left-2 z-10">
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-bold tracking-wider uppercase shadow-2xs backdrop-blur-md border {{ $isVideo ? 'bg-white/92 text-amber-700 border-amber-200/80' : 'bg-white/92 text-primary border-primary/20' }}">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase shadow-md {{ $isVideo ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white ring-1 ring-white/30' : 'bg-slate-950/85 backdrop-blur-md text-sky-300 ring-1 ring-white/20' }}">
                                                 @if ($isVideo)
-                                                    <x-icon name="film" class="h-2.5 w-2.5 text-amber-500" /> Video
+                                                    <x-icon name="film" class="h-2.5 w-2.5 text-white" />
+                                                    <span>VIDEO</span>
                                                 @else
-                                                    <x-icon name="image" class="h-2.5 w-2.5 text-primary" /> Image
+                                                    <x-icon name="image" class="h-2.5 w-2.5 text-sky-300" />
+                                                    <span>IMAGE</span>
                                                 @endif
                                             </span>
                                         </div>
@@ -246,7 +254,7 @@
                                         <button
                                             type="button"
                                             x-on:click.stop="$wire.openDeleteMedia({{ $item->id }})"
-                                            class="absolute top-2.5 right-2.5 z-20 rounded-xl bg-red-50/90 border border-red-100 p-2 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200"
+                                            class="absolute top-2 right-2 z-20 rounded-lg bg-black/60 backdrop-blur-sm border border-white/20 p-1.5 text-white hover:bg-rose-600 hover:border-rose-600 transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100 duration-200 cursor-pointer"
                                             title="Delete media"
                                         >
                                             <x-icon name="trash-2" class="h-3 w-3" />
@@ -254,8 +262,8 @@
                                     </div>
 
                                     @if ($item->caption)
-                                        <div class="p-3 border-t border-border/60 bg-surface/30">
-                                            <p class="text-xs text-foreground font-medium line-clamp-2 leading-snug">{{ $item->caption }}</p>
+                                        <div class="p-2 border-t border-border/60 bg-surface/30">
+                                            <p class="text-[11px] text-foreground font-medium line-clamp-1 leading-snug">{{ $item->caption }}</p>
                                         </div>
                                     @endif
                                 </div>

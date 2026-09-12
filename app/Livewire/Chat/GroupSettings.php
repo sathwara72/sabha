@@ -203,7 +203,7 @@ class GroupSettings extends Component
         if (trim($this->memberSearch) !== '') {
             $term = $this->memberSearch;
             $existingIds = $group->participants->where('status', 'active')->pluck('user_id')->merge($this->selectedMemberIds);
-            $memberResults = User::where('id', '!=', Auth::id())
+            $memberResults = User::nonAdmin()->where('id', '!=', Auth::id())
                 ->whereNotIn('id', $existingIds)
                 ->where('registration_status', 'active')
                 ->where(function ($q) use ($term) {

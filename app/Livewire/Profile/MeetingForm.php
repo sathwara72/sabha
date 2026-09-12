@@ -45,6 +45,12 @@ class MeetingForm extends Component
         $this->meetingImagePreview = media_url($meeting->image) ?? '';
     }
 
+    public function removePhoto(): void
+    {
+        $this->meetingImageFile = null;
+        $this->meetingImagePreview = '';
+    }
+
     public function saveMeeting()
     {
         $validated = $this->validate([
@@ -92,7 +98,7 @@ class MeetingForm extends Component
     {
         $memberLabels = [];
         $memberValueMap = [];
-        foreach (User::where('id', '!=', Auth::id())->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
+        foreach (User::where('id', '!=', Auth::id())->nonAdmin()->where('is_blocked', false)->orderBy('name')->get(['id', 'name', 'phone']) as $member) {
             $label = $member->phone ? "{$member->name} ({$member->phone})" : $member->name;
             $memberLabels[] = $label;
             $memberValueMap[$label] = $member->id;

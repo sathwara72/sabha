@@ -9,36 +9,50 @@ class Statistic extends Model
 {
     protected $fillable = [
         'label',
-        'value',
+        'value',    
     ];
 
     /**
-     * Refresh member/event-count-derived stat values from live counts and
-     * drop any stale city/mixer stats. Same behavior as the JSON API's
-     * getStatistics() endpoint, kept here since Blade controllers query
-     * Eloquent directly instead of hitting /api/statistics.
+     * Returns real dynamic statistics computed directly from database records.
      */
     public static function syncFromLiveCounts(): \Illuminate\Support\Collection
     {
-        try {
-            $userCount = User::count();
-            if ($userCount > 0) {
-                static::where('label', 'like', '%Professional%')
-                    ->orWhere('label', 'like', '%Member%')
-                    ->update(['value' => $userCount . '+']);
-            }
+        $activeMembers = User::nonAdmin()->where('registration_status', 'active')->count() ?: User::nonAdmin()->count();
+        $approvedBusinesses = Business::where('status', 'approved')->count() ?: Business::count();
+        $eventsHosted = Event::count();
 
-            $eventCount = Event::count();
-            if ($eventCount > 0) {
-                static::where('label', 'like', '%Event%')->update(['value' => $eventCount . '+']);
-            }
+        static::updateOrCreate(
+            ['id' => 1],
+            ['label' => 'Active Members', 'value' => $activeMembers . '+']
+        );
+        static::updateOrCreate(
+            ['id' => 2],
+            ['label' => 'Businesses Registered', 'value' => $approvedBusinesses . '+']
+        );
+        static::updateOrCreate(
+            ['id' => 3],
+            ['label' => 'Events Hosted', 'value' => $eventsHosted . '+']
+        );
 
-            static::where('label', 'like', '%Cit%')->delete();
-            static::where('label', 'like', '%Mixer%')->delete();
-        } catch (\Exception $e) {
-            Log::error('Failed to dynamically update statistics: ' . $e->getMessage());
+        return static::orderBy('id')->get();
+    }
+
+    /**
+     * Returns real monetary business exchanged amount from closed business referrals.
+     */
+    public static function realBusinessExchangedFormatted(): string
+    {
+        $referralTotal = (float) BusinessReferral::where('status', 'closed')->sum('amount');
+        if ($referralTotal >= 10000000) {
+            return '₹' . round($referralTotal / 10000000, 1) . 'Cr+';
+        }
+        if ($referralTotal >= 100000) {
+            return '₹' . round($referralTotal / 100000, 1) . 'L+';
+        }
+        if ($referralTotal > 0) {
+            return '₹' . number_format($referralTotal) . '+';
         }
 
-        return static::all();
+        return '₹0+';
     }
 }

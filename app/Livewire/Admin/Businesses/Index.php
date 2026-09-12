@@ -115,7 +115,7 @@ class Index extends Component
             });
         }
 
-        $businesses = $query->paginate(9);
+        $businesses = $query->paginate(15);
 
         $counts = [
             'all' => Business::count(),

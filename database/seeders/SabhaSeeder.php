@@ -64,43 +64,7 @@ class SabhaSeeder extends Seeder
              ]
          );
 
-         // Events
-         \App\Models\Event::firstOrCreate(
-             ['title' => 'Sabha Networking Mixer'],
-             [
-                 'description' => 'Connect with 50+ industry leaders in an informal rooftop setting.',
-                 'date' => now()->addDays(7),
-                 'location' => 'Grand Hyatt, Ahmedabad',
-                 'type' => 'Mixer',
-                 'image' => 'https://images.unsplash.com/photo-1540575861501-7ad0582373f3',
-                 'price_normal' => '₹2,499',
-                 'price_verified' => '₹1,499'
-             ]
-         );
-         \App\Models\Event::firstOrCreate(
-             ['title' => 'Scaling 101 Workshop'],
-             [
-                 'description' => 'A deep dive into operational efficiency and scaling your team.',
-                 'date' => now()->addDays(14),
-                 'location' => 'Business Park, Mumbai',
-                 'type' => 'Workshop',
-                 'image' => 'https://images.unsplash.com/photo-1511578314322-379afb476865',
-                 'price_normal' => '₹999',
-                 'price_verified' => 'Free'
-             ]
-         );
-         \App\Models\Event::firstOrCreate(
-             ['title' => 'Tech Founders Summit'],
-             [
-                 'description' => 'The ultimate gathering of Indian tech founders discussing the future.',
-                 'date' => now()->addDays(30),
-                 'location' => 'JW Marriott, Bangalore',
-                 'type' => 'Summit',
-                 'image' => 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678',
-                 'price_normal' => '₹5,499',
-                 'price_verified' => '₹3,499'
-             ]
-         );
+         // Events (Managed by Admin)
 
          // Stats
          \App\Models\Statistic::updateOrCreate(
@@ -131,26 +95,7 @@ class SabhaSeeder extends Seeder
          );
          \App\Models\Setting::updateOrCreate(
              ['key' => 'coordinators'],
-             ['value' => json_encode([
-                 [
-                     'city' => 'Mumbai Coordinator',
-                     'contact' => 'Ravi Sharma',
-                     'phone' => '+91 98200 12345',
-                     'email' => 'mumbai@sabha.global'
-                 ],
-                 [
-                     'city' => 'Pune Coordinator',
-                     'contact' => 'Pooja Verma',
-                     'phone' => '+91 96110 54321',
-                     'email' => 'pune@sabha.global'
-                 ],
-                 [
-                     'city' => 'Ahmedabad Coordinator',
-                     'contact' => 'Dev Patel',
-                     'phone' => '+91 94260 98765',
-                     'email' => 'ahmedabad@sabha.global'
-                 ]
-             ])]
+             ['value' => json_encode([])]
          );
 
          \App\Models\Setting::updateOrCreate(

@@ -6,6 +6,7 @@
     'fallbackType' => 'generic',
     'title' => '',
     'date' => '',
+    'blurBackdrop' => false,
 ])
 
 @php
@@ -24,18 +25,39 @@
     $initialLetter = strtoupper(mb_substr(trim($title ?: $alt ?: '?'), 0, 1));
 @endphp
 
-<div x-data="{ imgError: {{ $hasValidSrc ? 'false' : 'true' }} }" {{ $attributes->merge(['class' => $containerClass]) }}>
+<div {{ $attributes->merge(['class' => $containerClass]) }}>
     @if ($hasValidSrc)
-        <img
-            src="{{ $src }}"
-            alt="{{ $alt ?: $title }}"
-            x-show="!imgError"
-            x-on:error="imgError = true"
-            class="{{ $imgClass }}"
-        />
+        @if ($blurBackdrop)
+            {{-- Ambient Blurred Background --}}
+            <img
+                src="{{ $src }}"
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                class="absolute inset-0 h-full w-full object-cover blur-xl scale-125 opacity-70 filter pointer-events-none"
+            />
+            <div class="absolute inset-0 bg-slate-950/30 pointer-events-none"></div>
+
+            {{-- Full Foreground Image without cropping --}}
+            <img
+                src="{{ $src }}"
+                alt="{{ $alt ?: $title }}"
+                loading="lazy"
+                onerror="this.style.display='none'; const fb = this.closest('.relative').querySelector('.fallback-container'); if(fb) { fb.classList.remove('hidden'); fb.style.display='block'; }"
+                class="relative z-10 h-full w-full object-contain drop-shadow-md transition-transform duration-500 group-hover:scale-105"
+            />
+        @else
+            <img
+                src="{{ $src }}"
+                alt="{{ $alt ?: $title }}"
+                loading="lazy"
+                onerror="this.style.display='none'; if(this.nextElementSibling) { this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.style.display='block'; }"
+                class="{{ $imgClass }}"
+            />
+        @endif
     @endif
 
-    <div x-show="imgError" x-cloak class="h-full w-full">
+    <div class="fallback-container {{ $hasValidSrc ? 'hidden' : 'block' }} h-full w-full relative z-10">
         @switch($fallbackType)
             @case('event')
                 <div class="h-full w-full bg-gradient-to-br from-[#00379D] via-[#0F3459] to-[#091E36] flex flex-col items-center justify-center p-3 relative overflow-hidden select-none">

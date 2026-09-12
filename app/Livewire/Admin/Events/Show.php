@@ -198,7 +198,7 @@ class Show extends Component
         $registrations = $registrationsQuery->paginate(10, pageName: 'regPage');
         $registrationsTotal = \App\Models\EventRegistration::where('event_id', $this->eventId)->count();
 
-        $gallery = GalleryImage::where('event_id', $this->eventId)->latest()->paginate(8, pageName: 'galPage');
+        $gallery = GalleryImage::where('event_id', $this->eventId)->latest()->paginate(36, pageName: 'galPage');
         $galleryTotal = GalleryImage::where('event_id', $this->eventId)->count();
 
         return view('livewire.admin.events.show', [

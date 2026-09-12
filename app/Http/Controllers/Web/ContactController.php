@@ -11,12 +11,6 @@ use Illuminate\View\View;
 
 class ContactController extends Controller
 {
-    private const FALLBACK_COORDINATORS = [
-        ['city' => 'Mumbai Coordinator', 'contact' => 'Ravi Sharma', 'phone' => '+91 98200 12345', 'email' => 'mumbai@sabha.global', 'bg' => 'bg-blue-50/50', 'border' => 'border-blue-100'],
-        ['city' => 'Pune Coordinator', 'contact' => 'Pooja Verma', 'phone' => '+91 96110 54321', 'email' => 'pune@sabha.global', 'bg' => 'bg-emerald-50/50', 'border' => 'border-emerald-100'],
-        ['city' => 'Ahmedabad Coordinator', 'contact' => 'Dev Patel', 'phone' => '+91 94260 98765', 'email' => 'ahmedabad@sabha.global', 'bg' => 'bg-amber-50/50', 'border' => 'border-amber-100'],
-    ];
-
     private const COORDINATOR_STYLES = [
         ['bg' => 'bg-blue-50/50', 'border' => 'border-blue-100'],
         ['bg' => 'bg-emerald-50/50', 'border' => 'border-emerald-100'],
@@ -27,12 +21,16 @@ class ContactController extends Controller
     {
         $settings = Setting::all()->pluck('value', 'key');
 
-        $coordinators = self::FALLBACK_COORDINATORS;
+        $coordinators = [];
         if ($settings->get('coordinators')) {
             $raw = $settings->get('coordinators');
             $decoded = is_string($raw) ? json_decode($raw, true) : $raw;
-            if (! empty($decoded)) {
-                $coordinators = collect($decoded)->values()->map(function ($c, $idx) {
+            if (! empty($decoded) && is_array($decoded)) {
+                $filtered = collect($decoded)->filter(function ($c) {
+                    return ! empty($c['city']) || ! empty($c['contact']) || ! empty($c['phone']) || ! empty($c['email']);
+                })->values();
+
+                $coordinators = $filtered->map(function ($c, $idx) {
                     return array_merge((array) $c, self::COORDINATOR_STYLES[$idx % 3]);
                 })->all();
             }
