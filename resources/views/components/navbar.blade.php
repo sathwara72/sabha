@@ -218,12 +218,14 @@
                                 <p class="text-[11px] text-slate-500 truncate font-medium">{{ $user->email }}</p>
                             </div>
 
-                            {{-- Profile (For all users: Admin, Sub-Admin, and Members) --}}
-                            <a href="/profile" x-on:click="userDropdownOpen = false"
-                                class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                                <x-icon name="user" class="h-3.5 w-3.5 text-slate-500" />
-                                <span>{{ __('site.nav.profile') }}</span>
-                            </a>
+                            {{-- Profile (For Sub-Admin and Members only — not for full Admin) --}}
+                            @if ($user->role !== 'admin')
+                                <a href="/profile" x-on:click="userDropdownOpen = false"
+                                    class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                                    <x-icon name="user" class="h-3.5 w-3.5 text-slate-500" />
+                                    <span>{{ __('site.nav.profile') }}</span>
+                                </a>
+                            @endif
 
                             {{-- Admin Panel (if admin or sub-admin) --}}
                             @if ($user->canAccessAdminArea())
@@ -407,11 +409,13 @@
                             <x-icon name="message-square" class="h-3.5 w-3.5 text-primary" />
                             <span>{{ __('site.nav.chat') }}</span>
                         </a>
-                        <a href="/profile" x-on:click="mobileMenuOpen = false"
-                            class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
-                            <x-icon name="user" class="h-3.5 w-3.5 text-slate-500" />
-                            <span>{{ __('site.nav.profile') }}</span>
-                        </a>
+                        @if (auth()->user()->role !== 'admin')
+                            <a href="/profile" x-on:click="mobileMenuOpen = false"
+                                class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
+                                <x-icon name="user" class="h-3.5 w-3.5 text-slate-500" />
+                                <span>{{ __('site.nav.profile') }}</span>
+                            </a>
+                        @endif
                         @if (auth()->user()->canAccessAdminArea())
                             <a href="/admin" x-on:click="mobileMenuOpen = false"
                                 class="flex items-center justify-center gap-2 rounded-xl bg-blue-50 text-primary border border-primary/20 py-2.5 text-xs font-bold">
