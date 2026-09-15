@@ -787,15 +787,17 @@
                                          <div class="rounded-2xl border border-border bg-white hover:border-primary/40 hover:shadow-sm transition-all duration-200 overflow-hidden flex flex-col justify-between group">
                                              <div>
                                                  {{-- Event Image: Compact Height with blur-backdrop and object-contain --}}
-                                                 <div class="relative w-full h-32 sm:h-36 bg-slate-950 overflow-hidden flex items-center justify-center">
-                                                     <x-safe-image
-                                                         :src="media_url($eventDetails->image)"
-                                                         :alt="$eventDetails->title"
-                                                         :title="$eventDetails->title"
-                                                         :date="$eventDetails->date"
-                                                         :blur-backdrop="true"
-                                                         fallback-type="event"
-                                                     />
+                                                 <div class="relative w-full h-32 sm:h-36 bg-slate-950 flex items-center justify-center">
+                                                     <div class="absolute inset-0 overflow-hidden">
+                                                         <x-safe-image
+                                                             :src="media_url($eventDetails->image)"
+                                                             :alt="$eventDetails->title"
+                                                             :title="$eventDetails->title"
+                                                             :date="$eventDetails->date"
+                                                             :blur-backdrop="true"
+                                                             fallback-type="event"
+                                                         />
+                                                     </div>
 
                                                      {{-- Date Badge Overlay --}}
                                                      <div class="absolute top-2 left-2 flex flex-col items-center justify-center rounded-md bg-white/95 backdrop-blur-sm border border-white/60 shadow-xs px-1.5 py-0.5 min-w-[36px]">
@@ -804,7 +806,7 @@
                                                      </div>
 
                                                      {{-- Status Badges Floating Top Right --}}
-                                                     <div class="absolute top-2 right-2 flex flex-col items-end gap-1">
+                                                     <div class="absolute top-2 right-2 flex flex-col items-end gap-1 z-10">
                                                          <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shadow-xs {{ $isApproved ? 'bg-emerald-600 text-white' : ($isRejected ? 'bg-red-600 text-white' : 'bg-amber-500 text-white') }}">
                                                              @if ($isApproved)
                                                                  <x-icon name="check-circle-2" class="h-2.5 w-2.5" /> {{ __('site.profile.event_confirmed') }}
