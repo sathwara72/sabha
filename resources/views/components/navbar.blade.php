@@ -12,7 +12,11 @@
     }" x-init="
         window.addEventListener('scroll', () => { isScrolled = window.scrollY > 12 });
         isScrolled = window.scrollY > 12;
+        $watch('mobileMenuOpen', value => {
+            document.body.style.overflow = value ? 'hidden' : '';
+        });
     "
+    @keydown.window.escape="mobileMenuOpen = false"
     :class="isScrolled ? 'bg-white/95 backdrop-blur-md border-slate-200/90 shadow-sm' : 'bg-white/80 backdrop-blur-sm border-slate-100'"
     class="fixed inset-x-0 top-0 z-50 transition-all duration-300 border-b select-none font-outfit">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -298,154 +302,175 @@
     </div>
 
     {{-- ===================== MOBILE NAVIGATION DRAWER ===================== --}}
-    <div class="lg:hidden fixed inset-0 z-50 transition-opacity duration-200"
-        :class="mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'" x-cloak>
-        {{-- Backdrop --}}
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" x-on:click="mobileMenuOpen = false"></div>
+    <template x-teleport="body">
+        <div x-show="mobileMenuOpen"
+            x-cloak
+            class="lg:hidden fixed inset-0 z-[100] flex justify-end"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation">
+            {{-- Backdrop --}}
+            <div x-show="mobileMenuOpen"
+                x-transition:enter="transition-opacity ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition-opacity ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+                x-on:click="mobileMenuOpen = false"
+                aria-hidden="true"></div>
 
-        {{-- Slide Drawer --}}
-        <div class="fixed inset-y-0 right-0 w-full max-w-xs overflow-y-auto bg-white px-5 py-5 shadow-2xl transition-transform duration-300 flex flex-col justify-between"
-            :class="mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'">
-            <div>
-                {{-- Top Header --}}
-                <div class="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
-                    <a href="/" class="flex items-center gap-2.5" x-on:click="mobileMenuOpen = false">
-                        <img src="{{ asset('logo2.png') }}" alt="SABHA" class="h-9 w-9 object-contain" />
-                        <span class="text-xl font-black tracking-tight text-primary-dark">SABHA</span>
-                    </a>
-                    <button type="button"
-                        class="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                        x-on:click="mobileMenuOpen = false" aria-label="Close menu">
-                        <x-icon name="x" class="h-5 w-5" />
-                    </button>
-                </div>
+            {{-- Slide Drawer --}}
+            <div x-show="mobileMenuOpen"
+                x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="translate-x-full"
+                x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in duration-200 transform"
+                x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="translate-x-full"
+                class="relative w-full max-w-xs h-full bg-white px-5 py-5 shadow-2xl flex flex-col justify-between overflow-y-auto overscroll-contain z-10 font-outfit">
+                <div>
+                    {{-- Top Header --}}
+                    <div class="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
+                        <a href="/" class="flex items-center gap-2.5" x-on:click="mobileMenuOpen = false">
+                            <img src="{{ asset('logo2.png') }}" alt="SABHA" class="h-9 w-9 object-contain" />
+                            <span class="text-xl font-black tracking-tight text-primary-dark">SABHA</span>
+                        </a>
+                        <button type="button"
+                            class="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+                            x-on:click="mobileMenuOpen = false" aria-label="Close menu">
+                            <x-icon name="x" class="h-5 w-5" />
+                        </button>
+                    </div>
 
-                {{-- User Info if Authenticated --}}
-                @auth
-                    @php $user = auth()->user(); @endphp
-                    <div class="mb-5 rounded-2xl border border-slate-200/80 bg-slate-50 p-3.5">
-                        <div class="flex items-center gap-3">
-                            @if (media_url($user->avatar))
-                                <img src="{{ media_url($user->avatar) }}" alt="{{ $user->name }}"
-                                    class="h-9 w-9 rounded-xl object-contain bg-slate-100 shrink-0 shadow-2xs border border-slate-200" />
-                            @else
-                                <div
-                                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white font-black text-xs uppercase">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                    {{-- User Info if Authenticated --}}
+                    @auth
+                        @php $user = auth()->user(); @endphp
+                        <div class="mb-5 rounded-2xl border border-slate-200/80 bg-slate-50 p-3.5">
+                            <div class="flex items-center gap-3">
+                                @if (media_url($user->avatar))
+                                    <img src="{{ media_url($user->avatar) }}" alt="{{ $user->name }}"
+                                        class="h-9 w-9 rounded-xl object-contain bg-slate-100 shrink-0 shadow-2xs border border-slate-200" />
+                                @else
+                                    <div
+                                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white font-black text-xs uppercase">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-bold text-slate-900 truncate">{{ $user->name }}</p>
+                                    <p class="text-[11px] text-slate-500 truncate">{{ $user->email }}</p>
                                 </div>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs font-bold text-slate-900 truncate">{{ $user->name }}</p>
-                                <p class="text-[11px] text-slate-500 truncate">{{ $user->email }}</p>
                             </div>
                         </div>
-                    </div>
-                @endauth
+                    @endauth
 
-                {{-- Primary Nav Links --}}
-                <div class="flex flex-col gap-1">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1">Navigation</p>
-                    <a href="/" x-on:click="mobileMenuOpen = false"
-                        class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('/') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
-                        <span>{{ __('site.nav.home') }}</span>
-                    </a>
-                    <a href="/businesses" x-on:click="mobileMenuOpen = false"
-                        class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('businesses*') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
-                        <span>{{ __('site.nav.directory') }}</span>
-                    </a>
-                    <div class="rounded-xl overflow-hidden {{ request()->is('events*') ? 'bg-primary/5' : '' }}">
-                        <a href="/events" x-on:click="mobileMenuOpen = false"
-                            class="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition-colors {{ request()->is('events*') ? 'text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
-                            <span>{{ __('site.nav.events') }}</span>
-                            <span
-                                class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold">{{ __('site.nav.all_badge') }}</span>
+                    {{-- Primary Nav Links --}}
+                    <div class="flex flex-col gap-1">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1">Navigation</p>
+                        <a href="/" x-on:click="mobileMenuOpen = false"
+                            class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('/') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span>{{ __('site.nav.home') }}</span>
                         </a>
-                        <div class="pl-5 pr-2 pb-2 pt-0.5 space-y-1">
-                            <a href="/events?filter=current" x-on:click="mobileMenuOpen = false"
-                                class="flex items-center gap-2 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:bg-slate-100/70">
-                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                <span>{{ __('site.nav.booking_available') }}</span>
+                        <a href="/businesses" x-on:click="mobileMenuOpen = false"
+                            class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('businesses*') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span>{{ __('site.nav.directory') }}</span>
+                        </a>
+                        <div class="rounded-xl overflow-hidden {{ request()->is('events*') ? 'bg-primary/5' : '' }}">
+                            <a href="/events" x-on:click="mobileMenuOpen = false"
+                                class="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition-colors {{ request()->is('events*') ? 'text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
+                                <span>{{ __('site.nav.events') }}</span>
+                                <span
+                                    class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold">{{ __('site.nav.all_badge') }}</span>
                             </a>
-                            <a href="/events?filter=upcoming" x-on:click="mobileMenuOpen = false"
-                                class="flex items-center gap-2 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:bg-slate-100/70">
-                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                <span>{{ __('site.nav.booking_soon') }}</span>
+                            <div class="pl-5 pr-2 pb-2 pt-0.5 space-y-1">
+                                <a href="/events?filter=current" x-on:click="mobileMenuOpen = false"
+                                    class="flex items-center gap-2 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:bg-slate-100/70">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                    <span>{{ __('site.nav.booking_available') }}</span>
+                                </a>
+                                <a href="/events?filter=upcoming" x-on:click="mobileMenuOpen = false"
+                                    class="flex items-center gap-2 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:bg-slate-100/70">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                    <span>{{ __('site.nav.booking_soon') }}</span>
+                                </a>
+                                <a href="/events?filter=past" x-on:click="mobileMenuOpen = false"
+                                    class="flex items-center gap-2 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:bg-slate-100/70">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                                    <span>{{ __('site.nav.past_events') }}</span>
+                                </a>
+                            </div>
+                        </div>
+                        <a href="/gallery" x-on:click="mobileMenuOpen = false"
+                            class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('gallery*') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span>{{ __('site.nav.gallery') }}</span>
+                        </a>
+
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mt-3 mb-1">
+                            {{ __('site.nav.about_sabha') }}</p>
+                        <a href="/about" x-on:click="mobileMenuOpen = false"
+                            class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('about') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span>{{ __('site.nav.about') }}</span>
+                        </a>
+                        <a href="/trustees" x-on:click="mobileMenuOpen = false"
+                            class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('trustees') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span>{{ __('site.nav.trustees') }}</span>
+                        </a>
+                        <a href="/contact" x-on:click="mobileMenuOpen = false"
+                            class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('contact') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
+                            <span>{{ __('site.nav.contact') }}</span>
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Bottom Account Actions in Mobile Drawer --}}
+                <div class="border-t border-slate-100 pt-4 mt-6">
+                    @auth
+                        <div class="flex flex-col gap-2">
+                            <a href="/chat" x-on:click="mobileMenuOpen = false"
+                                class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
+                                <x-icon name="message-square" class="h-3.5 w-3.5 text-primary" />
+                                <span>{{ __('site.nav.chat') }}</span>
                             </a>
-                            <a href="/events?filter=past" x-on:click="mobileMenuOpen = false"
-                                class="flex items-center gap-2 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-600 hover:bg-slate-100/70">
-                                <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
-                                <span>{{ __('site.nav.past_events') }}</span>
+                            @if (auth()->user()->role !== 'admin')
+                                <a href="/profile" x-on:click="mobileMenuOpen = false"
+                                    class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
+                                    <x-icon name="user" class="h-3.5 w-3.5 text-slate-500" />
+                                    <span>{{ __('site.nav.profile') }}</span>
+                                </a>
+                            @endif
+                            @if (auth()->user()->canAccessAdminArea())
+                                <a href="/admin" x-on:click="mobileMenuOpen = false"
+                                    class="flex items-center justify-center gap-2 rounded-xl bg-blue-50 text-primary border border-primary/20 py-2.5 text-xs font-bold">
+                                    <x-icon name="shield-check" class="h-3.5 w-3.5" />
+                                    <span>{{ __('site.nav.admin') }}</span>
+                                </a>
+                            @endif
+                            <form method="POST" action="/logout" class="w-full">
+                                @csrf
+                                <button type="submit"
+                                    class="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-xs font-bold text-rose-600 cursor-pointer">
+                                    <x-icon name="log-out" class="h-3.5 w-3.5 text-rose-500" />
+                                    <span>{{ __('site.nav.logout') }}</span>
+                                </button>
+                            </form>
+                        </div>
+                    @else
+                        <div class="flex flex-col gap-2">
+                            <a href="/login" x-on:click="mobileMenuOpen = false"
+                                class="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
+                                {{ __('site.nav.login') }}
+                            </a>
+                            <a href="/register" x-on:click="mobileMenuOpen = false"
+                                class="flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm">
+                                <span>{{ __('site.nav.register') }}</span>
+                                <x-icon name="arrow-right" class="h-3.5 w-3.5" />
                             </a>
                         </div>
-                    </div>
-                    <a href="/gallery" x-on:click="mobileMenuOpen = false"
-                        class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('gallery*') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
-                        <span>{{ __('site.nav.gallery') }}</span>
-                    </a>
-
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mt-3 mb-1">
-                        {{ __('site.nav.about_sabha') }}</p>
-                    <a href="/about" x-on:click="mobileMenuOpen = false"
-                        class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('about') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
-                        <span>{{ __('site.nav.about') }}</span>
-                    </a>
-                    <a href="/trustees" x-on:click="mobileMenuOpen = false"
-                        class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('trustees') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
-                        <span>{{ __('site.nav.trustees') }}</span>
-                    </a>
-                    <a href="/contact" x-on:click="mobileMenuOpen = false"
-                        class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors {{ request()->is('contact') ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-50' }}">
-                        <span>{{ __('site.nav.contact') }}</span>
-                    </a>
+                    @endauth
                 </div>
             </div>
-
-            {{-- Bottom Account Actions in Mobile Drawer --}}
-            <div class="border-t border-slate-100 pt-4 mt-6">
-                @auth
-                    <div class="flex flex-col gap-2">
-                        <a href="/chat" x-on:click="mobileMenuOpen = false"
-                            class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
-                            <x-icon name="message-square" class="h-3.5 w-3.5 text-primary" />
-                            <span>{{ __('site.nav.chat') }}</span>
-                        </a>
-                        @if (auth()->user()->role !== 'admin')
-                            <a href="/profile" x-on:click="mobileMenuOpen = false"
-                                class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
-                                <x-icon name="user" class="h-3.5 w-3.5 text-slate-500" />
-                                <span>{{ __('site.nav.profile') }}</span>
-                            </a>
-                        @endif
-                        @if (auth()->user()->canAccessAdminArea())
-                            <a href="/admin" x-on:click="mobileMenuOpen = false"
-                                class="flex items-center justify-center gap-2 rounded-xl bg-blue-50 text-primary border border-primary/20 py-2.5 text-xs font-bold">
-                                <x-icon name="shield-check" class="h-3.5 w-3.5" />
-                                <span>{{ __('site.nav.admin') }}</span>
-                            </a>
-                        @endif
-                        <form method="POST" action="/logout" class="w-full">
-                            @csrf
-                            <button type="submit"
-                                class="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-xs font-bold text-rose-600">
-                                <x-icon name="log-out" class="h-3.5 w-3.5 text-rose-500" />
-                                <span>{{ __('site.nav.logout') }}</span>
-                            </button>
-                        </form>
-                    </div>
-                @else
-                    <div class="flex flex-col gap-2">
-                        <a href="/login" x-on:click="mobileMenuOpen = false"
-                            class="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs">
-                            {{ __('site.nav.login') }}
-                        </a>
-                        <a href="/register" x-on:click="mobileMenuOpen = false"
-                            class="flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-bold text-white shadow-sm">
-                            <span>{{ __('site.nav.register') }}</span>
-                            <x-icon name="arrow-right" class="h-3.5 w-3.5" />
-                        </a>
-                    </div>
-                @endauth
-            </div>
         </div>
-    </div>
+    </template>
 </header>
