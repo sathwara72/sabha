@@ -56,3 +56,4 @@ yarn-error.log*
 .fleet/
 .nova/
 .zed/
+/composer.phar
