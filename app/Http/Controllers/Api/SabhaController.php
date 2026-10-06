@@ -1142,6 +1142,12 @@ class SabhaController extends Controller
             'rejection_reason' => null
         ]);
 
+        try {
+            app(\App\Services\ZybraService::class)->recordEventPayment($registration);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Zybra API event sync failed for Registration {$registration->id}: " . $e->getMessage());
+        }
+
         // Generate QR code and send email to the user
         try {
             $userEmail = $registration->user->email;

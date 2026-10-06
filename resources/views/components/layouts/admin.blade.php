@@ -81,6 +81,13 @@
                     ],
                 ],
                 [
+                    'label' => 'Finance',
+                    'icon' => 'indian-rupee',
+                    'items' => [
+                        ['name' => 'Financial Report', 'icon' => 'indian-rupee', 'href' => route('admin.finance.index'), 'active' => request()->routeIs('admin.finance.*'), 'module' => null, 'fullAdminOnly' => true],
+                    ],
+                ],
+                [
                     'label' => 'Administration',
                     'icon' => 'settings',
                     'items' => [

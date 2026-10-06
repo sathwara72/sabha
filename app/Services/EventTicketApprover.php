@@ -34,6 +34,12 @@ class EventTicketApprover
             'rejection_reason' => null,
         ]);
 
+        try {
+            app(\App\Services\ZybraService::class)->recordEventPayment($registration);
+        } catch (\Exception $e) {
+            Log::error("Zybra event payment sync failed for Registration {$registration->id}: " . $e->getMessage());
+        }
+
         $this->sendApprovalEmail($registration, $event, $ticketNo);
 
         return $registration;

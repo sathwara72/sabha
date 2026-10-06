@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'zybra' => [
+        'base_url' => rtrim(env('ZYBRA_BASE_URL', 'https://api.zybra.in/api/v1'), '/'),
+        'api_key' => env('ZYBRA_API_KEY'),
+        'deposit_account_id' => (int) env('ZYBRA_DEPOSIT_ACCOUNT_ID', 0),
+        'payment_mode' => env('ZYBRA_PAYMENT_MODE', 'Cash'),
+        'membership_fee' => (float) env('ZYBRA_MEMBERSHIP_FEE', 1000.00),
+        'default_state_id' => (int) env('ZYBRA_DEFAULT_STATE_ID', 24),
+        'membership_income_account_id' => (int) env('ZYBRA_MEMBERSHIP_INCOME_ACCOUNT_ID', 0),
+        'event_income_account_id' => (int) env('ZYBRA_EVENT_INCOME_ACCOUNT_ID', 0),
+    ],
+
 ];

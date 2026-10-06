@@ -20,6 +20,9 @@ class EventRegistration extends Model
         'amount_paid',
         'rejection_reason',
         'is_attended',
+        'zybra_receipt_no',
+        'zybra_sync_status',
+        'zybra_error',
     ];
 
     protected $casts = [

@@ -111,6 +111,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     Route::middleware('full-admin')->group(function () {
         Route::view('/settings', 'pages.admin.settings')->name('settings.index');
+        Route::view('/finance', 'pages.admin.finance')->name('finance.index');
         Route::view('/sub-admins', 'pages.admin.sub-admins')->name('sub-admins.index');
         Route::view('/sub-admins/create', 'pages.admin.sub-admin-form')->name('sub-admins.create');
         Route::view('/sub-admins/{id}/edit', 'pages.admin.sub-admin-form')->name('sub-admins.edit');

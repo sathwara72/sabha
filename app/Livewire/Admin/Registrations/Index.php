@@ -109,6 +109,12 @@ class Index extends Component
         $user->update(['registration_status' => 'active', 'registration_rejection_reason' => null]);
 
         try {
+            app(\App\Services\ZybraService::class)->recordMembershipPayment($user);
+        } catch (\Exception $e) {
+            Log::error("Zybra membership sync failed for User {$user->id}: " . $e->getMessage());
+        }
+
+        try {
             Mail::to($user->email)->send(new RegistrationStatusMail($user, 'payment_approved'));
         } catch (\Exception $e) {
             Log::error("SABHA payment_approved email failed for {$user->email}: " . $e->getMessage());
