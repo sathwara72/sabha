@@ -40,6 +40,7 @@ class ZybraIntegrationTest extends TestCase
         parent::setUp();
 
         Mail::fake();
+        $this->withoutDefer();
 
         config()->set('services.zybra', [
             'base_url' => self::BASE,
@@ -158,6 +159,41 @@ class ZybraIntegrationTest extends TestCase
         $this->assertDatabaseHas('financial_entries', ['type' => 'membership', 'member_id' => $member->id, 'zybra_voucher_id' => 9001, 'zybra_voucher_number' => 'RC-90', 'amount' => 1000]);
     }
 
+    public function test_approval_does_not_wait_for_zybra_and_still_sends_the_email(): void
+    {
+        // Deferred callbacks collected but not run: this is what the admin's request sees
+        $this->withDefer();
+        $member = User::factory()->create(['registration_status' => 'pending_payment_review']);
+
+        Livewire::actingAs($this->admin())->test(RegistrationsIndex::class)->call('approvePayment', $member->id);
+
+        $this->assertSame('active', $member->fresh()->registration_status);
+        Mail::assertSent(\App\Mail\RegistrationStatusMail::class);
+        $this->assertSame([], $this->writes, 'Zybra must not be called inside the approval request');
+
+        // ...and the receipt is posted once the response has gone out
+        app(\Illuminate\Support\Defer\DeferredCallbackCollection::class)->invoke();
+        $this->assertSame('/receipts', $this->onlyWrite()[1]);
+        $this->assertSame('synced', $member->fresh()->zybra_sync_status);
+    }
+
+    public function test_entry_dates_use_india_time_not_utc(): void
+    {
+        // 00:30 IST on 7 Oct is still 6 Oct in UTC
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-10-06 19:00:00', 'UTC'));
+
+        Livewire::actingAs($this->admin())->test(FinanceIndex::class)
+            ->call('openEntry', 'income')
+            ->assertSet('entryDate', '2026-10-07')
+            ->set('entryAmount', '5')
+            ->set('entryAccountId', '502')
+            ->set('description', 'After midnight')
+            ->call('saveEntry')
+            ->assertHasNoErrors();
+
+        $this->assertSame('2026-10-07', $this->onlyWrite()[2]['date']);
+    }
+
     public function test_membership_receipt_is_not_posted_twice(): void
     {
         $member = User::factory()->create(['zybra_membership_receipt_no' => 'RC-5']);
@@ -203,9 +239,23 @@ class ZybraIntegrationTest extends TestCase
         $this->assertSame('RC-90', $registration->zybra_receipt_no);
     }
 
-    public function test_free_event_ticket_posts_nothing(): void
+    public function test_member_ticket_approval_emails_the_qr_ticket_and_posts_the_receipt(): void
     {
-        $event = Event::create(['title' => 'Free Meetup', 'date' => now()->addWeek(), 'location' => 'Ahmedabad', 'price_normal' => 0]);
+        $member = User::factory()->create(['name' => 'Ticket Member', 'email' => 'ticket@example.com']);
+        $event = Event::create(['title' => 'Annual Meet', 'date' => now()->addWeek(), 'location' => 'Ahmedabad', 'price_normal' => 200]);
+        $registration = EventRegistration::create(['event_id' => $event->id, 'user_id' => $member->id, 'status' => 'pending', 'amount_paid' => 200]);
+
+        app(EventTicketApprover::class)->approve($registration);
+
+        $this->assertSame('approved', $registration->fresh()->status);
+        $this->assertSame(200.0, $this->onlyWrite()[2]['lines'][0]['amount']);
+        $this->assertSame('synced', $registration->fresh()->zybra_sync_status);
+    }
+
+    public function test_free_ticket_or_visitor_pass_posts_nothing_even_for_a_paid_event(): void
+    {
+        // amount_paid defaults to 0.00, as for visitor passes; the event's own price must not be used
+        $event = Event::create(['title' => 'Paid Gala', 'date' => now()->addWeek(), 'location' => 'Ahmedabad', 'price_normal' => 500]);
         $registration = EventRegistration::create(['event_id' => $event->id, 'guest_name' => 'Guest', 'status' => 'pending']);
 
         app(EventTicketApprover::class)->approve($registration);

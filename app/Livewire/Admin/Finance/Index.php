@@ -130,7 +130,7 @@ class Index extends Component
         $this->successMsg = '';
 
         $this->entryType = $type === 'expense' ? 'expense' : 'income';
-        $this->entryDate = now()->toDateString();
+        $this->entryDate = $this->zybra()->today()->toDateString();
         $this->entryAmount = '';
         $this->entryAccountId = null;
         $this->paidBy = 'sabha';
@@ -158,7 +158,7 @@ class Index extends Component
 
         $this->validate([
             'entryType' => 'required|in:income,expense',
-            'entryDate' => 'required|date|before_or_equal:today',
+            'entryDate' => 'required|date|before_or_equal:' . $this->zybra()->today()->toDateString(),
             'entryAmount' => 'required|numeric|min:0.01|max:99999999',
             'entryAccountId' => ['required', 'integer', 'in:' . implode(',', $ledgerIds)],
             'paidBy' => 'required|in:sabha,member',
@@ -230,7 +230,7 @@ class Index extends Component
         $this->settleDirection = $party['net'] > 0 ? 'receive' : 'pay';
         $this->settleMax = abs($party['net']);
         $this->settleAmount = number_format(abs($party['net']), 2, '.', '');
-        $this->settleDate = now()->toDateString();
+        $this->settleDate = $this->zybra()->today()->toDateString();
         $this->settleCashAccountId = $this->zybra()->defaultCashAccountId() ?: null;
         $this->settlePaymentModeId = $this->zybra()->defaultPaymentModeId();
         $this->settleReference = '';
@@ -251,7 +251,7 @@ class Index extends Component
 
         $this->validate([
             'settleAmount' => 'required|numeric|min:0.01|max:' . $this->settleMax,
-            'settleDate' => 'required|date|before_or_equal:today',
+            'settleDate' => 'required|date|before_or_equal:' . $this->zybra()->today()->toDateString(),
             'settleCashAccountId' => ['required', 'integer', 'in:' . collect($zybra->cashAccounts())->pluck('id')->implode(',')],
             'settlePaymentModeId' => ['nullable', 'integer', 'in:' . collect($zybra->paymentModes())->pluck('id')->implode(',')],
             'settleReference' => 'nullable|string|max:100',
@@ -298,7 +298,7 @@ class Index extends Component
      */
     protected function range(): array
     {
-        $today = Carbon::today();
+        $today = $this->zybra()->today();
         $fyStart = $today->month >= 4 ? $today->copy()->setDate($today->year, 4, 1) : $today->copy()->setDate($today->year - 1, 4, 1);
 
         return match ($this->period) {

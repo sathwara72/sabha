@@ -12,8 +12,10 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Zybra is Sabha's cash book (Zybra API Integration Doc v1). Every rupee in or
@@ -40,6 +42,7 @@ class ZybraService
     protected int $defaultStateId;
     protected int $membershipIncomeAccountId;
     protected int $eventIncomeAccountId;
+    protected string $timezone;
 
     public function __construct()
     {
@@ -53,6 +56,16 @@ class ZybraService
         $this->defaultStateId = (int) ($config['default_state_id'] ?? 24);
         $this->membershipIncomeAccountId = (int) ($config['membership_income_account_id'] ?? 0);
         $this->eventIncomeAccountId = (int) ($config['event_income_account_id'] ?? 0);
+        $this->timezone = (string) ($config['timezone'] ?? 'Asia/Kolkata');
+    }
+
+    /**
+     * Today in Sabha's own timezone (the app runs on UTC, which is still
+     * "yesterday" in India until 5:30 AM IST).
+     */
+    public function today(): Carbon
+    {
+        return Carbon::now($this->timezone)->startOfDay();
     }
 
     /**
@@ -79,8 +92,9 @@ class ZybraService
 
     /**
      * Base request. Zybra authenticates with the API key as a Bearer token.
-     * Only 5xx and connection failures are retried; the Idempotency-Key is
-     * kept on retries, so a retried write is not duplicated.
+     * Only 5xx and connection failures are retried, once; the Idempotency-Key
+     * is kept on the retry, so a retried write is not duplicated. Timeouts are
+     * short so an unreachable Zybra fails in ~10s, well inside PHP's limit.
      */
     protected function request(?string $idempotencyKey = null): PendingRequest
     {
@@ -88,8 +102,9 @@ class ZybraService
             ->withToken(trim((string) $this->apiKey))
             ->acceptJson()
             ->asJson()
+            ->connectTimeout(4)
             ->timeout(15)
-            ->retry(3, 1000, fn (Exception $e) => $e instanceof ConnectionException
+            ->retry(2, 500, fn (Exception $e) => $e instanceof ConnectionException
                 || ($e instanceof RequestException && $e->response->serverError()), throw: false);
 
         if ($idempotencyKey) {
@@ -662,6 +677,46 @@ class ZybraService
     /* ------------------------------------------------------------------ */
 
     /**
+     * Record the membership fee in Zybra after the approval response has been
+     * sent, so a slow or unreachable Zybra never delays or breaks the approval
+     * (or its email). Failures are saved on the member (zybra_sync_status/zybra_error).
+     */
+    public function recordMembershipPaymentAfterResponse(User $user): void
+    {
+        $userId = $user->id;
+
+        defer(function () use ($userId) {
+            @set_time_limit(120);
+            try {
+                if ($user = User::find($userId)) {
+                    app(self::class)->recordMembershipPayment($user);
+                }
+            } catch (Throwable $e) {
+                Log::error("Zybra membership sync failed for User {$userId}: " . $e->getMessage());
+            }
+        });
+    }
+
+    /**
+     * Record an event ticket payment in Zybra after the approval response has been sent.
+     */
+    public function recordEventPaymentAfterResponse(EventRegistration $registration): void
+    {
+        $registrationId = $registration->id;
+
+        defer(function () use ($registrationId) {
+            @set_time_limit(120);
+            try {
+                if ($registration = EventRegistration::find($registrationId)) {
+                    app(self::class)->recordEventPayment($registration);
+                }
+            } catch (Throwable $e) {
+                Log::error("Zybra event sync failed for Registration {$registrationId}: " . $e->getMessage());
+            }
+        });
+    }
+
+    /**
      * Record a membership fee received (called when an admin approves the payment).
      */
     public function recordMembershipPayment(User $user, ?float $amount = null, ?string $refNo = null): array
@@ -678,7 +733,7 @@ class ZybraService
 
         try {
             $entry = $this->recordIncome([
-                'date' => now()->toDateString(),
+                'date' => $this->today()->toDateString(),
                 'amount' => $amount ?: $this->membershipFee,
                 'account_id' => $this->membershipIncomeAccountId,
                 'cash_account_id' => $this->depositAccountId,
@@ -720,7 +775,9 @@ class ZybraService
         $registration->loadMissing(['user', 'event']);
         $event = $registration->event;
 
-        $price = (float) ($registration->amount_paid ?: ($event?->price_normal ?: 0));
+        // amount_paid is what was actually charged (verified-member or normal
+        // price; 0 for free events and visitor passes), as shown to the member
+        $price = round((float) $registration->amount_paid, 2);
         if ($price <= 0) {
             // Free event passes bring in no money
             $registration->update(['zybra_sync_status' => 'synced', 'zybra_error' => null]);
@@ -730,7 +787,7 @@ class ZybraService
 
         try {
             $entry = $this->recordIncome([
-                'date' => now()->toDateString(),
+                'date' => $this->today()->toDateString(),
                 'amount' => $price,
                 'account_id' => $this->eventIncomeAccountId,
                 'cash_account_id' => $this->depositAccountId,

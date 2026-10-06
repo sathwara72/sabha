@@ -273,7 +273,7 @@
                         </div>
                         <div>
                             <label class="{{ $labelClass }}">Date <span class="text-red-500">*</span></label>
-                            <input type="date" wire:model="entryDate" max="{{ now()->toDateString() }}" class="{{ $inputClass }}" />
+                            <input type="date" wire:model="entryDate" max="{{ app(\App\Services\ZybraService::class)->today()->toDateString() }}" class="{{ $inputClass }}" />
                             @error('entryDate') <p class="mt-1 text-[11px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -381,7 +381,7 @@
                         </div>
                         <div>
                             <label class="{{ $labelClass }}">Date <span class="text-red-500">*</span></label>
-                            <input type="date" wire:model="settleDate" max="{{ now()->toDateString() }}" class="{{ $inputClass }}" />
+                            <input type="date" wire:model="settleDate" max="{{ app(\App\Services\ZybraService::class)->today()->toDateString() }}" class="{{ $inputClass }}" />
                             @error('settleDate') <p class="mt-1 text-[11px] text-rose-600 font-semibold">{{ $message }}</p> @enderror
                         </div>
                         <div>

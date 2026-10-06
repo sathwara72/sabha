@@ -44,6 +44,8 @@ return [
         'default_state_id' => (int) env('ZYBRA_DEFAULT_STATE_ID', 24),
         'membership_income_account_id' => (int) env('ZYBRA_MEMBERSHIP_INCOME_ACCOUNT_ID', 0),
         'event_income_account_id' => (int) env('ZYBRA_EVENT_INCOME_ACCOUNT_ID', 0),
+        // Dates of Zybra entries ("today", this month, financial year) use Sabha's own timezone
+        'timezone' => env('ZYBRA_TIMEZONE', 'Asia/Kolkata'),
     ],
 
 ];
