@@ -45,6 +45,14 @@ class User extends Authenticatable
         'business_document_type',
         'membership_payment_screenshot',
         'registration_rejection_reason',
+        'zybra_party_id',
+        'gstin',
+        'pan',
+        'state_code',
+        'pincode',
+        'zybra_membership_receipt_no',
+        'zybra_sync_status',
+        'zybra_error',
     ];
 
     /**

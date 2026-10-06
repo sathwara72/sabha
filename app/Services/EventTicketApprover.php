@@ -34,6 +34,8 @@ class EventTicketApprover
             'rejection_reason' => null,
         ]);
 
+        app(\App\Services\ZybraService::class)->recordEventPaymentAfterResponse($registration);
+
         $this->sendApprovalEmail($registration, $event, $ticketNo);
 
         return $registration;
@@ -129,7 +131,7 @@ class EventTicketApprover
             });
 
             Log::info("SABHA Approved Ticket Email successfully dispatched to {$userEmail}. Ticket No: {$ticketNo}.");
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) { // also PHP Errors (e.g. missing GD): an email failure must never break the approval
             Log::error("Failed to send approval email to {$registration->attendeeEmail()}: " . $e->getMessage());
         }
     }

@@ -1142,6 +1142,8 @@ class SabhaController extends Controller
             'rejection_reason' => null
         ]);
 
+        app(\App\Services\ZybraService::class)->recordEventPaymentAfterResponse($registration);
+
         // Generate QR code and send email to the user
         try {
             $userEmail = $registration->user->email;
@@ -1193,8 +1195,8 @@ class SabhaController extends Controller
             });
 
             Log::info("SABHA Approved Ticket Email successfully dispatched to {$userEmail}. Ticket No: {$ticketNo}.");
-        } catch (\Exception $e) {
-            Log::error("Failed to send approval email to {$registration->user->email}: " . $e->getMessage());
+        } catch (\Throwable $e) { // also PHP Errors (e.g. missing GD)
+            Log::error("Failed to send approval email to " . ($registration->attendeeEmail() ?: "registration #{$registration->id}") . ": " . $e->getMessage());
         }
 
         return response()->json([
